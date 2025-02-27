@@ -7,7 +7,7 @@ router.register(r'usuarios', UsuarioViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),
+    path('api/confirmar/', confirmar_usuario, name="confirmar_usuario"),
 ]
 
 

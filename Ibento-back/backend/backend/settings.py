@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  
+    'rest_framework',
+    'corsheaders', # Peticiones desde React  
     'api',  
 ]
 
@@ -36,6 +37,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Para permitir peticiones externas
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -68,6 +70,11 @@ DATABASES = {
         }
     }
 }
+
+# CORS (permite conexión con el frontend)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # URL del frontend en React
+]
 
 
 AUTH_PASSWORD_VALIDATORS = [
