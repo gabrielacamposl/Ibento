@@ -20,13 +20,13 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
         return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def confirmar_usuario(request):
-    token = request.data.get('token')
+@api_view(['GET'])  # Permite GET en lugar de POST
+def confirmar_usuario(request, token):
     usuario = get_object_or_404(Usuario, token=token)
 
     if usuario.is_confirmed:
         return JsonResponse({"mensaje": "Este usuario ya ha sido confirmado."}, status=status.HTTP_400_BAD_REQUEST)
+
     usuario.is_confirmed = True
     usuario.save()
     return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)

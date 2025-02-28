@@ -1,0 +1,19 @@
+
+# Crear usuario
+
+POST http://127.0.0.1:8000/api/usuarios/ 
+{
+    "nombre": "Juan", 
+    "apellido": "Pérez",
+    "email": "juan@example.com", "
+    password": "123456"
+    
+}
+
+# Confirmar usuarios
+
+POST http://127.0.0.1:8000/api/confirmar/ 
+
+{
+    "token": "TOKEN_DEL_EMAIL"
+}

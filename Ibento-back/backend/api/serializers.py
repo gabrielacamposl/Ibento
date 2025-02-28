@@ -5,9 +5,11 @@ from django.contrib.auth.hashers import make_password
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'nombre', 'apellido', 'email', 'password', 'token', 'is_confirmed']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['nombre', 'apellido', 'email', 'password']
 
     def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data['password'])
-        return super().create(validated_data)
+        # Hashear la contraseña antes de guardarla
+        usuario = Usuario.objects.create(**validated_data)
+        usuario.password = make_password(validated_data['password'])  # Asegura que la contraseña esté hasheada
+        usuario.save()
+        return usuario
