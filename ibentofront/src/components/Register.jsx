@@ -20,29 +20,35 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    console.log("Datos antes de enviar:", form); 
+
     if (form.password !== form.confirmPassword) {
-      setMessage("❌ Las contraseñas no coinciden");
-      return;
+        setMessage("Las contraseñas no coinciden");
+        return;
     }
 
     try {
-      const response = await registerUser({
-        nombre: form.nombre,
-        apellido: form.apellido,
-        email: form.email,
-        password: form.password,
-      });
+        const response = await registerUser({
+            nombre: form.nombre,
+            apellido: form.apellido,
+            email: form.email,
+            password: form.password,
+        });
 
-      if (response.mensaje) {
-        setMessage("✅ " + response.mensaje);
-        setTimeout(() => navigate("/confirmar"), 2000); // ✅ Redirigir después de 2s
-      } else {
-        setMessage("❌ Error al registrar usuario");
-      }
+        console.log("Respuesta del servidor:", response); 
+
+        if (response.mensaje) {
+            setMessage("✅ " + response.mensaje);
+            setTimeout(() => navigate("/confirmar"), 2000);
+        } else {
+            setMessage("Error al registrar usuario");
+        }
     } catch (error) {
-      setMessage("❌ Hubo un error en el servidor");
+        setMessage("Hubo un error en el servidor");
     }
-  }
+}
+
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
