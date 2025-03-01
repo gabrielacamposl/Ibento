@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Usuario
-from .serializers import UsuarioSerializer
+from .serializers import UsuarioSerializer, Login
 from .utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -30,3 +30,10 @@ def confirmar_usuario(request, token):
     usuario.is_confirmed = True
     usuario.save()
     return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def login_usuario(request):
+    serializer = Login(data=request.data)  
+    if serializer.is_valid():
+        return Response(serializer.validated_data)  
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
