@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password, check_password
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['nombre', 'apellido', 'email', 'password']
+        fields = ["_id",'nombre', 'apellido', 'email', 'password']
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])  
@@ -33,4 +33,4 @@ class Login(serializers.Serializer):
         if not usuario.is_confirmed:
             raise serializers.ValidationError("Debes confirmar tu cuenta primero")
 
-        return {"id": usuario.id, "email": usuario.email, "nombre": usuario.nombre}
+        return {"id": usuario._id, "email": usuario.email, "nombre": usuario.nombre}
