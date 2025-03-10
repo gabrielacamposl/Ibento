@@ -1,0 +1,4 @@
+/* Degradado de oscuro a claro */
+.bodyFoto {
+    background: linear-gradient(to top, #101010,transparent, transparent);
+}

@@ -1,0 +1,120 @@
+.btn-custom {
+    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+    color: white;
+  
+  }
+  
+  .btn-custom:hover {
+    background-color: #c237de; 
+   
+  }
+.interes {
+    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+    color: white;
+  
+  }
+
+.degradadoPerfil{
+  background: linear-gradient(to bottom,  #E4ABFF, #F3D1FF, #FFFFFF,#FFFFFF,#FFFFFF,#FFFFFF); /* Gradient */
+}
+
+.miPerfil{
+  color: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+}
+
+.Transparencia{
+  background: rgba(0, 0, 0, 0.5); /* Black transparent */
+  color: white;
+}
+
+.Transparencia2{
+  background: rgba(0, 0, 0, 0.3); /* Black transparent */
+  color: white;
+}
+
+.botonTransparente{
+  background: rgba(211, 211, 211, 0.3); /* Black transparent */
+  color: white;
+  border: .5px solid white;
+}
+.Morado{
+  background: #bc51f6; /* Gradient */
+  color: white;
+}
+
+.divBorder{
+  border: 2px dashed #bc51f6;
+  color: #ffffff;
+  
+}
+.texto{
+  color: #bc51f6;
+}
+
+.btn-off{
+  border: 2px solid #bc51f6;
+  color: black;
+}
+
+.botonAsistir{
+  background: white;
+  color:black;
+
+}
+
+/* JUAS JUAS ESTILOS DE verPerfil*/
+.btnAzul{
+  background: #A4CCF8; /* Gradient */
+  color: white;
+}
+
+.btnRosa{
+  background: #E3A4F8; /* Gradient */
+  color: white;
+}
+
+
+.btnVerde{
+  background: #87d480; /* Gradient */
+  color: white;
+}
+
+.btnTransparente {
+  background: rgba(89, 89, 89, 0.5); /* Gray transparent */
+  color: rgb(255, 255, 255);
+  border: node;
+}
+
+.btnRed{
+  color:red;
+}
+
+/*Estilos de favoritos*/
+.Caja{
+  background-color: #F5F6F8;
+}
+
+.fondoFavorito{
+  background-color: #B87BE2;
+}
+
+
+/*Estilos de Guardados*/
+.botonMatch{
+  
+  background-color: #BA6FEC;
+  color: white;
+}
+
+.cancelarMatch{
+  background-color: #C689EE;
+  color: black;
+}
+
+
+.BuscarMatch{
+
+  color: #BA6FEC;
+  text-decoration: solid;
+  border-bottom: 2px solid #C689EE;
+}
