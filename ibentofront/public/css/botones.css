@@ -135,3 +135,9 @@
 .morado{
   color:#a333ff
 }
+
+.TransparenciaFoto{
+  background-color: rgba(123, 56, 255, 0.5); /* Black transparent */
+  color: white;
+  background-blend-mode: color; /* Blend mode to apply color */
+}

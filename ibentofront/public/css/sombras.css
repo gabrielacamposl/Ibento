@@ -27,6 +27,9 @@
     
 }
 
+.bordeBajo {
+    border-bottom: 1px solid #c8c8c8;
+}
 
 @keyframes moveAndRotate {
     0% {
@@ -59,3 +62,4 @@
 .flashOnce {
     animation: flashOnce 1s;
 }
+

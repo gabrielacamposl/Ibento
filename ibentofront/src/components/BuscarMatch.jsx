@@ -57,6 +57,12 @@ const buscarMatchx = () => {
         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + users[currentUserIndex].pictures.length) % users[currentUserIndex].pictures.length);
     };
 
+
+    const handdleMessage = () =>{
+        setTimeout(() => navigate("/match"), 0);
+    }
+
+    
     if (currentUserIndex >= users.length) {
         return (
             <div className="text-black flex justify-center items-center min-h-screen">
@@ -65,7 +71,7 @@ const buscarMatchx = () => {
                         <button onClick className="BuscarMatch text-white ">
                             Buscar Match
                         </button>
-                        <button onClick className=" text-black font-bold rounded-full">
+                        <button onClick={handdleMessage} className=" text-black font-bold rounded-full">
                             Mensajes
                         </button>
                     </div>
@@ -94,7 +100,7 @@ const buscarMatchx = () => {
                         <button onClick  className="BuscarMatch text-white ">
                             Buscar Match
                         </button>
-                        <button onClick  className=" text-white font-bold rounded-full">
+                        <button onClick={handdleMessage}  className=" text-white font-bold rounded-full">
                             Mensajes
                         </button>
                     </div>

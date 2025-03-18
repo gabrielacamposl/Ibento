@@ -11,6 +11,7 @@ import Guardados from "./components/Guardados";
 import BuscarMatches from "./components/BuscarMatch";
 import VerMatch from "./components/verMatches";
 import Matches from "./components/itsMatch";
+import MisMatches from "./components/matches";
 export default function App() {
   return (
     <Router>
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/matches" element={<BuscarMatches />} />
         <Route path="/verMatches" element={<VerMatch />} />
         <Route path="/itsMatch" element={<Matches />} />
+        <Route path="/match" element={<MisMatches />} />
       </Routes>
     </Router>
   );
