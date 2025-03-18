@@ -3,6 +3,13 @@
     color: white;
   
   }
+
+  .btn-custom2 {
+    border: 3px solid #bc51f6;
+    color: black;
+    border-radius: 20px;
+  
+  }
   
   .btn-custom:hover {
     background-color: #c237de; 
@@ -33,7 +40,7 @@
 }
 
 .botonTransparente{
-  background: rgba(211, 211, 211, 0.3); /* Black transparent */
+  background: rgba(255, 255, 255, 0.2); /* Black transparent */
   color: white;
   border: .5px solid white;
 }
@@ -117,4 +124,14 @@
   color: #BA6FEC;
   text-decoration: solid;
   border-bottom: 2px solid #C689EE;
+}
+
+
+
+.rojo{
+  color:rgb(216, 0, 0)
+}
+
+.morado{
+  color:#a333ff
 }

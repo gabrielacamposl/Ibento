@@ -9,6 +9,8 @@ import Perfiles from "./components/PerfilUsers";
 import Favoritos from "./components/Favoritos";
 import Guardados from "./components/Guardados";
 import BuscarMatches from "./components/BuscarMatch";
+import VerMatch from "./components/verMatches";
+import Matches from "./components/itsMatch";
 export default function App() {
   return (
     <Router>
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/favoritos" element={<Favoritos />} />
         <Route path="/guardados" element={<Guardados />} />
         <Route path="/matches" element={<BuscarMatches />} />
+        <Route path="/verMatches" element={<VerMatch />} />
+        <Route path="/itsMatch" element={<Matches />} />
       </Routes>
     </Router>
   );

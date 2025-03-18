@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import '../../public/css/botones.css';
 import '../../public/css/sombras.css';
-
-
-
+import { useNavigate } from "react-router-dom";
 
 const buscarMatchx = () => {
+    const navigate = useNavigate();
     const users = [
         {
             name: 'Lee Know',
@@ -13,6 +12,7 @@ const buscarMatchx = () => {
             pictures: ["/lee2.jpeg", "/lee.jpeg"],
             asistir: ['EDC', 'FlowFest'],
             eventosComun: ['Fiesta de disfraces', 'Karaoke'],
+            match:false,
         },
         {
             name: 'Jungkook',
@@ -20,6 +20,7 @@ const buscarMatchx = () => {
             pictures: ["/jung2.webp", "/jung.webp"],
             asistir: ['Lollapalooza', 'Tomorrowland'],
             eventosComun: ['Concierto de rock', 'Festival de cine'],
+            match:false,
         },
         {
             name: 'Jin',
@@ -27,6 +28,7 @@ const buscarMatchx = () => {
             pictures: ["/jin2.png", "/jin.jpeg"],
             asistir: ['Ultra Music Festival', 'Coachella'],
             eventosComun: ['Exposición de arte', 'Torneo de videojuegos'],
+            match:true,
         },
         // Add more users as needed
     ];
@@ -42,6 +44,9 @@ const buscarMatchx = () => {
     const handleMatch = () => {
         setCurrentUserIndex((prevIndex) => (prevIndex + 1));
         setCurrentImageIndex(0);
+        if(users[currentUserIndex].match){
+            setTimeout(() => navigate("/itsMatch"), 0);
+        }
     };
 
     const handleNext = () => {
