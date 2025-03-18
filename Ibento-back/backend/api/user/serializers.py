@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuario
+from api.models import Usuario, Subcategoria
 from django.contrib.auth.hashers import make_password, check_password
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class Login(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        from .models import Usuario  # Importa correctamente el modelo
+        from api.models import Usuario  # Importa correctamente el modelo
 
         try:
             usuario = Usuario.objects.get(email=data["email"])
@@ -34,3 +34,20 @@ class Login(serializers.Serializer):
             raise serializers.ValidationError("Debes confirmar tu cuenta primero")
 
         return {"id": usuario._id, "email": usuario.email, "nombre": usuario.nombre}
+    
+
+class UsuarioPreferences (serializers.ModelSerializer):
+    preferencias_evento = serializers.PrimaryKeyRelatedField(
+    many=True,  # Porque es una lista de referencias
+    queryset=Subcategoria.objects.all()
+)
+
+
+    class Meta:
+        model = Usuario
+        fields = ['preferencias_evento']
+
+        def update(self, instance, validated_data):
+            instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
+            instance.save()
+            return instance

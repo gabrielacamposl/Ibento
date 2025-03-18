@@ -2,9 +2,9 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import Usuario
+from api.models import Usuario
 from .serializers import UsuarioSerializer, Login
-from .utils import enviar_email_confirmacion
+from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
