@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import '../../public/css/botones.css';
 import { Link } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const verMatch = () => {
+    const navigate = useNavigate();
     const [user, setUser] = useState({
         name: 'Harry Styles',
         age: 31,
@@ -56,8 +57,13 @@ const verMatch = () => {
         }
     ];
 
+    const handdleMatch = () => {
+        navigate('/itsMatch');
+    }
    
-
+    const handdleVerLike = () => {
+        navigate('/verLike');
+    }
     return (
         <div className="flex justify-center items-center min-h-screen p-4">
             <div className="degradadoPerfil  mt-5  p-5  max-w-lg w-full">
@@ -79,9 +85,9 @@ const verMatch = () => {
                 <div className=" ml-auto mr-auto flex flex-wrap  p-4 w-full">
                     <React.Fragment>
                         {users.map((user, index) => (
-                            <div key={index} className="flex flex-col  m-2 ">
+                            <div  key={index} className="flex flex-col  m-2 ">
                                 <div className="relative rounded-full">
-                                    <img src={user.pictures[0]} className="w-50 h-60 object-cover rounded" alt={user.name} />
+                                    <img onClick={handdleVerLike} src={user.pictures[0]} className="w-50 h-60 object-cover rounded" alt={user.name} />
                                     <label className="absolute bottom-0 text-center w-full Transparencia cursor-pointer">
                                         <span className='ml-2 '>{user.name}</span>
                                         <div className='flex justify-center items-center'>
@@ -91,7 +97,7 @@ const verMatch = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                                                     </svg>
                                                 </button>
-                                                <button className=" botonTransparente text-white p-2 rounded-full size-8">
+                                                <button onClick={handdleMatch} className=" botonTransparente text-white p-2 rounded-full size-8">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4" className="morado">
                                                     <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
                                                     </svg>

@@ -68,10 +68,10 @@ const buscarMatchx = () => {
             <div className="text-black flex justify-center items-center min-h-screen">
                 <div className="w-full mt-5  h-190 relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full ">
                 <div className=" left-2 top-10  space-x-5 font-bold flex justify-between items-center ">
-                        <button onClick className="BuscarMatch text-white ">
+                        <button onClick className="cursor-pointer BuscarMatch text-white ">
                             Buscar Match
                         </button>
-                        <button onClick={handdleMessage} className=" text-black font-bold rounded-full">
+                        <button onClick={handdleMessage} className="cursor-pointer text-black font-bold rounded-full">
                             Mensajes
                         </button>
                     </div>
@@ -97,10 +97,10 @@ const buscarMatchx = () => {
                 <div className="relative w-120 h-190 rounded-lg overflow-hidden ">
                 
                 <div className="absolute  z-5 left-2 top-10  space-x-5 transform font-bold flex justify-between items-center ">
-                        <button onClick  className="BuscarMatch text-white ">
+                        <button onClick  className="cursor-pointer BuscarMatch text-white ">
                             Buscar Match
                         </button>
-                        <button onClick={handdleMessage}  className=" text-white font-bold rounded-full">
+                        <button onClick={handdleMessage}  className="cursor-pointer text-white font-bold rounded-full">
                             Mensajes
                         </button>
                     </div>

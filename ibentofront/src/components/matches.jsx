@@ -66,11 +66,15 @@ const matches = () => {
 
     }
 
+
+    const handdleFuture = () => {
+        navigate("/verMatches");
+        }
     return (
         <div className="flex justify-center items-center min-h-screen p-4">
             <div className="degradadoPerfil mt-5 p-5 max-w-lg w-full">
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
-                    <button className="">
+                    <button className=" cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
@@ -82,10 +86,10 @@ const matches = () => {
                 </div>
                 
                 <div className="font-bold "></div>
-                    <button onClick={handdleSearch} className="font-bold text-white">
+                    <button onClick={handdleSearch} className="cursor-pointer font-bold text-white">
                         Buscar Match
                     </button>
-                    <button className="BuscarMatch font-bold ml-4">
+                    <button className="cursor-pointer BuscarMatch font-bold ml-4">
                         Mensajes
                     </button>
                     <h3 className='mt-10 font-bold'>Nuevos Matches</h3>
@@ -95,7 +99,7 @@ const matches = () => {
                        <div className="m-1 flex-shrink-0 relative">
                             <div className="rounded-full">
                                 <img src={user.pictures[0]} className="w-30 h-40 object-cover rounded" alt={user.name} />
-                                <label className="absolute bottom-0 text text-center h-full w-full TransparenciaFoto cursor-pointer">
+                                <label onClick={handdleFuture} className="absolute bottom-0 text text-center h-full w-full TransparenciaFoto cursor-pointer">
                                     <div className='mt-10'>
                                        <h1>Futuros Acompañantes</h1>
                                         <div className='flex justify-center items-center'>

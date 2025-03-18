@@ -12,6 +12,7 @@ import BuscarMatches from "./components/BuscarMatch";
 import VerMatch from "./components/verMatches";
 import Matches from "./components/itsMatch";
 import MisMatches from "./components/matches";
+import Like from "./components/verLike";
 export default function App() {
   return (
     <Router>
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/verMatches" element={<VerMatch />} />
         <Route path="/itsMatch" element={<Matches />} />
         <Route path="/match" element={<MisMatches />} />
+        <Route path="/verLike" element={<Like />} />
       </Routes>
     </Router>
   );
