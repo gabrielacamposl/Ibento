@@ -13,6 +13,7 @@ import VerMatch from "./components/verMatches";
 import Matches from "./components/itsMatch";
 import MisMatches from "./components/matches";
 import Like from "./components/verLike";
+import Chat from "./components/chat";
 export default function App() {
   return (
     <Router>
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/itsMatch" element={<Matches />} />
         <Route path="/match" element={<MisMatches />} />
         <Route path="/verLike" element={<Like />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
     </Router>
   );

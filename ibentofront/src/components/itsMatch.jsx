@@ -32,6 +32,11 @@ const itsMatch = () => {
 const handdleContinuar = () => {
     navigate("/matches");
 }
+const handdleChat = () => {
+    navigate("/chat");
+}
+
+
    
 
     return (
@@ -83,8 +88,8 @@ const handdleContinuar = () => {
                         </div>
                         
                     </React.Fragment>
-                    <div className="mt-20 w-full">
-                        <button className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
+                    <div className="mt-30 w-full">
+                        <button onClick={handdleChat} className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
                         <button onClick={handdleContinuar} className='btn-custom2 rounded h-10 w-full font-bold text-lg'>Continuar</button>
                     </div>
                 </div>
