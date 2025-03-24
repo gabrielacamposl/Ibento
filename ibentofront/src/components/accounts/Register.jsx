@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api";
+import { registerUser } from "../../api";
 import { InputText } from "primereact/inputtext";
-import { inputStyles } from "../styles/styles";
+import { inputStyles } from "../../styles/styles";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
@@ -12,9 +12,10 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { Button } from "primereact/button";
-import { buttonStyle } from "../styles/styles";
+import { buttonStyle } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { Grid2 } from "@mui/material";
 
 
 
@@ -29,7 +30,7 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
 
   const [message, setMessage] = useState("");
@@ -42,6 +43,11 @@ export default function Register() {
     e.preventDefault();
 
     console.log("Datos antes de enviar:", form);
+
+    if (!isTermsAccepted) {
+      setMessage("Debes aceptar los términos y condiciones para continuar.");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setMessage("Las contraseñas no coinciden");
@@ -175,7 +181,7 @@ export default function Register() {
                     <button
                       type="button"
                       className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)} // Cambia el estado al hacer clic
+                      onClick={() => setShowPassword(!showPassword)} 
                     >
                       {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
                     </button>
@@ -204,7 +210,14 @@ export default function Register() {
                 </Grid>
                 <Grid item xs={12}>
                 <FormControlLabel
-                    control={<Checkbox value="allowPrivTerm" color="primary" />}
+                    control={
+                      <Checkbox
+                        value="allowPrivTerm"
+                        color="primary"
+                        checked={isTermsAccepted}
+                        onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                      />
+                    }
                     label={
                       <span style={{ fontSize: "18px" }}>
                         He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
@@ -227,18 +240,11 @@ export default function Register() {
       </motion.div>
 
 
-
-
       {/* Formulario para móviles */}
       <div className="block md:hidden">
 
         <div className="block md:hidden w-full h-screen flex flex-col">
-
-          {/* Sección superior con animación */}
           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
-
-
-          {/* 🔹 Luces flotantes */}
           <div className="absolute inset-0 z-10">
             {[...Array(9)].map((_, i) => {
               const color = colors[i % colors.length]; // Alterna entre colores
@@ -278,32 +284,32 @@ export default function Register() {
             zIndex: 10,
           }}
         >
-          <Container component="main" maxWidth="xs" className="w-full">
+          <Grid container component="main" maxWidth="xs" className="w-full h-full">
             <CssBaseline />
             <Typography variant="h5" component="h1" className="text-center font-bold text-gray-700 mb-4">
               Crear Cuenta
             </Typography>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input className={inputStyles} name="nombre" required />
+                  <InputText className={inputStyles} name="nombre" required />
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <label className="block text-sm font-medium text-gray-700">Apellido</label>
-                  <input className={inputStyles} name="apellido" required />
+                  <InputText className={inputStyles} name="apellido" required />
                 </Grid>
 
                 <Grid item xs={12}>
                   <label className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-                  <input className={inputStyles} name="email" required />
+                  <InputText className={inputStyles} name="email" required />
                 </Grid>
 
                 <Grid item xs={12}>
                   <label className="block text-sm font-medium text-gray-700">Contraseña</label>
                   <div className="relative">
-                    <input
+                    <InputText
                       className={`${inputStyles} pr-10`}
                       type={showPassword ? "text" : "password"}
                       name="password"
@@ -322,7 +328,7 @@ export default function Register() {
                 <Grid item xs={12}>
                   <label className="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
                   <div className="relative">
-                    <input
+                    <InputText
                       className={`${inputStyles} pr-10`}
                       type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
@@ -363,7 +369,7 @@ export default function Register() {
             </Button> */}
 
             </form>
-          </Container>
+          </Grid>
         </Box>
       </div>
     </div>
