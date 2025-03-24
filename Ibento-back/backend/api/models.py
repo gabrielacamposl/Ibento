@@ -16,10 +16,12 @@ class Usuario(models.Model):
     is_confirmed = models.BooleanField(default=False)
     preferencias_evento = models.JSONField(default=list, blank=True, null=True)
 
-    extra_data = models.JSONField(null= True, blank=True) #Permite que los datos sean dinámicos
 
     def __str__(self):
         return self.email
+
+    
+# Clases para las Categorias y Subcategorías de los Eventos
 
 class CategoriaEvento (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
@@ -38,3 +40,30 @@ class Subcategoria(models.Model):
     def __str__(self):
         return self.nombre_subcategoria
 
+
+
+    
+
+# class Evento(models.Model):
+#     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+#     organizador = models.ForeignKey(
+#         Usuario, on_delete=models.CASCADE, related_name="eventos", to_field="_id")
+#     nombre_evento = models.CharField(max_length=100, null=True, blank=True)
+#     descripcion_evento = models.TextField(null=True, blank=True)
+#     lugar_maps = models.CharField(max_length=100, null=True, blank=True)
+#     fecha_evento= models.DateField(null=True, blank=True)
+#     hora_evento = models.TimeField(null=True, blank=True)
+#     categorias_tags = models.JSONField(default=list, blank=True, null=True)
+#     foto_evento = models.ImageField(upload_to='fotos_evento/', null=True, blank=True)
+#     is_boletos = models.BooleanField(default=False)
+#     boletos = models.JSONField(default=list, blank=True, null=True)
+
+#     def _str_(self):
+#         return self.nombre_evento
+    
+
+# class Mensaje(models.Model):
+#     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+#     UsuarioA = models.ForeignKey(models.CASCADE, related_name="usuario_A", to_field="_id")
+#     UsuarioB = models.ForeignKey(models.CASCADE, related_name="usuario_B", to_field="_id")
+#     mensaje = models.TextField()

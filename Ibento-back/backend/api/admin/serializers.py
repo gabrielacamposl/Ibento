@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from api.models import CategoriaEvento, Subcategoria
 
+# -------------- Categorias para Eventos --------------
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoriaEvento
         fields = ["_id", "nombre"]
+        
 
 class SubcategoriaSerializer(serializers.ModelSerializer):
     categoria = serializers.SlugRelatedField(

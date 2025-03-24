@@ -8,13 +8,15 @@ class UsuarioAdmin(admin.ModelAdmin):
     list_filter = ['apellido']
     readonly_fields = ['_id']
 
+# ------------------ Registro de etiquetas de eventos Categorías y Subcategorias -----------------
+
 @admin.register(CategoriaEvento)
-class CategoriaAdmin(admin.ModelAdmin):
+class CategoriaEventoAdmin(admin.ModelAdmin):
     list_display = ['_id', 'nombre']
     search_fields = ['nombre']
 
 
-class SubcategoriasAdmin(admin.ModelAdmin):
+class SubcategoriasEventoAdmin(admin.ModelAdmin):
     list_display = ['_id', 'nombre_subcategoria', 'categoria']
     search_fields = ['nombre_subcategoria']
     list_filter = ['categoria']
@@ -25,4 +27,6 @@ class SubcategoriasAdmin(admin.ModelAdmin):
             kwargs["to_field_name"] = "_id"  # Asegurar que usa el campo correcto
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-admin.site.register(Subcategoria, SubcategoriasAdmin)
+admin.site.register(Subcategoria, SubcategoriasEventoAdmin)
+
+

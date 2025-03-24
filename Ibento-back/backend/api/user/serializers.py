@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from api.models import Usuario, Subcategoria
 from django.contrib.auth.hashers import make_password, check_password
+import cloudinary.uploader
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,16 +23,13 @@ class Login(serializers.Serializer):
         try:
             usuario = Usuario.objects.get(email=data["email"])
         except Usuario.DoesNotExist:
-            raise serializers.ValidationError("Error en el correo o contraseña")
-
-        if not usuario.password or usuario.password.startswith("pbkdf2_sha256$") is False:
-            raise serializers.ValidationError("Contraseña no válida. Intenta restablecerla.")
+            raise serializers.ValidationError("Error en el correo o contraseña.")
 
         if not check_password(data["password"], usuario.password):
-            raise serializers.ValidationError("Error en el correo o contraseña")
+            raise serializers.ValidationError("Error en el correo o contraseña.")
 
         if not usuario.is_confirmed:
-            raise serializers.ValidationError("Debes confirmar tu cuenta primero")
+            raise serializers.ValidationError("Debes confirmar tu cuenta primero.")
 
         return {"id": usuario._id, "email": usuario.email, "nombre": usuario.nombre}
     
@@ -42,7 +40,6 @@ class UsuarioPreferences (serializers.ModelSerializer):
     queryset=Subcategoria.objects.all()
 )
 
-
     class Meta:
         model = Usuario
         fields = ['preferencias_evento']
@@ -51,3 +48,5 @@ class UsuarioPreferences (serializers.ModelSerializer):
             instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
             instance.save()
             return instance
+
+

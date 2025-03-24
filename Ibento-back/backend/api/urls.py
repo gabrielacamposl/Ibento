@@ -1,6 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.user.views import UsuarioViewSet, confirmar_usuario, login_usuario
+from api.user.views import (UsuarioViewSet, 
+                            confirmar_usuario, 
+                            login_usuario, 
+                            )
 
 
 router = DefaultRouter()

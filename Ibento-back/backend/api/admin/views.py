@@ -9,4 +9,4 @@ class CategoriaViewSet(viewsets.ModelViewSet):
 class SubcategoriasViewSet(viewsets.ModelViewSet):
     queryset = Subcategoria.objects.all()
     serializar_class = SubcategoriaSerializer
-        
+

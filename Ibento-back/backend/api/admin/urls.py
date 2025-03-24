@@ -8,7 +8,5 @@ admin_router.register(r'categorias', CategoriaViewSet)
 admin_router.register(r'subcategorias', SubcategoriasViewSet)
 
 urlpatterns = [
-    # Rutas de usuarios
-    # Rutas de admin
     path('admin/', include(admin_router.urls)),
 ]
