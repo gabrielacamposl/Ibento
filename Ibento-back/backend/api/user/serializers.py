@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Usuario, Subcategoria
+from api.models import Usuario, Subcategoria, SubcategoriaPerfil
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
 
@@ -49,4 +49,63 @@ class UsuarioPreferences (serializers.ModelSerializer):
             instance.save()
             return instance
 
+
+# Creación de perfil para busqueda de acompañantes
+
+## Subir imágenes de perfil para la busqueda de acompañantes
+
+class UploadProfilePicture(serializers.Serializer):
+    images = serializers.ListField(
+        child = serializers.ImageField(),
+        min_length = 3,
+        max_length = 6,
+    )
+
+    def save (self, usuario):
+        urls = []
+        for image in self.validated_data['images']:
+            result = cloudinary.uploader.upload(image)
+            urls.append(result['secure_url'])
+        usuario.profile_pic = urls
+        usuario.save()
+        return usuario
+
+## Datos Personales para el perfil
+
+class PersonalData(serializers.ModelSerializer):
+    model = Usuario
+    fields = ["description", "birthday", "gender", "curp"]
+
+    def update(self, instance, validated_data):
+        instance.description = validated_data.get("description", instance.description)
+        instance.birthday = validated_data.get("birthday", instance.birthday)
+        instance.gender = validated_data.get("gender", instance.gender)
+        instance.curp = validated_data.get("curp", instance.curp)
+        instance.save()
+        return instance
+      
+
+## Selección de respuestas para conocer más al usuarios
+
+class PersonalPreferences(serializers.ModelSerializer):
+    preferences = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=SubcategoriaPerfil.objects.all(),
+    )
+
+    def save(self, usuario):
+        usuario.preferencias_generales = [p.id for p in self.validated_data["preferences"]]
+        usuario.save()
+        return usuario
+    
+# Validación de INE
+
+class UploadINE(serializers.ModelSerializer):
+    ine_f = serializers.ImageField()
+    ine_m = serializers.ImageField()
+
+# Comparación de rostros segundo filtro
+
+class CompararRostroSerializer(serializers.Serializer):
+    foto_camara = serializers.ImageField()
 

@@ -16,6 +16,28 @@ class Usuario(models.Model):
     is_confirmed = models.BooleanField(default=False)
     preferencias_evento = models.JSONField(default=list, blank=True, null=True)
 
+     # Preferenicas de eventos
+    save_events = models.JSONField(default=list, blank=True, null=True)
+    favourite_events = models.JSONField(default=list, blank=True, null=True)
+
+    # Campos para la creación del perfil de acompañantes
+    profile_pic = models.JSONField(default=None, null=True, blank=True)
+    preferencias_generales = models.JSONField(default=None, null=True, blank=True)
+    birthday = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=[('F', 'Femenino'), ('M', 'Masculino'), ('O', 'Otro')])
+    description = models.TextField(null=True, blank=True)
+    curp = models.CharField(max_length=18, null = True, blank=True)
+
+    # Campos para validación del INE
+    is_ine_validated = models.BooleanField(default=False) # Verificación del perfil con INE
+    is_validated_camera = models.BooleanField(default=False) # Verificación del perfil con la cámara
+
+    # Emparejamiento con acompañantes
+    matches = models.JSONField(default=list, blank=True, null=True)
+    futuros_matches = models.JSONField(default=list, blank=True, null=True)
+    blocked = models.JSONField(default = list, blank= True, null=True)
+
+
 
     def __str__(self):
         return self.email
