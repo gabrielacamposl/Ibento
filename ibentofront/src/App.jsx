@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/Register";
 import Confirm from "./components/Confirm";
 import Login from "./components/Login";
+
+import PrincipalEventos from "./principalEventos";
+
 import Perfil from "./components/Perfil";
 import EditarPerfil from "./components/EditarPerfil";
 import EditarIntereses from "./components/Intereses";
@@ -16,6 +19,7 @@ import MisMatches from "./components/matches";
 import Like from "./components/verLike";
 import Chat from "./components/chat";
 
+
 export default function App() {
   return (
     <Router>
@@ -24,6 +28,8 @@ export default function App() {
         <Route path="/" element={<Register />} />
         <Route path="/confirmar" element={<Confirm />} />
         <Route path="/login" element={<Login />} />
+
+        <Route path="/principalEventos" element={<PrincipalEventos />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/editarPerfil" element={<EditarPerfil />} />
         <Route path="/editarIntereses" element={<EditarIntereses />} />
@@ -36,7 +42,6 @@ export default function App() {
         <Route path="/match" element={<MisMatches />} />
         <Route path="/verLike" element={<Like />} />
         <Route path="/chat" element={<Chat />} />
-
       </Routes>
     </Router>
   );
