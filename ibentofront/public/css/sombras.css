@@ -1,0 +1,65 @@
+/* Degradado de oscuro a claro */
+.bodyFoto {
+    background: linear-gradient(to top, #101010,transparent, transparent);
+}
+
+
+.sombraMatch1 {
+    box-shadow: 8px -10px 1px 3px rgba(187, 132, 212, 100);
+}
+
+
+.sombraMatch2 {
+    box-shadow: -8px 10px 1px 3px rgba(91, 114, 210, 100);
+}
+
+.pNuevo {
+    font-size: xx-large;
+    display: inline-block;
+    transform: rotate(-30deg);
+}
+
+.pParther{
+    font-size: xx-large;
+    display: inline-block;
+    transform: rotate(20deg);
+    
+    
+}
+
+.bordeBajo {
+    border-bottom: 1px solid #c8c8c8;
+}
+
+@keyframes moveAndRotate {
+    0% {
+        transform: translateX(100) rotate(0deg);
+    }
+    50% {
+        transform: translateX(10px) rotate(10deg);
+    }
+    100% {
+        transform: translateX(20) rotate(0deg);
+    }
+}
+
+.animateDiv {
+    animation: moveAndRotate 2s ease-in-out infinite;
+}
+
+@keyframes flashOnce {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.flashOnce {
+    animation: flashOnce 1s;
+}
+
