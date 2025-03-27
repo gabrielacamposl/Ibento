@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { confirmUser } from "../api";
+import { confirmUser } from "../../api";
 
 export default function Confirm() {
   const [token, setToken] = useState("");

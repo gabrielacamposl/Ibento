@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import Register from "./components/Register";
 import Confirm from "./components/Confirm";
 import Login from "./components/Login";
@@ -14,10 +15,12 @@ import Matches from "./components/itsMatch";
 import MisMatches from "./components/matches";
 import Like from "./components/verLike";
 import Chat from "./components/chat";
+
 export default function App() {
   return (
     <Router>
       <Routes>
+
         <Route path="/" element={<Register />} />
         <Route path="/confirmar" element={<Confirm />} />
         <Route path="/login" element={<Login />} />
@@ -33,6 +36,7 @@ export default function App() {
         <Route path="/match" element={<MisMatches />} />
         <Route path="/verLike" element={<Like />} />
         <Route path="/chat" element={<Chat />} />
+
       </Routes>
     </Router>
   );
