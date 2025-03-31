@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../public/css/botones.css';
+import "../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 const categorias = [
     { id: 1, nombre: 'Deportes', valores: ['Fútbol', 'Baloncesto', 'Tenis', 'Natación', 'Ciclismo'] },

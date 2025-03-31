@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import '../../public/css/botones.css';
-import '../../public/css/sombras.css';
+import "../assets/css/botones.css";
+import "../assets/css/sombras.css";
 import { useNavigate } from "react-router-dom";
 
 const buscarMatchx = () => {

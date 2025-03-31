@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../public/css/botones.css';
+import "../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
