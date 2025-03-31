@@ -1,8 +1,11 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import Usuario, Subcategoria, SubcategoriaPerfil
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
 
+
+# Creación del usuario
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
@@ -12,14 +15,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         validated_data['password'] = make_password(validated_data['password'])  
         return Usuario.objects.create(**validated_data)  
     
-    
+# Login / Inicio de Sesión    
 class Login(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        from api.models import Usuario  # Importa correctamente el modelo
-
         try:
             usuario = Usuario.objects.get(email=data["email"])
         except Usuario.DoesNotExist:
@@ -31,9 +32,31 @@ class Login(serializers.Serializer):
         if not usuario.is_confirmed:
             raise serializers.ValidationError("Debes confirmar tu cuenta primero.")
 
-        return {"id": usuario._id, "email": usuario.email, "nombre": usuario.nombre}
+        refresh = RefreshToken.for_user(usuario)
+
+        return {
+            "id": usuario._id,
+            "email": usuario.email,
+            "nombre": usuario.nombre,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }
+    
+# Sign out / Cierre de Sesión
+class Logout(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, data):
+        try:
+            token = RefreshToken(data["refresh"])
+            token.blacklist()  # Invalidar el token
+        except Exception:
+            raise serializers.ValidationError("Sesión expirado.")
+
+        return {}
     
 
+# Selección de preferencias para la recomendación de eventos
 class UsuarioPreferences (serializers.ModelSerializer):
     preferencias_evento = serializers.PrimaryKeyRelatedField(
     many=True,  # Porque es una lista de referencias
