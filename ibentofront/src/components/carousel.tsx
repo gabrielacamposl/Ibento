@@ -1,4 +1,3 @@
-import './carousel.css';
 import React from 'react';
 
 

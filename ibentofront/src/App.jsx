@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Register from "./components/Register";
-import Confirm from "./components/Confirm";
-import Login from "./components/Login";
+import Register from "./components/accounts/Register";
+import Confirm from "./components/accounts/Confirm";
+import Login from "./components/accounts/Login";
 
 import PrincipalEventos from "./principalEventos";
 

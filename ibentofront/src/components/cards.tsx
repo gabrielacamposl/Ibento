@@ -1,4 +1,3 @@
- import './cards.css';
  import { HeartIcon, ClockIcon } from '@heroicons/react/24/solid';
  import React from 'react';
 

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import './cards.css';
 import { HeartIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 
