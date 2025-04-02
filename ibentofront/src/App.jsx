@@ -4,7 +4,6 @@ import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
 
-import PrincipalEventos from "./principalEventos";
 
 import Perfil from "./components/Perfil";
 import EditarPerfil from "./components/EditarPerfil";
@@ -18,6 +17,13 @@ import Matches from "./components/itsMatch";
 import MisMatches from "./components/matches";
 import Like from "./components/verLike";
 import Chat from "./components/chat";
+import PrincipalEventos from "./principalEventos";
+import RecuperarContrasena from "./recuperarContrasena";
+import IngresarCodigo from "./ingresarCodigo";
+import NuevaContrasena from "./nuevaContrasena";
+import Nc from "./nc";
+import EventoPage from "./components/eventoPage";  
+
 
 
 export default function App() {
@@ -42,6 +48,12 @@ export default function App() {
         <Route path="/match" element={<MisMatches />} />
         <Route path="/verLike" element={<Like />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/principalEventos" element={<PrincipalEventos />} />
+        <Route path = "/recuperarContraseña" element = {<RecuperarContrasena/>}/>
+        <Route path="/ingresarCodigo" element={<IngresarCodigo />} />
+        <Route path="/nuevaContrasena" element={<NuevaContrasena />} />
+        <Route path="/nc" element={<Nc />} />
+        <Route path="/eventoPage" element={<EventoPage />} />
       </Routes>
     </Router>
   );

@@ -4,7 +4,7 @@ import React from 'react';
 const Carousel = () => {
 
     return (
-        <div className="carousel rounded-box w-screen h-48 mt-6">
+        <div className="carousel rounded-box w-full h-48 mt-6">
         <div className="carousel-item w-full">
           <img
             src="https://img.daisyui.com/images/stock/photo-1559703248-dcaaec9fab78.webp"
