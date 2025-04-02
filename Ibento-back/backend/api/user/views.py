@@ -1,13 +1,16 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import RefreshToken
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from api.models import Usuario
 from .serializers import (UsuarioSerializer, 
                           Login,
+                          Logout,
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
@@ -41,12 +44,22 @@ def confirmar_usuario(request, token):
     return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(["POST"])
+@permission_classes([AllowAny])
 def login_usuario(request):
-    serializer = Login(data=request.data)  
+    serializer = Login(data=request.data)
     if serializer.is_valid():
-        return Response(serializer.validated_data)  
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.validated_data, status=200)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout_usuario(request):
+    serializer = Logout(data=request.data)
+    if serializer.is_valid():
+        return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
+    return Response(serializer.errors, status=400)
 
 # ------------- Creación de Perfil para la Busqueda de Acompñantes --------------------------------
 

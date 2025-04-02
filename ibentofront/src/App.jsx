@@ -23,6 +23,7 @@ import IngresarCodigo from "./ingresarCodigo";
 import NuevaContrasena from "./nuevaContrasena";
 import Nc from "./nc";
 import EventoPage from "./components/eventoPage";  
+import VerificarPerfil from "./components/verificar";
 
 
 
@@ -30,11 +31,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
-
         <Route path="/" element={<Register />} />
         <Route path="/confirmar" element={<Confirm />} />
         <Route path="/login" element={<Login />} />
-
         <Route path="/principalEventos" element={<PrincipalEventos />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/editarPerfil" element={<EditarPerfil />} />
@@ -54,6 +53,7 @@ export default function App() {
         <Route path="/nuevaContrasena" element={<NuevaContrasena />} />
         <Route path="/nc" element={<Nc />} />
         <Route path="/eventoPage" element={<EventoPage />} />
+        <Route path="/verificar" element={<VerificarPerfil />} />
       </Routes>
     </Router>
   );

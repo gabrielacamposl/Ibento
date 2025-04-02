@@ -21,8 +21,8 @@ class Usuario(models.Model):
     favourite_events = models.JSONField(default=list, blank=True, null=True)
 
     # Campos para la creación del perfil de acompañantes
-    profile_pic = models.JSONField(default=None, null=True, blank=True)
-    preferencias_generales = models.JSONField(default=None, null=True, blank=True)
+    profile_pic = models.JSONField(default=list, null=True, blank=True)
+    preferencias_generales = models.JSONField(default=list, null=True, blank=True)
     birthday = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=[('F', 'Femenino'), ('M', 'Masculino'), ('O', 'Otro')])
     description = models.TextField(null=True, blank=True)
