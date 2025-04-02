@@ -141,3 +141,26 @@
   color: white;
   background-blend-mode: color; /* Blend mode to apply color */
 }
+
+
+.barraPorciento{
+  background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+ 
+}
+
+.btn-inactive{
+  background-color: none;
+  border: 1.5px solid #9433D5;
+  color: #000000;
+}
+
+.btn-active{
+  background: #df7fff; /* Gradient */
+  color: #ffffff;
+  border:1.5px solid #bc51f6;
+}
+
+
+.botonLink{
+  color: #2878fa;
+}
