@@ -37,7 +37,8 @@ class Usuario(models.Model):
     futuros_matches = models.JSONField(default=list, blank=True, null=True)
     blocked = models.JSONField(default = list, blank= True, null=True)
 
-
+    # Token para Firebase Cloud Messaging
+    token_fcm = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.email
@@ -80,8 +81,26 @@ class Subcategoria(models.Model):
         return self.nombre_subcategoria
 
 
+class Conversacion (models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    usuario_a = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="chats_a", to_field = "_id")
+    usuario_b = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="chats_b", to_field = "_id")
 
-    
+    def __str__(self):
+        return f"{self.usuario_a} - {self.usuario_b}"
+
+class Mensaje(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    conversacion = models.ForeignKey(Conversacion, on_delete=models.CASCADE, related_name="mensajes", to_field="_id")
+    remitente = models.ForeignKey(Usuario, on_delete = models.CASCADE, related_name = "mensajes_enviados", to_field = "_id")
+    receptor = models.ForeignKey(Usuario, on_delete = models.CASCADE, related_name = "mensajes_recibidos", to_field = "_id")
+    mensaje = models.TextField()
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.remitente} -> {self.receptor}: {self.mensaje}"
+
+
 
 # class Evento(models.Model):
 #     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
