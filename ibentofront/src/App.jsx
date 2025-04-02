@@ -24,9 +24,6 @@ import NuevaContrasena from "./nuevaContrasena";
 import Nc from "./nc";
 import EventoPage from "./components/eventoPage";  
 import VerificarPerfil from "./components/verificar";
-import Register from "./components/Register";
-import Confirm from "./components/Confirm";
-import Login from "./components/Login";
 
 
 
@@ -34,10 +31,6 @@ export default function App() {
   return (
     <Router>
       <Routes>
-
-        <Route path="/" element={<Register />} />
-        <Route path="/confirmar" element={<Confirm />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Register />} />
         <Route path="/confirmar" element={<Confirm />} />
         <Route path="/login" element={<Login />} />
