@@ -4,7 +4,7 @@ import re
 import json
 import requests
 
-api_key = "AIzaSyAeZkU1RIZuPmiRqBfNOJb9iPUH87jjWeQ"
+api_key = ""
 
 def obtener_coordenadas(direccion, api_key):
     """

@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 
 # Configuración
-TICKETMASTER_API_KEY = "LwNCjnI1T10t1b5HfOGqeaXEFDipwWn9"  # Reemplaza con tu API key o usa variables de entorno
+TICKETMASTER_API_KEY = ""  # Reemplaza con tu API key o usa variables de entorno
 
 def format_event_data(events):
     
