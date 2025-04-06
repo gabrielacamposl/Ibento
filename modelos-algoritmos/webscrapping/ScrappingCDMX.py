@@ -1,24 +1,56 @@
+
 from playwright.sync_api import sync_playwright
 import time
 import re
 import json
 import requests
 
-api_key = ""
+from dotenv import load_dotenv
+import os
+from openai import OpenAI
+
+load_dotenv()
+
+API_KEY_GOOGLE = os.getenv("API_KEY_GOOGLE")
+API_KEY_DEEPSEEK = os.getenv("API_KEY_DEEPSEEK")
+
+client = OpenAI(api_key=API_KEY_DEEPSEEK, base_url="https://api.deepseek.com")
+API_URL = "https://api.deepseek.com/v1/chat/completions"
+
+def analizar_genero(titulo, descripcion):
+    prompt = f"""
+    Analiza el siguiente título y descripción, y determina a qué géneros pertenece.
+    Responde **solo** con una lista de géneros relevantes separados por comas.
+    Los generos pueden ser los siguientes y pueden ser varios:
+    Música, Deportes, Artes y Teatro, Familia, Misceláneo, Alternativa, Indie Rock, Metal Alternativo, 
+    Blues, Blues Acústico, Blues Rock, Clásica, Cámara. Coral, Country, Country Alternativo, Country Pop, 
+    Electrónica, Casa, Techno, Folk, Folk Alternativo, Celta, Hip-Hop/Rap, Consciente, Este, Jazz, Avant-Garde Jazz, 
+    Bebop, Latina, Bachata, Banda, Pop, Pop Alternativo, Pop Dance, R&B, R&B Alternativo, Contemporáneo adulto, Rock, Rock and Roll, Rock alternativo, Mundial, 
+    Afro-Beat, Árabe, Deportes de aventura, Béisbol, Baloncesto, Boxeo, Críquet, Fútbol, Fútbol americano, Golf, Hockey, Lacrosse, Artes marciales, Deportes de motor, 
+    Olimpiadas, Carreras de caballos, Rodeo, Tenis, Voleibol, Ballet, Musicales, Ópera, Actuaciones, Teatro, Para niños, Disney en Hielo, Monstruo Jam, Sesame Street Live
+    Circo, Comedia, Ferias, Festivales, Películas, Museos, Parques, Espectáculos
+
+    **Título**: {titulo}  
+    **Descripción**: {descripcion}
+    """
+
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant"},
+            {"role": "user", "content": f"{prompt}"},
+        ],
+        stream=False
+    )
+
+    
+    # Extrae el contenido de la respuesta
+    generos = response.choices[0].message.content
+    return generos.strip()
+
 
 def obtener_coordenadas(direccion, api_key):
-    """
-    Obtiene las coordenadas geográficas (latitud y longitud) de una dirección
-    utilizando la API de Geocoding de Google Maps.
-    
-    Args:
-        direccion (str): La dirección o nombre del lugar a buscar
-        api_key (str): Tu clave de API de Google Maps
-        
-    Returns:
-        dict: Un diccionario con las coordenadas {'lat': latitud, 'lng': longitud}
-             o None si no se encontraron resultados
-    """
+
     # Preparar la URL para la solicitud a la API
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
@@ -62,7 +94,7 @@ def obtener_detalles_evento_con_blockquote(page):
     descripcion = page.locator('.container.px-2 blockquote').all_inner_texts()
     costo = page.locator('.row.w-100 div ul li ul li').all_inner_texts()
     ubicacion = page.locator('.col-md-9.px-md-5.d-flex.align-items-center.flex-row div span').inner_text()
-
+    url = page.url
     style_img = page.locator('.container-fluid.cdmx-billboard-page-event-banner-image').get_attribute('style')
 
     patron = r"\s*url\(['\"](.*?)['\"]\)"
@@ -97,9 +129,11 @@ def obtener_detalles_evento_con_blockquote(page):
     for p in descripcion:
         desc = desc + p + " "
 
+    generos = analizar_genero(nombre, descripcion)
+
     coordenadas = None
     if ubicacion:
-        coordenadas = obtener_coordenadas(ubicacion, api_key)
+        coordenadas = obtener_coordenadas(ubicacion, API_KEY_GOOGLE)
 
     return {
         "nombre": nombre,
@@ -109,7 +143,9 @@ def obtener_detalles_evento_con_blockquote(page):
         "descripcion": desc,
         "fechas": fechas,
         "coordenadas": coordenadas,
-        "img_url": img
+        "img_url": img,
+        "url": url,
+        "clasificaciones": generos
     }
 
 def obtener_detalles_evento_sin_blockquote(page):
@@ -118,6 +154,7 @@ def obtener_detalles_evento_sin_blockquote(page):
     lugar = page.locator('.container-fluid.cdmx-billboard-page-event-banner-image h2').inner_text()
     descripcion = page.locator('.container.px-2 p').all_inner_texts()
     costo = page.locator('.row.w-100 div ul li ul li').all_inner_texts()
+    url = page.url
     ubicacion = page.locator('.col-md-9.px-md-5.d-flex.align-items-center.flex-row div span').inner_text()
 
     style_img = page.locator('.container-fluid.cdmx-billboard-page-event-banner-image').get_attribute('style')
@@ -152,10 +189,12 @@ def obtener_detalles_evento_sin_blockquote(page):
     desc = ""
     for p in descripcion:
         desc = desc + p + " "
+
+    generos = analizar_genero(nombre, descripcion)
     
     coordenadas = None
     if ubicacion:
-        coordenadas = obtener_coordenadas(ubicacion, api_key)
+        coordenadas = obtener_coordenadas(ubicacion, API_KEY_GOOGLE)
 
     return {
         "nombre": nombre,
@@ -165,7 +204,9 @@ def obtener_detalles_evento_sin_blockquote(page):
         "descripcion": desc,
         "fechas": fechas,
         "coordenadas": coordenadas,
-        "img_url": img
+        "img_url": img,
+        "url": url,
+        "clasificaciones": generos
     }
 
 def imprimir_detalles_evento(detalles, n):
@@ -178,9 +219,12 @@ def imprimir_detalles_evento(detalles, n):
     print(f"Costo: {detalles['costo']}")
     print(f"Ubicación: {detalles['ubicacion']}")
     print(f"Descripción: {detalles['descripcion']}")
+    print(f"Generos: {detalles['clasificaciones']}")
     print(f"Fechas: {detalles['fechas']}")
     print(f"Coordenadas: {detalles['coordenadas']}")
     print(f"Imagen_URL: {detalles['img_url']}")
+    print(f"URL: {detalles['url']}")
+    print("------------------------------------------------------------")
 
 def scrape_eventos():
 

@@ -25,6 +25,8 @@ import Nc from "./nc";
 import EventoPage from "./components/eventoPage";  
 import VerificarPerfil from "./components/verificar";
 
+import MainLayout from "./layouts/MainLayout";
+
 
 
 export default function App() {
@@ -54,6 +56,10 @@ export default function App() {
         <Route path="/nc" element={<Nc />} />
         <Route path="/eventoPage" element={<EventoPage />} />
         <Route path="/verificar" element={<VerificarPerfil />} />
+        <Route path="/prueba" element={<MainLayout />}>
+          <Route index element= {<PrincipalEventos />} />
+          <Route path="evento" element={<EventoPage />} />
+        </Route>
       </Routes>
     </Router>
   );
