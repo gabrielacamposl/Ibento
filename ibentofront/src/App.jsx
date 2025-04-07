@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
+import VerificarCorreo from "./components/accounts/VerificarCorreo";
+
+import EventosPreferencias from "./components/preferences/EventosPreferencias";
 
 
 import Perfil from "./components/Perfil";
@@ -31,9 +34,18 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Register />} />
-        <Route path="/confirmar" element={<Confirm />} />
-        <Route path="/login" element={<Login />} />
+
+        {/* Auth & Register*/}
+        <Route path="/" element={<Login/>} />
+        <Route path="/registrar" element={<Register />} />
+        <Route path="/verificar-correo" element={<VerificarCorreo />} />
+        <Route path="/confirmar/:token" element={<Confirm/>} />
+
+        {/* Preferencias del Usuario para sugerencia de Eventos*/}
+        <Route path="/preferencias" element={<EventosPreferencias />} />
+
+        {/* Matches*/}
+
         <Route path="/principalEventos" element={<PrincipalEventos />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/editarPerfil" element={<EditarPerfil />} />
