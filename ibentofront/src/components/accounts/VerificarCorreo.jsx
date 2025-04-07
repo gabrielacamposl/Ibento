@@ -1,32 +1,24 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../api";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import { Box, Typography, CircularProgress } from "@mui/material";
-import { Button } from "primereact/button";
-import { buttonStyle } from "../../styles/styles";
+import Box from '@mui/material/Box';
+import { motion } from "framer-motion";
 
-export default function Confirm() {
 
-  const { token } = useParams();
-  const [estado, setEstado] = useState("verificando"); // 'verificando' | 'exito' | 'error'
 
-  useEffect(() => {
-    const confirmarCuenta = async () => {
-      try {
-        await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
-        setEstado("exito");
-      } catch (error) {
-        setEstado("error");
-      }
-    };
+export default function VerificarCorreo() {
 
-    confirmarCuenta();
-  }, [token]);
+  const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
+
+
+
 
   return (
+
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
 
@@ -91,26 +83,12 @@ export default function Confirm() {
             }}
           >
             <CssBaseline />
-            {estado === "verificando" && (
-              <>
-                <CircularProgress />
-                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
-              </>
-            )}
-            {estado === "exito" && (
-              <Typography variant="h4" color="primary">
-                🎉 ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
-            )}
-            {estado === "error" && (
-              <Typography variant="h5" color="error">
-                😓 Algo salió mal. El enlace de verificación puede haber expirado o es inválido.
-              </Typography>
-            )}
-
-            <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={"/"}/>
+            <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
+              Verifica tu Cuenta
+            </Typography>
+            <Typography variant="h5" component="h2">
+            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
+            </Typography>
           </Container>
         </Box>
       </motion.div>
@@ -162,28 +140,17 @@ export default function Confirm() {
         >
           <Grid container component="main" maxWidth="xs" className="w-full h-full">
             <CssBaseline />
-            {estado === "verificando" && (
-              <>
-                <CircularProgress />
-                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
-              </>
-            )}
-            {estado === "exito" && (
-              <Typography variant="h4" color="primary">
-                🎉 ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
-            )}
-            {estado === "error" && (
-              <Typography variant="h5" color="error">
-                😓 Algo salió mal. El enlace de verificación puede haber expirado o es inválido.
-              </Typography>
-            )}
-            <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={"/"}/>
+            <Typography variant="h5" component="h1" className="text-center font-bold text-gray-700 mb-4">
+              Crear Cuenta
+            </Typography>
+            <Typography variant="h5" component="h2">
+            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
+            </Typography>
           </Grid>
         </Box>
       </div>
     </div>
+
+
   );
 }

@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom'; 
 import axios from "axios";
 import {
-  Avatar,
-  TextField,
   FormControlLabel,
   Checkbox,
-  Link,
   Paper,
   Box,
   Grid,
@@ -20,16 +18,20 @@ import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
 
+
+
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const navigate = useNavigate();
 
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/login/", {
@@ -38,6 +40,7 @@ const Login = () => {
       });
 
       localStorage.setItem("user", JSON.stringify(response.data));
+      navigate("/verificar-correo");
     } catch (err) {
       alert("Error en el correo o contraseña");
     }
@@ -165,13 +168,18 @@ const Login = () => {
                   sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                 />
 
-                <Button className={buttonStyle} type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                <Button className={buttonStyle} type="submit" 
+                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                onClick={handleLogin}>
                   Iniciar Sesión
                 </Button>
                 <Grid container justifyContent="center" alignItems="center">
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
 
-                    <Link href="#" variant="body2" sx={{
+                    <Link 
+                    to="/registrar" 
+                    component="button"
+                    variant="body2" sx={{
                       fontWeight: "bold",
                       fontSize: 18,
                       color: "rgb(129, 45, 177)",
@@ -248,7 +256,7 @@ const Login = () => {
 
                   {/* Olvidaste tu contraseña */}
                   <Grid item xs={12} sx={{ textAlign: "right", mt: 1 }}>
-                    <Link href="#" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 14 }}>
+                    <Link to="/" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 14 }}>
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </Grid>
@@ -272,6 +280,7 @@ const Login = () => {
                       borderRadius: "20px",
                       fontWeight: "bold",
                     }}
+                    onClick={handleLogin}
                   >
                     Iniciar Sesión
                   </Button>
@@ -281,7 +290,7 @@ const Login = () => {
                     <Grid item>
                       <Link
                         component="button"
-                        onClick={() => navigate("/crear-cuenta")} 
+                        to = "/registrar"
                         variant="body2"
                         sx={{
                           fontWeight: "bold",
