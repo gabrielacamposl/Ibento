@@ -1,4 +1,6 @@
 from djongo import models
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from bson import ObjectId
 import uuid
 
@@ -81,8 +83,41 @@ class Subcategoria(models.Model):
         return self.nombre_subcategoria
 
 
+# Matches de acompañantes
+
+class Matches (models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default= generate_objectid)
+    usuario_a = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="usuario_a", to_field= "_id")
+    usuario_b = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name = "usuario_b", to_field= "_id")
+    fecha_match = models.DateTimeField(auto_now_add = True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['usuario_a', 'usuario_b'],
+                name='unique_match_pair'
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        # Validar duplicados en ambos sentidos
+        if Matches.objects.filter(
+            Q(usuario_a=self.usuario_a, usuario_b=self.usuario_b) |
+            Q(usuario_a=self.usuario_b, usuario_b=self.usuario_a)
+        ).exists():
+            raise ValidationError("Este match ya existe entre estos usuarios.")
+
+        super().save(*args, **kwargs)
+
+    def _str_ (self):
+        return f"Match entre {self.usuario_a.nombre} y {self.usuario_b.nombre}"
+    
+    
+# Chats con los matches
+
 class Conversacion (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    match = models.OneToOneField(Matches, on_delete=models.CASCADE, related_name="chat", to_field="_id")
     usuario_a = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="chats_a", to_field = "_id")
     usuario_b = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="chats_b", to_field = "_id")
 
@@ -100,6 +135,12 @@ class Mensaje(models.Model):
     def __str__(self):
         return f"{self.remitente} -> {self.receptor}: {self.mensaje}"
 
+
+# Envío de Mensajes -> Notificaciones Push
+
+# class UserDevice(models.Model):
+#     user = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+#     device = models.OneToOneField(GCMDevice, on_delete=models.CASCADE)
 
 
 # class Evento(models.Model):
@@ -119,9 +160,3 @@ class Mensaje(models.Model):
 #     def _str_(self):
 #         return self.nombre_evento
     
-
-# class Mensaje(models.Model):
-#     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-#     UsuarioA = models.ForeignKey(models.CASCADE, related_name="usuario_A", to_field="_id")
-#     UsuarioB = models.ForeignKey(models.CASCADE, related_name="usuario_B", to_field="_id")
-#     mensaje = models.TextField()

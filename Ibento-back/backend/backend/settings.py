@@ -28,10 +28,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+  #  'push_notifications', # fcm 
     'corsheaders', # Peticiones desde React  
     'api',  
 ]
 
+# PUSH_NOTIFICATION_SETTINGS = {
+#     "FCM_API_KEY" : os.getenv("FCM_API"),
+#     "FCM_ERROR_TIMEOUT": 5,
+#     "UPDATE_ON_DUPLICATE_REG_ID": True,
+# }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Token válido 

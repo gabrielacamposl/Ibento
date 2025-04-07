@@ -66,7 +66,7 @@ payload_validation = {
 
 response_validation = requests.post(url_validation, json=payload_validation, headers=headers_validation)
 print("response_validation:", response_validation)
-
+a
 userinfo = response_validation.json()
 status = userinfo["response"]["status"]
 print(status)

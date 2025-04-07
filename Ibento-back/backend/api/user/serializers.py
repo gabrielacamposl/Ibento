@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from api.models import Usuario, Subcategoria, SubcategoriaPerfil
+from rest_framework.pagination import PageNumberPagination  
+from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
 
@@ -68,12 +69,13 @@ class UsuarioPreferences (serializers.ModelSerializer):
         fields = ['preferencias_evento']
 
         def update(self, instance, validated_data):
-            instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
+            #instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
+            instance.preferencias_evento = [sub._id for sub in validated_data['preferencias_evento']]
             instance.save()
             return instance
 
 
-# Creación de perfil para busqueda de acompañantes
+# ----------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES -----------------------------
 
 ## Subir imágenes de perfil para la busqueda de acompañantes
 
@@ -132,3 +134,34 @@ class UploadINE(serializers.ModelSerializer):
 class CompararRostroSerializer(serializers.Serializer):
     foto_camara = serializers.ImageField()
 
+
+# Matches
+
+class MatchSerializer (serializers.ModelSerializer):
+    usuario_a = UsuarioSerializer(read_only=True)
+    usuario_b = UsuarioSerializer(read_only = True)
+
+    class Meta:
+        model = Matches
+        fields = ["_id", "usuario_a", "usuario_b", "fecha_match"]
+
+
+# Mensajería con matches
+
+class MensajesSerializer(serializers.ModelSerializer):
+    remitente_nombre = serializers.CharField(source="remitente.nombre", read_only= True)
+    receptor_nombre = serializers.CharField(source="receptor.nombre", read_only=True)
+
+    class Meta:
+        model = Mensaje
+        fields = ["_id", "conversacion", "remitente", "receptor", "mensaje", "fecha_envio"]
+
+
+class ConversacionSerializer (serializers.ModelSerializer):
+   usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only = True)
+   usuario_b_nombre = serializers.CharField(source = "usuario_b.nombre", read_only = True)
+   mensajes = MensajesSerializer (many= True, read_only=True) # Se inicializan los mensajes
+
+   class Meta:
+       model = Conversacion
+       fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]

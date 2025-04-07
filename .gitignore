@@ -8,6 +8,8 @@ ibento-backend/backend/db.sqlite3
 # Ignorar dependencias de Node.js
 ibento-front/node_modules/
 
+#Claves Firebase
+Ibento-backend/backend/ibento-8e4fc.json
 
 # Archivos de entorno
 *.env
@@ -15,3 +17,6 @@ ibento-front/node_modules/
 .vscode/
 .idea/
 *.sublime-workspace
+
+modelo-algoritmos/INEValidation/dataset/
+node_modules/
