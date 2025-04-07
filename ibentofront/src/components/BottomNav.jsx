@@ -1,8 +1,6 @@
 // src/components/BottomNav.jsx
 import { NavLink } from "react-router-dom";
-// No necesitas importar './bottom-nav.css' si solo usas Tailwind,
-// a menos que tengas estilos específicos allí.
-// import './bottom-nav.css' 
+
 import {
   MagnifyingGlassIcon as MGOutline,
   HomeIcon as HomeOutline,

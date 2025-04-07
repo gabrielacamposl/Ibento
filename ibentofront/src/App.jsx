@@ -36,28 +36,29 @@ export default function App() {
         <Route path="/" element={<Register />} />
         <Route path="/confirmar" element={<Confirm />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/principalEventos" element={<PrincipalEventos />} />
-        <Route path="/perfil" element={<Perfil />} />
-        <Route path="/editarPerfil" element={<EditarPerfil />} />
-        <Route path="/editarIntereses" element={<EditarIntereses />} />
-        <Route path="/verPerfil" element={<Perfiles />} />
-        <Route path="/favoritos" element={<Favoritos />} />
-        <Route path="/guardados" element={<Guardados />} />
-        <Route path="/matches" element={<BuscarMatches />} />
-        <Route path="/verMatches" element={<VerMatch />} />
-        <Route path="/itsMatch" element={<Matches />} />
-        <Route path="/match" element={<MisMatches />} />
-        <Route path="/verLike" element={<Like />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/principalEventos" element={<PrincipalEventos />} />
-        <Route path = "/recuperarContraseña" element = {<RecuperarContrasena/>}/>
-        <Route path="/ingresarCodigo" element={<IngresarCodigo />} />
-        <Route path="/nuevaContrasena" element={<NuevaContrasena />} />
-        <Route path="/nc" element={<Nc />} />
-        <Route path="/eventoPage" element={<EventoPage />} />
-        <Route path="/verificar" element={<VerificarPerfil />} />
+
+
         <Route path="/prueba" element={<MainLayout />}>
           <Route index element= {<PrincipalEventos />} />
+          <Route path="perfil" element={<Perfil />} />
+          <Route path="editarPerfil" element={<EditarPerfil />} />
+          <Route path="editarIntereses" element={<EditarIntereses />} />
+          <Route path="verPerfil" element={<Perfiles />} />
+          <Route path="favoritos" element={<Favoritos />} />
+          <Route path="guardados" element={<Guardados />} />
+          <Route path="matches" element={<BuscarMatches />} />
+          <Route path="verMatches" element={<VerMatch />} />
+          <Route path="itsMatch" element={<Matches />} />
+          <Route path="match" element={<MisMatches />} />
+          <Route path="verLike" element={<Like />} />
+          <Route path="chat" element={<Chat />} />
+          <Route path="principalEventos" element={<PrincipalEventos />} />
+          <Route path ="recuperarContraseña" element = {<RecuperarContrasena/>}/>
+          <Route path="ingresarCodigo" element={<IngresarCodigo />} />
+          <Route path="nuevaContrasena" element={<NuevaContrasena />} />
+          <Route path="nc" element={<Nc />} />
+          <Route path="eventoPage" element={<EventoPage />} />
+          <Route path="verificar" element={<VerificarPerfil />} />
           <Route path="evento" element={<EventoPage />} />
         </Route>
       </Routes>
