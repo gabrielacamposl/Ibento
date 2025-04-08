@@ -25,34 +25,34 @@ function BottomNav() {
       "rounded-full bg-gradient-to-r from-blue-400 to-purple-500" : "text-gray-500 hover:text-gray-700"
     } transition-colors duration-200`;
 
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-gray-200 bg-white shadow-lg">
-      {/* Home Link */}
-      <NavLink to="/prueba" end className={getNavLinkClass}>
-        <HomeOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Search Link */}
-      <NavLink to="/prueba/evento" className={getNavLinkClass}>
-        <MGOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Chat Link */}
-      <NavLink to="/prueba/favoritos" className={getNavLinkClass}>
-        <ChatOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Explore Link */}
-      <NavLink to="/prueba/verPerfil" className={getNavLinkClass}>
-        <FaceSmileOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Profile Link */}
-      <NavLink to="/prueba/chat" className={getNavLinkClass}>
-        <UserOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-    </nav>
-  );
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-gray-200 bg-white shadow-lg">
+        {/* Home Link */}
+        <NavLink to="/principal/eventos" end className={getNavLinkClass}>
+          <HomeOutline className="mb-1 h-6 w-6" />
+        </NavLink>
+  
+        {/* Search Link */}
+        <NavLink to="/principal/eventos/" className={getNavLinkClass}>
+          <MGOutline className="mb-1 h-6 w-6" />
+        </NavLink>
+  
+        {/* Chat Link */}
+        <NavLink to="/principal/match" className={getNavLinkClass}>
+          <ChatOutline className="mb-1 h-6 w-6" />
+        </NavLink>
+  
+        {/* Explore Link */}
+        <NavLink to="/principal/verPerfil" className={getNavLinkClass}>
+          <FaceSmileOutline className="mb-1 h-6 w-6" />
+        </NavLink>
+  
+        {/* Profile Link */}
+        <NavLink to="/principal/perfil" className={getNavLinkClass}>
+          <UserOutline className="mb-1 h-6 w-6" />
+        </NavLink>
+      </nav>
+    );
 }
 
 export default BottomNav;

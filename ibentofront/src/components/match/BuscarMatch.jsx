@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
-import "../assets/css/sombras.css";
+import "../../assets/css/botones.css";
+import "../../assets/css/sombras.css";
 import { useNavigate } from "react-router-dom";
 
 const buscarMatchx = () => {
@@ -45,7 +45,7 @@ const buscarMatchx = () => {
         setCurrentUserIndex((prevIndex) => (prevIndex + 1));
         setCurrentImageIndex(0);
         if(users[currentUserIndex].match){
-            setTimeout(() => navigate("/itsMatch"), 0);
+            setTimeout(() => navigate("../itsMatch"), 0);
         }
     };
 
@@ -59,7 +59,7 @@ const buscarMatchx = () => {
 
 
     const handdleMessage = () =>{
-        setTimeout(() => navigate("/match"), 0);
+        setTimeout(() => navigate("../match"), 0);
     }
 
     
@@ -68,7 +68,7 @@ const buscarMatchx = () => {
             <div className="text-black flex justify-center items-center min-h-screen">
                 <div className="w-full mt-5  h-190 relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full ">
                 <div className=" left-2 top-10  space-x-5 font-bold flex justify-between items-center ">
-                        <button onClick className="cursor-pointer BuscarMatch text-white ">
+                        <button  className="cursor-pointer BuscarMatch text-white ">
                             Buscar Match
                         </button>
                         <button onClick={handdleMessage} className="cursor-pointer text-black font-bold rounded-full">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
-import { buttonStyle, inputStyles } from "../styles/styles";
+import { buttonStyle, inputStyles } from "../../styles/styles";
 const EditarPerfil = () => {
     const [user, setUser] = useState({
         name: 'Harry Styles',
@@ -136,7 +136,7 @@ const EditarPerfil = () => {
            
                    
                 </div>
-                <Link to="/perfil" className="w-full text-white flex items-center justify-center p-2">
+                <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2">
                         <button className={buttonStyle}>Guardar</button>
                     </Link>
             </div>

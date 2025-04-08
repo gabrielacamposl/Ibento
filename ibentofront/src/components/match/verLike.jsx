@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
@@ -58,16 +58,16 @@ const Like = () => {
 
 
     const handleLike= () => {
-        navigate('/itsMatch');
+        navigate('../itsMatch');
     };
 
     const handleDislike = () => {
-        navigate('/verMatches');
+        navigate('../verMatches');
     }
 
 
     return (
-        <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="text-black flex justify-center items-center min-h-screen p-4">
             <div className="relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full">
                 <div className="relative h-100 w-full">
                     <img src={user.pictures[currentImageIndex]} className="w-full h-full object-cover" alt={user.name} />

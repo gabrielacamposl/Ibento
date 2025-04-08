@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
@@ -31,10 +31,10 @@ const Chat = () => {
 
 
     const handdleInfo = () => {
-        navigate("/verPerfil");
+        navigate("../verPerfil");
     }
     return (
-        <div className="flex flex-col justify-center items-center min-h-screen p-4">
+        <div className="text-black flex flex-col justify-center items-center min-h-screen p-4">
             <div className="relative flex h-120 flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full">
                 <div className="w-full  ">
                     <div className=''>

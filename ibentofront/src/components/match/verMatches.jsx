@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 const verMatch = () => {
@@ -58,14 +58,14 @@ const verMatch = () => {
     ];
 
     const handdleMatch = () => {
-        navigate('/itsMatch');
+        navigate('../itsMatch');
     }
    
     const handdleVerLike = () => {
-        navigate('/verLike');
+        navigate('../verLike');
     }
     return (
-        <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="text-black flex justify-center items-center min-h-screen p-4">
             <div className="degradadoPerfil  mt-5  p-5  max-w-lg w-full">
             <div className="mb-2 flex justify-end items-end font-bold text-2xl w-full">
                                 <button className="">

@@ -1,5 +1,5 @@
 import React from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Carousel } from 'primereact/carousel';
 import { Button } from 'primereact/button';
@@ -143,7 +143,7 @@ const Perfil = () => {
                     alt={user.name}
                     />
                     <Link
-                    to="/editarPerfil"
+                    to="../editarPerfil"
                     className="border-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 absolute bottom-0 right-0 bg-purple-300 text-white p-2 rounded-full"
                     >
                     <svg

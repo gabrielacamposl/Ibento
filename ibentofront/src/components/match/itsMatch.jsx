@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 const itsMatch = () => {
@@ -30,17 +30,17 @@ const itsMatch = () => {
     ];
 
 const handdleContinuar = () => {
-    navigate("/matches");
+    navigate("../matches");
 }
 const handdleChat = () => {
-    navigate("/chat");
+    navigate("../chat");
 }
 
 
    
 
     return (
-        <div className="flashOnce flex justify-center items-center min-h-screen p-4">
+        <div className="text-black flashOnce flex justify-center items-center min-h-screen p-4">
             <div className=" mt-5 p-5 max-w-lg w-full" style={{ backgroundImage: `url('/public/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
                     <button className="">
