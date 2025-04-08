@@ -66,6 +66,7 @@ export default function App() {
         <Route path="/nc" element={<Nc />} />
         <Route path="/eventoPage" element={<EventoPage />} />
         <Route path="/verificar" element={<VerificarPerfil />} />
+      </Routes>
     </Router>
   );
 }
