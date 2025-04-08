@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,29 +7,62 @@ import Grid from '@mui/material/Grid';
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { Button } from "primereact/button";
 import { buttonStyle } from "../../styles/styles";
+import { motion } from "framer-motion";
 
 export default function Confirm() {
-
   const { token } = useParams();
   const [estado, setEstado] = useState("verificando"); // 'verificando' | 'exito' | 'error'
+  const [mensaje, setMensaje] = useState("");  // Mensaje de error o éxito
+  const navigate = useNavigate();
+  const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
   useEffect(() => {
     const confirmarCuenta = async () => {
       try {
-        await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
-        setEstado("exito");
+        // Hacemos la llamada al backend para confirmar el token
+        const response = await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
+
+        // Si la confirmación es exitosa, se guarda email y password desde localStorage
+        if (response.data.success) {
+          setEstado("exito");
+
+          // Realizar login automático para el seguimiento de la creación de la cuenta
+          const email = localStorage.getItem("email");
+          const password = localStorage.getItem("password");
+
+          if (email && password) {
+            const loginResponse = await axios.post("http://127.0.0.1:8000/api/login/", { email, password });
+
+            if (loginResponse.data.token) {
+              // Guardamos el token y redirigimos a preferencias
+              localStorage.setItem("token", loginResponse.data.token);
+              navigate("/preferencias"); // Redirigir a la página de preferencias
+            } else {
+              setEstado("error");
+              setMensaje("No se pudo iniciar sesión automáticamente.");
+            }
+          } else {
+            setEstado("error");
+            setMensaje("No se encontraron las credenciales para login.");
+          }
+        } else {
+          // Si la respuesta del backend indica que la confirmación falló
+          setEstado("error");
+          setMensaje("El enlace de confirmación es inválido o ha expirado.");
+        }
       } catch (error) {
+        // Si hubo un error en la comunicación con el backend
         setEstado("error");
+        setMensaje("Hubo un error al intentar confirmar tu cuenta.");
       }
     };
 
     confirmarCuenta();
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
-
       <motion.div
         className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
       >
@@ -99,26 +132,24 @@ export default function Confirm() {
             )}
             {estado === "exito" && (
               <Typography variant="h4" color="primary">
-                🎉 ¡Tu cuenta ha sido verificada con éxito!
+                ¡Tu cuenta ha sido verificada con éxito!
               </Typography>
             )}
             {estado === "error" && (
               <Typography variant="h5" color="error">
-                😓 Algo salió mal. El enlace de verificación puede haber expirado o es inválido.
+                 Algo salió mal. {mensaje}
               </Typography>
             )}
 
             <Button className={buttonStyle} type="submit" 
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={"/"}/>
+                onClick={() => navigate("/preferencias")}> Siguiente </Button>
           </Container>
         </Box>
       </motion.div>
 
-
       {/* Formulario para móviles */}
       <div className="block md:hidden">
-
         <div className="block md:hidden w-full h-screen flex flex-col">
           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
           <div className="absolute inset-0 z-10">
@@ -170,17 +201,17 @@ export default function Confirm() {
             )}
             {estado === "exito" && (
               <Typography variant="h4" color="primary">
-                🎉 ¡Tu cuenta ha sido verificada con éxito!
+               ¡Tu cuenta ha sido verificada con éxito!
               </Typography>
             )}
             {estado === "error" && (
               <Typography variant="h5" color="error">
-                😓 Algo salió mal. El enlace de verificación puede haber expirado o es inválido.
+                Algo salió mal. {mensaje}
               </Typography>
             )}
             <Button className={buttonStyle} type="submit" 
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={"/"}/>
+                onClick={() => navigate("/preferencias")}> Siguiente </Button>
           </Grid>
         </Box>
       </div>

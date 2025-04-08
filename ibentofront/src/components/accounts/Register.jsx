@@ -30,6 +30,8 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
+
   const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
 
   const [message, setMessage] = useState("");
@@ -65,7 +67,9 @@ export default function Register() {
 
       if (response.mensaje) {
         setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta." + response.mensaje);
-        setTimeout(() => navigate("/confirmar"), 2000);
+        localStorage.setItem("email", form.email);
+        localStorage.setItem("password", form.password);
+        setTimeout(() => navigate("/verificar-correo"), 2000);
       } else {
         setMessage("Error al registrar usuario");
       }

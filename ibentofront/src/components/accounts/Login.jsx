@@ -26,12 +26,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
 
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const navigate = useNavigate();
+
 
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/login/", {
@@ -40,7 +41,7 @@ const Login = () => {
       });
 
       localStorage.setItem("user", JSON.stringify(response.data));
-      navigate("/verificar-correo");
+      navigate("/principalEventos");
     } catch (err) {
       alert("Error en el correo o contraseña");
     }
