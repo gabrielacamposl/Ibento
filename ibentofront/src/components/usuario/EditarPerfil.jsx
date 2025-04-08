@@ -47,13 +47,11 @@ const EditarPerfil = () => {
     return (
         <div className="flex justify-center items-center  text-black">
             <div className="degradadoPerfil relative flex flex-col items-center  p-5  max-w-lg w-full">
-                <div className="miPerfil flex font-bold text-2xl w-full">
-                    <h1 className='miPerfil'>Editar Perfil</h1>
-                </div>
+               
                 
                 <div className="flex justify-center items-center m-2 space-x-4">
                     <div className="relative">
-                        <img src={user.pictures[0]} className="w-30 h-30 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={user.name} />
+                        <img src={user.pictures[0]} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={user.name} />
                     </div>
                    
                 </div>
@@ -76,7 +74,7 @@ const EditarPerfil = () => {
                     </div>
                 </div>
                 
-                <div className=" p-4 w-full overflow-x-auto h-100">
+                <div className=" p-4 w-full overflow-x-auto min-h-screen">
                 <React.Fragment>
                         <h2 className="">Fotos {user.pictures.length}/6</h2>
                         <h2 className=" mb-2 text-lg font-semibold">Mis fotografías</h2>

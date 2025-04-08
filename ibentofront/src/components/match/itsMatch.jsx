@@ -40,8 +40,8 @@ const handdleChat = () => {
    
 
     return (
-        <div className="text-black flashOnce flex justify-center items-center min-h-screen p-4">
-            <div className=" mt-5 p-5 max-w-lg w-full" style={{ backgroundImage: `url('/public/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
+        <div className="text-black flashOnce flex justify-center items-center min-h-screen ">
+            <div className="  p-5 max-w-lg " style={{ backgroundImage: `url('/public/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
                     <button className="">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
@@ -50,14 +50,14 @@ const handdleChat = () => {
                     </button>
                 </div>
 
-                <div className="h-175 mt-10 p-4 w-full flex flex-col justify-center items-center">
+                <div className="min-h-screen p-4 w-full flex flex-col justify-center items-center">
 
                     <React.Fragment>
                         <div className="animateDiv flex justify-center items-center ">
                             <div className="relative ">
                                 <img src={users[0].pictures[0]} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={users[0].name} />
                                 <div className="absolute bottom-12 right-10 w-full flex justify-center items-center mb-10">
-                                    <svg width="300" height="150">
+                                    <svg width="280" height="150">
                                         <defs>
                                             <path id="curve1" d="M 50,70 Q 130,-20 200,50"  />
                                         </defs>

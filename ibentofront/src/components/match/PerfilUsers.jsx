@@ -64,8 +64,8 @@ const verPerfil = () => {
 
 
     return (
-        <div className="text-black flex justify-center items-center min-h-screen p-4">
-            <div className="relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full">
+        <div className="text-black flex justify-center  min-h-screen ">
+            <div className="relative flex flex-col items-center   p-5 shadow-t max-w-lg w-full">
                 <div className="relative h-100 w-full">
                     <img src={user.pictures[currentImageIndex]} className="w-full h-full object-cover" alt={user.name} />
                     
@@ -91,7 +91,7 @@ const verPerfil = () => {
                 <h1 className="mt-2 mb-3 text-2xl font-semibold ">{user.name}, {user.age}</h1>
                 <div className="bg-white shadow-xl p-2 w-full">
                     <h2 className="text-lg font-semibold">Sobre mí</h2>
-                    <p>{user.bio}</p>
+                    <p className='text-justify'>{user.bio}</p>
 
                     <h2 className="text-lg mt-3 font-semibold">Eventos en común</h2>
                     <div className="mt-2 flex flex-wrap">

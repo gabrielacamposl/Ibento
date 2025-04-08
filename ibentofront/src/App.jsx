@@ -29,7 +29,7 @@ import PrincipalEventos from "./components/eventos/principalEventos";
 import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
 import NuevaContrasena from "./nuevaContrasena";
-import Nc from "./nc";
+
 
 
 
