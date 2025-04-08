@@ -2,6 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import (UsuarioViewSet, 
+                            CategoriaEventoViewSet,
+                            SubcategoriaViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -16,7 +18,9 @@ from api.user.views import (UsuarioViewSet,
 
 
 router = DefaultRouter()
-router.register(r'usuarios', UsuarioViewSet)
+router.register(r'usuarios', UsuarioViewSet, basename='usuario')
+router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
+router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -24,7 +28,7 @@ urlpatterns = [
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
     path('usuarios/<str:usuario_id>/preferencias/', usuario_preferencias, name='usuario_preferencias'),
-
+    
     # JWT Tokens
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

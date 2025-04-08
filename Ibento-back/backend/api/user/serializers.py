@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
-from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje
+from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje, CategoriaEvento
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
 
@@ -73,6 +73,24 @@ class UsuarioPreferences (serializers.ModelSerializer):
             instance.preferencias_evento = [sub._id for sub in validated_data['preferencias_evento']]
             instance.save()
             return instance
+
+
+
+
+# -------------- Categorias para Eventos --------------
+
+class SubcategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = ['_id', 'categoria', 'nombre_subcategoria']
+
+class CategoriaEventoSerializer(serializers.ModelSerializer):
+    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CategoriaEvento
+        fields = ['_id', 'nombre', 'subcategorias']
+
 
 
 # ----------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES -----------------------------

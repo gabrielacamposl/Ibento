@@ -69,6 +69,7 @@ export default function Register() {
         setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta." + response.mensaje);
         localStorage.setItem("email", form.email);
         localStorage.setItem("password", form.password);
+        localStorage.setItem("usuario_id", response.usuarioId);  // Guarda el usuarioId
         setTimeout(() => navigate("/verificar-correo"), 2000);
       } else {
         setMessage("Error al registrar usuario");

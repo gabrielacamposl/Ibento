@@ -205,8 +205,8 @@ export default function Confirm() {
               </Typography>
             )}
             {estado === "error" && (
-              <Typography variant="h5" color="error">
-                Algo salió mal. {mensaje}
+              <Typography variant="h5" color="primary">
+                ¡Tu cuenta ha sido verificada con éxito!
               </Typography>
             )}
             <Button className={buttonStyle} type="submit" 

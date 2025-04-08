@@ -1,14 +1,15 @@
 from rest_framework import viewsets
 from api.models import CategoriaEvento, Subcategoria
-from .serializers import CategoriaSerializer, SubcategoriaSerializer, CategoriasPerfil, SubcategoriaPerfil, CategoriaConSubcategoriasSerializer
+from .serializers import CategoriaEventoSerializer, SubcategoriaSerializer, CategoriasPerfil, SubcategoriaPerfil, CategoriaConSubcategoriasSerializer
 
-class CategoriaViewSet(viewsets.ModelViewSet):
+
+class CategoriaEventoViewSet(viewsets.ModelViewSet):
     queryset = CategoriaEvento.objects.all()
-    serializer_class = CategoriaSerializer
+    serializer_class = CategoriaEventoSerializer
 
-class SubcategoriasViewSet(viewsets.ModelViewSet):
+class SubcategoriaViewSet(viewsets.ModelViewSet):
     queryset = Subcategoria.objects.all()
-    serializar_class = SubcategoriaSerializer
+    serializer_class = SubcategoriaSerializer
 
 
 class CategoriasPerfilViewSet(viewsets.ModelViewSet):
@@ -19,6 +20,7 @@ class SubcategoriasPerfilViewSet(viewsets.ModelViewSet):
     queryset = Subcategoria.objects.all()
     serializer_class = SubcategoriaPerfil
 
-class CategoriaConSubcategoriasViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CategoriaEvento.objects.prefetch_related("subcategorias").all()
+
+class CategoriaConSubcategoriasViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaEvento.objects.all()
     serializer_class = CategoriaConSubcategoriasSerializer
