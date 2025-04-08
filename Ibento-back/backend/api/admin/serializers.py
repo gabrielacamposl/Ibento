@@ -1,21 +1,20 @@
 from rest_framework import serializers
 from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil, SubcategoriaPerfil
+
+
 # -------------- Categorias para Eventos --------------
-class CategoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CategoriaEvento
-        fields = ["_id", "nombre"]
-        
 
 class SubcategoriaSerializer(serializers.ModelSerializer):
-    categoria = serializers.SlugRelatedField(
-        queryset=CategoriaEvento.objects.all(), slug_field="_id"
-    )
-
     class Meta:
         model = Subcategoria
-        fields = ["_id", "nombre_subcategoria", "categoria"]
+        fields = ['_id', 'categoria', 'nombre_subcategoria']
 
+class CategoriaEventoSerializer(serializers.ModelSerializer):
+    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CategoriaEvento
+        fields = ['_id', 'nombre', 'subcategorias']
 
 # --------------  Categorías para el Perfil de Usuario --------------
 
@@ -37,14 +36,10 @@ class RespuestasSerializer(serializers.ModelSerializer):
 
 
 
-class SubcategoriaMiniSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subcategoria
-        fields = ["_id", "nombre_subcategoria"]
 
 class CategoriaConSubcategoriasSerializer(serializers.ModelSerializer):
-    subcategorias = SubcategoriaMiniSerializer(many=True, read_only=True)
+    subcategorias = SubcategoriaSerializer(many=True)  # Esto incluirá las subcategorías relacionadas
 
     class Meta:
         model = CategoriaEvento
-        fields = ["_id", "nombre", "subcategorias"]
+        fields = ["_id", "nombre", "subcategorias"]  # Agregamos 'subcategorias' aquí
