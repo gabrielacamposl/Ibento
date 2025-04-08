@@ -13,6 +13,18 @@
     box-shadow: -8px 10px 1px 3px rgba(91, 114, 210, 100);
 }
 
+
+.activo{
+    border-bottom: 2px solid #B97DF1;
+    color: #B97DF1;
+    font-weight: bold;
+}
+.inactivo{
+    color:black;
+    margin-bottom: 1px;
+    font-weight: bold;
+}
+
 .pNuevo {
     font-size: xx-large;
     display: inline-block;

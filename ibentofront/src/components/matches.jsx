@@ -71,7 +71,7 @@ const matches = () => {
         navigate("/verMatches");
         }
     return (
-        <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="flex justify-center items-center min-h-screen ">
             <div className="degradadoPerfil mt-5 p-5 max-w-lg w-full">
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
                     <button className=" cursor-pointer">

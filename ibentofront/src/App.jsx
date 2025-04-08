@@ -60,7 +60,7 @@ export default function App() {
         <Route path="/verLike" element={<Like />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/principalEventos" element={<PrincipalEventos />} />
-        <Route path = "/recuperarContraseña" element = {<RecuperarContrasena/>}/>
+        <Route path = "/recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>
         <Route path="/ingresarCodigo" element={<IngresarCodigo />} />
         <Route path="/nuevaContrasena" element={<NuevaContrasena />} />
         <Route path="/nc" element={<Nc />} />
