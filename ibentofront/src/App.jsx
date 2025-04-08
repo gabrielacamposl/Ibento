@@ -6,6 +6,7 @@ import Login from "./components/accounts/Login";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
 
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
+import Prueba from "./components/preferences/prueba";
 
 
 import Perfil from "./components/Perfil";
@@ -44,6 +45,7 @@ export default function App() {
 
         {/* Preferencias del Usuario para sugerencia de Eventos*/}
         <Route path="/preferencias" element={<EventosPreferencias />} />
+        <Route path="/prueba" element={<Prueba />} />
 
         {/* Matches*/}
         <Route path="/principalEventos" element={<PrincipalEventos />} />
