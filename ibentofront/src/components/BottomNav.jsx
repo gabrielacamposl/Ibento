@@ -21,79 +21,35 @@ function BottomNav() {
 
   const getNavLinkClass = ({ isActive }) =>
     `flex flex-col items-center w-1/5 py-1 ${
-      isActive ? "text-blue-600" : "text-gray-500 hover:text-gray-700"
+      isActive ? 
+      "rounded-full bg-gradient-to-r from-blue-400 to-purple-500" : "text-gray-500 hover:text-gray-700"
     } transition-colors duration-200`;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-gray-200 bg-white shadow-lg">
       {/* Home Link */}
-      <NavLink to="/prueba" className={getNavLinkClass}>
-        {({ isActive }) => (
-          <>
-            {isActive ? (
-              <HomeSolid className="mb-1 h-6 w-6" />
-            ) : (
-              <HomeOutline className="mb-1 h-6 w-6" />
-            )}
-            <span className="text-xs">Home</span>
-          </>
-        )}
+      <NavLink to="/prueba" end className={getNavLinkClass}>
+        <HomeOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Search Link */}
       <NavLink to="/prueba/evento" className={getNavLinkClass}>
-        {({ isActive }) => (
-          <>
-            {isActive ? (
-              <MGSolid className="mb-1 h-6 w-6" />
-            ) : (
-              <MGOutline className="mb-1 h-6 w-6" />
-            )}
-            <span className="text-xs">Search</span>
-          </>
-        )}
+        <MGOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Chat Link */}
-      <NavLink to="/prueba/evento" className={getNavLinkClass}>
-        {({ isActive }) => (
-          <>
-            {isActive ? (
-              <ChatSolid className="mb-1 h-6 w-6" />
-            ) : (
-              <ChatOutline className="mb-1 h-6 w-6" />
-            )}
-            <span className="text-xs">Chat</span>
-          </>
-        )}
+      <NavLink to="/prueba/favoritos" className={getNavLinkClass}>
+        <ChatOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Explore Link */}
-      <NavLink to="/prueba/evento" className={getNavLinkClass}>
-        {({ isActive }) => (
-          <>
-            {isActive ? (
-              <FaceSmileSolid className="mb-1 h-6 w-6" />
-            ) : (
-              <FaceSmileOutline className="mb-1 h-6 w-6" />
-            )}
-            <span className="text-xs">Explore</span>
-          </>
-        )}
+      <NavLink to="/prueba/verPerfil" className={getNavLinkClass}>
+        <FaceSmileOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Profile Link */}
-      <NavLink to="/prueba/evento" className={getNavLinkClass}>
-        {({ isActive }) => (
-          <>
-            {isActive ? (
-              <UserSolid className="mb-1 h-6 w-6" />
-            ) : (
-              <UserOutline className="mb-1 h-6 w-6" />
-            )}
-            <span className="text-xs">Profile</span>
-          </>
-        )}
+      <NavLink to="/prueba/chat" className={getNavLinkClass}>
+        <UserOutline className="mb-1 h-6 w-6" />
       </NavLink>
     </nav>
   );

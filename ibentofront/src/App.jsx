@@ -61,6 +61,10 @@ export default function App() {
           <Route path="verificar" element={<VerificarPerfil />} />
           <Route path="evento" element={<EventoPage />} />
         </Route>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element= {<PrincipalEventos />} />
+          <Route path="perfil" element={<Perfil />} />
+        </Route>
       </Routes>
     </Router>
   );
