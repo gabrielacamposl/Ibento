@@ -1,5 +1,6 @@
  import { HeartIcon, ClockIcon } from '@heroicons/react/24/solid';
  import React from 'react';
+ import { Link } from 'react-router-dom';
 
 function Cards() {
     return (
@@ -9,11 +10,11 @@ function Cards() {
             <div className="w-screen overflow-x-auto">   
             {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
             <div className="flex flex-row space-x-4">
-                <Card imageUrl="/imgIcon.jpeg" title="Titulo 1" />
-                <Card imageUrl="/imgIcon2.jpeg" title="Titulo 2" />
-                <Card imageUrl="/imgIcon3.jpeg" title="Titulo 3" />
-                <Card imageUrl="/imgIcon4.png" title="Titulo 4" />
-                <Card imageUrl="/imgIcon5.jpeg" title="Titulo 5" />
+                <Card imageUrl="/imgIcon.jpeg" title="Titulo 1" id="1" />
+                <Card imageUrl="/imgIcon2.jpeg" title="Titulo 2" id="2" />
+                <Card imageUrl="/imgIcon3.jpeg" title="Titulo 3" id="3" />
+                <Card imageUrl="/imgIcon4.png" title="Titulo 4" id="4"/>
+                <Card imageUrl="/imgIcon5.jpeg" title="Titulo 5" id="5"/>
             </div>
             </div>
         </div>
@@ -23,12 +24,14 @@ function Cards() {
   interface CardProps {
     imageUrl: string;
     title: string;
+    id: string;
   }
 
-  function Card({ imageUrl, title }: CardProps) {
+  function Card({ imageUrl, title, id }: CardProps) {
+    const url = "../eventos/" + id;
     return (
         <>
-        <div className="flex flex-col flex-none p-2 h-auto w-44 drop-shadow-xl items-center lg: w-72">
+        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-44 drop-shadow-xl items-center lg: w-72">
             <div className="relative bg-white rounded-lg flex flex-col flex p-2 shadow-md">
                 <img 
                 src={imageUrl} 
@@ -43,8 +46,7 @@ function Cards() {
             <div className="mt-2 p-2">
                 <h3 className="font-medium text-black">{title}</h3>
             </div>
-        </div>
-      
+        </Link>
         </>
     );
   }
