@@ -33,3 +33,18 @@ class RespuestasSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubcategoriaPerfil
         fields = ["_id", "nombre_subcategoria_perfil", "categoria_perfil"]
+
+
+
+
+class SubcategoriaMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = ["_id", "nombre_subcategoria"]
+
+class CategoriaConSubcategoriasSerializer(serializers.ModelSerializer):
+    subcategorias = SubcategoriaMiniSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CategoriaEvento
+        fields = ["_id", "nombre", "subcategorias"]

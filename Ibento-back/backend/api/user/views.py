@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
@@ -7,17 +8,20 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from api.models import Usuario
+from api.models import Usuario, Mensaje, Matches, Conversacion
 from .serializers import (UsuarioSerializer, 
                           Login,
                           Logout,
+                          UsuarioPreferences,
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
                           UploadINE,
-                          CompararRostroSerializer
+                          CompararRostroSerializer,
+                          MatchSerializer,
+                          MensajesSerializer,
+                          ConversacionSerializer,
                           )
-
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -60,6 +64,29 @@ def logout_usuario(request):
     if serializer.is_valid():
         return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
     return Response(serializer.errors, status=400)
+
+# ------------- Preferencias de Eventos del Usuario -----------------------------------------------
+
+@api_view(["GET", "PUT"])
+@permission_classes([IsAuthenticated])
+def usuario_preferencias(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Obtener preferencias (GET)
+    if request.method == "GET":
+        serializer = UsuarioPreferences(usuario)
+        return Response(serializer.data)
+
+    # Actualizar preferencias (PUT)
+    if request.method == "PUT":
+        serializer = UsuarioPreferences(usuario, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ------------- Creación de Perfil para la Busqueda de Acompñantes --------------------------------
 
@@ -164,3 +191,109 @@ def completar_perfil(request):
     usuario.save()
 
     return Response({"mensaje": "Perfil completado exitosamente."}, status=status.HTTP_200_OK)
+
+
+# ------------ Creación de Matches ------------------------------------
+
+@api_view(["POST"])
+def crear_match(request):
+    
+    usuario_a_id = request.data.get("usuario_a")
+    usuario_b_id = request.data.get("usuario_b")
+
+    if usuario_a_id == usuario_b_id:
+        return Response({"error": "No puedes hacer match."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Evitar duplicados (match en ambos sentidos)
+    match_existente = Matches.objects.filter(
+        Q(usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id) |
+        Q(usuario_a_id=usuario_b_id, usuario_b_id=usuario_a_id)
+    ).first()
+
+    if match_existente:
+        return Response({"message": "El match ya existe."}, status=status.HTTP_200_OK)
+
+    # Crear Match y Conversación
+    match = Matches.objects.create(usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
+    Conversacion.objects.create(match=match, usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
+
+    return Response({"message": "Match y Conversación creados"}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+def obtener_matches_usuario(request, usuario_id):
+    
+    matches = Matches.objects.filter(models.Q(usuario_a_id=usuario_id) | models.Q(usuario_b_id=usuario_id))
+    serializer = MatchSerializer(matches, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def obtener_conversacion(request, match_id):
+    
+    conversacion = Conversacion.objects.get(match_id=match_id)
+    serializer = ConversacionSerializer(conversacion)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+def enviar_mensaje(request):
+    
+    conversacion_id = request.data.get("conversacion_id")
+    remitente_id = request.data.get("remitente_id")
+    receptor_id = request.data.get("receptor_id")
+    contenido = request.data.get("contenido")
+
+    conversacion = Conversacion.objects.get(_id=conversacion_id)
+
+    mensaje = Mensaje.objects.create(
+        conversacion=conversacion,
+        remitente_id=remitente_id,
+        receptor_id=receptor_id,
+        mensaje=contenido
+    )
+
+    # # Enviar notificación push al receptor
+    # devices = FCMDevice.objects.filter(user_id=receptor_id)
+    # devices.send_message(
+    #     title="Nuevo Mensaje",
+    #     body=f"Tienes un nuevo mensaje de {mensaje.remitente.nombre}",
+    #     data={"conversacion_id": conversacion_id}
+    # )
+
+    serializer = MensajesSerializer(mensaje)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# Clase de Paginación
+class MensajePagination(PageNumberPagination):
+    page_size = 10  # Cambia este número por la cantidad de mensajes por página
+    page_size_query_param = 'page_size'
+    max_page_size = 100  # Esto es opcional, define el máximo que puede pedir un cliente
+
+
+@api_view(["GET"])
+def obtener_mensajes(request, conversacion_id):
+    # # Ver. convencional - sin paginación
+    # conversacion = Conversacion.objects.get(_id=conversacion_id)
+    # mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by('-fecha_creacion')
+    # serializer = MensajesSerializer(mensajes, many=True)
+    # return Response(serializer.data)
+    try:
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+    except Conversacion.DoesNotExist:
+        return Response({"error": "Conversación no encontrada."}, status=404)
+    
+    mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by('fecha_creacion')
+    paginator = MensajePagination()
+    resultado_paginado = paginator.paginate_queryset(mensajes, request)
+    serializer = MensajesSerializer(resultado_paginado, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+@api_view(['DELETE'])
+def eliminar_match(request, match_id):
+    try:
+        match = Matches.objects.get(id=match_id)
+        match.delete()
+        return Response({'mensaje': 'Match eliminado correctamente'}, status=204)
+    except Matches.DoesNotExist:
+        return Response({'error': 'Match no encontrado'}, status=404)
