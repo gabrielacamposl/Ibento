@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
+import VerificarCorreo from "./components/accounts/VerificarCorreo";
+
+import EventosPreferencias from "./components/preferences/EventosPreferencias";
 
 
 import Perfil from "./components/Perfil";
@@ -33,39 +36,36 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Register />} />
-        <Route path="/confirmar" element={<Confirm />} />
-        <Route path="/login" element={<Login />} />
+        {/* Auth & Register*/}
+        <Route path="/" element={<Login/>} />
+        <Route path="/registrar" element={<Register />} />
+        <Route path="/verificar-correo" element={<VerificarCorreo />} />
+        <Route path="/confirmar/:token" element={<Confirm/>} />
 
+        {/* Preferencias del Usuario para sugerencia de Eventos*/}
+        <Route path="/preferencias" element={<EventosPreferencias />} />
 
-        <Route path="/prueba" element={<MainLayout />}>
-          <Route index element= {<PrincipalEventos />} />
-          <Route path="perfil" element={<Perfil />} />
-          <Route path="editarPerfil" element={<EditarPerfil />} />
-          <Route path="editarIntereses" element={<EditarIntereses />} />
-          <Route path="verPerfil" element={<Perfiles />} />
-          <Route path="favoritos" element={<Favoritos />} />
-          <Route path="guardados" element={<Guardados />} />
-          <Route path="matches" element={<BuscarMatches />} />
-          <Route path="verMatches" element={<VerMatch />} />
-          <Route path="itsMatch" element={<Matches />} />
-          <Route path="match" element={<MisMatches />} />
-          <Route path="verLike" element={<Like />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="principalEventos" element={<PrincipalEventos />} />
-          <Route path ="recuperarContraseña" element = {<RecuperarContrasena/>}/>
-          <Route path="ingresarCodigo" element={<IngresarCodigo />} />
-          <Route path="nuevaContrasena" element={<NuevaContrasena />} />
-          <Route path="nc" element={<Nc />} />
-          <Route path="eventoPage" element={<EventoPage />} />
-          <Route path="verificar" element={<VerificarPerfil />} />
-          <Route path="evento" element={<EventoPage />} />
-        </Route>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element= {<PrincipalEventos />} />
-          <Route path="perfil" element={<Perfil />} />
-        </Route>
-      </Routes>
+        {/* Matches*/}
+        <Route path="/principalEventos" element={<PrincipalEventos />} />
+        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/editarPerfil" element={<EditarPerfil />} />
+        <Route path="/editarIntereses" element={<EditarIntereses />} />
+        <Route path="/verPerfil" element={<Perfiles />} />
+        <Route path="/favoritos" element={<Favoritos />} />
+        <Route path="/guardados" element={<Guardados />} />
+        <Route path="/matches" element={<BuscarMatches />} />
+        <Route path="/verMatches" element={<VerMatch />} />
+        <Route path="/itsMatch" element={<Matches />} />
+        <Route path="/match" element={<MisMatches />} />
+        <Route path="/verLike" element={<Like />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/principalEventos" element={<PrincipalEventos />} />
+        <Route path = "/recuperarContraseña" element = {<RecuperarContrasena/>}/>
+        <Route path="/ingresarCodigo" element={<IngresarCodigo />} />
+        <Route path="/nuevaContrasena" element={<NuevaContrasena />} />
+        <Route path="/nc" element={<Nc />} />
+        <Route path="/eventoPage" element={<EventoPage />} />
+        <Route path="/verificar" element={<VerificarPerfil />} />
     </Router>
   );
 }

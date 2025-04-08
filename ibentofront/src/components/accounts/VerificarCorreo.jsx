@@ -1,68 +1,27 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../api";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import { Box, Typography, CircularProgress } from "@mui/material";
-import { Button } from "primereact/button";
-import { buttonStyle } from "../../styles/styles";
+import Box from '@mui/material/Box';
 import { motion } from "framer-motion";
 
-export default function Confirm() {
-  const { token } = useParams();
-  const [estado, setEstado] = useState("verificando"); // 'verificando' | 'exito' | 'error'
-  const [mensaje, setMensaje] = useState("");  // Mensaje de error o éxito
-  const navigate = useNavigate();
-  const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
-  useEffect(() => {
-    const confirmarCuenta = async () => {
-      try {
-        // Hacemos la llamada al backend para confirmar el token
-        const response = await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
 
-        // Si la confirmación es exitosa, se guarda email y password desde localStorage
-        if (response.data.success) {
-          setEstado("exito");
+export default function VerificarCorreo() {
 
-          // Realizar login automático para el seguimiento de la creación de la cuenta
-          const email = localStorage.getItem("email");
-          const password = localStorage.getItem("password");
+  const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
 
-          if (email && password) {
-            const loginResponse = await axios.post("http://127.0.0.1:8000/api/login/", { email, password });
 
-            if (loginResponse.data.token) {
-              // Guardamos el token y redirigimos a preferencias
-              localStorage.setItem("token", loginResponse.data.token);
-              navigate("/preferencias"); // Redirigir a la página de preferencias
-            } else {
-              setEstado("error");
-              setMensaje("No se pudo iniciar sesión automáticamente.");
-            }
-          } else {
-            setEstado("error");
-            setMensaje("No se encontraron las credenciales para login.");
-          }
-        } else {
-          // Si la respuesta del backend indica que la confirmación falló
-          setEstado("error");
-          setMensaje("El enlace de confirmación es inválido o ha expirado.");
-        }
-      } catch (error) {
-        // Si hubo un error en la comunicación con el backend
-        setEstado("error");
-        setMensaje("Hubo un error al intentar confirmar tu cuenta.");
-      }
-    };
 
-    confirmarCuenta();
-  }, [token, navigate]);
 
   return (
+
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
+
       <motion.div
         className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
       >
@@ -124,32 +83,20 @@ export default function Confirm() {
             }}
           >
             <CssBaseline />
-            {estado === "verificando" && (
-              <>
-                <CircularProgress />
-                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
-              </>
-            )}
-            {estado === "exito" && (
-              <Typography variant="h4" color="primary">
-                ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
-            )}
-            {estado === "error" && (
-              <Typography variant="h5" color="error">
-                 Algo salió mal. {mensaje}
-              </Typography>
-            )}
-
-            <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate("/preferencias")}> Siguiente </Button>
+            <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
+              Verifica tu Cuenta
+            </Typography>
+            <Typography variant="h5" component="h2">
+            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
+            </Typography>
           </Container>
         </Box>
       </motion.div>
 
+
       {/* Formulario para móviles */}
       <div className="block md:hidden">
+
         <div className="block md:hidden w-full h-screen flex flex-col">
           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
           <div className="absolute inset-0 z-10">
@@ -193,28 +140,17 @@ export default function Confirm() {
         >
           <Grid container component="main" maxWidth="xs" className="w-full h-full">
             <CssBaseline />
-            {estado === "verificando" && (
-              <>
-                <CircularProgress />
-                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
-              </>
-            )}
-            {estado === "exito" && (
-              <Typography variant="h4" color="primary">
-               ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
-            )}
-            {estado === "error" && (
-              <Typography variant="h5" color="error">
-                Algo salió mal. {mensaje}
-              </Typography>
-            )}
-            <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate("/preferencias")}> Siguiente </Button>
+            <Typography variant="h5" component="h1" className="text-center font-bold text-gray-700 mb-4">
+              Crear Cuenta
+            </Typography>
+            <Typography variant="h5" component="h2">
+            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
+            </Typography>
           </Grid>
         </Box>
       </div>
     </div>
+
+
   );
 }
