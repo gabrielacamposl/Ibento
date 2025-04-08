@@ -28,13 +28,14 @@ import Nc from "./nc";
 import EventoPage from "./components/eventoPage";  
 import VerificarPerfil from "./components/verificar";
 
+import MainLayout from "./layouts/MainLayout";
+
 
 
 export default function App() {
   return (
     <Router>
       <Routes>
-
         {/* Auth & Register*/}
         <Route path="/" element={<Login/>} />
         <Route path="/registrar" element={<Register />} />
@@ -45,7 +46,6 @@ export default function App() {
         <Route path="/preferencias" element={<EventosPreferencias />} />
 
         {/* Matches*/}
-
         <Route path="/principalEventos" element={<PrincipalEventos />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/editarPerfil" element={<EditarPerfil />} />
@@ -66,7 +66,6 @@ export default function App() {
         <Route path="/nc" element={<Nc />} />
         <Route path="/eventoPage" element={<EventoPage />} />
         <Route path="/verificar" element={<VerificarPerfil />} />
-      </Routes>
     </Router>
   );
 }

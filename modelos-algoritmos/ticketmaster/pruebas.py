@@ -145,6 +145,25 @@ def get_ticketmaster_events(size=100, city=None, dma_id=802, start_date_time=Non
     except Exception as e:
         print(f"Error fetching data from TicketMaster API: {e}")
         return []
+    
+def get_event_details(event_id):
+    """
+    Obtiene detalles de un evento específico por ID
+    """
+    api_url = f"https://app.ticketmaster.com/discovery/v2/events/{event_id}?apikey={TICKETMASTER_API_KEY}"
+    
+    try:
+        response = requests.get(api_url)
+        data = response.json()
+        
+        # Formatear los datos del evento
+        formatted_event = format_event_data([data])[0]
+        
+        return formatted_event
+    
+    except Exception as e:
+        print(f"Error fetching event with ID {event_id}: {e}")
+        return None
 
 def save_events_to_json(events, filename='ticketmaster_events.json'):
     try:
@@ -156,26 +175,9 @@ def save_events_to_json(events, filename='ticketmaster_events.json'):
         print(f"Error saving events to JSON: {e}")
         return False
 
-if __name__ == "__main__":
-    
-    # Obtener eventos
-    print("Fetching events from Ticketmaster...")
-    events = get_ticketmaster_events(
-        size=200,
-    )
-    
-    # Mostrar información de eventos
-    print(f"\nFound {len(events)} events")
-    for i, event in enumerate(events[:5]):
-        print(f"\n--- Event {i+1} ---")
-        print(f"Nombre: {event['nombre']}")
-        print(f"Lugar: {event['lugar']}")
-        print(f"Ubicación: {event['ubicacion']}")
-        print(f"Coordenadas: {event['coordenadas']}")
-        print(f"Fechas: {event['fechas']}")
-        print(f"Descripción: {event['descripcion']}")
-        print(f"Clasificaciones: {event['clasificaciones']}")
-    
-    # Guardar eventos en JSON
-    filename = f"ticketmaster_events.json"
-    save_events_to_json(events, filename)
+def main():
+
+    res = get_event_details("1AfZkaEGkeWj-IK")
+    print(res)
+
+main()

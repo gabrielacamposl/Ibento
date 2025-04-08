@@ -1,24 +1,5 @@
 [
     {
-        "nombre": "Sound: Check Xpo",
-        "lugar": "World Trade Center",
-        "costo": [
-            "Pago en Linea: $ 200",
-            "Registro y pago en sitio: $ 400"
-        ],
-        "ubicacion": "Montecito 38 , Nápoles, Benito Juárez, C.P. 03810, Ciudad de México",
-        "descripcion": "Durante los 3 días de exposición, usted estará en contacto con todas las novedades en la industria de la música y el espectáculo en México. ",
-        "fechas": [
-            "01/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.3954245,
-            "lng": -99.1740938,
-            "formatted_address": "Montecito 38, Nápoles, Benito Juárez, 03810 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/6781636866741-sound-check-Xpo.jpg"
-    },
-    {
         "nombre": "Mujeres en el Ejército",
         "lugar": "Galería Abierta Gandhi de las rejas de Chapultepec",
         "costo": [
@@ -27,7 +8,6 @@
         "ubicacion": "Paseo de la Reforma s/n s/n, Juárez, Cuauhtémoc, C.P. 06600, Ciudad de México",
         "descripcion": "Galería Abierta Gandhi de las rejas del bosque de Chapultepec.\nInauguración 6 de marzo a las 12:00. La exposición permanecerá en exhibición hasta el 20 de abril. Retratos de mujeres que están en el Ejército Mexicano.  CarteleraCdMx\n\nTiempo de Mujeres 2025 ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -53,7 +33,9 @@
             "lng": -99.1633646,
             "formatted_address": "Av. P.º de la Reforma, Juárez, 06600 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af96cde5772-mujeres.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af96cde5772-mujeres.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29061/02-04-2025/mujeres-en-el-ejrcito?return_to=%2Fbusqueda%3F%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Homenaje a Elena Poniatowska",
@@ -64,7 +46,6 @@
         "ubicacion": "Av. Wilfrido Massieu s/n, esquina con Av. Instituto Politécnico Nacional, , Nueva Industrial Vallejo, Gustavo A. Madero, C.P. 07700, Ciudad de México",
         "descripcion": "Jueves 6 de marzo, 2025\nExposición\n\nDel 6 de marzo al 30 de abril | 24 horas abierto| Galería Abierta del Instituto Politécnico Nacional\n ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -100,7 +81,9 @@
             "lng": -99.1319661,
             "formatted_address": "Av Instituto Politécnico Nacional, Nueva Industrial Vallejo, Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67b76aa1a7a3a-elena.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67b76aa1a7a3a-elena.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29171/02-04-2025/homenaje-a-elena-poniatowska?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Es Mujer",
@@ -111,7 +94,6 @@
         "ubicacion": "Paseo de la Reforma , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
         "descripcion": "Del 7 de marzo al 27 de abril de 2025. Inauguración 7 de marzo 12 horas\nGalería abierta Grutas de las rejas del Bosque de Chapultepec Esta exposición busca inspirar. Es una invitación para que cada mujer que se detenga frente a estas imágenes se reconozca en ellas. Para que entienda que no hay sueño demasiado ambicioso, no hay oficio, arte ni ciencia que quede fuera de su alcance. Que no hay nada que limite nuestra capacidad de crear, liderar y transformar. CarteleraCdMx\n Tiempo de Mujeres 2025 ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -144,7 +126,9 @@
             "lng": -99.1883692,
             "formatted_address": "Av. P.º de la Reforma, 11580 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af9ca80d892-gab.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af9ca80d892-gab.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29065/02-04-2025/es-mujer?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Estudio propio",
@@ -155,7 +139,6 @@
         "ubicacion": "Aldama 63 , San Lucas, Iztapalapa, C.P. 09000, Ciudad de México",
         "descripcion": "Del 1 de marzo al 15 de abril de 2025\n24 horas | Galería Abierta de la Alcaldía Iztapalapa \n La lucha de las mujeres por tener una aceptación y presencia en el espacio público ha sido una lucha que hasta ahora no se ha superado. El grave problema social de la ausencia de mujeres artistas en los museos, la exclusión de las mujeres en el medio artístico hizo que este grupo de mujeres, en 1994, se organizaran en esta Comunidad de Mujeres en el Arte y el Colectivo de Mujeres en la Música, A.C. Para la Secretaría de Cultura de la Ciudad de México es una prioridad la lucha por la igualdad de géneros, a que las mujeres vivan una vida libre de violencia y que ambos, mujeres y hombres, tengamos los mismos derechos y obligaciones.\n CarteleraCdMx ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -176,25 +159,29 @@
             "lng": -99.0927617,
             "formatted_address": "Aldama 63, San Pablo, Iztapalapa, 09000 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67bf5d4e29da2-galeria_abierta_de_las_rejas_de_la_delegacion_iztapalapa.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67bf5d4e29da2-galeria_abierta_de_las_rejas_de_la_delegacion_iztapalapa.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29347/02-04-2025/estudio-propio?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
-        "nombre": "II FESTIVAL DE CULTURA VIVA COMUNITARIA, CIUDAD DE MÉXICO / Bosque de Chapultepec",
-        "lugar": "Primera Sección del Bosque de Chapultepec",
+        "nombre": "Almuerzo desnudo, 1991",
+        "lugar": "Radio UNAM",
         "costo": [
             "General: Gratuito"
         ],
-        "ubicacion": "Bosque de Chapultepec , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
-        "descripcion": "Caravana Quetzalcóatl del Movimiento Latinoamericano de Cultura Viva Comunitaria\n\nSEDE: BOSQUE DE CHAPULTEPEC\n\nMartes 1 de abril, 2025\n\n\n 8 horas I Recorrido de la Ruta sur por el Bosque de Chapultepec\n\n10 horas | Ceremonia del Ahuehuete Sabio, petición del agua\n\n\n Ahuehuete el \"Sargento\" Bosque de Chapultepec\n\n\n CarteleraCdMx\nCarteleraComunitaria ",
+        "ubicacion": "Adolfo Prieto 133 , Del Valle Centro, Benito Juárez, C.P. 03100, Ciudad de México",
+        "descripcion": " Después del trágico accidente sufrido por su mujer, un escritor que cae en la adicción a ciertas drogas, empieza a sufrir horribles alucinaciones que lo transportan a un mundo de pesadilla.  ",
         "fechas": [
-            "01/04/2025"
+            "02/04/2025"
         ],
         "coordenadas": {
-            "lat": 19.4194815,
-            "lng": -99.18945579999999,
-            "formatted_address": "Bosque de Chapultepec, Miguel Hidalgo, Ciudad de México, CDMX, Mexico"
+            "lat": 19.398415,
+            "lng": -99.1660792,
+            "formatted_address": "Adolfo Prieto 133, código 2, Col del Valle Centro, Benito Juárez, 03103 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67e729b5d41dd-WhatsApp-Image-2025-03-27-at-13.31.58.jpeg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67eaf79d25fa8-vweb_02_cine_Almuerzo_CDMX.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29934/02-04-2025/almuerzo-desnudo-1991?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Películas, Alternativa"
     },
     {
         "nombre": "Cerámica, voces del barro antiguo",
@@ -210,7 +197,6 @@
         "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
         "descripcion": " Una muestra selecta dedicada a la cerámica arqueológica, que destaca la importancia de los objetos de barro como fuente de información clave para comprender a las sociedades del pasado, desde su descubrimiento en excavaciones hasta su restauración y tratamiento museográfico.\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -246,7 +232,9 @@
             "lng": -99.1899987,
             "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9d69da81fb-Cerámica,-voces-del-barro-antiguo.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9d69da81fb-Cerámica,-voces-del-barro-antiguo.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29539/02-04-2025/cermica-voces-del-barro-antiguo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Amazônia",
@@ -262,7 +250,6 @@
         "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
         "descripcion": " \"Amazônia documenta la vida cotidiana en esta región que se extiende por nueve países de América del Sur y alberga a 188 grupos indígenas, 114 de los cuales no han tenido contacto con el exterior. Concebida por el fotógrafo Sebastião Salgado, a través de 230 fotografías en blanco y negro, establece un diálogo entre la naturaleza y el ser humano, reflejando la majestuosidad de la selva, los ríos y las montañas. La exposición incluye dos salas con proyecciones: una de paisajes musicalizados con el poema sinfónico Erosión de Heitor Villa-Lobos, y otra con retratos indígenas acompañados de una composición de Rodolfo Stroeter.\"\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -298,7 +285,9 @@
             "lng": -99.1899987,
             "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e4fc8dea7-Amazônia.-Sebastião-Salgado.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e4fc8dea7-Amazônia.-Sebastião-Salgado.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29545/02-04-2025/amaznia?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Silencios Interrumpidos",
@@ -309,7 +298,6 @@
         "ubicacion": "eje central lázaro cárdenas 6 , primer piso , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
         "descripcion": "Viernes 14 de marzo\nCentro Cultural El Rule | 17 horas\n\n Exposición colectiva que busca sensibilizar al público sobre la violencia contra las mujeres, un problema social urgente, a través de la mirada de tres artistas visuales mexicanas. A lo largo de sus trayectorias, estas creadoras han abordado las violencias de género en su obra, generando una reflexión crítica desde el arte.\nLa muestra se presenta en el marco del 8 de marzo, Día Internacional de la Mujer. Participan las artistas plásticas Natalia Eguiluz, Rosa Borrás y Eugenia Ávila, en la curaduría está Andrés Mendoza.\n\n CarteleraCdMx\n\nCarteleraComunitaria ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -329,7 +317,50 @@
             "lng": -99.1408316,
             "formatted_address": "Eje Central Lázaro Cárdenas 6, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06000 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67d1d2db72d85-WhatsApp-Image-2025-03-11-at-19.03.28.jpeg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67d1d2db72d85-WhatsApp-Image-2025-03-11-at-19.03.28.jpeg",
+        "url": "https://cartelera.cdmx.gob.mx/29603/02-04-2025/silencios-interrumpidos?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Artes y Teatro, Museos"
+    },
+    {
+        "nombre": "Neni Fest Ciudad de México",
+        "lugar": "Museo Yancuic",
+        "costo": [
+            "General: Gratuito"
+        ],
+        "ubicacion": "Acceso al Paradero , Los Ángeles, Iztapalapa, C.P. 09830, Ciudad de México",
+        "descripcion": " Miércoles 2 de abril, 2025 De 09 a 17 horas | Museo Yancuic  Festival para conocer las inquietudes y fortalecer el emprendimiento femenino en la capital del país. Secretaría de Desarrollo Económico. CarteleraCdMx  ",
+        "fechas": [
+            "02/04/2025"
+        ],
+        "coordenadas": {
+            "lat": 19.3451419,
+            "lng": -99.0639979,
+            "formatted_address": "Acceso al Paradero, Los Ángeles, 09830 Ciudad de México, CDMX, Mexico"
+        },
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67e60005c1707-Museo-Yancuic.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29871/02-04-2025/neni-fest-ciudad-de-mxico?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "generos": "Festivales, Ferias, Misceláneo"
+    },
+    {
+        "nombre": "The Logistics World",
+        "lugar": "Centro Citibanamex",
+        "costo": [
+            "Previo Registro: Gratuito"
+        ],
+        "ubicacion": "Avenida del Conscripto 311 , Lomas de Sotelo, Miguel Hidalgo, C.P. 11200, Ciudad de México",
+        "descripcion": "La Exposición de Logística, Comercio Exterior y Carga más grande de México y Centroamérica, que reúne en dos días a más de 400 proveedores con los compradores líderes de la industria. Negocios + Ideas + Oportunidades. ",
+        "fechas": [
+            "02/04/2025",
+            "03/04/2025"
+        ],
+        "coordenadas": {
+            "lat": 19.4420818,
+            "lng": -99.2225337,
+            "formatted_address": "Av. del Conscripto 311, Lomas de Sotelo, Hipódromo de las Américas, Miguel Hidalgo, 11610 Ciudad de México, CDMX, Mexico"
+        },
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/6781717406b9c-The-Logistics-World.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/20764/02-04-2025/the-logistics-world?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Misceláneo, Ferias, Festivales"
     },
     {
         "nombre": "El fascinante mundo de los billetes",
@@ -340,7 +371,6 @@
         "ubicacion": "Pl. San Jacinto 5 , San Ángel, Álvaro Obregón, C.P. 01000, Ciudad de México",
         "descripcion": " La muestra representa una oportunidad para adentrarse en el complejo universo de la creación y fabricación de los billetes, sobre los que, por su circulación masiva y uso cotidiano, pocas veces se reflexiona, al tiempo de conocer el potencial expresivo de los materiales en las manos y el talento de extraordinarios creadores mexicanos.\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -370,7 +400,9 @@
             "lng": -99.1919638,
             "formatted_address": "Pl. San Jacinto 5, San Ángel TNT, San Ángel, Álvaro Obregón, 01000 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae39b228d13-El-fascinante-mundo-de-los-billetes.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae39b228d13-El-fascinante-mundo-de-los-billetes.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29013/02-04-2025/el-fascinante-mundo-de-los-billetes?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Museos, Arte"
     },
     {
         "nombre": "Bordar el fuego. Marta Moreno",
@@ -384,7 +416,6 @@
         "ubicacion": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
         "descripcion": " La artista contemporánea Marta Moreno fusiona arte e historia a través del punch needle. En sus obras, reinterpreta los primeros registros ilustrados de fuegos artificiales, como el Catálogo ilustrado de explosivos de día y noche, publicado por The Hirayama Fireworks Company, en Japón alrededor de 1877. La exposición, realizada en colaboración con la galería Proyecto H, en el marco de la feria de arte ZONAMACO, interactúa con obras de la Colección Permanente del Museo e invita a los visitantes a explorar la conexión entre la pirotecnia ancestral y sus infinitas posibilidades artísticas.\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -408,7 +439,9 @@
             "lng": -99.1434319,
             "formatted_address": "Av. Hidalgo 45, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae3ff254e50-Bordar-el-fuego.-Marta-Moreno.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae3ff254e50-Bordar-el-fuego.-Marta-Moreno.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29014/02-04-2025/bordar-el-fuego-marta-moreno?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Tiempo de Mujeres 2025",
@@ -419,7 +452,6 @@
         "ubicacion": "P.za de la Constitución s/n , Centro (Área 2), Cuauhtémoc, C.P. 06010, Ciudad de México",
         "descripcion": "Del 28 de febrero al 6 de abril 2025\n\n150 actividades 23 sedes en 12 alcaldías\n\nFestival multidisciplinario centrado en destacar, difundir y reconocer el trabajo de las mujeres en las artes y la cultura. Durante todo el mes de marzo integra espectáculos, charlas y talleres en pos de contribuir a un cambio cultural que promueve la equidad de género.\n\n\nEn esta edición se entregarán reconocimientos a pioneras del rock en México, y además habrá conciertos, homenajes, actividades al aire libre, ciclos de cine, charlas, exposiciones, performances, cabaret, danza, clases magistrales, creación de murales, encuentros y clínicas con perspectiva de género, y se instalarán módulos de atención de salud y pruebas médicos.\n\nCarteleraCdMx\n\nTiempo de Mujeres 2025 150 actividades 23 sedes en 12 alcaldías CarteleraCdMx\n Tiempo de Mujeres 2025 ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -431,7 +463,9 @@
             "lng": -99.1333215,
             "formatted_address": "P.za de la Constitución, Centro Histórico de la Cdad. de México, Centro, Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae6909d0d9a-TIEMPO.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae6909d0d9a-TIEMPO.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29017/02-04-2025/tiempo-de-mujeres-2025?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Música, Rock, Pop, Festivales, Espectáculos, Películas, Danza, Teatro, Museos"
     },
     {
         "nombre": "Germán List Arzubide",
@@ -444,7 +478,6 @@
         "ubicacion": "CALLE TACUBA 8 , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
         "descripcion": " \"La muestra busca reconocer la gran influencia de Germán List Arzubide, quien estuvo vinculado con el desarrollo cultural, ideológico, social y pedagógico en nuestro país. Con cerca de 300 piezas, el público podrá admirar obra artística, fotografías, marionetas, bibliografía, documentos manuscritos y correspondencia, que rinden homenaje al literato nacido en Puebla. La exhibición se enriquece con piezas de Diego Rivera, Aurora Reyes, Ezequiel Negrete Lira, Juan Leonardo Cordero, Francisco Arturo Marín, Luis Arenal, Isaías Cervantes, Enrique Gottdiener y Ramón Alva de la Canal, entre otros.\"\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -480,7 +513,9 @@
             "lng": -99.1394686,
             "formatted_address": "National Art Museum, C. de Tacuba 8, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06010 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e7cf50963-Germán-List-Arzubide.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e7cf50963-Germán-List-Arzubide.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29546/02-04-2025/germn-list-arzubide?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Estampas de la Revolución Mexicana. Un Trabajo Gráfico de Activismo Colectivo",
@@ -494,7 +529,6 @@
         "ubicacion": "Av. Revolución 1608 , San Ángel, Álvaro Obregón, C.P. 01000, Ciudad de México",
         "descripcion": " \"La presente muestra –concebida en el marco del 50 aniversario del MACG– despliega, a manera de libro abierto, los 85 grabados en linóleo que integran la Carpeta de Estampas de la Revolución Mexicana producida por el Taller de Gráfica Popular en 1947; un trabajo de carácter colectivo de indiscutible valor tanto estético como histórico y social que forma parte del acervo permanente de este recinto. \"\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -530,7 +564,9 @@
             "lng": -99.19031129999999,
             "formatted_address": "Av. Revolución 1608, San Ángel, Álvaro Obregón, 01000 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9eb3f0d30c-Estampas-de-la-Revolución-Mexicana.-Un-trabajo-gráfico-de-activismo-colectivo.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9eb3f0d30c-Estampas-de-la-Revolución-Mexicana.-Un-trabajo-gráfico-de-activismo-colectivo.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29550/02-04-2025/estampas-de-la-revolucin-mexicana-un-trabajo-grfico-de-activismo-colectivo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Museos"
     },
     {
         "nombre": "Antonio. Moda Indomable",
@@ -544,7 +580,6 @@
         "ubicacion": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
         "descripcion": " \"Bocetos, fotografías, atuendos, películas y revistas del emblemático ilustrador de moda Antonio Lopez, que influyó con su estilo los años setenta y ochenta. \" \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -580,7 +615,9 @@
             "lng": -99.1434319,
             "formatted_address": "Av. Hidalgo 45, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9ee0f7fa3f-Antonio.-Moda-indomable.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9ee0f7fa3f-Antonio.-Moda-indomable.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29551/02-04-2025/antonio-moda-indomable?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Moda"
     },
     {
         "nombre": "La Casa, La Enagua. Un tejido sonoro para habitar",
@@ -591,7 +628,6 @@
         "ubicacion": "Lic. Verdad 8 , Centro (Área 6), Cuauhtémoc, C.P. 06060, Ciudad de México",
         "descripcion": " \n Ex Teresa Arte Actual se complace en anunciar la #apertura, de “La Casa, La Enagua. Un tejido sonoro para habitar” de la artista salvadoreña, Alexia Miranda.\n La obra se inspira en el miriñaque, accesorio en forma de armazón que utilizaban las mujeres en el siglo XIX.\n  Al apropiarse de esta prenda, Alexia Miranda resignifica la experiencia de opresión de los cuerpos femeninos, transformando al miriñaque en un espacio íntimo que cobija la equidad y la inclusión.  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -615,7 +651,9 @@
             "lng": -99.1305175,
             "formatted_address": "Lic. Verdad 8, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06060 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c6176cbf3c9-La-Casa,-La-Enagua.-Un-tejido-sonoro-para-habitar.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c6176cbf3c9-La-Casa,-La-Enagua.-Un-tejido-sonoro-para-habitar.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29459/02-04-2025/la-casa-la-enagua-un-tejido-sonoro-para-habitar?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Teatro"
     },
     {
         "nombre": "Veneno de amor",
@@ -626,7 +664,6 @@
         "ubicacion": "La Academia 22 , Centro (Área 6), Cuauhtémoc, C.P. 06060, Ciudad de México",
         "descripcion": " Oráculo de una gorda rebelde de Erika Bulle. Una muestra que desafía los cánones y celebra el deseo, el cuerpo y la rebeldía.\n \n  ",
         "fechas": [
-            "01/04/2025",
             "02/04/2025",
             "03/04/2025",
             "04/04/2025",
@@ -641,56 +678,8 @@
             "lng": -99.1288503,
             "formatted_address": "Antigua Academia de San Carlos, C. de la Academia 22, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06060 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67d462a13c84e-Veneno-de-amor.jpg"
-    },
-    {
-        "nombre": "Las Reglas del Juego",
-        "lugar": "MODO Museo del Objeto***",
-        "costo": [
-            "General: $ 60",
-            "INAPAM, estudiantes y maestros : $ 30",
-            "Vecinos de la Roma con INE: $ 30",
-            "Menores de 12 an?os: Gratuito"
-        ],
-        "ubicacion": "Colima 145 , Roma Norte, Cuauhtémoc, C.P. 06700, Ciudad de México",
-        "descripcion": " \"El tiempo significa y transcurre de forma diferente para cada uno de nosotros. El tiempo, sabemos entonces, es relativo. Para una persona privada de su libertad, el tiempo es materia cuantificable ya que define el futuro y la permanencia en un sitio. Detrás de los muros, los días se convierten en travesías que deben ser planeadas por medio de inagotables prácticas repetitivas, utilizando estrategias de supervivencia para combatir el hastío y la espera. El juego y la creación artística quedan unidos por acuerdos que nacen entre individuos y grupos y que no pueden imponerse. Es así cómo el acto lúdico y el artístico quedan anclados a una necesidad de emancipación y de autonomía; una regla elemental que merece atención.\"\n \n  ",
-        "fechas": [
-            "01/04/2025",
-            "02/04/2025",
-            "03/04/2025",
-            "04/04/2025",
-            "05/04/2025",
-            "06/04/2025",
-            "08/04/2025",
-            "09/04/2025",
-            "10/04/2025",
-            "11/04/2025",
-            "12/04/2025",
-            "13/04/2025",
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.4202415,
-            "lng": -99.1590997,
-            "formatted_address": "Colima 145, Roma Nte., Cuauhtémoc, 06700 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67dd95a647b14-Las-Reglas-del-Juego.jpg"
+        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67d462a13c84e-Veneno-de-amor.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29653/02-04-2025/veneno-de-amor?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "generos": "Artes y Teatro, Teatro"
     }
 ]

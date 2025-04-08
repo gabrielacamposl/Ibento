@@ -1,15 +1,167 @@
+
 import React, { useState } from "react";
-import { Image } from 'primereact/image';
-import { Tag } from 'primereact/tag';
 import { ClockIcon, MapPinIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartOutline, BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid';
-import { Divider } from 'primereact/divider';
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './carousel';
 
 function Page() {
+    //Eventos
+    const [events, setEvents] = useState([
+      {
+        id : 1,
+        imagen_url : "https://example.com/palacio_bellas_artes.jpg",
+        nombre : "Exposición Frida Kahlo en Bellas Artes",
+        tags : ["Arte", "Cultura", "Exposición"],
+        fecha : "2023-11-15",
+        hora : "10:00",
+        lugar : "Palacio de Bellas Artes",
+        descripcion : "Exposición retrospectiva de la obra de Frida Kahlo con piezas nunca antes exhibidas.",
+        fotos_urls : 
+        [
+            "https://example.com/frida1.jpg",
+            "https://example.com/frida2.jpg"
+        ]
+      },
+      {
+        id : 2,
+        imagen_url : "https://example.com/zocalo_concierto.jpg",
+        nombre : "Concierto de la Orquesta Filarmónica en el Zócalo",
+        tags : ["Música", "Concierto", "Gratis"],
+        fecha : "2023-12-05",
+        hora : "19:30",
+        lugar : "Plaza de la Constitución (Zócalo)",
+        descripcion : "Concierto gratuito de la Orquesta Filarmónica de la Ciudad de México con repertorio clásico.",
+        fotos_urls : 
+        [
+            "https://example.com/zocalo1.jpg",
+            "https://example.com/zocalo2.jpg"
+        ]
+    },
+    
+    {
+      id : 3,
+      imagen_url : "https://example.com/chapultepec_feria.jpg",
+      nombre : "Feria del Libro en Chapultepec",
+      tags : ["Literatura", "Feria", "Libros"],
+      fecha : "2023-11-20",
+      hora : "09:00",
+      lugar : "Bosque de Chapultepec",
+      descripcion : "Feria anual del libro con presentaciones de autores, talleres y descuentos en libros.",
+      fotos_urls : 
+      [
+          "https://example.com/feria_libro1.jpg",
+          "https://example.com/feria_libro2.jpg"
+      ]
+    },
+    {
+      id : 4,
+      imagen_url : "https://example.com/roma_mezcal.jpg",
+      nombre : "Festival del Mezcal en la Roma",
+      tags : ["Gastronomía", "Mezcal", "Degustación"],
+      fecha : "2023-11-25",
+      hora : "12:00",
+      lugar : "Plaza Río de Janeiro",
+      descripcion : "Evento anual donde podrás degustar más de 50 tipos de mezcal artesanal de diferentes regiones de México.",
+      fotos_urls : 
+      [
+          "https://example.com/mezcal1.jpg",
+          "https://example.com/mezcal2.jpg"
+      ]
+    },
+    {
+      id : 5,
+      imagen_url : "https://example.com/cineteca.jpg",
+      nombre : "Ciclo de Cine Francés en la Cineteca",
+      tags : ["Cine", "Francia", "Cultura"],
+      fecha : "2023-12-01",
+      hora : "16:00",
+      lugar : "Cineteca Nacional",
+      descripcion : "Proyección de lo mejor del cine francés contemporáneo con presentaciones especiales.",
+      fotos_urls : [
+          "https://example.com/cine_frances1.jpg",
+          "https://example.com/cine_frances2.jpg"
+      ]
+    },
+    {
+      id : 6,
+      imagen_url : "https://example.com/xochimilco.jpg",
+      nombre : "Noche de Leyendas en Xochimilco",
+      tags : ["Tradición", "Leyendas", "Trajinera"],
+      fecha : "2023-11-18",
+      hora : "20:00",
+      lugar : "Embarcaderos de Xochimilco",
+      descripcion : "Recorrido nocturno en trajinera con narración de leyendas mexicanas tradicionales.",
+      fotos_urls : [
+          "https://example.com/xochimilco1.jpg",
+          "https://example.com/xochimilco2.jpg"
+      ]
+    },
+    {
+      id: 7,
+      imagen_url: "https://example.com/teatro_juarez.jpg",
+      nombre : "Obra de Teatro: 'El Quijote'",
+      tags : ["Teatro", "Literatura", "Clásico"],
+      fecha : "2023-11-22",
+      hora : "18:00",
+      lugar : "Teatro Juárez",
+      descripcion : "Adaptación contemporánea de la obra maestra de Cervantes con producción mexicana.",
+      fotos_urls : 
+      [
+          "https://example.com/quijote1.jpg",
+          "https://example.com/quijote2.jpg"
+      ]
+    },
+    {
+      id : 8,
+      imagen_url : "https://example.com/munal.jpg",
+      nombre : "Noche de Museos en el MUNAL",
+      tags : ["Museo", "Arte", "Noche de Museos"],
+      fecha : "2023-11-29",
+      hora : "19:00",
+      lugar : "Museo Nacional de Arte",
+      descripcion : "Visita guiada nocturna por las exposiciones permanentes del MUNAL con actividades especiales.",
+      fotos_urls : 
+      [
+          "https://example.com/munal1.jpg",
+          "https://example.com/munal2.jpg"
+      ]
+    },
+    {
+      id : 9, 
+      imagen_url : "https://example.com/foro_sol.jpg",
+      nombre : "Concierto de Café Tacvba",
+      tags : ["Rock", "Concierto", "Música en vivo"],
+      fecha : "2023-12-10",
+      hora : "21:00",
+      lugar : "Foro Sol",
+      descripcion : "Concierto de la legendaria banda mexicana Café Tacvba presentando su nuevo álbum.",
+      fotos_urls : 
+      [
+          "https://example.com/tacvba1.jpg",
+          "https://example.com/tacvba2.jpg"
+      ]
+    },
+    {
+      id : 10,
+      imagen_url : "https://example.com/teatro_colon.jpg",
+      nombre : "Ballet Folklórico de México",
+      tags : ["Ballet", "Cultura", "Tradición"],
+      fecha : "2023-12-15",
+      hora : "20:00",
+      lugar : "Teatro Colón",
+      descripcion : "Presentación del Ballet Folklórico de México con danzas tradicionales de diferentes regiones.",
+      fotos_urls : 
+      [
+          "https://example.com/ballet1.jpg",
+          "https://example.com/ballet2.jpg"
+      ]
+    }
+  ]);
+
+
     const [date, setDate] = useState<Date | null>(null);
 
     // Coordenadas del Autódromo Hermanos Rodríguez
