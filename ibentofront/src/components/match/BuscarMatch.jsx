@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
-import "../assets/css/sombras.css";
+import "../../assets/css/botones.css";
+import "../../assets/css/sombras.css";
 import { useNavigate } from "react-router-dom";
 
 const buscarMatchx = () => {
@@ -45,7 +45,7 @@ const buscarMatchx = () => {
         setCurrentUserIndex((prevIndex) => (prevIndex + 1));
         setCurrentImageIndex(0);
         if(users[currentUserIndex].match){
-            setTimeout(() => navigate("/itsMatch"), 0);
+            setTimeout(() => navigate("../itsMatch"), 0);
         }
     };
 
@@ -59,16 +59,16 @@ const buscarMatchx = () => {
 
 
     const handdleMessage = () =>{
-        setTimeout(() => navigate("/match"), 0);
+        setTimeout(() => navigate("../match"), 0);
     }
 
     
     if (currentUserIndex >= users.length) {
         return (
             <div className="text-black flex justify-center items-center min-h-screen">
-                <div className="w-full mt-5  h-190 relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full ">
+                <div className="w-full   relative flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full ">
                 <div className=" left-2 top-10  space-x-5 font-bold flex justify-between items-center ">
-                        <button onClick className="cursor-pointer BuscarMatch text-white ">
+                        <button  className="cursor-pointer BuscarMatch text-white ">
                             Buscar Match
                         </button>
                         <button onClick={handdleMessage} className="cursor-pointer text-black font-bold rounded-full">
@@ -92,9 +92,9 @@ const buscarMatchx = () => {
     const user = users[currentUserIndex];
 
     return (
-        <div className="flex justify-center items-center min-h-screen p-4">
-            <div className="relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full ">
-                <div className="relative w-120 h-190 rounded-lg overflow-hidden ">
+        <div className="flex justify-center items-center min-h-screen ">
+            <div className="relative flex flex-col items-center  shadow-md shadow-t max-w-lg w-full ">
+                <div className="relative w-full min-h-screen  overflow-hidden ">
                 
                 <div className="absolute  z-5 left-2 top-10  space-x-5 transform font-bold flex justify-between items-center ">
                         <button onClick  className="cursor-pointer BuscarMatch text-white ">
@@ -153,7 +153,7 @@ const buscarMatchx = () => {
 
                     <div className="absolute inset-0 z-1 bodyFoto"/>
                     <div className="absolute inset-0 z-0">
-                        <img src={user.pictures[currentImageIndex]} className="w-full h-full object-cover-fit z-0" alt={user.name} />
+                        <img src={user.pictures[currentImageIndex]} className="w-full h-full sm:h-full object-cover z-0" alt={user.name} />
                     </div>
                 </div>
             </div>

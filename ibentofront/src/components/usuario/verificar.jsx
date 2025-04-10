@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import "../assets/css/botones.css";
-import { buttonStyle } from "../styles/styles";
+import "../../assets/css/botones.css";
+import { buttonStyle } from "../../styles/styles";
 
 const verificar = () => {
     const [user, setUser] = useState({

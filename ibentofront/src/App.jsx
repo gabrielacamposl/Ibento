@@ -9,19 +9,24 @@ import EventosPreferencias from "./components/preferences/EventosPreferencias";
 import Prueba from "./components/preferences/prueba";
 
 
-import Perfil from "./components/Perfil";
-import EditarPerfil from "./components/EditarPerfil";
-import EditarIntereses from "./components/Intereses";
-import Perfiles from "./components/PerfilUsers";
-import Favoritos from "./components/Favoritos";
-import Guardados from "./components/Guardados";
-import BuscarMatches from "./components/BuscarMatch";
-import VerMatch from "./components/verMatches";
-import Matches from "./components/itsMatch";
-import MisMatches from "./components/matches";
-import Like from "./components/verLike";
-import Chat from "./components/chat";
-import PrincipalEventos from "./principalEventos";
+import Perfil from "./components/usuario/Perfil";
+import EditarPerfil from "./components/usuario/EditarPerfil";
+import EditarIntereses from "./components/usuario/Intereses";
+import Favoritos from "./components/usuario/Favoritos";
+import Guardados from "./components/usuario/Guardados";
+import VerificarPerfil from "./components/usuario/verificar";
+
+import BuscarMatches from "./components/match/BuscarMatch";
+import Perfiles from "./components/match/PerfilUsers";
+import VerMatch from "./components/match/verMatches";
+import Matches from "./components/match/itsMatch";
+import MisMatches from "./components/match/matches";
+import Like from "./components/match/verLike";
+import Chat from "./components/match/chat";
+
+import EventoPage from "./components/eventos/eventoPage";  
+
+import PrincipalEventos from "./components/eventos/principalEventos";
 import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
 import NuevaContrasena from "./nuevaContrasena";
@@ -35,16 +40,15 @@ import MainLayout from "./layouts/MainLayout";
 export default function App() {
   return (
     <Router>
-      <Routes>
-        {/* Auth & Register*/}
-        <Route path="/" element={<Login/>} />
-        <Route path="/registrar" element={<Register />} />
-        <Route path="/verificar-correo" element={<VerificarCorreo />} />
-        <Route path="/confirmar/:token" element={<Confirm/>} />
+    <Routes>
+      {/* Auth & Register*/}
+      <Route path="/" element={<Login/>} />
+      <Route path="/registrar" element={<Register />} />
+      <Route path="/verificar-correo" element={<VerificarCorreo />} />
+      <Route path="/confirmar/:token" element={<Confirm/>} />
 
-        {/* Preferencias del Usuario para sugerencia de Eventos*/}
-        <Route path="/preferencias" element={<EventosPreferencias />} />
-        <Route path="/prueba" element={<Prueba />} />
+      {/* Preferencias del Usuario para sugerencia de Eventos*/}
+      <Route path="/preferencias" element={<EventosPreferencias />} />
 
         {/* Matches*/}
 
