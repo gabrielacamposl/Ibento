@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,12 +10,12 @@ const Guardados = ({events}) => {
     const matchDisponible = (valido) => {
         if(valido === 'No'){
             alert("No puedes buscar match, crea una cuenta de matches");
-            navigate('/verificar');
+            navigate('../verificar');
             return ;
            
         }
       
-        navigate('/matches');
+        navigate('../matches');
     }
 
     return (

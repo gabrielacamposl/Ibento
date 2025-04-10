@@ -15,7 +15,6 @@
     "@heroicons/react": "^2.2.0",
     "@mui/material": "^7.0.1",
     "@react-google-maps/api": "^2.20.6",
-    "@rollup/rollup-darwin-arm64": "^4.39.0",
     "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.1",
     "clsx": "^2.1.1",

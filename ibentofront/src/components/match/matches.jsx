@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 const matches = () => {
@@ -62,17 +62,19 @@ const matches = () => {
     ];
 
    const handdleSearch = () => {
-       navigate("/matches");
+       navigate("../matches");
 
     }
 
 
     const handdleFuture = () => {
-        navigate("/verMatches");
+        navigate("../verMatches");
         }
+
+        
     return (
-        <div className="flex justify-center items-center min-h-screen ">
-            <div className="degradadoPerfil mt-5 p-5 max-w-lg w-full">
+        <div className="justify-center text-black flex   min-h-screen ">
+            <div className="degradadoPerfil  p-5 max-w-lg w-full">
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
                     <button className=" cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
