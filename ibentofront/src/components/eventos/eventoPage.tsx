@@ -7,7 +7,17 @@ import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './carousel';
 
+import {useParams} from 'react-router-dom';
+
 function Page() {
+
+  //Para uso futuro
+  const params = useParams();
+
+  const { eventId } = useParams<{ eventId: string }>();
+  console.log("ID del evento:", eventId);
+  const eventIdInt = parseInt(eventId || "0", 10);
+
     //Eventos
     const [events, setEvents] = useState([
       {
@@ -137,6 +147,7 @@ function Page() {
       fecha : "2023-12-10",
       hora : "21:00",
       lugar : "Foro Sol",
+      
       descripcion : "Concierto de la legendaria banda mexicana Café Tacvba presentando su nuevo álbum.",
       fotos_urls : 
       [
@@ -161,6 +172,25 @@ function Page() {
     }
   ]);
 
+  const evento = events.find(ev => ev.id === Number(eventIdInt));
+
+  // Si no se encuentra el evento
+  if (!evento) {
+    return <div>Evento no encontrado</div>;
+  }
+
+  const { 
+    imagen_url, 
+    nombre, 
+    tags, 
+    fecha, 
+    hora, 
+    lugar, 
+    descripcion, 
+    fotos_urls 
+  } = evento;
+
+
 
     const [date, setDate] = useState<Date | null>(null);
 
@@ -180,6 +210,8 @@ function Page() {
   const toggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
   };
+
+
     
     return (
         
@@ -187,9 +219,9 @@ function Page() {
         {/* Mobile View */}
         <div className='md:hidden flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white'>
           <div className='flex flex-col items-center w-full h-full bg-white rounded-lg shadow-lg'>
-            <img src='img2.jpg' alt='Evento' className='w-full h-80 rounded-lg4' />
+            <img src={imagen_url} alt='Evento' className='w-full h-80 rounded-lg4' />
             <div className="flex flex-row">
-              <p className='text-black text-4xl antialiased font-bold px-4 mt-2'>Formula 1: Gran premio de la Ciudad de México</p>
+              <p className='text-black text-4xl antialiased font-bold px-4 mt-2'>{nombre}</p>
               <div className='flex flex-col space-y-6 items-center justify-center p-4'>
                 <button 
                   onClick={toggleLike}
@@ -215,25 +247,27 @@ function Page() {
               </div>
             </div>
             <div className='flex flex-row flex-wrap gap-2 items-center justify-center w-full h-auto'>
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>Carreras</button>
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>Deportes</button>
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>F1</button>
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>Aire Libre</button>
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>Aventura</button>  
-              <button className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'>Eventos</button>
+              {tags.map((tag, index) => (
+                <button 
+                  key={index} 
+                  className='bg-gray-50 text-black px-4 py-2 rounded-full mt-4'
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
             <div className='flex flex-row my-4 flex-wrap gap-4 items-center justify-center w-full h-auto'>
                 <div className='flex flex-row space-x-1 items-center justify-center'>
                 <CalendarIcon className='h-8 w-8 text-black' />
-                <p className='text-black font-bold'>dom, 2 de nov, 2025</p>
+                <p className='text-black font-bold'>{fecha}</p>
                 </div>
                 <div className='flex flex-row space-x-1 items-center justify-center'>
                 <ClockIcon className='h-6 w-6 text-black' />
-                <p className='text-black font-bold'>2:30 pm</p>
+                <p className='text-black font-bold'>{hora}</p>
                 </div>
                 <div className='flex flex-row space-x-1 items-center justify-center'>
                 <MapPinIcon className='h-6 w-6 text-black' />
-                <p className='text-black font-bold'>Autódromo Hermanos Rodriguez</p>
+                <p className='text-black font-bold'>{lugar}</p>
                 </div>
             </div>
             <div className="w-full px-6 my-4">
@@ -247,7 +281,7 @@ function Page() {
                 <p className="mb-1 text-xl font-bold text-black text-left">Acerca de</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <article className="text-wrap text-black text-justify text-base mt-4">
-                  <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+                  <p>{descripcion}</p>
                 </article>
             </div>
             
@@ -255,7 +289,7 @@ function Page() {
                 <p className="mb-1 text-xl font-bold text-black text-left">Ubicación</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <article className="text-wrap text-black text-justify text-base mt-4">
-                  <p>Viad. Río de la Piedad S/n, Granjas México, Iztacalco, 08400 Ciudad de México, CDMX</p>
+                  <p>{lugar}</p>
                 </article>
                 <EventMap location={eventLocation} />
             </div>

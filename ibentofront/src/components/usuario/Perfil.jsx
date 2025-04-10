@@ -1,5 +1,5 @@
 import React from 'react';
-import "../assets/css/botones.css";
+import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Carousel } from 'primereact/carousel';
 import { Button } from 'primereact/button';
@@ -117,9 +117,7 @@ const Perfil = () => {
     return (
         <div className="flex justify-center items-center  overflow-x-auto" style={{ width: '100vw' }}>
             <div className="degradadoPerfil relative flex flex-col items-center  shadow-md p-5 shadow-t max-w-lg w-full">
-                <div className="miPerfil flex font-bold text-2xl w-full">
-                    <h1 className='miPerfil text-black'>Mi Perfil</h1>
-                </div>
+      
                 
                 <div className="relative w-full h-60 mt-1 ">
                 {/* Carrusel */}
@@ -143,7 +141,7 @@ const Perfil = () => {
                     alt={user.name}
                     />
                     <Link
-                    to="/editarPerfil"
+                    to="../editarPerfil"
                     className="border-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 absolute bottom-0 right-0 bg-purple-300 text-white p-2 rounded-full"
                     >
                     <svg
@@ -165,14 +163,20 @@ const Perfil = () => {
 
       
                 <div className="text-black w-full">
-                    <h1 className="text-2xl font-semibold">{user.name}</h1>
-                    <div className='flex space-x-2'>
+                    <h1 className="mt-5 text-3xl mb-3 font-semibold">{user.name}</h1>
+                    <div className='space-x-2'>
+                    <h1 className="flex space-x-2 text-2xl ">
+                        <div className="flex ">
                         {user.genero === 'H' ? (
                             <i className="pi pi-mars mt-1" style={{ color: 'slateblue' }}></i>
                         ) : (
                             <i className="pi pi-venus mt-1" style={{ color: 'pink' }}></i>
                         )}
-                        <h1 className="text-lg">{user.age} años</h1>
+                        </div>
+                        <div>
+                         {user.age} años
+                         </div>
+                         </h1>
                     </div>
                     <div className='flex space-x-2'>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">

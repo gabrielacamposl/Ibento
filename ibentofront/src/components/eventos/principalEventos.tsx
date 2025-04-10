@@ -1,8 +1,9 @@
 import React from 'react';
-import Carousel from './components/carousel';
-import Cards from './components/cards';
-import CardWrapper from './components/card';
-import SearchMenu from './components/menu';
+import Carousel from './carousel';
+import Cards from './cards';
+import CardWrapper from './card';
+import SearchMenu from './menu';
+
 function Page(){
 
     return(

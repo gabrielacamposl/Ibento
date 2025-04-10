@@ -28,27 +28,27 @@ function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-gray-200 bg-white shadow-lg">
       {/* Home Link */}
-      <NavLink to="/prueba" end className={getNavLinkClass}>
+      <NavLink to="/principal/eventos" end className={getNavLinkClass}>
         <HomeOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Search Link */}
-      <NavLink to="/prueba/evento" className={getNavLinkClass}>
+      <NavLink to="/principal/eventos/" className={getNavLinkClass}>
         <MGOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Chat Link */}
-      <NavLink to="/prueba/favoritos" className={getNavLinkClass}>
+      <NavLink to="/principal/match" className={getNavLinkClass}>
         <ChatOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Explore Link */}
-      <NavLink to="/prueba/verPerfil" className={getNavLinkClass}>
+      <NavLink to="/principal/verPerfil" className={getNavLinkClass}>
         <FaceSmileOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
       {/* Profile Link */}
-      <NavLink to="/prueba/chat" className={getNavLinkClass}>
+      <NavLink to="/principal/perfil" className={getNavLinkClass}>
         <UserOutline className="mb-1 h-6 w-6" />
       </NavLink>
     </nav>
