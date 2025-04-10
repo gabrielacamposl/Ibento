@@ -28,7 +28,38 @@ const EventosPreferencias = () => {
 
     const navigate = useNavigate();
 
+    const categoriasDePrueba = [
+      {
+        id: '1',
+        nombre: 'Electrónica',
+        valores: ['Smartphones', 'Laptops', 'Tablets', 'Accesorios']
+      },
+      {
+        id: '2',
+        nombre: 'Ropa',
+        valores: ['Hombre', 'Mujer', 'Niños', 'Deportiva']
+      },
+      {
+        id: '3',
+        nombre: 'Hogar',
+        valores: ['Muebles', 'Decoración', 'Cocina', 'Jardín']
+      },
+      {
+        id: '4',
+        nombre: 'Deportes',
+        valores: ['Fútbol', 'Baloncesto', 'Natación', 'Ciclismo']
+      },
+      {
+        id: '5',
+        nombre: 'Libros',
+        valores: ['Ficción', 'No ficción', 'Educativos', 'Infantiles']
+      }
+    ];
+
     useEffect(() => {
+      if (process.env.NODE_ENV === 'development') {
+        setCategorias(categoriasDePrueba);
+      } else {
         axios.get('http://localhost:8000/api/categorias/')
             .then(response => {
                 const categoriasFormateadas = response.data.map(cat => ({
@@ -41,7 +72,9 @@ const EventosPreferencias = () => {
             .catch(error => {
                 console.error('Error cargando categorías:', error);
             });
+        }
     }, []);
+    
 
     const toggleSeleccionado = (valor) => {
         setSeleccionados((prevSeleccionados) =>
@@ -53,57 +86,57 @@ const EventosPreferencias = () => {
 
 
     // Guardar preferencias usando axios
-    const guardarPreferencias = () => {
-        // Verifica que el usuarioId esté presente
-        if (!usuarioId) {
-            console.error("No se ha encontrado el usuarioId");
-            return;
-        }
+    // const guardarPreferencias = () => {
+    //     // Verifica que el usuarioId esté presente
+    //     if (!usuarioId) {
+    //         console.error("No se ha encontrado el usuarioId");
+    //         return;
+    //     }
 
-        const subcategoriasSeleccionadas = categorias.flatMap((categoria) =>
-            categoria.subcategorias
-                .filter((sub) => seleccionados.includes(sub.nombre_subcategoria))
-                .map((sub) => sub._id)
-        );
+    //     const subcategoriasSeleccionadas = categorias.flatMap((categoria) =>
+    //         categoria.subcategorias
+    //             .filter((sub) => seleccionados.includes(sub.nombre_subcategoria))
+    //             .map((sub) => sub._id)
+    //     );
 
-        // Si no se seleccionó ninguna subcategoría, puedes mostrar un mensaje de error
-        if (subcategoriasSeleccionadas.length === 0) {
-            toast.current.show({
-                severity: 'error',
-                summary: 'No se seleccionaron preferencias',
-                detail: 'Por favor selecciona al menos una preferencia de evento.',
-                life: 3000,
-            });
-            return;
-        }
+    //     // Si no se seleccionó ninguna subcategoría, puedes mostrar un mensaje de error
+    //     if (subcategoriasSeleccionadas.length === 0) {
+    //         toast.current.show({
+    //             severity: 'error',
+    //             summary: 'No se seleccionaron preferencias',
+    //             detail: 'Por favor selecciona al menos una preferencia de evento.',
+    //             life: 3000,
+    //         });
+    //         return;
+    //     }
 
-        // Realizar la solicitud PUT con axios para guardar las preferencias del usuario
-        axios.put(`http://localhost:8000/usuarios/${usuarioId}/preferencias/`, 
-            { preferencias_evento: subcategoriasSeleccionadas })
-            .then((response) => {
-                // Mostrar el Toast con el mensaje de éxito
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Preferencias guardadas',
-                    detail: 'Tus preferencias de eventos se han actualizado con éxito.',
-                    life: 3000,  // Toast desaparece después de 3 segundos
-                });
-            })
-            .catch((err) => {
-                console.error("Error al guardar preferencias:", err);
-                toast.current.show({
-                    severity: 'error',
-                    summary: 'Error al guardar preferencias',
-                    detail: 'Ocurrió un error al guardar tus preferencias. Intenta nuevamente.',
-                    life: 3000,
-                });
-            });
-    }
+    //     // Realizar la solicitud PUT con axios para guardar las preferencias del usuario
+    //     axios.put(`http://localhost:8000/usuarios/${usuarioId}/preferencias/`, 
+    //         { preferencias_evento: subcategoriasSeleccionadas })
+    //         .then((response) => {
+    //             // Mostrar el Toast con el mensaje de éxito
+    //             toast.current.show({
+    //                 severity: 'success',
+    //                 summary: 'Preferencias guardadas',
+    //                 detail: 'Tus preferencias de eventos se han actualizado con éxito.',
+    //                 life: 3000,  // Toast desaparece después de 3 segundos
+    //             });
+    //         })
+    //         .catch((err) => {
+    //             console.error("Error al guardar preferencias:", err);
+    //             toast.current.show({
+    //                 severity: 'error',
+    //                 summary: 'Error al guardar preferencias',
+    //                 detail: 'Ocurrió un error al guardar tus preferencias. Intenta nuevamente.',
+    //                 life: 3000,
+    //             });
+    //         });
+    // }
 
 
     return (
 
-          <div className="h-screen flex justify-center items-center">
+          <div className="min-h-screen flex justify-center items-center">
               {/* Formulario para la visualización web  */}
         
               <motion.div
@@ -211,9 +244,9 @@ const EventosPreferencias = () => {
               {/* Formulario para móviles */}
               <div className="block md:hidden">
         
-                <div className="block md:hidden w-full h-screen flex flex-col">
-                  <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
-                  <div className="absolute inset-0 z-10">
+                <div className="block md:hidden w-full min-h-screen flex items-center justify-center flex-col p-4">
+                  {/*<div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>*/}
+                  <div className="inset-0 w-full z-10">
                     {[...Array(9)].map((_, i) => {
                       const color = colors[i % colors.length]; // Alterna entre colores
                       return (
@@ -240,29 +273,26 @@ const EventosPreferencias = () => {
                     })}
                   </div>
                   {/* Logo */}
-                  <img src="/logo.png" alt="Logo" className="w-16 h-16 z-20" />
-        
-                </div>
-        
-                {/* Contenedor del formulario */}
+                  <img src="ibento_logo.png" alt="Logo" className="w-16 h-auto" />
+                  
+                  {/* Contenedor del formulario */}
                 <Box
-                  className="bg-white rounded-t-3xl shadow-lg flex justify-center items-start p-6"
+                  className="rounded-t-3xl shadow-lg flex justify-center items-start p-6"
                   sx={{
                     width: "100%",
+                    height: "100%",
                     zIndex: 10,
                   }}
                 >
-                  <Grid container component="main" maxWidth="xs" className="w-full h-full">
+                  <Grid container component="main" maxWidth="xs" className="w-full  ">
                     <CssBaseline />
-                    <Typography variant="h5" component="h1" className="text-center font-bold text-gray-700 mb-4">
-                      Crear Cuenta
-                    </Typography>
+                      <p className="text-black font-bold text-4xl mb-10">¿Qué tipo de eventos te gustan?</p>
                     <div className="intereses-container">
                     {categorias.map((categoria) => (
                         <div key={categoria.id} className="categoria mb-5">
                             {/* Categoría - estilo con degradado */}
                             <div
-                                className="btn-custom text-white font-bold text-lg inline-block rounded-full px-4 py-2 mb-2 ml-2 mt-4 shadow"
+                                className="btn-custom text-white font-bold text-xl inline-block rounded-full px-6 py-2 mb-2 ml-2 mt-4 shadow"
                                 style={{ cursor: 'default' }}
                             >
                                 {categoria.nombre}
@@ -290,6 +320,10 @@ const EventosPreferencias = () => {
                    
                   </Grid>
                 </Box>
+
+                </div>
+        
+                
               </div>
             </div>
     );

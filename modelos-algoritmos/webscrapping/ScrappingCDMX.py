@@ -232,7 +232,7 @@ def scrape_eventos():
     
     with sync_playwright() as p:
         # Iniciar el navegador
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
         
         # Navegar a la página
