@@ -52,55 +52,7 @@ const EventosPreferencias = () => {
     };
 
 
-    // Guardar preferencias usando axios
-    const guardarPreferencias = () => {
-        // Verifica que el usuarioId esté presente
-        if (!usuarioId) {
-            console.error("No se ha encontrado el usuarioId");
-            return;
-        }
-
-        const subcategoriasSeleccionadas = categorias.flatMap((categoria) =>
-            categoria.subcategorias
-                .filter((sub) => seleccionados.includes(sub.nombre_subcategoria))
-                .map((sub) => sub._id)
-        );
-
-        // Si no se seleccionó ninguna subcategoría, puedes mostrar un mensaje de error
-        if (subcategoriasSeleccionadas.length === 0) {
-            toast.current.show({
-                severity: 'error',
-                summary: 'No se seleccionaron preferencias',
-                detail: 'Por favor selecciona al menos una preferencia de evento.',
-                life: 3000,
-            });
-            return;
-        }
-
-        // Realizar la solicitud PUT con axios para guardar las preferencias del usuario
-        axios.put(`http://localhost:8000/usuarios/${usuarioId}/preferencias/`, 
-            { preferencias_evento: subcategoriasSeleccionadas })
-            .then((response) => {
-                // Mostrar el Toast con el mensaje de éxito
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Preferencias guardadas',
-                    detail: 'Tus preferencias de eventos se han actualizado con éxito.',
-                    life: 3000,  // Toast desaparece después de 3 segundos
-                });
-            })
-            .catch((err) => {
-                console.error("Error al guardar preferencias:", err);
-                toast.current.show({
-                    severity: 'error',
-                    summary: 'Error al guardar preferencias',
-                    detail: 'Ocurrió un error al guardar tus preferencias. Intenta nuevamente.',
-                    life: 3000,
-                });
-            });
-    }
-
-
+    
     return (
 
           <div className="h-screen flex justify-center items-center">
@@ -143,7 +95,7 @@ const EventosPreferencias = () => {
                   sx={{
                     height: "80vh",
                     width: "90vw",
-                    
+                    maxWidth: 420,
                     zIndex: 10,
                     display: "flex",
                     justifyContent: "center",
@@ -203,6 +155,11 @@ const EventosPreferencias = () => {
                     ))}
                 </div>
                 </Grid>
+                 <Button className={buttonStyle} type="submit" 
+                                variant="contained" sx={{ mt: 3, mb: 2 }}
+                                >
+                                 Siguiente
+                                </Button>
                   </Container>
                 </Box>
               </motion.div>
