@@ -6,6 +6,7 @@ import Login from "./components/accounts/Login";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
 
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
+import Prueba from "./components/preferences/prueba";
 
 
 import Perfil from "./components/usuario/Perfil";
@@ -84,6 +85,5 @@ export default function App() {
 
     </Routes>
   </Router>
-
   );
 }

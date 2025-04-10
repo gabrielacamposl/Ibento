@@ -1,3 +1,4 @@
+// Verifica que esta línea esté presente para exportar la función
 export async function registerUser(userData) {
   try {
     const response = await fetch("http://127.0.0.1:8000/api/usuarios/", {
@@ -9,15 +10,23 @@ export async function registerUser(userData) {
     });
 
     if (!response.ok) {
-      throw new Error("Error en la petición");
+      const errorData = await response.json();
+      console.error("Error de API:", errorData);
+      throw new Error(errorData?.detail || "Error en la petición");
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log("Respuesta de la API:", data);
+    return data;
   } catch (error) {
     console.error("Error en registerUser:", error);
     throw error;
   }
 }
+
+
+
+
 
 export async function confirmUser(token) {
   try {

@@ -8,7 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from api.models import Usuario, Mensaje, Matches, Conversacion
+from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
+from api.models import CategoriaEvento
 from .serializers import (UsuarioSerializer, 
                           Login,
                           Logout,
@@ -21,6 +22,8 @@ from .serializers import (UsuarioSerializer,
                           MatchSerializer,
                           MensajesSerializer,
                           ConversacionSerializer,
+                          CategoriaEventoSerializer, 
+                          SubcategoriaSerializer,
                           )
 
 
@@ -35,6 +38,16 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
             return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
         return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class CategoriaEventoViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaEvento.objects.all()
+    serializer_class = CategoriaEventoSerializer
+
+class SubcategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Subcategoria.objects.all()
+    serializer_class = SubcategoriaSerializer
+
 
 @api_view(['GET'])  # Permite GET en lugar de POST 
 def confirmar_usuario(request, token):
@@ -67,8 +80,8 @@ def logout_usuario(request):
 
 # ------------- Preferencias de Eventos del Usuario -----------------------------------------------
 
+
 @api_view(["GET", "PUT"])
-@permission_classes([IsAuthenticated])
 def usuario_preferencias(request, usuario_id):
     try:
         usuario = Usuario.objects.get(id=usuario_id)
