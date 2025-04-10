@@ -30,9 +30,8 @@ import PrincipalEventos from "./components/eventos/principalEventos";
 import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
 import NuevaContrasena from "./nuevaContrasena";
-
-
-
+import EventoPage from "./components/eventoPage";  
+import VerificarPerfil from "./components/verificar";
 
 import MainLayout from "./layouts/MainLayout";
 
@@ -51,39 +50,38 @@ export default function App() {
       {/* Preferencias del Usuario para sugerencia de Eventos*/}
       <Route path="/preferencias" element={<EventosPreferencias />} />
 
-      {/* Matches*/}
+        {/* Matches*/}
 
+        
+        <Route path="/principal" element={<MainLayout />}>
 
-      <Route path="/principal" element={<MainLayout />}>
+          {/*Eventos*/}
+          <Route path="eventos" element={<PrincipalEventos />}/>
+          <Route path="eventos/:eventId" element={<EventoPage />} />
+          
 
-        {/*Eventos*/}
-        <Route path="eventos" element={<PrincipalEventos />}>
-          <Route path=":eventId" element={<EventoPage />} />
+          <Route path="perfil" element={<Perfil />} />
+          <Route path="editarPerfil" element={<EditarPerfil />} />
+          <Route path="editarIntereses" element={<EditarIntereses />} />
+          <Route path="verPerfil" element={<Perfiles />} />
+          <Route path="favoritos" element={<Favoritos />} />
+          <Route path="guardados" element={<Guardados />} />
+          <Route path="matches" element={<BuscarMatches />} />
+          <Route path="verMatches" element={<VerMatch />} />
+          <Route path="itsMatch" element={<Matches />} />
+          <Route path="match" element={<MisMatches />} />
+          <Route path="verLike" element={<Like />} />
+          <Route path="chat" element={<Chat />} />
+          
+          <Route path = "recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>
+          <Route path="ingresarCodigo" element={<IngresarCodigo />} />
+          <Route path="nuevaContrasena" element={<NuevaContrasena />} />
+          <Route path="verificar" element={<VerificarPerfil />} />
+
         </Route>
 
-
-        <Route path="perfil" element={<Perfil />} />
-        <Route path="editarPerfil" element={<EditarPerfil />} />
-        <Route path="editarIntereses" element={<EditarIntereses />} />
-        <Route path="verPerfil" element={<Perfiles />} />
-        <Route path="favoritos" element={<Favoritos />} />
-        <Route path="guardados" element={<Guardados />} />
-        <Route path="matches" element={<BuscarMatches />} />
-        <Route path="verMatches" element={<VerMatch />} />
-        <Route path="itsMatch" element={<Matches />} />
-        <Route path="match" element={<MisMatches />} />
-        <Route path="verLike" element={<Like />} />
-        <Route path="chat" element={<Chat />} />
-
-        <Route path = "recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>
-        <Route path="ingresarCodigo" element={<IngresarCodigo />} />
-        <Route path="nuevaContrasena" element={<NuevaContrasena />} />
-        <Route path="verificar" element={<VerificarPerfil />} />
-
-      </Route>
-
-
-    </Routes>
-  </Router>
+        
+      </Routes>
+    </Router>
   );
 }
