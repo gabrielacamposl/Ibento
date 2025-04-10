@@ -587,7 +587,7 @@ def compatibilidad_total(respuestas_usuario1, respuestas_usuario2):
     total_compatibilidad += compatibilidad_interaccion(respuestas_usuario1[8], respuestas_usuario2[8])
     total_compatibilidad += compatibilidad_personalidad(respuestas_usuario1[10], respuestas_usuario2[10])
 
-    return total_compatibilidad/10.0
+    return total_compatibilidad/10.0 
 
 #Asignar valores a cada pregunta
 #Actualizar los valores de intereses
