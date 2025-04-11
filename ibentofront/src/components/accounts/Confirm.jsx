@@ -8,15 +8,16 @@ import { Box, Typography, CircularProgress } from "@mui/material";
 import { Button } from "primereact/button";
 import { buttonStyle } from "../../styles/styles";
 import { motion } from "framer-motion";
-
+import "../../assets/css/mascota.css";
 export default function Confirm() {
   const { token } = useParams();
-  const [estado, setEstado] = useState("verificando"); // 'verificando' | 'exito' | 'error'
+  const [estado, setEstado] = useState("exito"); // 'verificando' | 'exito' | 'error'
   const [mensaje, setMensaje] = useState("");  // Mensaje de error o éxito
   const navigate = useNavigate();
   const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
   useEffect(() => {
+    
     const confirmarCuenta = async () => {
       try {
         // Hacemos la llamada al backend para confirmar el token
@@ -131,14 +132,23 @@ export default function Confirm() {
               </>
             )}
             {estado === "exito" && (
-              <Typography variant="h4" color="primary">
-                ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
+               <div>
+               <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="black">
+               ¡Tu cuenta ha sido verificada con éxito!
+               
+               </Typography>
+               <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
+               </div>
             )}
+            {/* Mensaje de error o éxito */}
             {estado === "error" && (
-              <Typography variant="h5" color="error">
+             
+              <div>
+              <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="error">
                  Algo salió mal. {mensaje}
               </Typography>
+              <img src="/nutriaTiste.png" alt="nutria jsjs" className="nutria2" />
+              </div>
             )}
 
             <Button className={buttonStyle} type="submit" 
@@ -150,7 +160,7 @@ export default function Confirm() {
 
       {/* Formulario para móviles */}
       <div className="block md:hidden">
-        <div className="block md:hidden w-full h-screen flex flex-col">
+        <div className="block md:hidden w-full h-screen flex flex-col items-center justify-center relative overflow-hidden ">
           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
           <div className="absolute inset-0 z-10">
             {[...Array(9)].map((_, i) => {
@@ -178,8 +188,8 @@ export default function Confirm() {
               );
             })}
           </div>
-          {/* Logo */}
-          <img src="/logo.png" alt="Logo" className="w-16 h-16 z-20" />
+     
+       
 
         </div>
 
@@ -200,14 +210,23 @@ export default function Confirm() {
               </>
             )}
             {estado === "exito" && (
-              <Typography variant="h4" color="primary">
+               <div>
+               <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="black">
                ¡Tu cuenta ha sido verificada con éxito!
-              </Typography>
+               
+               </Typography>
+               <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
+               </div>
             )}
+            {/* Mensaje de error o éxito */}
             {estado === "error" && (
-              <Typography variant="h5" color="primary">
-                ¡Tu cuenta ha sido verificada con éxito!
+             
+              <div>
+              <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="error">
+                 Algo salió mal. {mensaje}
               </Typography>
+              <img src="/nutriaTiste.png" alt="nutria jsjs" className="nutria2" />
+              </div>
             )}
             <Button className={buttonStyle} type="submit" 
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
