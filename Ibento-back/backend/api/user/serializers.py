@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje, CategoriaEvento
@@ -6,7 +7,11 @@ from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
 
 
-# Creación del usuario
+
+# ------------------------------------------- CREACIÓN DE USUARIO -------------------------------------------
+
+# -------- Creación del usuario
+
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
@@ -16,7 +21,29 @@ class UsuarioSerializer(serializers.ModelSerializer):
         validated_data['password'] = make_password(validated_data['password'])  
         return Usuario.objects.create(**validated_data)  
     
-# Login / Inicio de Sesión    
+
+# -------- Selección de preferencias para la recomendación de eventos
+class UsuarioPreferences (serializers.ModelSerializer):
+    preferencias_evento = serializers.PrimaryKeyRelatedField(
+    many=True,  # Porque es una lista de referencias
+    queryset=Subcategoria.objects.all()
+)
+
+    class Meta:
+        model = Usuario
+        fields = ['preferencias_evento']
+
+        def update(self, instance, validated_data):
+            #instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
+            instance.preferencias_evento = [sub._id for sub in validated_data['preferencias_evento']]
+            instance.save()
+            return instance
+
+
+    
+# -------------------------------------- LOGIN / LOGOUT ----------------------------------------
+    
+# ------ Login / Inicio de Sesión    
 class Login(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -43,7 +70,7 @@ class Login(serializers.Serializer):
             "refresh": str(refresh),
         }
     
-# Sign out / Cierre de Sesión
+#------- Logout / Cierre de Sesión
 class Logout(serializers.Serializer):
     refresh = serializers.CharField()
 
@@ -57,45 +84,10 @@ class Logout(serializers.Serializer):
         return {}
     
 
-# Selección de preferencias para la recomendación de eventos
-class UsuarioPreferences (serializers.ModelSerializer):
-    preferencias_evento = serializers.PrimaryKeyRelatedField(
-    many=True,  # Porque es una lista de referencias
-    queryset=Subcategoria.objects.all()
-)
 
-    class Meta:
-        model = Usuario
-        fields = ['preferencias_evento']
+# -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
 
-        def update(self, instance, validated_data):
-            #instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
-            instance.preferencias_evento = [sub._id for sub in validated_data['preferencias_evento']]
-            instance.save()
-            return instance
-
-
-
-
-# -------------- Categorias para Eventos --------------
-
-class SubcategoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subcategoria
-        fields = ['_id', 'categoria', 'nombre_subcategoria']
-
-class CategoriaEventoSerializer(serializers.ModelSerializer):
-    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = CategoriaEvento
-        fields = ['_id', 'nombre', 'subcategorias']
-
-
-
-# ----------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES -----------------------------
-
-## Subir imágenes de perfil para la busqueda de acompañantes
+#---------- Subir imágenes de perfil para la busqueda de acompañantes
 
 class UploadProfilePicture(serializers.Serializer):
     images = serializers.ListField(
@@ -113,7 +105,7 @@ class UploadProfilePicture(serializers.Serializer):
         usuario.save()
         return usuario
 
-## Datos Personales para el perfil
+# ---------- Datos Personales para el perfil
 
 class PersonalData(serializers.ModelSerializer):
     model = Usuario
@@ -128,7 +120,7 @@ class PersonalData(serializers.ModelSerializer):
         return instance
       
 
-## Selección de respuestas para conocer más al usuarios
+#----------- Selección de respuestas para conocer más al usuarios
 
 class PersonalPreferences(serializers.ModelSerializer):
     preferences = serializers.PrimaryKeyRelatedField(
@@ -141,20 +133,22 @@ class PersonalPreferences(serializers.ModelSerializer):
         usuario.save()
         return usuario
     
-# Validación de INE
+# ------- Validación de INE
 
 class UploadINE(serializers.ModelSerializer):
     ine_f = serializers.ImageField()
     ine_m = serializers.ImageField()
 
-# Comparación de rostros segundo filtro
+#---------- Comparación de rostros segundo filtro
 
 class CompararRostroSerializer(serializers.Serializer):
     foto_camara = serializers.ImageField()
+    ine_f = serializers.ImageField()
 
 
-# Matches
+# ----------------------------------------------- MATCHES ------------------------------------------------
 
+# ------Generar Match
 class MatchSerializer (serializers.ModelSerializer):
     usuario_a = UsuarioSerializer(read_only=True)
     usuario_b = UsuarioSerializer(read_only = True)
@@ -164,7 +158,7 @@ class MatchSerializer (serializers.ModelSerializer):
         fields = ["_id", "usuario_a", "usuario_b", "fecha_match"]
 
 
-# Mensajería con matches
+#---------- Mensajería con matches
 
 class MensajesSerializer(serializers.ModelSerializer):
     remitente_nombre = serializers.CharField(source="remitente.nombre", read_only= True)
@@ -174,6 +168,7 @@ class MensajesSerializer(serializers.ModelSerializer):
         model = Mensaje
         fields = ["_id", "conversacion", "remitente", "receptor", "mensaje", "fecha_envio"]
 
+# --------- Conversaciones con matches
 
 class ConversacionSerializer (serializers.ModelSerializer):
    usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only = True)
@@ -183,3 +178,20 @@ class ConversacionSerializer (serializers.ModelSerializer):
    class Meta:
        model = Conversacion
        fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]
+       
+       
+    
+# ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
+
+class SubcategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = ['_id', 'categoria', 'nombre_subcategoria']
+
+class CategoriaEventoSerializer(serializers.ModelSerializer):
+    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CategoriaEvento
+        fields = ['_id', 'nombre', 'subcategorias']
+

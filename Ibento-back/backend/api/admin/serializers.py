@@ -4,6 +4,9 @@ from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil, Subcateg
 
 # -------------- Categorias para Eventos --------------
 
+    
+# ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS -------------------------------
+
 class SubcategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subcategoria
@@ -16,30 +19,37 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
         model = CategoriaEvento
         fields = ['_id', 'nombre', 'subcategorias']
 
-# --------------  Categorías para el Perfil de Usuario --------------
 
-class CategoriasPerfilSerializer(serializers.ModelSerializer):
+
+# ------------------------------ CATEGORÍAS PARA LAS PREGUNTAS DEL PERFIL -----------------------------------
+
+
+# ------- Respuestas para el perfil
+class SubcategoriaPerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = ['_id', 'nombre_subcategoria_perfil', 'categoria_perfil']
+
+
+# ----- Preguntas para el perfil
+class CategoriaPerfilSerializer(serializers.ModelSerializer):
+    subcategorias_perfil = SubcategoriaSerializer(many=True, read_only=True)
+
     class Meta:
         model = CategoriasPerfil
-        fields = ["_id", "categoria_perfil"]
+        fields = ['_id', 'categoria_perfil']
         
 
-class RespuestasSerializer(serializers.ModelSerializer):
-    categoria_perfil = serializers.SlugRelatedField(
-        queryset=CategoriasPerfil.objects.all(), slug_field="_id"  
-    )
-
-    class Meta:
-        model = SubcategoriaPerfil
-        fields = ["_id", "nombre_subcategoria_perfil", "categoria_perfil"]
 
 
+# class RespuestasSerializer(serializers.ModelSerializer):
+#     categoria_perfil = serializers.SlugRelatedField(
+#         queryset=CategoriasPerfil.objects.all(), slug_field="_id"  
+#     )
+
+#     class Meta:
+#         model = SubcategoriaPerfil
+#         fields = ["_id", "nombre_subcategoria_perfil", "categoria_perfil"]
 
 
 
-class CategoriaConSubcategoriasSerializer(serializers.ModelSerializer):
-    subcategorias = SubcategoriaSerializer(many=True)  # Esto incluirá las subcategorías relacionadas
-
-    class Meta:
-        model = CategoriaEvento
-        fields = ["_id", "nombre", "subcategorias"]  # Agregamos 'subcategorias' aquí
