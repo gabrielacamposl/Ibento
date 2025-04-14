@@ -8,6 +8,9 @@ import uuid
 def generate_objectid():
     return str(ObjectId())  # Retorna un ObjectId convertido a string
 
+
+# ----------------------------------------------- USER ---------------------------------------------------------
+
 class Usuario(models.Model):
     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
     nombre = models.CharField(max_length=100)
@@ -45,45 +48,9 @@ class Usuario(models.Model):
     def __str__(self):
         return self.email
 
-# Clases para las Preguntas de preferencias personales para crear el perfil de "Busqueda de Acompañantes"
-
-class CategoriasPerfil(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.CharField(max_length=50)
-    def __str__(self):
-        return self.categoria_perfil
-
-class SubcategoriaPerfil(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.ForeignKey(
-        CategoriasPerfil, on_delete = models.CASCADE, related_name="subcategorias_perfiles", to_field="_id"
-    )
-    nombre_subcategoria_perfil = models.CharField(max_length=70)
-    def __str__(self):
-        return self.nombre_subcategoria_perfil
-    
-    
-# Clases para las Categorias y Subcategorías de los Eventos
-
-class CategoriaEvento (models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
-    nombre = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.nombre
-
-class Subcategoria(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria = models.ForeignKey(
-        CategoriaEvento, on_delete = models.CASCADE, related_name="subcategorias", to_field="_id"
-    )
-    nombre_subcategoria = models.CharField(max_length=70)
-
-    def __str__(self):
-        return self.nombre_subcategoria
 
 
-# Matches de acompañantes
+# --------- Matches de acompañantes
 
 class Matches (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default= generate_objectid)
@@ -113,7 +80,7 @@ class Matches (models.Model):
         return f"Match entre {self.usuario_a.nombre} y {self.usuario_b.nombre}"
     
     
-# Chats con los matches
+# ------------- Chats con los matches
 
 class Conversacion (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
@@ -160,3 +127,43 @@ class Mensaje(models.Model):
 #     def _str_(self):
 #         return self.nombre_evento
     
+    
+    
+# ------------------------------------------- FUNCIONES PARA ADMIN -------------------------------------------    
+    
+    # Clases para las Preguntas de preferencias personales para crear el perfil de "Busqueda de Acompañantes"
+
+class CategoriasPerfil(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria_perfil = models.CharField(max_length=50)
+    def __str__(self):
+        return self.categoria_perfil
+
+class SubcategoriaPerfil(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria_perfil = models.ForeignKey(
+        CategoriasPerfil, on_delete = models.CASCADE, related_name="subcategorias_perfiles", to_field="_id"
+    )
+    nombre_subcategoria_perfil = models.CharField(max_length=70)
+    def __str__(self):
+        return self.nombre_subcategoria_perfil
+    
+    
+# Clases para las Categorias y Subcategorías de los Eventos
+
+class CategoriaEvento (models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+class Subcategoria(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria = models.ForeignKey(
+        CategoriaEvento, on_delete = models.CASCADE, related_name="subcategorias", to_field="_id"
+    )
+    nombre_subcategoria = models.CharField(max_length=70)
+
+    def __str__(self):
+        return self.nombre_subcategoria
