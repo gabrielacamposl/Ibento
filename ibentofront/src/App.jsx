@@ -4,9 +4,8 @@ import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
-
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
-import Prueba from "./components/preferences/prueba";
+
 
 
 import Perfil from "./components/usuario/Perfil";
@@ -24,15 +23,13 @@ import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
 
-import EventoPage from "./components/eventos/eventoPage";  
 
+
+import EventoPage from "./components/eventos/eventoPage";  
 import PrincipalEventos from "./components/eventos/principalEventos";
 import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
-import NuevaContrasena from "./nuevaContrasena";
-import EventoPage from "./components/eventoPage";  
-import VerificarPerfil from "./components/verificar";
-
+import NuevaContrasena from "./nuevaContrasena";  
 import MainLayout from "./layouts/MainLayout";
 
 

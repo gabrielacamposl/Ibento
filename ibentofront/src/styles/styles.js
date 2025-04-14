@@ -11,6 +11,12 @@ export const buttonStyle = clsx(
 "font-bold shadow-lg hover:text-purple hover:bg-white px-12 py-1 text-l"
 );
 
+export const buttonStyleCategoria = clsx(
+  "w-fit  justify-start items-center",
+  "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
+  "font-bold shadow-lg hover:text-purple hover:bg-white px-8 py-1 text-l"
+  );
+
 export const buttonStyleSecondary = clsx(
   "w-full flex justify-center items-center",
   " text-purple bg-white",

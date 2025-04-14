@@ -2,6 +2,7 @@ import { useEffect, useState,  useRef  } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Toast } from 'primereact/toast';
+
 import {
     Paper,
     Box,
@@ -11,7 +12,7 @@ import {
     Container
 } from "@mui/material";
 import { Button } from "primereact/button";
-import { buttonStyle, inputStyles } from "../../styles/styles";
+import { buttonStyle, inputStyles,buttonStyleCategoria } from "../../styles/styles";
 import { motion } from "framer-motion";
 
 
@@ -30,29 +31,29 @@ const EventosPreferencias = () => {
 
     const categoriasDePrueba = [
       {
-        id: '1',
-        nombre: 'Electrónica',
-        valores: ['Smartphones', 'Laptops', 'Tablets', 'Accesorios']
+      id: '1',
+      nombre: 'Electrónica',
+      valores: ['Smartphones', 'Laptops', 'Tablets', 'Accesorios', 'Cámaras', 'Drones', 'Consolas de videojuegos']
       },
       {
-        id: '2',
-        nombre: 'Ropa',
-        valores: ['Hombre', 'Mujer', 'Niños', 'Deportiva']
+      id: '2',
+      nombre: 'Ropa',
+      valores: ['Hombre', 'Mujer', 'Niños', 'Deportiva', 'Formal', 'Casual', 'Accesorios']
       },
       {
-        id: '3',
-        nombre: 'Hogar',
-        valores: ['Muebles', 'Decoración', 'Cocina', 'Jardín']
+      id: '3',
+      nombre: 'Hogar',
+      valores: ['Muebles', 'Decoración', 'Cocina', 'Jardín', 'Electrodomésticos', 'Iluminación', 'Organización']
       },
       {
-        id: '4',
-        nombre: 'Deportes',
-        valores: ['Fútbol', 'Baloncesto', 'Natación', 'Ciclismo']
+      id: '4',
+      nombre: 'Deportes',
+      valores: ['Fútbol', 'Baloncesto', 'Natación', 'Ciclismo', 'Tenis', 'Running', 'Yoga']
       },
       {
-        id: '5',
-        nombre: 'Libros',
-        valores: ['Ficción', 'No ficción', 'Educativos', 'Infantiles']
+      id: '5',
+      nombre: 'Libros',
+      valores: ['Ficción', 'No ficción', 'Educativos', 'Infantiles', 'Misterio', 'Romance', 'Ciencia ficción']
       }
     ];
 
@@ -83,6 +84,13 @@ const EventosPreferencias = () => {
                 : [...prevSeleccionados, valor]
         );
     };
+    const guardarPreferencias = () => {
+        //Jiji
+        console.log("Me guardé")
+        setTimeout(() => {
+          navigate("../principal/eventos");
+        }, 0);
+    }
 
 
     // Guardar preferencias usando axios
@@ -136,12 +144,10 @@ const EventosPreferencias = () => {
 
     return (
 
-          <div className="min-h-screen flex justify-center items-center">
+          <div className="min-h-screen flex justify-center overflow-hidden">
               {/* Formulario para la visualización web  */}
         
-              <motion.div
-                className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
-              >
+              <motion.div className="hidden md:block relative w-full min-h-screen flex justify-center items-center overflow-hidden ">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300 "></div>
                 <div className="absolute inset-0 z-10">
         
@@ -169,48 +175,53 @@ const EventosPreferencias = () => {
                           ease: "easeInOut",
                         }}
                       />
-                    );
-                  })}
-                </div>
-                <Box
-                  sx={{
-                    height: "80vh",
-                    width: "90vw",
+                    );}
+                  )}
+                    </div>
                     
-                    zIndex: 10,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    overflowY: "auto",
-                    bgcolor: "background.default",
-                    padding: 2,
-                  }}
-                >
-                  <Container
-                    component="main"
-                    maxWidth="xs"
-                    sx={{
+                    <Box
+                      sx={{
+                      height: "80",
+                      width: "auto",
+                      zIndex: 10,
                       display: "flex",
-                      flexDirection: "column",
+                      justifyContent: "center",
                       alignItems: "center",
-                      backgroundColor: "white",
-                      boxShadow: 3,
-                      p: 4,
-                      zIndex: 20,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <CssBaseline />
-                    <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
-                      Crear Cuenta
-                    </Typography>
-                    <Grid container spacing={2}>
-                    <div className="intereses-container">
-                    {categorias.map((categoria) => (
+                      overflowY: "hidden",
+                      bgcolor: "background.default",
+                      padding: 2,
+                      margin: "auto", // Center the component horizontally and vertically
+                      }}
+                    >
+                      <Container
+                      component="main"
+                      maxWidth="xs"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        backgroundColor: "white",
+                        boxShadow: 3,
+                        p: 4,
+                        zIndex: 20,
+                        borderRadius: 2,
+                        overflowY: "hidden",
+                      }}
+                      >
+                      <CssBaseline />
+                      {/* Logo */}
+                  <img src="ibento_logo.png" alt="Logo" className="w-16 h-auto" />
+                      <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2,fontWeight: "bold" }}>
+                      ¿Qué tipo de eventos te gustan?
+                      </Typography>
+                      
+                      <Grid container spacing={2}>
+                      <div className="intereses-container">
+                      {categorias.map((categoria) => (
                         <div key={categoria.id} className="categoria mb-5">
-                            {/* Categoría - estilo con degradado */}
+                          {/* Categoría - estilo con degradado */}
                             <div
-                                className="btn-custom text-white font-bold text-lg inline-block rounded-full px-4 py-2 mb-2 ml-2 mt-4 shadow"
+                                className={buttonStyleCategoria}
                                 style={{ cursor: 'default' }}
                             >
                                 {categoria.nombre}
@@ -223,7 +234,7 @@ const EventosPreferencias = () => {
                                         key={valor}
                                         className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition 
                                             ${seleccionados.includes(valor)
-                                                ? 'bg-purple-400 text-white shadow'
+                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
                                                 : 'btn-off'
                                             }`}
                                         onClick={() => toggleSeleccionado(valor)}
@@ -232,9 +243,18 @@ const EventosPreferencias = () => {
                                     </li>
                                 ))}
                             </ul>
+                            
                         </div>
+                        
                     ))}
+                    
                 </div>
+                <button
+                              onClick={guardarPreferencias} 
+                                className={buttonStyle}
+                            >
+                                Crear Cuenta
+                            </button>
                 </Grid>
                   </Container>
                 </Box>
