@@ -2,6 +2,8 @@
 import React from 'react';
 import { HeartIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { Avatar } from 'primereact/avatar';
+import { AvatarGroup } from 'primereact/avatargroup';
 
 
 export default function CardWrapper() {
@@ -11,7 +13,7 @@ export default function CardWrapper() {
 
     return (
         <>
-        <div className='overflow-y-scroll'>
+        <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
                 {imgs.map((img, index) => (
                     console.log(img),
@@ -37,19 +39,25 @@ export function Card({
 
     const url = "../eventos/" + index;
     return (
-        <Link to={url} className="bg-white rounded-lg flex-col flex-none p-2 h-72 w-48 drop-shadow-xl ">
+        <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-72 w-48 drop-shadow-xl ">
             <img
             src={`/${img}`}
             className="rounded-lg object-cover w-full h-48" 
             alt={title}/>
-            <h2 className="text-xl font-medium text-black text-left">{title}</h2>
+            <h2 className="text-base font-medium text-black text-left my-2">{title}</h2>
 
-            <div className='flex flex-row items-center justify-center space-x-2'>
-                <div className='flex space-x-2 items-center justify-center'>
+            <div className='flex flex-row items-center justify-center gap-4 my-4'>
+                <div className='flex w-full space-x-1 items-center justify-center'>
+                    <AvatarGroup>
+                        <Avatar image="imgIcon.jpeg" size="large" shape="circle" />
+                        <Avatar image="avatar2.png" size="large" shape="circle" />
+                        <Avatar image="avatar3.png" size="large" shape="circle" />
+                    </AvatarGroup>
                     <HeartIcon className='h-8 w-8 text-black' />
                     <p className='text-black'>1.5mil</p>
                     <ClockIcon className='h-6 w-6 text-black' />
-                    <p className='text-black'>En 6 dias</p>
+                    <p className='text-black'>6D</p>
+                    
                 </div>
             </div>   
         </Link>

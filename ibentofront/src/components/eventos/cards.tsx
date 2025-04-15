@@ -9,7 +9,7 @@ function Cards() {
             {/* Contenedor con scroll horizontal */}
             <div className="w-screen overflow-x-auto">   
             {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-            <div className="flex flex-row space-x-4">
+            <div className="flex flex-row space-x-1 items-center w-screen h-auto p-2">  
                 <Card imageUrl="/imgIcon.jpeg" title="Titulo 1" id="1" />
                 <Card imageUrl="/imgIcon2.jpeg" title="Titulo 2" id="2" />
                 <Card imageUrl="/imgIcon3.jpeg" title="Titulo 3" id="3" />
@@ -31,16 +31,21 @@ function Cards() {
     const url = "../eventos/" + id;
     return (
         <>
-        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-44 drop-shadow-xl items-center lg: w-72">
-            <div className="relative bg-white rounded-lg flex flex-col flex p-2 shadow-md">
-                <img 
-                src={imageUrl} 
-                className="rounded-lg object-cover w-full h-36 lg: h-48" 
-                alt={title} 
-                />
+        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-64 drop-shadow-xl items-center lg:w-72">
+            <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
+                <div className='relative w-full h-36 lg:h-48'>
+                    <img 
+                    src={imageUrl} 
+                    className="rounded-xl object-cover w-full h-36 lg:h-48 " 
+                    alt={title} 
+                    />
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
+                </div>
+                
+                
                 <div className='absolute bottom-3 left-3 flex flex-row space-x-2 items-center'>
-                    <HeartIcon className='h-6 w-6 font-strong' />
-                    <h2 className="text-2xl font-bold">1.5mil</h2>
+                    <HeartIcon className='h-4 w-4 font-strong' />
+                    <h2 className="text-sm font-bold">1.5mil</h2>
                 </div>
             </div>
             <div className="mt-2 p-2">

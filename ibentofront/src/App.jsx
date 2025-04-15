@@ -31,6 +31,7 @@ import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
 import NuevaContrasena from "./nuevaContrasena";  
 import MainLayout from "./layouts/MainLayout";
+import Busqueda  from "./components/eventos/busqueda";
 
 
 
@@ -55,6 +56,7 @@ export default function App() {
           {/*Eventos*/}
           <Route path="eventos" element={<PrincipalEventos />}/>
           <Route path="eventos/:eventId" element={<EventoPage />} />
+          <Route path="busqueda" element={<Busqueda />} />
           
 
           <Route path="perfil" element={<Perfil />} />
