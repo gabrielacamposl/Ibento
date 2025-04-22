@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
 import axios from "axios";
 import {
   FormControlLabel,
@@ -169,27 +169,27 @@ const Login = () => {
                   sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                 />
 
-                <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={handleLogin}>
+                <Button className={buttonStyle} type="submit"
+                  fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}>
                   Iniciar Sesión
                 </Button>
                 <Grid container justifyContent="center" alignItems="center">
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
 
-                    <Link 
-                    to="/registrar" 
-                    component="button"
-                    variant="body2" sx={{
-                      fontWeight: "bold",
-                      fontSize: 18,
-                      color: "rgb(129, 45, 177)",
-                      textDecoration: "none",
-                      "&:hover": {
-                        textDecoration: "underline",
-                        color: "rgb(164, 96, 203)",
-                      },
-                    }}>
+                    <Link
+                      to="/registrar"
+                      component="button"
+                      variant="body2" sx={{
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        color: "rgb(129, 45, 177)",
+                        textDecoration: "none",
+                        "&:hover": {
+                          textDecoration: "underline",
+                          color: "rgb(164, 96, 203)",
+                        },
+                      }}>
                       Crear cuenta
                     </Link>
                   </Grid>
@@ -212,34 +212,38 @@ const Login = () => {
                 {/* Logo */}
                 <Box component="img" src={ibentoLogo} alt="Ibento Logo" sx={{ width: 100, height: "auto", mb: 2 }} />
 
-                {/* Título */}
-                <Typography component="h1" variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-                  Iniciar Sesión
-                </Typography>
-
-                {/* Formulario */}
-                <Box component="form" sx={{ width: "100%" }}>
-                  {/* Email */}
-                  <label className="block text-sm font-medium text-gray-700">Email:</label>
+                <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
+                Inicia Sesión
+              </Typography>
+              <Box component="form" sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Correo electrónico<span className="text-red-500">*</span>
+                  </label>
                   <InputText
-                    className="w-full border rounded-md px-3 py-2 mt-1"
+                    className={`${inputStyles} pr-10`}
                     required
                     fullWidth
                     id="email"
+                    label="Email Address"
                     name="email"
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
 
-                  {/* Contraseña */}
-                  <label className="block text-sm font-medium text-gray-700 mt-3">Contraseña:</label>
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Correo electrónico<span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <InputText
-                      className="w-full border rounded-md px-3 py-2 pr-10 mt-1"
+                      className={`${inputStyles} pr-10`}
                       required
                       fullWidth
                       name="password"
+                      label="Contraseña"
                       type={showPassword ? "text" : "password"}
                       id="password"
                       autoComplete="current-password"
@@ -248,85 +252,54 @@ const Login = () => {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-3 flex items-center"
+                      className="absolute inset-y-0 right-2 flex items-center"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
                     </button>
                   </div>
+                </Grid>
 
-                  {/* Olvidaste tu contraseña */}
-                  <Grid item xs={12} sx={{ textAlign: "right", mt: 1 }}>
-                    <Link to="/" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 14 }}>
-                      ¿Olvidaste tu contraseña?
+                <Grid item xs={12} container justifyContent="left" alignItems="left">
+
+                  <Link href="#" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </Grid>
+
+
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Recordar cuenta"
+                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+                />
+
+                <Button className={buttonStyle} type="submit"
+                  fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}>
+                  Iniciar Sesión
+                </Button>
+                <Grid container justifyContent="center" alignItems="center">
+                  <Grid item xs={12} container justifyContent="center" alignItems="center">
+
+                    <Link
+                      to="/registrar"
+                      component="button"
+                      variant="body2" sx={{
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        color: "rgb(129, 45, 177)",
+                        textDecoration: "none",
+                        "&:hover": {
+                          textDecoration: "underline",
+                          color: "rgb(164, 96, 203)",
+                        },
+                      }}>
+                      Crear cuenta
                     </Link>
                   </Grid>
-
-                  {/* Recordar cuenta */}
-                  <FormControlLabel
-                    control={<Checkbox value="remember" color="primary" />}
-                    label={<Typography sx={{ fontSize: "0.8rem" }}>Recordar cuenta</Typography>}
-                  />
-
-                  {/* Botón de Iniciar sesión */}
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{
-                      mt: 3,
-                      mb: 2,
-                      bgcolor: "rgb(129, 45, 177)",
-                      color: "white",
-                      borderRadius: "20px",
-                      fontWeight: "bold",
-                    }}
-                    onClick={handleLogin}
-                  >
-                    Iniciar Sesión
-                  </Button>
-
-                  {/* Crear cuenta */}
-                  <Grid container justifyContent="center" alignItems="center">
-                    <Grid item>
-                      <Link
-                        component="button"
-                        to = "/registrar"
-                        variant="body2"
-                        sx={{
-                          fontWeight: "bold",
-                          fontSize: 16,
-                          color: "rgb(129, 45, 177)",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                            color: "rgb(164, 96, 203)",
-                          },
-                        }}
-                      >
-                        Crear Cuenta
-                      </Link>
-                    </Grid>
-                  </Grid>
-
-                  {/* Botón de Google */}
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      mt: 3,
-                      mb: 2,
-                      borderRadius: "20px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    <img src="/images/google-icon.png" alt="Google" className="w-5 h-5" />
-                    Iniciar con Google
-                  </Button>
-                </Box>
+                </Grid>
+              </Box>
               </Box>
             </Grid>
           </Grid>

@@ -1,0 +1,19 @@
+.nutria{
+    filter: hue-rotate(300deg) saturate(1.5) brightness(1.1);
+    background-color: transparent;
+    border-radius: 50%;
+    width: 50%;
+    justify-content: center;
+    margin: 0 auto;
+    display: flex;
+}
+
+.nutria2{
+    filter: hue-rotate(300deg) saturate(1.5) brightness(1.1);
+    background-color: transparent;
+ 
+    width: 40%;
+    justify-content: center;
+    margin: 0 auto;
+    display: flex;
+}

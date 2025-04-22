@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
+import LoginPrueba from "./components/accounts/loginprueba";
+import Inicio from "./components/accounts/inicio";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
-
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
-import Prueba from "./components/preferences/prueba";
+
 
 
 import Perfil from "./components/usuario/Perfil";
@@ -24,15 +25,13 @@ import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
 
-import EventoPage from "./components/eventos/eventoPage";  
 
+
+import EventoPage from "./components/eventos/eventoPage";  
 import PrincipalEventos from "./components/eventos/principalEventos";
 import RecuperarContrasena from "./recuperarContrasena";
 import IngresarCodigo from "./ingresarCodigo";
-import NuevaContrasena from "./nuevaContrasena";
-import EventoPage from "./components/eventoPage";  
-import VerificarPerfil from "./components/verificar";
-
+import NuevaContrasena from "./nuevaContrasena";  
 import MainLayout from "./layouts/MainLayout";
 
 
@@ -47,6 +46,9 @@ export default function App() {
       <Route path="/verificar-correo" element={<VerificarCorreo />} />
       <Route path="/confirmar/:token" element={<Confirm/>} />
 
+      <Route path="/loginp" element={<LoginPrueba/>}/>
+      <Route path="/inicio" element={<Inicio/>}/>
+      
       {/* Preferencias del Usuario para sugerencia de Eventos*/}
       <Route path="/preferencias" element={<EventosPreferencias />} />
 

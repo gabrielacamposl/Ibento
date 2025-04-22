@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Toast } from 'primereact/toast';
 
-const Intereses = () => {
+const Preferencias = () => {
     const [categorias, setCategorias] = useState([]);
     const [seleccionados, setSeleccionados] = useState([]);
+    const toast = useRef(null);
+    const usuarioId = localStorage.getItem("usuario_id");
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
         axios.get('http://localhost:8000/api/categorias/')
             .then(response => {
-                const categoriasFormateadas = response.data.map(cat => ({
-                    id: cat._id,
-                    nombre: cat.nombre,
-                    valores: cat.subcategorias.map(sub => sub.nombre_subcategoria)
-                }));
-                setCategorias(categoriasFormateadas);
+                setCategorias(response.data);
             })
             .catch(error => {
                 console.error('Error cargando categorías:', error);
@@ -29,54 +27,76 @@ const Intereses = () => {
         );
     };
 
+    const guardarPreferencias = () => {
+        const subcategoriasSeleccionadas = categorias.flatMap((categoria) =>
+            categoria.subcategorias
+                .filter((sub) => seleccionados.includes(sub.nombre_subcategoria))
+                .map((sub) => sub._id)
+        );
+
+        if (subcategoriasSeleccionadas.length === 0) {
+            toast.current.show({
+                severity: 'error',
+                summary: 'No se seleccionaron preferencias',
+                detail: 'Por favor selecciona al menos una preferencia de evento.',
+                life: 3000,
+            });
+            return;
+        }
+
+        // Actualizar preferencias y marcar como completadas
+        axios.put(
+            `http://localhost:8000/usuarios/${usuarioId}/preferencias/`, 
+            { preferencias_evento: subcategoriasSeleccionadas, preferencias_completadas: true },
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        )
+        .then(response => {
+            toast.current.show({
+                severity: 'success',
+                summary: 'Preferencias guardadas',
+                detail: 'Tus preferencias de eventos se han actualizado con éxito.',
+                life: 3000,
+            });
+            // Redirigir al dashboard o a donde se deba ir después de completar las preferencias
+            navigate('/dashboard');
+        })
+        .catch(err => {
+            console.error('Error al guardar preferencias:', err);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error al guardar preferencias',
+                detail: 'Ocurrió un error al guardar tus preferencias. Intenta nuevamente.',
+                life: 3000,
+            });
+        });
+    };
+
     return (
-        <div className="flex justify-center items-center min-h-screen p-4">
-            <div className="degradadoPerfil relative flex flex-col items-center mt-5 shadow-md p-5 shadow-t max-w-lg w-full">
-                <div className="miPerfil flex font-bold text-2xl w-full">
-                    <h1 className='miPerfil'>Editar Intereses</h1>
+        <div>
+            <h3>Selecciona tus preferencias</h3>
+            {categorias.map((categoria) => (
+                <div key={categoria.id}>
+                    <h4>{categoria.nombre}</h4>
+                    <ul>
+                        {categoria.subcategorias.map((sub) => (
+                            <li key={sub._id}>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        value={sub.nombre_subcategoria}
+                                        onChange={() => toggleSeleccionado(sub.nombre_subcategoria)}
+                                    />
+                                    {sub.nombre_subcategoria}
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-
-                <div className="flex justify-center items-center mb-5 space-x-4">
-
-                </div>
-
-                <div className="intereses-container">
-                    {categorias.map((categoria) => (
-                        <div key={categoria.id} className="categoria mb-5">
-                            {/* Categoría - estilo con degradado */}
-                            <div
-                                className="btn-custom text-white font-bold text-lg inline-block rounded-full px-4 py-2 mb-2 ml-2 mt-4 shadow"
-                                style={{ cursor: 'default' }}
-                            >
-                                {categoria.nombre}
-                            </div>
-
-                            {/* Subcategorías */}
-                            <ul className='flex flex-wrap'>
-                                {categoria.valores.map((valor) => (
-                                    <li
-                                        key={valor}
-                                        className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition 
-                                            ${seleccionados.includes(valor)
-                                                ? 'bg-purple-400 text-white shadow'
-                                                : 'btn-off'
-                                            }`}
-                                        onClick={() => toggleSeleccionado(valor)}
-                                    >
-                                        {valor}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-
-                <Link to="/perfil" className="text-white flex items-center justify-center p-2 mt-4">
-                    <button className='rounded-full btn-custom text-2xl flex wrap font-semibold items-center justify-center px-10'>Guardar</button>
-                </Link>
-            </div>
+            ))}
+            <button onClick={guardarPreferencias}>Guardar Preferencias</button>
+            <Toast ref={toast} />
         </div>
     );
 };
 
-export default Intereses;
+export default Preferencias;
