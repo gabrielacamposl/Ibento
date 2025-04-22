@@ -1,17 +1,44 @@
-import React from 'react';
+import React from "react";
+import { motion } from "framer-motion";
+import CardWrapper from "./card";
 
-function SearchMenu(){
-    return(
-        <div className="flex justify-between px-4 text-sm">
-        <button className="text-purple-700 font-medium border-b-2 border-purple-700 pb-1 g-2">
-          Próximos eventos
-        </button>
-        <button className=" ">Cercanos a mí</button>
-        <button className="text-gray-500">Culturales</button>
-        <button className="text-gray-500">Musicales</button>
+const Menu = () => {
+  const [index, setIndex] = React.useState(0);
+
+  const tabs = ["Próximos eventos", "Cercanos a mí", "Culturales", "Musicales"];
+
+  return (
+    <div className="w-full">
+      <div className="relative flex flex-row text-sm items-center w-full h-auto p-2">
+        {tabs.map((tab, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            className={`flex-1 text-center ${
+              index === i ? "text-purple-700 font-medium" : "text-black"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+
+        {/* Subrayado animado */}
+        <motion.div
+          className="absolute bottom-0 h-0.5 bg-purple-700"
+          layout
+          initial={false}
+          animate={{
+            width: `${103 / tabs.length}%`,
+            x: `${index * (365 / tabs.length)}%`,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
       </div>
-    )
+      
+      <CardWrapper name={tabs[index]} />
 
-}
+    </div>
+  );
+};
 
-export default SearchMenu;
+export default Menu;

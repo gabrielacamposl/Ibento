@@ -16,163 +16,242 @@ function Page() {
 
   const { eventId } = useParams<{ eventId: string }>();
   console.log("ID del evento:", eventId);
-  const eventIdInt = parseInt(eventId || "0", 10);
 
-    //Eventos
-    const [events, setEvents] = useState([
-      {
-        id : 1,
-        imagen_url : "https://example.com/palacio_bellas_artes.jpg",
-        nombre : "Exposición Frida Kahlo en Bellas Artes",
-        tags : ["Arte", "Cultura", "Exposición"],
-        fecha : "2023-11-15",
-        hora : "10:00",
-        lugar : "Palacio de Bellas Artes",
-        descripcion : "Exposición retrospectiva de la obra de Frida Kahlo con piezas nunca antes exhibidas.",
-        fotos_urls : 
-        [
-            "https://example.com/frida1.jpg",
-            "https://example.com/frida2.jpg"
-        ]
-      },
-      {
-        id : 2,
-        imagen_url : "https://example.com/zocalo_concierto.jpg",
-        nombre : "Concierto de la Orquesta Filarmónica en el Zócalo",
-        tags : ["Música", "Concierto", "Gratis"],
-        fecha : "2023-12-05",
-        hora : "19:30",
-        lugar : "Plaza de la Constitución (Zócalo)",
-        descripcion : "Concierto gratuito de la Orquesta Filarmónica de la Ciudad de México con repertorio clásico.",
-        fotos_urls : 
-        [
-            "https://example.com/zocalo1.jpg",
-            "https://example.com/zocalo2.jpg"
-        ]
-    },
-    
+  const events = [
+    // Populares
     {
-      id : 3,
-      imagen_url : "https://example.com/chapultepec_feria.jpg",
-      nombre : "Feria del Libro en Chapultepec",
-      tags : ["Literatura", "Feria", "Libros"],
-      fecha : "2023-11-20",
-      hora : "09:00",
-      lugar : "Bosque de Chapultepec",
-      descripcion : "Feria anual del libro con presentaciones de autores, talleres y descuentos en libros.",
-      fotos_urls : 
-      [
-          "https://example.com/feria_libro1.jpg",
-          "https://example.com/feria_libro2.jpg"
-      ]
+        id: "ECIP1-1",
+        nombre: "Populares 1: League of legends Finals",
+        imagen_url: "lolicon.jpeg",
+        fecha: "2025-04-27",
+        hora: "18:00",
+        lugar: "Arena CDMX, Ciudad de México",
+        coordenadas: { lat: 19.484119, lng: -99.147690 },
+        numLikes: 1500,
+        numGuardados: 347,
+        tags: ["Deportes", "eSports", "Competencia"],
+        descripcion: "Final mundial de League of Legends, el evento más esperado por los fanáticos de los eSports. ¡No te lo pierdas!",
+        fotos: ["lolicon.jpeg", "lolicon.jpeg", "lolicon.jpeg"]
     },
     {
-      id : 4,
-      imagen_url : "https://example.com/roma_mezcal.jpg",
-      nombre : "Festival del Mezcal en la Roma",
-      tags : ["Gastronomía", "Mezcal", "Degustación"],
-      fecha : "2023-11-25",
-      hora : "12:00",
-      lugar : "Plaza Río de Janeiro",
-      descripcion : "Evento anual donde podrás degustar más de 50 tipos de mezcal artesanal de diferentes regiones de México.",
-      fotos_urls : 
-      [
-          "https://example.com/mezcal1.jpg",
-          "https://example.com/mezcal2.jpg"
-      ]
+        id: "ECIP1-2",
+        nombre: "Populares 2: Morat",
+        imagen_url: "moraticon.jpg",
+        fecha: "2025-05-05",
+        hora: "20:00",
+        lugar: "Auditorio Nacional, Ciudad de México",
+        coordenadas: { lat: 19.426978, lng: -99.189560 },
+        numLikes: 1000000,
+        numGuardados: 8921,
+        tags: ["Concierto", "Pop", "Latino"],
+        descripcion: "Morat regresa a los escenarios con su gira mundial. Vive una noche llena de emociones y buena música.",
+        fotos: ["moraticon.jpg", "moraticon.jpg", "moraticon.jpg"]
     },
     {
-      id : 5,
-      imagen_url : "https://example.com/cineteca.jpg",
-      nombre : "Ciclo de Cine Francés en la Cineteca",
-      tags : ["Cine", "Francia", "Cultura"],
-      fecha : "2023-12-01",
-      hora : "16:00",
-      lugar : "Cineteca Nacional",
-      descripcion : "Proyección de lo mejor del cine francés contemporáneo con presentaciones especiales.",
-      fotos_urls : [
-          "https://example.com/cine_frances1.jpg",
-          "https://example.com/cine_frances2.jpg"
-      ]
+        id: "ECIP1-3",
+        nombre: "Populares 3: The Bities",
+        imagen_url: "btsicon.jpg",
+        fecha: "2025-06-12",
+        hora: "19:30",
+        lugar: "Foro Sol, Ciudad de México",
+        coordenadas: { lat: 19.404167, lng: -99.096944 },
+        numLikes: 10000,
+        numGuardados: 1573,
+        tags: ["Concierto", "K-Pop", "Internacional"],
+        descripcion: "The Bities, la sensación del K-Pop, llega a México para un concierto inolvidable. ¡No te quedes fuera!",
+        fotos: ["btsicon.jpg", "btsicon.jpg", "btsicon.jpg"]
     },
     {
-      id : 6,
-      imagen_url : "https://example.com/xochimilco.jpg",
-      nombre : "Noche de Leyendas en Xochimilco",
-      tags : ["Tradición", "Leyendas", "Trajinera"],
-      fecha : "2023-11-18",
-      hora : "20:00",
-      lugar : "Embarcaderos de Xochimilco",
-      descripcion : "Recorrido nocturno en trajinera con narración de leyendas mexicanas tradicionales.",
-      fotos_urls : [
-          "https://example.com/xochimilco1.jpg",
-          "https://example.com/xochimilco2.jpg"
-      ]
+        id: "ECIP1-4",
+        nombre: "Populares 4: Harry Styles todo precioso",
+        imagen_url: "harryicon.jpg",
+        fecha: "2025-04-21",
+        hora: "21:00",
+        lugar: "Palacio de los Deportes, Ciudad de México",
+        coordenadas: { lat: 19.411944, lng: -99.096111 },
+        numLikes: 250,
+        numGuardados: 98,
+        tags: ["Concierto", "Pop", "Internacional"],
+        descripcion: "Harry Styles regresa a México con su gira mundial. Disfruta de sus mejores éxitos en vivo.",
+        fotos: ["harryicon.jpg", "harryicon.jpg", "harryicon.jpg"]
+    },
+
+    // Próximos
+    {
+        id: "EPIP1-1",
+        nombre: "Proximos 1: League of legends Finals",
+        imagen_url: "lolicon.jpeg",
+        fecha: "2025-04-27",
+        hora: "18:00",
+        lugar: "Arena CDMX, Ciudad de México",
+        coordenadas: { lat: 19.484119, lng: -99.147690 },
+        numLikes: 1500,
+        numGuardados: 347,
+        tags: ["Deportes", "eSports", "Competencia"],
+        descripcion: "Final mundial de League of Legends, el evento más esperado por los fanáticos de los eSports. ¡No te lo pierdas!",
+        fotos: ["lolicon.jpeg", "lolicon.jpeg", "lolicon.jpeg"]
     },
     {
-      id: 7,
-      imagen_url: "https://example.com/teatro_juarez.jpg",
-      nombre : "Obra de Teatro: 'El Quijote'",
-      tags : ["Teatro", "Literatura", "Clásico"],
-      fecha : "2023-11-22",
-      hora : "18:00",
-      lugar : "Teatro Juárez",
-      descripcion : "Adaptación contemporánea de la obra maestra de Cervantes con producción mexicana.",
-      fotos_urls : 
-      [
-          "https://example.com/quijote1.jpg",
-          "https://example.com/quijote2.jpg"
-      ]
+        id: "EPIP1-2",
+        nombre: "Proximos 2: Morat",
+        imagen_url: "moraticon.jpg",
+        fecha: "2025-05-05",
+        hora: "20:00",
+        lugar: "Auditorio Nacional, Ciudad de México",
+        coordenadas: { lat: 19.426978, lng: -99.189560 },
+        numLikes: 1000000,
+        numGuardados: 8921,
+        tags: ["Concierto", "Pop", "Latino"],
+        descripcion: "Morat regresa a los escenarios con su gira mundial. Vive una noche llena de emociones y buena música.",
+        fotos: ["moraticon.jpg", "moraticon.jpg", "moraticon.jpg"]
     },
     {
-      id : 8,
-      imagen_url : "https://example.com/munal.jpg",
-      nombre : "Noche de Museos en el MUNAL",
-      tags : ["Museo", "Arte", "Noche de Museos"],
-      fecha : "2023-11-29",
-      hora : "19:00",
-      lugar : "Museo Nacional de Arte",
-      descripcion : "Visita guiada nocturna por las exposiciones permanentes del MUNAL con actividades especiales.",
-      fotos_urls : 
-      [
-          "https://example.com/munal1.jpg",
-          "https://example.com/munal2.jpg"
-      ]
+        id: "EPIP1-3",
+        nombre: "Proximos 3: The Bities",
+        imagen_url: "btsicon.jpg",
+        fecha: "2025-06-12",
+        hora: "19:30",
+        lugar: "Foro Sol, Ciudad de México",
+        coordenadas: { lat: 19.404167, lng: -99.096944 },
+        numLikes: 10000,
+        numGuardados: 1573,
+        tags: ["Concierto", "K-Pop", "Internacional"],
+        descripcion: "The Bities, la sensación del K-Pop, llega a México para un concierto inolvidable. ¡No te quedes fuera!",
+        fotos: ["btsicon.jpg", "btsicon.jpg", "btsicon.jpg"]
     },
     {
-      id : 9, 
-      imagen_url : "https://example.com/foro_sol.jpg",
-      nombre : "Concierto de Café Tacvba",
-      tags : ["Rock", "Concierto", "Música en vivo"],
-      fecha : "2023-12-10",
-      hora : "21:00",
-      lugar : "Foro Sol",
-      
-      descripcion : "Concierto de la legendaria banda mexicana Café Tacvba presentando su nuevo álbum.",
-      fotos_urls : 
-      [
-          "https://example.com/tacvba1.jpg",
-          "https://example.com/tacvba2.jpg"
-      ]
+        id: "EPIP1-4",
+        nombre: "Proximos 4: Harry Styles todo precioso",
+        imagen_url: "harryicon.jpg",
+        fecha: "2025-04-21",
+        hora: "21:00",
+        lugar: "Palacio de los Deportes, Ciudad de México",
+        coordenadas: { lat: 19.411944, lng: -99.096111 },
+        numLikes: 250,
+        numGuardados: 98,
+        tags: ["Concierto", "Pop", "Internacional"],
+        descripcion: "Harry Styles regresa a México con su gira mundial. Disfruta de sus mejores éxitos en vivo.",
+        fotos: ["harryicon.jpg", "harryicon.jpg", "harryicon.jpg"]
+    },
+
+    // Culturales
+    {
+        id: "ECUIP1-1",
+        nombre: "Culturales 1: League of legends Finals",
+        imagen_url: "lolicon.jpeg",
+        fecha: "2025-04-27",
+        hora: "18:00",
+        lugar: "Arena CDMX, Ciudad de México",
+        coordenadas: { lat: 19.484119, lng: -99.147690 },
+        numLikes: 1500,
+        numGuardados: 347,
+        tags: ["Deportes", "eSports", "Competencia"],
+        descripcion: "Final mundial de League of Legends, el evento más esperado por los fanáticos de los eSports. ¡No te lo pierdas!",
+        fotos: ["lolicon.jpeg", "lolicon.jpeg", "lolicon.jpeg"]
     },
     {
-      id : 10,
-      imagen_url : "https://example.com/teatro_colon.jpg",
-      nombre : "Ballet Folklórico de México",
-      tags : ["Ballet", "Cultura", "Tradición"],
-      fecha : "2023-12-15",
-      hora : "20:00",
-      lugar : "Teatro Colón",
-      descripcion : "Presentación del Ballet Folklórico de México con danzas tradicionales de diferentes regiones.",
-      fotos_urls : 
-      [
-          "https://example.com/ballet1.jpg",
-          "https://example.com/ballet2.jpg"
-      ]
+        id: "ECUIP1-2",
+        nombre: "Culturales 2: Morat",
+        imagen_url: "moraticon.jpg",
+        fecha: "2025-05-05",
+        hora: "20:00",
+        lugar: "Auditorio Nacional, Ciudad de México",
+        coordenadas: { lat: 19.426978, lng: -99.189560 },
+        numLikes: 1000000,
+        numGuardados: 8921,
+        tags: ["Concierto", "Pop", "Latino"],
+        descripcion: "Morat regresa a los escenarios con su gira mundial. Vive una noche llena de emociones y buena música.",
+        fotos: ["moraticon.jpg", "moraticon.jpg", "moraticon.jpg"]
+    },
+    {
+        id: "ECUIP1-3",
+        nombre: "Culturales 3: The Bities",
+        imagen_url: "btsicon.jpg",
+        fecha: "2025-06-12",
+        hora: "19:30",
+        lugar: "Foro Sol, Ciudad de México",
+        coordenadas: { lat: 19.404167, lng: -99.096944 },
+        numLikes: 10000,
+        numGuardados: 1573,
+        tags: ["Concierto", "K-Pop", "Internacional"],
+        descripcion: "The Bities, la sensación del K-Pop, llega a México para un concierto inolvidable. ¡No te quedes fuera!",
+        fotos: ["btsicon.jpg", "btsicon.jpg", "btsicon.jpg"]
+    },
+    {
+        id: "ECUIP1-4",
+        nombre: "Culturales 4: Harry Styles todo precioso",
+        imagen_url: "harryicon.jpg",
+        fecha: "2025-04-21",
+        hora: "21:00",
+        lugar: "Palacio de los Deportes, Ciudad de México",
+        coordenadas: { lat: 19.411944, lng: -99.096111 },
+        numLikes: 250,
+        numGuardados: 98,
+        tags: ["Concierto", "Pop", "Internacional"],
+        descripcion: "Harry Styles regresa a México con su gira mundial. Disfruta de sus mejores éxitos en vivo.",
+        fotos: ["harryicon.jpg", "harryicon.jpg", "harryicon.jpg"]
+    },
+
+    // Musicales
+    {
+        id: "EMUIP1-1",
+        nombre: "Musicales 1: League of legends Finals",
+        imagen_url: "lolicon.jpeg",
+        fecha: "2025-04-27",
+        hora: "18:00",
+        lugar: "Arena CDMX, Ciudad de México",
+        coordenadas: { lat: 19.484119, lng: -99.147690 },
+        numLikes: 1500,
+        numGuardados: 347,
+        tags: ["Deportes", "eSports", "Competencia"],
+        descripcion: "Final mundial de League of Legends, el evento más esperado por los fanáticos de los eSports. ¡No te lo pierdas!",
+        fotos: ["lolicon.jpeg", "lolicon.jpeg", "lolicon.jpeg"]
+    },
+    {
+        id: "EMUIP1-2",
+        nombre: "Musicales 2: Morat",
+        imagen_url: "moraticon.jpg",
+        fecha: "2025-05-05",
+        hora: "20:00",
+        lugar: "Auditorio Nacional, Ciudad de México",
+        coordenadas: { lat: 19.426978, lng: -99.189560 },
+        numLikes: 1000000,
+        numGuardados: 8921,
+        tags: ["Concierto", "Pop", "Latino"],
+        descripcion: "Morat regresa a los escenarios con su gira mundial. Vive una noche llena de emociones y buena música.",
+        fotos: ["moraticon.jpg", "moraticon.jpg", "moraticon.jpg"]
+    },
+    {
+        id: "EMUIP1-3",
+        nombre: "Musicales 3: The Bities",
+        imagen_url: "btsicon.jpg",
+        fecha: "2025-06-12",
+        hora: "19:30",
+        lugar: "Foro Sol, Ciudad de México",
+        coordenadas: { lat: 19.404167, lng: -99.096944 },
+        numLikes: 10000,
+        numGuardados: 1573,
+        tags: ["Concierto", "K-Pop", "Internacional"],
+        descripcion: "The Bities, la sensación del K-Pop, llega a México para un concierto inolvidable. ¡No te quedes fuera!",
+        fotos: ["btsicon.jpg", "btsicon.jpg", "btsicon.jpg"]
+    },
+    {
+        id: "EMUIP1-4",
+        nombre: "Musicales 4: Harry Styles todo precioso",
+        imagen_url: "harryicon.jpg",
+        fecha: "2025-04-21",
+        hora: "21:00",
+        lugar: "Palacio de los Deportes, Ciudad de México",
+        coordenadas: { lat: 19.411944, lng: -99.096111 },
+        numLikes: 250,
+        numGuardados: 98,
+        tags: ["Concierto", "Pop", "Internacional"],
+        descripcion: "Harry Styles regresa a México con su gira mundial. Disfruta de sus mejores éxitos en vivo.",
+        fotos: ["harryicon.jpg", "harryicon.jpg", "harryicon.jpg"]
     }
-  ]);
+];
 
-  const evento = events.find(ev => ev.id === Number(eventIdInt));
+  const evento = events.find(ev => ev.id === eventId);
 
   // Si no se encuentra el evento
   if (!evento) {
@@ -187,7 +266,7 @@ function Page() {
     hora, 
     lugar, 
     descripcion, 
-    fotos_urls 
+    fotos 
   } = evento;
 
 
@@ -219,9 +298,9 @@ function Page() {
         {/* Mobile View */}
         <div className='md:hidden flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white'>
           <div className='flex flex-col items-center w-full h-full bg-white rounded-lg shadow-lg'>
-            <img src={imagen_url} alt='Evento' className='w-full h-80 rounded-lg4' />
+            <img src={`/${imagen_url}`} alt='Evento' className='w-full h-80 rounded-lg4' />
             <div className="flex flex-row">
-              <p className='text-black text-4xl antialiased font-bold px-4 mt-2'>{nombre}</p>
+              <p id="titulo" className='text-black text-4xl antialiased font-bold px-4 mt-2'>{nombre}</p>
               <div className='flex flex-col space-y-6 items-center justify-center p-4'>
                 <button 
                   onClick={toggleLike}
@@ -271,14 +350,14 @@ function Page() {
                 </div>
             </div>
             <div className="w-full px-6 my-4">
-                <p className="mb-1 text-xl font-bold text-black text-left">Fechas</p>
+                <p id="titulo" className="mb-1 text-xl font-bold text-black text-left">Fechas</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <div className="card flex justify-content-center">
                   <Calendar className="text-black" value={date} onChange={(e) => setDate(e.value || null)} inline showWeek />
                 </div>
             </div>
             <div className="w-full px-6 my-4">
-                <p className="mb-1 text-xl font-bold text-black text-left">Acerca de</p>
+                <p id="titulo" className="mb-1 text-xl font-bold text-black text-left">Acerca de</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <article className="text-wrap text-black text-justify text-base mt-4">
                   <p>{descripcion}</p>
@@ -286,16 +365,16 @@ function Page() {
             </div>
             
             <div className="w-full px-6 my-4">
-                <p className="mb-1 text-xl font-bold text-black text-left">Ubicación</p>
+                <p id="titulo" className="mb-1 text-xl font-bold text-black text-left">Ubicación</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <article className="text-wrap text-black text-justify text-base mt-4">
                   <p>{lugar}</p>
                 </article>
-                <EventMap location={eventLocation} />
+                <EventMap location={evento.coordenadas} />
             </div>
 
             <div className="w-full px-6 my-4">
-                <p className="mb-1 text-xl font-bold text-black text-left">Galeria</p>
+                <p id="titulo" className="mb-1 text-xl font-bold text-black text-left">Galeria</p>
                 <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
                 <div className="w-auto h-auto mt-4">
                   <Carousel />
@@ -327,6 +406,7 @@ function Page() {
             <p className='text-black font-bold'>2:30 pm</p>
           </div>
           <div className='flex flex-row space-x-1 items-center justify-center'>
+            <EventMap location={evento.coordenadas} />
             <MapPinIcon className='h-6 w-6 text-black' />
             <p className='text-black font-bold'>Autódromo Hermanos Rodriguez</p>
           </div>
