@@ -31,6 +31,7 @@ INSTALLED_APPS = [
   #  'push_notifications', # fcm 
     'corsheaders', # Peticiones desde React  
     'api',  
+    'api.user',
 ]
 
 # PUSH_NOTIFICATION_SETTINGS = {
@@ -62,7 +63,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'api.user.middleware.JWTBlacklistMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Para permitir peticiones externas
 ]
 
@@ -92,7 +95,7 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'Ibento',
         'CLIENT': {
-            'host': 'mongodb://localhost:27017',
+            'host':  os.getenv("MONGO_HOST"),
         }
     }
 }

@@ -14,5 +14,5 @@ router.register(r'perfil/preguntas', CategoriasPerfilViewSet, basename='categori
 router.register(r'perfil/respuestas', SubcategoriasPerfilViewSet, basename='subcategoria_perfil')
 
 urlpatterns = [
-    path('admin/', include(router.urls)),
+    path('api/', include(router.urls)),
 ]
