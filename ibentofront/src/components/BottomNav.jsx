@@ -33,7 +33,7 @@ function BottomNav() {
       </NavLink>
 
       {/* Search Link */}
-      <NavLink to="/principal/eventos/" className={getNavLinkClass}>
+      <NavLink to="/principal/busqueda" className={getNavLinkClass}>
         <MGOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
