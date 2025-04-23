@@ -18,32 +18,32 @@ else:
     exit()
 
 
-# Captura desde la webcam
-#cap = cv2.VideoCapture(0)
+#Captura desde la webcam
+cap = cv2.VideoCapture(0)
 
 
-# print("Presiona 'c' para capturar una imagen.")
-# while True:
-#     ret, frame = cap.read()
-#     cv2.imshow("Webcam", frame)
-#     if cv2.waitKey(1) & 0xFF == ord('c'):
-#         break
+print("Presiona 'c' para capturar una imagen.")
+while True:
+    ret, frame = cap.read()
+    cv2.imshow("Webcam", frame)
+    if cv2.waitKey(1) & 0xFF == ord('c'):
+        break
 
 #Desde el teléfono
 
 
-url = "http://192.168.1.110/4747/video"
-cap = cv2.VideoCapture(url)
+# url = "http://192.168.1.110/4747/video"
+# cap = cv2.VideoCapture(url)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("No se pudo obtener el frame.")
-        break
+# while True:
+#     ret, frame = cap.read()
+#     if not ret:
+#         print("No se pudo obtener el frame.")
+#         break
 
-    cv2.imshow("Cámara del Celular", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+#     cv2.imshow("Cámara del Celular", frame)
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         break
 
 cap.release()
 cv2.destroyAllWindows()

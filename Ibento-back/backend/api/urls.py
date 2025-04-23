@@ -4,7 +4,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import (UsuarioViewSet, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
-                            guardar_preferencias,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -27,11 +26,12 @@ urlpatterns = [
 
     # Auth & Register
     path('api/', include(router.urls)),
-    path('api/login/',login_usuario, name='login_usuario'),
+    path('login/', login_usuario, name='login'),
+    path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
     path('usuarios/<str:usuario_id>/preferencias-eventos/', usuario_preferencias, name='usuario_preferencias'),
-    path('usuarios/<int:usuario_id>/preferencias/', guardar_preferencias, name='guardar-preferencias'),
+   # path('usuarios/<int:usuario_id>/preferencias/', guardar_preferencias, name='guardar-preferencias'),
     
     # JWT Tokens
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -50,6 +50,16 @@ class Usuario(models.Model):
 
 
 
+# ------------------ Tokens para Login 
+
+class TokenBlackList(models.Model):
+    token = models.CharField(max_length=500, unique=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.token[:50] + "..."
+    
+
 # --------- Matches de acompañantes
 
 class Matches (models.Model):

@@ -1,10 +1,18 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
-from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje, CategoriaEvento
+from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
+from api.models import (Usuario, 
+                        TokenBlackList,
+                        Subcategoria, 
+                        SubcategoriaPerfil, 
+                        Matches, 
+                        Conversacion, 
+                        Mensaje, 
+                        CategoriaEvento)
+
 
 
 
@@ -63,7 +71,7 @@ class Login(serializers.Serializer):
         refresh = RefreshToken.for_user(usuario)
 
         return {
-            "id": usuario._id,
+            "id": str(usuario._id),
             "email": usuario.email,
             "nombre": usuario.nombre,
             "access": str(refresh.access_token),
@@ -75,14 +83,17 @@ class Logout(serializers.Serializer):
     refresh = serializers.CharField()
 
     def validate(self, data):
-        try:
-            token = RefreshToken(data["refresh"])
-            token.blacklist()  # Invalidar el token
-        except Exception:
-            raise serializers.ValidationError("Sesión expirado.")
+        refresh_token = data["refresh"]
 
+        # Verifica si ya fue blacklisteado
+        if TokenBlackList.objects.filter(token=refresh_token).exists():
+            raise serializers.ValidationError("Este token ya fue invalidado.")
+
+        # Guarda el token en la blacklist
+        TokenBlackList.objects.create(token=refresh_token)
         return {}
     
+
 
 
 # -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
@@ -141,10 +152,8 @@ class UploadINE(serializers.ModelSerializer):
 
 #---------- Comparación de rostros segundo filtro
 
-class CompararRostroSerializer(serializers.Serializer):
-    foto_camara = serializers.ImageField()
-    ine_f = serializers.ImageField()
-
+class ValidacionRostro(serializers.ModelSerializer):
+    foto_camara = serializers.ImageField(required=True)
 
 # ----------------------------------------------- MATCHES ------------------------------------------------
 

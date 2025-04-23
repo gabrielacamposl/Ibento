@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
+import LoginPrueba from "./components/accounts/loginprueba";
+import Inicio from "./components/accounts/inicio";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
 
@@ -45,6 +47,9 @@ export default function App() {
       <Route path="/verificar-correo" element={<VerificarCorreo />} />
       <Route path="/confirmar/:token" element={<Confirm/>} />
 
+      <Route path="/loginp" element={<LoginPrueba/>}/>
+      <Route path="/inicio" element={<Inicio/>}/>
+      
       {/* Preferencias del Usuario para sugerencia de Eventos*/}
       <Route path="/preferencias" element={<EventosPreferencias />} />
 

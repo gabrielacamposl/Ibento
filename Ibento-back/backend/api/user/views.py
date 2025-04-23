@@ -5,26 +5,46 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
+# Imports para eñ reconocimiento facial
+# import base64
+# import numpy as np
+# from PIL import Image
+# from io import BytesIO
+# import dlib
+# from scipy.spatial import distance
+
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.utils.deprecation import MiddlewareMixin
+from django.http import JsonResponse
+# Importar modelos 
 from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
-from api.models import CategoriaEvento
-from .serializers import (UsuarioSerializer, 
+from api.models import CategoriaEvento, TokenBlackList
+from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           Login,
-                          Logout,
-                          UsuarioPreferences,
+                          Logout, 
+                          # Serializer para selección de categorías de eventos
+                          UsuarioPreferences, 
+                          # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
                           UploadINE,
-                          CompararRostroSerializer,
+                          ValidacionRostro,
+                          # Serializers para creación de matches
                           MatchSerializer,
+                          # Serializer para los chats de los matches
                           MensajesSerializer,
                           ConversacionSerializer,
+                          # Seriallizer para añadir categorías y sucategorías de los eventos
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
                           )
+
+# face_detector = dlib.get_frontal_face_detector()
+# shape_predictor = dlib.shape_predictor("modelos/shape_predictor_68_face_landmarks.dat")
+# face_rec_model = dlib.face_recognition_model_v1("modelos/dlib_face_recognition_resnet_model_v1.dat")
 
 
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
@@ -58,7 +78,6 @@ def confirmar_usuario(request, token):
 
 
 # ------------- Preferencias de Eventos del Usuario
-
 
 @api_view(["GET", "PUT"])
 def usuario_preferencias(request, usuario_id):
@@ -144,6 +163,7 @@ def save_personal_data(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
 
 # --------- Subir INE para Validar el Perfil 
@@ -172,25 +192,29 @@ def upload_ine(request):
 
 # ----------- Comparación de Rostros 
 
-@api_view(['POST'])
-def comparar_rostros(request):
-    usuario = request.user
-    serializer = CompararRostroSerializer(data=request.data)
+# def get_face_descriptor(image, face):
+#     shape = shape_predictor(image, face)
+#     return face_rec_model.compute_face_descriptor(image, shape)
 
-    if serializer.is_valid():
-        foto_camara = serializer.validated_data['foto_camara']
+# @api_view(['POST'])
+# def comparar_rostros(request):
+#     usuario = request.user
+#     serializer = CompararRostroSerializer(data=request.data)
+
+#     if serializer.is_valid():
+#         foto_camara = serializer.validated_data['foto_camara']
         
-        # Simulación de API externa que compara rostros
-        # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
-        rostro_coincide = True
-        if rostro_coincide:
-            usuario.is_validated_camera = True
-            usuario.save()
-            return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
+#         # Simulación de API externa que compara rostros
+#         # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
+#         rostro_coincide = True
+#         if rostro_coincide:
+#             usuario.is_validated_camera = True
+#             usuario.save()
+#             return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])

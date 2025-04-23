@@ -19,6 +19,7 @@ face_ine = faces_ine[0]
 x1, y1, x2, y2 = face_ine.left(), face_ine.top(), face_ine.right(), face_ine.bottom()
 image_ine_bgr = cv2.cvtColor(image_ine, cv2.COLOR_RGB2BGR)
 cv2.rectangle(image_ine_bgr, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
 # REDIMENSIONAR imagen para mostrarla más pequeña
 scale_percent = 50  # Reducción al 50%
 width = int(image_ine_bgr.shape[1] * scale_percent / 100)
@@ -48,7 +49,7 @@ while True:
         print("No se pudo leer el frame.")
         continue
 
-    cv2.imshow("📱 DroidCam", img)
+    cv2.imshow("DroidCam", img)
 
     key = cv2.waitKey(1)
     if key & 0xFF == ord('c'):
