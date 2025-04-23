@@ -4,6 +4,7 @@ import { HeartIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
+import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/solid';
 
 
 export default function EventWrapper() {
@@ -13,7 +14,7 @@ export default function EventWrapper() {
             id: 1,
             title: "Festival de Música Electrónica",
             imageUrl: "imgIcon.jpeg",
-            date: "2025-05-15T19:00:00",
+            date: "2025-05-15",
             location: "Parque Central, Ciudad de México",
             price: 350,
             url: "/events/1"
@@ -22,7 +23,7 @@ export default function EventWrapper() {
             id: 2,
             title: "Exposición de Arte Contemporáneo",
             imageUrl: "imgIcon2.jpeg",
-            date: "2025-06-22T10:00:00",
+            date: "2025-06-22",
             location: "Galería Nacional, Guadalajara",
             price: 120,
             url: "/events/2"
@@ -31,7 +32,7 @@ export default function EventWrapper() {
             id: 3,
             title: "Conferencia de Ingeniería Sustentable",
             imageUrl: "imgIcon3.jpeg",
-            date: "2025-05-30T09:00:00",
+            date: "2025-05-30",
             location: "Centro de Convenciones, Monterrey",
             price: 0,
             url: "/events/3"
@@ -40,7 +41,7 @@ export default function EventWrapper() {
             id: 4,
             title: "Torneo de Ajedrez Internacional",
             imageUrl: "imgIcon4.png",
-            date: "2025-07-10T11:00:00",
+            date: "2025-07-10",
             location: "Hotel Emperador, Cancún",
             price: 200,
             url: "/events/4"
@@ -49,7 +50,7 @@ export default function EventWrapper() {
             id: 5,
             title: "Feria Gastronómica Latinoamericana",
             imageUrl: "imgIcon.jpeg",
-            date: "2025-08-05T12:00:00",
+            date: "2025-08-05",
             location: "Plaza Principal, Puebla",
             price: 150,
             url: "/events/5"
@@ -58,7 +59,7 @@ export default function EventWrapper() {
             id: 6,
             title: "Maratón Urbano 2025",
             imageUrl: "imgIcon2.jpeg",
-            date: "2025-09-18T07:00:00",
+            date: "2025-09-18",
             location: "Circuito Reforma, Ciudad de México",
             price: 250,
             url: "/events/6"
@@ -67,7 +68,7 @@ export default function EventWrapper() {
             id: 7,
             title: "Festival de Cine Independiente",
             imageUrl: "imgIcon3.jpeg",
-            date: "2025-10-12T16:00:00",
+            date: "2025-10-12",
             location: "Cineteca Nacional, Ciudad de México",
             price: 180,
             url: "/events/7"
@@ -116,11 +117,18 @@ export function EventCard({ id, imageUrl, title, date, location, price, url }) {
                 className="rounded-lg object-cover w-40 h-40" 
                 alt={title}/>
                 
-                <div className='flex flex-col justify-center px-4'>
-                    <p className="text-base font-medium text-black text-left">{title}</p>
-                    <p className='text-sm font-light text-black text-left'>{date}</p>
-                    <p className='text-sm font-light text-black text-left'>{location}</p>
-                    <p className='text-sm font-bold text-black text-left'>Desde: ${price}</p>
+                <div className='flex flex-col justify-center px-6 gap-2'>
+                    <p className="text-base font-bold text-black text-left">{title}</p>
+                    <div className='flex flex-row space-x-2'>
+                        <CalendarIcon className='text-black h-4 w-4' />
+                        <p className='text-sm font-light text-black text-left'>{date}</p>
+                    </div>
+                    
+                    <div className='flex flex-row space-x-2'>
+                        <MapPinIcon className='text-black h-4 w-4' />
+                        <p className='text-sm font-bold text-black text-left'>{location}</p>
+                    </div>
+                    
                     
                 </div>
             </div>

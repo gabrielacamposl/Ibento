@@ -36,7 +36,7 @@ const Carousel = () => {
 ];
 
     return (
-        <div className="carousel rounded-box w-full max-h-92 mt-6">
+        <div className="carousel rounded-box w-full mx-2 max-h-92 mt-6">
         {populares.map((event, index) => (
             console.log(index),
             <div className="carousel-item w-full relative h-92">

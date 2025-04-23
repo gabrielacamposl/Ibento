@@ -45,7 +45,7 @@ function Cards() {
             <div className="flex flex-row space-x-1 w-full h-auto p-2">  
                 {populares.map((event, index) => (
                     console.log(index),
-                    <Card key={event.id} img={event.img} title={event.title} likes={event.numLikes} />
+                    <Card key={event.id} id = {event.id} img={event.img} title={event.title} likes={event.numLikes} />
                 ))}
             </div>
             </div>
@@ -54,14 +54,15 @@ function Cards() {
   }
   
   interface CardProps {
+    id : string;
     img: string;
     title: string;
     key: string;
     likes: number
   }
 
-  function Card({ img, title, key, likes }: CardProps) {
-    const url = "../eventos/" + key;
+  function Card({ id, img, title, key, likes }: CardProps) {
+    const url = "../eventos/" + id;
 
     let likeString = "";
     if (likes >= 1000000) {

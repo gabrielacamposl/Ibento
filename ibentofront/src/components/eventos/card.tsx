@@ -274,7 +274,7 @@ export function Card({
                         <Avatar image={avatars[1]} size="large" shape="circle" />
                         <Avatar image={avatars[2]} size="large" shape="circle" />
                     </AvatarGroup>
-                    <HeartIcon className='h-8 w-8 text-black' />
+                    <HeartIcon className='h-6 w-6 text-black' />
                     <p className='text-black'>{likeString}</p>
                     <ClockIcon className='h-6 w-6 text-black' />
                     <p className='text-black'>{fechaString}</p>
