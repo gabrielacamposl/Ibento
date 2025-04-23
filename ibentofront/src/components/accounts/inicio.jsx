@@ -1,40 +1,38 @@
-import React from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// src/pages/CrearCuenta.jsx
+import React, { useState } from 'react';
+import api from '../../axiosConfig';
 
-function Inicio() {
-  const navigate = useNavigate();
+const CrearCuenta = () => {
+  const [form, setForm] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    password: '',
+  });
 
-  const cerrarSesion = async () => {
-    const refresh = localStorage.getItem("refresh");
-    const access = localStorage.getItem("access");
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axios.post(
-        "http://localhost:8000/api/logout_usuario/",
-        { refresh },
-        {
-          headers: {
-            Authorization: `Bearer ${access}`,
-          },
-        }
-      );
-
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      navigate("/login");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      alert("No se pudo cerrar sesión");
+      const res = await api.post('crear-cuenta/', form);
+      alert(res.data.mensaje);
+    } catch (err) {
+      alert('Error creando cuenta: ' + JSON.stringify(err.response.data));
     }
   };
 
   return (
-    <div>
-      <h2>Bienvenido a Inicio</h2>
-      <button onClick={cerrarSesion}>Cerrar sesión</button>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input name="nombre" onChange={handleChange} placeholder="Nombre" />
+      <input name="apellido" onChange={handleChange} placeholder="Apellido" />
+      <input name="email" onChange={handleChange} placeholder="Email" type="email" />
+      <input name="password" onChange={handleChange} placeholder="Contraseña" type="password" />
+      <button type="submit">Crear Cuenta</button>
+    </form>
   );
-}
+};
 
-export default Inicio;
+export default CrearCuenta;
