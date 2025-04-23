@@ -4,7 +4,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.tokens import RefreshToken
+
+
 # Imports para eñ reconocimiento facial
 # import base64
 # import numpy as np
@@ -22,7 +23,7 @@ from django.http import JsonResponse
 from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
 from api.models import CategoriaEvento, TokenBlackList
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
-                          Login,
+                          LoginSerializer,
                           Logout, 
                           # Serializer para selección de categorías de eventos
                           UsuarioPreferences, 
@@ -51,17 +52,28 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
 
 # --------- Crear un nuevo usuario
 
-class UsuarioViewSet(viewsets.ModelViewSet):
-    queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
+# class UsuarioViewSet(viewsets.ModelViewSet):
+#     queryset = Usuario.objects.all()
+#     serializer_class = UsuarioSerializer
 
-    def create(self, request, *args, **kwargs):
-        usuario = UsuarioSerializer(data=request.data)
-        if usuario.is_valid():
-            nuevo_usuario = usuario.save()
-            enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
-            return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
-        return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def create(self, request, *args, **kwargs):
+#         usuario = UsuarioSerializer(data=request.data)
+#         if usuario.is_valid():
+#             nuevo_usuario = usuario.save()
+#             enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
+#             return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
+#         return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def crear_usuario(request):
+    serializer = UsuarioSerializer(data=request.data)
+    if serializer.is_valid():
+        usuario = serializer.save()
+        enviar_email_confirmacion(usuario)
+        return Response({"mensaje": "Usuario registrado, revisa tu correo."}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # --------- Confirmación de cuenta
 
@@ -107,22 +119,33 @@ def usuario_preferencias(request, usuario_id):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login_usuario(request):
-    serializer = Login(data=request.data)
+    serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
-        return Response(serializer.validated_data, status=200)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # ------------- Logout
+
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def logout_usuario(request):
+#     serializer = Logout(data=request.data)
+#     if serializer.is_valid():
+#         return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
+#     return Response(serializer.errors, status=400)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_usuario(request):
-    serializer = Logout(data=request.data)
-    if serializer.is_valid():
-        return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
-    return Response(serializer.errors, status=400)
+    auth_header = request.headers.get("Authorization", "")
 
+    if auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+        TokenBlackList.objects.get_or_create(token=token)
+        return Response({"mensaje": "Sesión cerrada correctamente."}, status=status.HTTP_205_RESET_CONTENT)
 
+    return Response({"error": "Token no proporcionado"}, status=status.HTTP_400_BAD_REQUEST)
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 

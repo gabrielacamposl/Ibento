@@ -1,5 +1,6 @@
 from djongo import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db.models import Q
 from bson import ObjectId
 import uuid
@@ -9,7 +10,25 @@ def generate_objectid():
     return str(ObjectId())  # Retorna un ObjectId convertido a string
 
 
+
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("El email es obligatorio")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    # def create_superuser(self, email, password=None, **extra_fields):
+    #     extra_fields.setdefault('is_superuser', True)
+    #     extra_fields.setdefault('is_staff', True)
+    #     return self.create_user(email, password, **extra_fields)
+
+
 # ----------------------------------------------- USER ---------------------------------------------------------
+
 
 class Usuario(models.Model):
     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
@@ -44,6 +63,12 @@ class Usuario(models.Model):
 
     # Token para Firebase Cloud Messaging
     token_fcm = models.CharField(max_length=255, null=True, blank=True)
+
+    # def __str__(self):
+    #     return self.email
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = 'email'
 
     def __str__(self):
         return self.email
