@@ -1,6 +1,8 @@
 import React from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
+const API_GOOGLE_MAPS = import.meta.env.VITE_API_KEY_GOOGLE;
+
 const containerStyle = {
   width: '100%',
   height: '300px',
@@ -18,7 +20,7 @@ const EventMap = ({ location }) => {
   const center = location || defaultCenter;
 
   return (
-    <LoadScript googleMapsApiKey="AIzaSyCTn_5oWyVtpk2Pc76KiHUVr-BE58QbCw8">
+    <LoadScript googleMapsApiKey={API_GOOGLE_MAPS}>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
