@@ -26,8 +26,8 @@ urlpatterns = [
 
     # Auth & Register
     path('api/', include(router.urls)),
-    path('crear-cuenta/', crear_usuario, name='crear_cuenta'),
-    path('login/', login_usuario, name='login'),
+    path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
+    path('api/login/', login_usuario, name='login'),
     path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),

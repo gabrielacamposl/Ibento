@@ -15,7 +15,6 @@ from api.models import (Usuario,
 
 
 
-Usuario = get_user_model()
 # ------------------------------------------- CREACIÓN DE USUARIO -------------------------------------------
 
 # -------- Creación del usuario
@@ -66,7 +65,7 @@ class LoginSerializer(serializers.Serializer):
         except Usuario.DoesNotExist:
             raise serializers.ValidationError("Correo o contraseña incorrectos")
 
-        if not usuario.check_password(data["password"]):
+        if not check_password(data["password"], usuario.password):
             raise serializers.ValidationError("Correo o contraseña incorrectos")
 
         if not usuario.is_confirmed:

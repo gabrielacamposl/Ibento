@@ -17,8 +17,6 @@ from rest_framework.decorators import api_view, permission_classes
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.utils.deprecation import MiddlewareMixin
-from django.http import JsonResponse
 # Importar modelos 
 from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
 from api.models import CategoriaEvento, TokenBlackList

@@ -124,6 +124,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'api.Usuario'
+
 
 # Envío de tokens mediante correo electrónico
 

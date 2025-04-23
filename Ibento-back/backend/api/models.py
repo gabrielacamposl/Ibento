@@ -1,6 +1,7 @@
 from djongo import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from bson import ObjectId
 import uuid
@@ -16,8 +17,8 @@ class UsuarioManager(BaseUserManager):
         if not email:
             raise ValueError("El email es obligatorio")
         email = self.normalize_email(email)
+        extra_fields["password"] = make_password(password)  # Hashea aquí
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
         user.save(using=self._db)
         return user
     
@@ -30,7 +31,7 @@ class UsuarioManager(BaseUserManager):
 # ----------------------------------------------- USER ---------------------------------------------------------
 
 
-class Usuario(models.Model):
+class Usuario(AbstractBaseUser, PermissionsMixin):
     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -67,6 +68,8 @@ class Usuario(models.Model):
     # def __str__(self):
     #     return self.email
     objects = UsuarioManager()
+
+    REQUIRED_FIELDS = ['nombre', 'apellido']
 
     USERNAME_FIELD = 'email'
 
