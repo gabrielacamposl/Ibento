@@ -2,6 +2,7 @@ import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
+import api from '../../axiosConfig';
 import axios from "axios";
 import {
   FormControlLabel,
@@ -28,24 +29,28 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-
-
   const handleLogin = async (e) => {
     e.preventDefault();
-
-
+  
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login/", {
-        email,
-        password,
-      });
-
-      localStorage.setItem("user", JSON.stringify(response.data));
-      navigate("/principalEventos");
+      const res = await api.post("login/", { email, password });
+  
+      // Guardar tokens
+      localStorage.setItem("access", res.data.access);
+      localStorage.setItem("refresh", res.data.refresh);
+  
+      alert("Sesión iniciada correctamente");
+  
+      // Redirigir a vista principal
+      // navigate("/principal/eventos");
+      window.location.href = '/principal/eventos'; 
     } catch (err) {
-      alert("Error en el correo o contraseña");
+      console.error("Error al iniciar sesión:", err);
+      const mensajeError = err.response?.data?.detail || "Correo o contraseña incorrectos";
+      alert("Error al iniciar sesión: " + mensajeError);
     }
   };
+  
 
   return (
 
