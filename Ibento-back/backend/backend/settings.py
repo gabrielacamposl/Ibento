@@ -16,6 +16,8 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -121,6 +123,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'api.Usuario'
 
 
 # Envío de tokens mediante correo electrónico

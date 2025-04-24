@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from api.user.views import (UsuarioViewSet, 
+from api.user.views import (crear_usuario, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
                             confirmar_usuario, 
@@ -18,7 +18,7 @@ from api.user.views import (UsuarioViewSet,
 
 
 router = DefaultRouter()
-router.register(r'usuarios', UsuarioViewSet, basename='usuario')
+
 router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
 router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
 
@@ -26,7 +26,8 @@ urlpatterns = [
 
     # Auth & Register
     path('api/', include(router.urls)),
-    path('login/', login_usuario, name='login'),
+    path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
+    path('api/login/', login_usuario, name='login'),
     path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),

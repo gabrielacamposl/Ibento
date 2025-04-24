@@ -1,48 +1,34 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// src/pages/Login.jsx
+import React, { useState } from 'react';
+import api from '../../axiosConfig';
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+const Login = () => {
+  const [cred, setCred] = useState({ email: '', password: '' });
+
+  const handleChange = (e) => {
+    setCred({ ...cred, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post("http://localhost:8000/api/login_usuario/", {
-        email,
-        password,
-      });
-
-      localStorage.setItem("access", res.data.access);
-      localStorage.setItem("refresh", res.data.refresh);
-      navigate("/inicio");
-    } catch (error) {
-      console.error("Login error", error);
-      alert("Error en el login: " + (error.response?.data?.non_field_errors || "Intenta de nuevo"));
+      const res = await api.post('login/', cred);
+      localStorage.setItem('access', res.data.access);
+      localStorage.setItem('refresh', res.data.refresh);
+      alert('Sesión iniciada');
+      window.location.href = '/logout'; // redirige a otra vista
+    } catch (err) {
+      alert('Error al iniciar sesión: ' + JSON.stringify(err.response.data));
     }
   };
 
   return (
     <form onSubmit={handleLogin}>
-      <h2>Iniciar Sesión</h2>
-      <input
-        type="email"
-        placeholder="Correo"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Entrar</button>
+      <input name="email" onChange={handleChange} placeholder="Email" type="email" />
+      <input name="password" onChange={handleChange} placeholder="Contraseña" type="password" />
+      <button type="submit">Iniciar Sesión</button>
     </form>
   );
-}
+};
 
 export default Login;

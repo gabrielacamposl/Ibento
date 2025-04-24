@@ -4,6 +4,7 @@ import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
 import LoginPrueba from "./components/accounts/loginprueba";
+import Logout from "./components/accounts/logout";
 import Inicio from "./components/accounts/inicio";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
@@ -49,6 +50,7 @@ export default function App() {
 
       <Route path="/loginp" element={<LoginPrueba/>}/>
       <Route path="/inicio" element={<Inicio/>}/>
+      <Route path="/logout" element={<Logout/>}/>
       
       {/* Preferencias del Usuario para sugerencia de Eventos*/}
       <Route path="/preferencias" element={<EventosPreferencias />} />
