@@ -137,7 +137,3 @@ export function EventCard({ id, imageUrl, title, date, location, price, url }) {
         
     );
 }
-
-export function Pictures(){
-
-}

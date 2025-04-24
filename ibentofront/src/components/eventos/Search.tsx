@@ -5,7 +5,9 @@ import { useDebouncedCallback } from 'use-debounce';
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  console.log(searchParams)
   const location = useLocation();
+  console.log(location)
   const navigate = useNavigate();
   
   const handleSearch = useDebouncedCallback((term) => {
@@ -13,9 +15,6 @@ export default function Search({ placeholder }: { placeholder: string }) {
     
     // Crear una nueva instancia de URLSearchParams basada en los parámetros actuales
     const params = new URLSearchParams(searchParams);
-    
-    // Establecer la página a 1 cuando se realiza una nueva búsqueda
-    params.set('page', '1');
 
     if (term) {
       params.set('query', term);
@@ -33,7 +32,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
         Search
       </label>
       <input
-        className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
+        className="peer text-black block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
         placeholder={placeholder}
         onChange={(e) => {
           handleSearch(e.target.value);
