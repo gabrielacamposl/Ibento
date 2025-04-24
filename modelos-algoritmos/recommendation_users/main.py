@@ -146,7 +146,7 @@ questions = [
             "Manga",
             "Dungeons & Dragons",
             "Fotografía",
-            "Cospllay",
+            "Cosplay",
             "Moda vintage",
             "Influencer",
             "Exposiciones",

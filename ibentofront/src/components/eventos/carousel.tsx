@@ -3,14 +3,52 @@ import React from 'react';
 
 const Carousel = () => {
 
+  const populares = [
+    {
+        id: "ECIP1-1",
+        title: "Populares 1: League of legends Finals",
+        img: "lolicon.jpeg",
+        fecha: "2025-04-27",
+        numLikes: 1500,
+    },
+    {
+        id: "ECIP1-2",
+        title: "Populares 2: Morat",
+        img: "moraticon.jpg",
+        fecha: "2025-05-05",
+        numLikes: 1000000,
+
+    },
+    {
+        id: "ECIP1-3",
+        title: "Populares 3: The Bities",
+        img: "btsicon.jpg",
+        fecha: "2025-06-12",
+        numLikes: 10000,
+    },
+    {
+        id: "ECIP1-4",
+        title: "Populares 4: Harry Styles todo precioso",
+        img: "harryicon.jpg",
+        fecha: "2025-04-21",
+        numLikes: 250,
+    }
+];
+
     return (
-        <div className="carousel rounded-box w-full max-h-92 mt-6">
-        <div className="carousel-item w-full">
-          <img
-            src="https://img.daisyui.com/images/stock/photo-1559703248-dcaaec9fab78.webp"
-            className="w-full"
-            alt="Tailwind CSS Carousel component" />
-        </div>
+        <div className="carousel rounded-box w-full mx-2 max-h-92 mt-6">
+        {populares.map((event, index) => (
+            console.log(index),
+            <div className="carousel-item w-full relative h-92">
+              <img
+                src={`/${event.img}`}
+                className="w-full"
+                alt="Tailwind CSS Carousel component" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
+            </div>
+        ))}
+
+        
         <div className="carousel-item w-full">
           <img
             src="https://img.daisyui.com/images/stock/photo-1565098772267-60af42b81ef2.webp"

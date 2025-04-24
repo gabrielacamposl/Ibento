@@ -3,18 +3,50 @@
  import { Link } from 'react-router-dom';
 
 function Cards() {
+
+    const populares = [
+        {
+            id: "ECIP1-1",
+            title: "Populares 1: League of legends Finals",
+            img: "lolicon.jpeg",
+            fecha: "2025-04-27",
+            numLikes: 1500,
+        },
+        {
+            id: "ECIP1-2",
+            title: "Populares 2: Morat",
+            img: "moraticon.jpg",
+            fecha: "2025-05-05",
+            numLikes: 1000000,
+
+        },
+        {
+            id: "ECIP1-3",
+            title: "Populares 3: The Bities",
+            img: "btsicon.jpg",
+            fecha: "2025-06-12",
+            numLikes: 10000,
+        },
+        {
+            id: "ECIP1-4",
+            title: "Populares 4: Harry Styles todo precioso",
+            img: "harryicon.jpg",
+            fecha: "2025-04-21",
+            numLikes: 250,
+        }
+    ];
+
     return (
-        <div className="h-auto flex flex-col justify-center p-4 mx-10">
+        <div className="h-auto flex w-full flex-col justify-center box-border p-4">
             <h3 className="mb-4 text-xl font-bold text-black text-left">Populares</h3>
             {/* Contenedor con scroll horizontal */}
-            <div className="w-screen overflow-x-auto">   
+            <div className="w-full overflow-x-auto">   
             {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-            <div className="flex flex-row space-x-4">
-                <Card imageUrl="/imgIcon.jpeg" title="Titulo 1" id="1" />
-                <Card imageUrl="/imgIcon2.jpeg" title="Titulo 2" id="2" />
-                <Card imageUrl="/imgIcon3.jpeg" title="Titulo 3" id="3" />
-                <Card imageUrl="/imgIcon4.png" title="Titulo 4" id="4"/>
-                <Card imageUrl="/imgIcon5.jpeg" title="Titulo 5" id="5"/>
+            <div className="flex flex-row space-x-1 w-full h-auto p-2">  
+                {populares.map((event, index) => (
+                    console.log(index),
+                    <Card key={event.id} id = {event.id} img={event.img} title={event.title} likes={event.numLikes} />
+                ))}
             </div>
             </div>
         </div>
@@ -22,25 +54,42 @@ function Cards() {
   }
   
   interface CardProps {
-    imageUrl: string;
+    id : string;
+    img: string;
     title: string;
-    id: string;
+    key: string;
+    likes: number
   }
 
-  function Card({ imageUrl, title, id }: CardProps) {
+  function Card({ id, img, title, key, likes }: CardProps) {
     const url = "../eventos/" + id;
+
+    let likeString = "";
+    if (likes >= 1000000) {
+        likeString = (likes / 1000000).toFixed(1) + "M";
+    } else if (likes >= 1000) {
+        likeString = (likes / 1000).toFixed(1) + "k";
+    } else {
+        likeString = likes + "";
+    }
+
     return (
         <>
-        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-44 drop-shadow-xl items-center lg: w-72">
-            <div className="relative bg-white rounded-lg flex flex-col flex p-2 shadow-md">
-                <img 
-                src={imageUrl} 
-                className="rounded-lg object-cover w-full h-36 lg: h-48" 
-                alt={title} 
-                />
-                <div className='absolute bottom-3 left-3 flex flex-row space-x-2 items-center'>
-                    <HeartIcon className='h-6 w-6 font-strong' />
-                    <h2 className="text-2xl font-bold">1.5mil</h2>
+        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-64 drop-shadow-xl lg:w-72">
+            <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
+                <div className='relative w-full h-36 lg:h-48'>
+                    <img 
+                    src={`/${img}`} 
+                    className="rounded-xl object-cover w-full h-36 lg:h-48 " 
+                    alt={title} 
+                    />
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
+                </div>
+                
+                
+                <div className='absolute bottom-3 left-3 flex flex-row space-x-2'>
+                    <HeartIcon className='h-4 w-4 font-strong' />
+                    <h2 className="text-sm font-bold">{likeString}</h2>
                 </div>
             </div>
             <div className="mt-2 p-2">

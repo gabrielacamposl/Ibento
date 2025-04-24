@@ -1,5 +1,7 @@
 from djongo import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from bson import ObjectId
 import uuid
@@ -8,7 +10,28 @@ import uuid
 def generate_objectid():
     return str(ObjectId())  # Retorna un ObjectId convertido a string
 
-class Usuario(models.Model):
+
+
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("El email es obligatorio")
+        email = self.normalize_email(email)
+        extra_fields["password"] = make_password(password)  # Hashea aquí
+        user = self.model(email=email, **extra_fields)
+        user.save(using=self._db)
+        return user
+    
+    # def create_superuser(self, email, password=None, **extra_fields):
+    #     extra_fields.setdefault('is_superuser', True)
+    #     extra_fields.setdefault('is_staff', True)
+    #     return self.create_user(email, password, **extra_fields)
+
+
+# ----------------------------------------------- USER ---------------------------------------------------------
+
+
+class Usuario(AbstractBaseUser, PermissionsMixin):
     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -42,48 +65,30 @@ class Usuario(models.Model):
     # Token para Firebase Cloud Messaging
     token_fcm = models.CharField(max_length=255, null=True, blank=True)
 
+    # def __str__(self):
+    #     return self.email
+    objects = UsuarioManager()
+
+    REQUIRED_FIELDS = ['nombre', 'apellido']
+
+    USERNAME_FIELD = 'email'
+
     def __str__(self):
         return self.email
 
-# Clases para las Preguntas de preferencias personales para crear el perfil de "Busqueda de Acompañantes"
 
-class CategoriasPerfil(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.CharField(max_length=50)
-    def __str__(self):
-        return self.categoria_perfil
 
-class SubcategoriaPerfil(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.ForeignKey(
-        CategoriasPerfil, on_delete = models.CASCADE, related_name="subcategorias_perfiles", to_field="_id"
-    )
-    nombre_subcategoria_perfil = models.CharField(max_length=70)
+# ------------------ Tokens para Login 
+
+class TokenBlackList(models.Model):
+    token = models.CharField(max_length=500, unique=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.nombre_subcategoria_perfil
+        return self.token[:50] + "..."
     
-    
-# Clases para las Categorias y Subcategorías de los Eventos
 
-class CategoriaEvento (models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
-    nombre = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.nombre
-
-class Subcategoria(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria = models.ForeignKey(
-        CategoriaEvento, on_delete = models.CASCADE, related_name="subcategorias", to_field="_id"
-    )
-    nombre_subcategoria = models.CharField(max_length=70)
-
-    def __str__(self):
-        return self.nombre_subcategoria
-
-
-# Matches de acompañantes
+# --------- Matches de acompañantes
 
 class Matches (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default= generate_objectid)
@@ -113,7 +118,7 @@ class Matches (models.Model):
         return f"Match entre {self.usuario_a.nombre} y {self.usuario_b.nombre}"
     
     
-# Chats con los matches
+# ------------- Chats con los matches
 
 class Conversacion (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
@@ -160,3 +165,43 @@ class Mensaje(models.Model):
 #     def _str_(self):
 #         return self.nombre_evento
     
+    
+    
+# ------------------------------------------- FUNCIONES PARA ADMIN -------------------------------------------    
+    
+    # Clases para las Preguntas de preferencias personales para crear el perfil de "Busqueda de Acompañantes"
+
+class CategoriasPerfil(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria_perfil = models.CharField(max_length=50)
+    def __str__(self):
+        return self.categoria_perfil
+
+class SubcategoriaPerfil(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria_perfil = models.ForeignKey(
+        CategoriasPerfil, on_delete = models.CASCADE, related_name="subcategorias_perfiles", to_field="_id"
+    )
+    nombre_subcategoria_perfil = models.CharField(max_length=70)
+    def __str__(self):
+        return self.nombre_subcategoria_perfil
+    
+    
+# Clases para las Categorias y Subcategorías de los Eventos
+
+class CategoriaEvento (models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+class Subcategoria(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
+    categoria = models.ForeignKey(
+        CategoriaEvento, on_delete = models.CASCADE, related_name="subcategorias", to_field="_id"
+    )
+    nombre_subcategoria = models.CharField(max_length=70)
+
+    def __str__(self):
+        return self.nombre_subcategoria

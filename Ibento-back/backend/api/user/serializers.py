@@ -1,63 +1,39 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
-from api.models import Usuario, Subcategoria, SubcategoriaPerfil, Matches, Conversacion, Mensaje, CategoriaEvento
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 import cloudinary.uploader
+from api.models import (Usuario, 
+                        TokenBlackList,
+                        Subcategoria, 
+                        SubcategoriaPerfil, 
+                        Matches, 
+                        Conversacion, 
+                        Mensaje, 
+                        CategoriaEvento)
 
 
-# Creación del usuario
+
+# ------------------------------------------- CREACIÓN DE USUARIO -------------------------------------------
+
+# -------- Creación del usuario
+
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ["_id",'nombre', 'apellido', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data['password'])  
-        return Usuario.objects.create(**validated_data)  
-    
-# Login / Inicio de Sesión    
-class Login(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+        return Usuario.objects.create_user(**validated_data)
 
-    def validate(self, data):
-        try:
-            usuario = Usuario.objects.get(email=data["email"])
-        except Usuario.DoesNotExist:
-            raise serializers.ValidationError("Error en el correo o contraseña.")
-
-        if not check_password(data["password"], usuario.password):
-            raise serializers.ValidationError("Error en el correo o contraseña.")
-
-        if not usuario.is_confirmed:
-            raise serializers.ValidationError("Debes confirmar tu cuenta primero.")
-
-        refresh = RefreshToken.for_user(usuario)
-
-        return {
-            "id": usuario._id,
-            "email": usuario.email,
-            "nombre": usuario.nombre,
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-        }
-    
-# Sign out / Cierre de Sesión
-class Logout(serializers.Serializer):
-    refresh = serializers.CharField()
-
-    def validate(self, data):
-        try:
-            token = RefreshToken(data["refresh"])
-            token.blacklist()  # Invalidar el token
-        except Exception:
-            raise serializers.ValidationError("Sesión expirado.")
-
-        return {}
+    # def create(self, validated_data):
+    #     validated_data['password'] = make_password(validated_data['password'])  
+    #     return Usuario.objects.create(**validated_data)  
     
 
-# Selección de preferencias para la recomendación de eventos
+# -------- Selección de preferencias para la recomendación de eventos
 class UsuarioPreferences (serializers.ModelSerializer):
     preferencias_evento = serializers.PrimaryKeyRelatedField(
     many=True,  # Porque es una lista de referencias
@@ -75,27 +51,57 @@ class UsuarioPreferences (serializers.ModelSerializer):
             return instance
 
 
+    
+# -------------------------------------- LOGIN / LOGOUT ----------------------------------------
+    
+# ------ Login / Inicio de Sesión    
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        try:
+            usuario = Usuario.objects.get(email=data["email"])
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("Correo o contraseña incorrectos")
+
+        if not check_password(data["password"], usuario.password):
+            raise serializers.ValidationError("Correo o contraseña incorrectos")
+
+        if not usuario.is_confirmed:
+            raise serializers.ValidationError("Debes confirmar tu cuenta primero")
+
+        refresh = RefreshToken.for_user(usuario)
+
+        return {
+            "id": usuario._id,
+            "email": usuario.email,
+            "nombre": usuario.nombre,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }
+    
+#------- Logout / Cierre de Sesión
+class Logout(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, data):
+        refresh_token = data["refresh"]
+
+        # Verifica si ya fue blacklisteado
+        if TokenBlackList.objects.filter(token=refresh_token).exists():
+            raise serializers.ValidationError("Este token ya fue invalidado.")
+
+        # Guarda el token en la blacklist
+        TokenBlackList.objects.create(token=refresh_token)
+        return {}
+    
 
 
-# -------------- Categorias para Eventos --------------
 
-class SubcategoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subcategoria
-        fields = ['_id', 'categoria', 'nombre_subcategoria']
+# -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
 
-class CategoriaEventoSerializer(serializers.ModelSerializer):
-    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = CategoriaEvento
-        fields = ['_id', 'nombre', 'subcategorias']
-
-
-
-# ----------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES -----------------------------
-
-## Subir imágenes de perfil para la busqueda de acompañantes
+#---------- Subir imágenes de perfil para la busqueda de acompañantes
 
 class UploadProfilePicture(serializers.Serializer):
     images = serializers.ListField(
@@ -113,7 +119,7 @@ class UploadProfilePicture(serializers.Serializer):
         usuario.save()
         return usuario
 
-## Datos Personales para el perfil
+# ---------- Datos Personales para el perfil
 
 class PersonalData(serializers.ModelSerializer):
     model = Usuario
@@ -128,7 +134,7 @@ class PersonalData(serializers.ModelSerializer):
         return instance
       
 
-## Selección de respuestas para conocer más al usuarios
+#----------- Selección de respuestas para conocer más al usuarios
 
 class PersonalPreferences(serializers.ModelSerializer):
     preferences = serializers.PrimaryKeyRelatedField(
@@ -141,20 +147,20 @@ class PersonalPreferences(serializers.ModelSerializer):
         usuario.save()
         return usuario
     
-# Validación de INE
+# ------- Validación de INE
 
 class UploadINE(serializers.ModelSerializer):
     ine_f = serializers.ImageField()
     ine_m = serializers.ImageField()
 
-# Comparación de rostros segundo filtro
+#---------- Comparación de rostros segundo filtro
 
-class CompararRostroSerializer(serializers.Serializer):
-    foto_camara = serializers.ImageField()
+class ValidacionRostro(serializers.ModelSerializer):
+    foto_camara = serializers.ImageField(required=True)
 
+# ----------------------------------------------- MATCHES ------------------------------------------------
 
-# Matches
-
+# ------Generar Match
 class MatchSerializer (serializers.ModelSerializer):
     usuario_a = UsuarioSerializer(read_only=True)
     usuario_b = UsuarioSerializer(read_only = True)
@@ -164,7 +170,7 @@ class MatchSerializer (serializers.ModelSerializer):
         fields = ["_id", "usuario_a", "usuario_b", "fecha_match"]
 
 
-# Mensajería con matches
+#---------- Mensajería con matches
 
 class MensajesSerializer(serializers.ModelSerializer):
     remitente_nombre = serializers.CharField(source="remitente.nombre", read_only= True)
@@ -174,6 +180,7 @@ class MensajesSerializer(serializers.ModelSerializer):
         model = Mensaje
         fields = ["_id", "conversacion", "remitente", "receptor", "mensaje", "fecha_envio"]
 
+# --------- Conversaciones con matches
 
 class ConversacionSerializer (serializers.ModelSerializer):
    usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only = True)
@@ -183,3 +190,20 @@ class ConversacionSerializer (serializers.ModelSerializer):
    class Meta:
        model = Conversacion
        fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]
+       
+       
+    
+# ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
+
+class SubcategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = ['_id', 'categoria', 'nombre_subcategoria']
+
+class CategoriaEventoSerializer(serializers.ModelSerializer):
+    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CategoriaEvento
+        fields = ['_id', 'nombre', 'subcategorias']
+

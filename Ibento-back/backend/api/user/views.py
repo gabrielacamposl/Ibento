@@ -4,52 +4,78 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.tokens import RefreshToken
+
+
+# Imports para eñ reconocimiento facial
+# import base64
+# import numpy as np
+# from PIL import Image
+# from io import BytesIO
+# import dlib
+# from scipy.spatial import distance
+
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+# Importar modelos 
 from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
-from api.models import CategoriaEvento
-from .serializers import (UsuarioSerializer, 
-                          Login,
-                          Logout,
-                          UsuarioPreferences,
+from api.models import CategoriaEvento, TokenBlackList
+from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
+                          LoginSerializer,
+                          Logout, 
+                          # Serializer para selección de categorías de eventos
+                          UsuarioPreferences, 
+                          # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
                           UploadINE,
-                          CompararRostroSerializer,
+                          ValidacionRostro,
+                          # Serializers para creación de matches
                           MatchSerializer,
+                          # Serializer para los chats de los matches
                           MensajesSerializer,
                           ConversacionSerializer,
+                          # Seriallizer para añadir categorías y sucategorías de los eventos
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
                           )
 
-
-class UsuarioViewSet(viewsets.ModelViewSet):
-    queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
-
-    def create(self, request, *args, **kwargs):
-        usuario = UsuarioSerializer(data=request.data)
-        if usuario.is_valid():
-            nuevo_usuario = usuario.save()
-            enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
-            return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
-        return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
-class CategoriaEventoViewSet(viewsets.ModelViewSet):
-    queryset = CategoriaEvento.objects.all()
-    serializer_class = CategoriaEventoSerializer
-
-class SubcategoriaViewSet(viewsets.ModelViewSet):
-    queryset = Subcategoria.objects.all()
-    serializer_class = SubcategoriaSerializer
+# face_detector = dlib.get_frontal_face_detector()
+# shape_predictor = dlib.shape_predictor("modelos/shape_predictor_68_face_landmarks.dat")
+# face_rec_model = dlib.face_recognition_model_v1("modelos/dlib_face_recognition_resnet_model_v1.dat")
 
 
-@api_view(['GET'])  # Permite GET en lugar de POST 
+# ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
+
+# --------- Crear un nuevo usuario
+
+# class UsuarioViewSet(viewsets.ModelViewSet):
+#     queryset = Usuario.objects.all()
+#     serializer_class = UsuarioSerializer
+
+#     def create(self, request, *args, **kwargs):
+#         usuario = UsuarioSerializer(data=request.data)
+#         if usuario.is_valid():
+#             nuevo_usuario = usuario.save()
+#             enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
+#             return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
+#         return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def crear_usuario(request):
+    serializer = UsuarioSerializer(data=request.data)
+    if serializer.is_valid():
+        usuario = serializer.save()
+        enviar_email_confirmacion(usuario)
+        return Response({"mensaje": "Usuario registrado, revisa tu correo."}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# --------- Confirmación de cuenta
+
+@api_view(['GET'])  # GET para confirmar la cuenta / POST colocar en el body el token
 def confirmar_usuario(request, token):
     usuario = get_object_or_404(Usuario, token=token)
 
@@ -61,25 +87,7 @@ def confirmar_usuario(request, token):
     return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def login_usuario(request):
-    serializer = Login(data=request.data)
-    if serializer.is_valid():
-        return Response(serializer.validated_data, status=200)
-    return Response(serializer.errors, status=400)
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def logout_usuario(request):
-    serializer = Logout(data=request.data)
-    if serializer.is_valid():
-        return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
-    return Response(serializer.errors, status=400)
-
-# ------------- Preferencias de Eventos del Usuario -----------------------------------------------
-
+# ------------- Preferencias de Eventos del Usuario
 
 @api_view(["GET", "PUT"])
 def usuario_preferencias(request, usuario_id):
@@ -101,7 +109,43 @@ def usuario_preferencias(request, usuario_id):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# ------------- Creación de Perfil para la Busqueda de Acompñantes --------------------------------
+
+# -------------------------------------------- LOGIN Y LOGOUT DEL USUARIO  ----------------------------------------------
+
+# ------------- Login
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def login_usuario(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ------------- Logout
+
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def logout_usuario(request):
+#     serializer = Logout(data=request.data)
+#     if serializer.is_valid():
+#         return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
+#     return Response(serializer.errors, status=400)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout_usuario(request):
+    auth_header = request.headers.get("Authorization", "")
+
+    if auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+        TokenBlackList.objects.get_or_create(token=token)
+        return Response({"mensaje": "Sesión cerrada correctamente."}, status=status.HTTP_205_RESET_CONTENT)
+
+    return Response({"error": "Token no proporcionado"}, status=status.HTTP_400_BAD_REQUEST)
+
+# ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 
 # Upload Photos
 @api_view(['POST'])
@@ -139,7 +183,11 @@ def save_personal_data(request):
         return Response({"mensaje": "Datos personales guardados correctamente."}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# --------- Subir INE para Validar el Perfil -----------------------------------
+
+
+# ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
+
+# --------- Subir INE para Validar el Perfil 
 
 @api_view(['POST'])
 def upload_ine(request):
@@ -163,27 +211,31 @@ def upload_ine(request):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# ----------- Comparación de Rostros ----------------------------------
+# ----------- Comparación de Rostros 
 
-@api_view(['POST'])
-def comparar_rostros(request):
-    usuario = request.user
-    serializer = CompararRostroSerializer(data=request.data)
+# def get_face_descriptor(image, face):
+#     shape = shape_predictor(image, face)
+#     return face_rec_model.compute_face_descriptor(image, shape)
 
-    if serializer.is_valid():
-        foto_camara = serializer.validated_data['foto_camara']
+# @api_view(['POST'])
+# def comparar_rostros(request):
+#     usuario = request.user
+#     serializer = CompararRostroSerializer(data=request.data)
+
+#     if serializer.is_valid():
+#         foto_camara = serializer.validated_data['foto_camara']
         
-        # Simulación de API externa que compara rostros
-        # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
-        rostro_coincide = True
-        if rostro_coincide:
-            usuario.is_validated_camera = True
-            usuario.save()
-            return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
+#         # Simulación de API externa que compara rostros
+#         # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
+#         rostro_coincide = True
+#         if rostro_coincide:
+#             usuario.is_validated_camera = True
+#             usuario.save()
+#             return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -206,7 +258,9 @@ def completar_perfil(request):
     return Response({"mensaje": "Perfil completado exitosamente."}, status=status.HTTP_200_OK)
 
 
-# ------------ Creación de Matches ------------------------------------
+# -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
+
+# ------- Crear Match
 
 @api_view(["POST"])
 def crear_match(request):
@@ -233,12 +287,31 @@ def crear_match(request):
     return Response({"message": "Match y Conversación creados"}, status=status.HTTP_201_CREATED)
 
 
+# ------- Ver Matches
+
 @api_view(["GET"])
 def obtener_matches_usuario(request, usuario_id):
     
     matches = Matches.objects.filter(models.Q(usuario_a_id=usuario_id) | models.Q(usuario_b_id=usuario_id))
     serializer = MatchSerializer(matches, many=True)
     return Response(serializer.data)
+
+# ------- Eliminar Match
+
+@api_view(['DELETE'])
+def eliminar_match(request, match_id):
+    try:
+        match = Matches.objects.get(id=match_id)
+        match.delete()
+        return Response({'mensaje': 'Match eliminado correctamente'}, status=204)
+    except Matches.DoesNotExist:
+        return Response({'error': 'Match no encontrado'}, status=404)
+    
+
+
+# -------------------------------------- MENSAJERÍA CON MATCHES -------------------------------------------
+
+# ------- Ver chats 
 
 @api_view(["GET"])
 def obtener_conversacion(request, match_id):
@@ -247,6 +320,7 @@ def obtener_conversacion(request, match_id):
     serializer = ConversacionSerializer(conversacion)
     return Response(serializer.data)
 
+# ------- Enviar Mensaje
 
 @api_view(["POST"])
 def enviar_mensaje(request):
@@ -277,16 +351,17 @@ def enviar_mensaje(request):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# Clase de Paginación
+#---------- Paginación de mensajes
 class MensajePagination(PageNumberPagination):
     page_size = 10  # Cambia este número por la cantidad de mensajes por página
     page_size_query_param = 'page_size'
     max_page_size = 100  # Esto es opcional, define el máximo que puede pedir un cliente
 
 
+ # ------- Obtener Mensajes de los Chats
 @api_view(["GET"])
 def obtener_mensajes(request, conversacion_id):
-    # # Ver. convencional - sin paginación
+    # # -------- Ver. convencional - sin paginación
     # conversacion = Conversacion.objects.get(_id=conversacion_id)
     # mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by('-fecha_creacion')
     # serializer = MensajesSerializer(mensajes, many=True)
@@ -302,11 +377,17 @@ def obtener_mensajes(request, conversacion_id):
     serializer = MensajesSerializer(resultado_paginado, many=True)
     return paginator.get_paginated_response(serializer.data)
 
-@api_view(['DELETE'])
-def eliminar_match(request, match_id):
-    try:
-        match = Matches.objects.get(id=match_id)
-        match.delete()
-        return Response({'mensaje': 'Match eliminado correctamente'}, status=204)
-    except Matches.DoesNotExist:
-        return Response({'error': 'Match no encontrado'}, status=404)
+
+# -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
+    
+    
+# -------  Categorías de Eventos
+class CategoriaEventoViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaEvento.objects.all()
+    serializer_class = CategoriaEventoSerializer
+    
+# ------- Subcategorías de Eventos
+
+class SubcategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Subcategoria.objects.all()
+    serializer_class = SubcategoriaSerializer
