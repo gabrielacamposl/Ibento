@@ -14,7 +14,8 @@ import EditarIntereses from "./components/usuario/Intereses";
 import Favoritos from "./components/usuario/Favoritos";
 import Guardados from "./components/usuario/Guardados";
 import VerificarPerfil from "./components/usuario/verificar";
-
+import PerfilCheck from "./components/usuario/PerfilVerificado";
+import PerfilRepetido from "./components/usuario/profileRepeat";
 import BuscarMatches from "./components/match/BuscarMatch";
 import Perfiles from "./components/match/PerfilUsers";
 import VerMatch from "./components/match/verMatches";
@@ -69,6 +70,9 @@ export default function App() {
           <Route path="match" element={<MisMatches />} />
           <Route path="verLike" element={<Like />} />
           <Route path="chat" element={<Chat />} />
+          <Route path="profileVerify" element={<PerfilCheck />} />
+          <Route path="profileRepeat" element={<PerfilRepetido />} />
+          {/* Recuperar Contraseña */}
           
           <Route path = "recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>
           <Route path="ingresarCodigo" element={<IngresarCodigo />} />
