@@ -4,6 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+import json
 
 
 # Imports para eñ reconocimiento facial
@@ -14,11 +15,14 @@ from rest_framework.decorators import api_view, permission_classes
 # import dlib
 # from scipy.spatial import distance
 
+#Servicio de ticketmaster
+from api.services.ticketmaster import guardar_eventos_desde_json
+
 from api.utils import enviar_email_confirmacion
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 # Importar modelos 
-from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
+from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria, Evento
 from api.models import CategoriaEvento, TokenBlackList
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
@@ -39,6 +43,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Seriallizer para añadir categorías y sucategorías de los eventos
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
+                          EventoSerializer
                           )
 
 # face_detector = dlib.get_frontal_face_detector()
@@ -381,6 +386,20 @@ def obtener_mensajes(request, conversacion_id):
 # -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
     
     
+class EventoViewSet(viewsets.ModelViewSet):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+
+
+
+# --------- Crear evento
+@api_view(['POST'])
+def importar_ticketmaster(request):
+    with open("api/user/ticketmaster_events_min.json", "r", encoding="utf-8") as f:
+        eventos_json = json.load(f)
+    guardar_eventos_desde_json(eventos_json)
+    return Response({'mensaje': 'Eventos importados correctamente'})
+
 # -------  Categorías de Eventos
 class CategoriaEventoViewSet(viewsets.ModelViewSet):
     queryset = CategoriaEvento.objects.all()

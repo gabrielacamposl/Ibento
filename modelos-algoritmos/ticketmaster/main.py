@@ -94,57 +94,75 @@ def format_event_data(events):
 
         # Construir el objeto formateado
         formatted_event = {
-            "nombre": event.get('name', 'Sin nombre'),
-            "lugar": event.get('_embedded', {}).get('venues', [{}])[0].get('name', 'Lugar no especificado'),
-            "costo": prices if prices else ['Precio no disponible'],
-            "ubicacion": location,
-            "coordenadas": coordinates,
-            "descripcion": event.get('info') or event.get('pleaseNote') or 'Sin descripción disponible',
-            "clasificaciones": classi if classi else ['Sin clasificaciones'],
-            "fechas": dates if dates else ['Fecha no especificada'],
-            "img_url": image_url
+            "title": event.get('name', 'Sin nombre'),
+            "place": event.get('_embedded', {}).get('venues', [{}])[0].get('name', 'Lugar no especificado'),
+            "price": prices if prices else ['Precio no disponible'],
+            "location": location,
+            "coordinates": coordinates,
+            "description": event.get('info') or event.get('pleaseNote') or 'Sin descripción disponible',
+            "classification": classi if classi else ['Sin clasificaciones'],
+            "dates": dates if dates else ['Fecha no especificada'],
+            "img_url": image_url,
+            "url": event.get('url', 'URL no disponible')
         }
         
         formatted_events.append(formatted_event)
     
     return formatted_events
 
-def get_ticketmaster_events(size=100, city=None, dma_id=802, start_date_time=None, 
-                           end_date_time=None, keyword=None):
-    
-    # Construir URL base
-    api_url = f"https://app.ticketmaster.com/discovery/v2/events.json?apikey={TICKETMASTER_API_KEY}&size={size}"
-    
-    # Añadir parámetros opcionales si están presentes
-    if city:
-        api_url += f"&city={city}"
-    if dma_id:
-        api_url += f"&dmaId={dma_id}"
-    if start_date_time:
-        api_url += f"&startDateTime={start_date_time}"
-    if end_date_time:
-        api_url += f"&endDateTime={end_date_time}"
-    if keyword:
-        api_url += f"&keyword={keyword}"
-    
-    try:
-        # Realizar la petición a la API de TicketMaster
-        response = requests.get(api_url)
-        data = response.json()
-        
-        # Verificar si hay eventos
-        if '_embedded' not in data or 'events' not in data['_embedded']:
-            print("No events found")
-            return []
-        
-        # Formatear los datos de eventos
-        formatted_events = format_event_data(data['_embedded']['events'])
-        
-        return formatted_events
-    
-    except Exception as e:
-        print(f"Error fetching data from TicketMaster API: {e}")
-        return []
+def get_all_ticketmaster_events(size=200, city=None, dma_id=802, start_date_time=None, 
+                               end_date_time=None, keyword=None, max_pages=1):
+    all_events = []
+    page = 0
+
+    while True:
+        # Construir URL base
+        api_url = (
+            f"https://app.ticketmaster.com/discovery/v2/events.json?"
+            f"apikey={TICKETMASTER_API_KEY}&size={size}&page={page}"
+        )
+        if city:
+            api_url += f"&city={city}"
+        if dma_id:
+            api_url += f"&dmaId={dma_id}"
+        if start_date_time:
+            api_url += f"&startDateTime={start_date_time}"
+        if end_date_time:
+            api_url += f"&endDateTime={end_date_time}"
+        if keyword:
+            api_url += f"&keyword={keyword}"
+
+        try:
+            response = requests.get(api_url)
+            data = response.json()
+
+            # Verificar si hay eventos
+            if '_embedded' not in data or 'events' not in data['_embedded']:
+                print(f"No more events found on page {page}.")
+                break
+
+            events = data['_embedded']['events']
+            formatted_events = format_event_data(events)
+            all_events.extend(formatted_events)
+
+            print(f"Fetched {len(events)} events from page {page}.")
+
+            # Si la cantidad de eventos es menor al máximo, ya no hay más páginas
+            if len(events) < size:
+                break
+
+            page += 1
+
+            # Seguridad: evitar bucles infinitos
+            if page >= max_pages:
+                print("Reached max_pages limit.")
+                break
+
+        except Exception as e:
+            print(f"Error fetching data from TicketMaster API: {e}")
+            break
+
+    return all_events
 
 def save_events_to_json(events, filename='ticketmaster_events.json'):
     try:
@@ -157,25 +175,27 @@ def save_events_to_json(events, filename='ticketmaster_events.json'):
         return False
 
 if __name__ == "__main__":
-    
-    # Obtener eventos
-    print("Fetching events from Ticketmaster...")
-    events = get_ticketmaster_events(
+
+    print("Fetching all events from Ticketmaster (with pagination)...")
+    events = get_all_ticketmaster_events(
         size=200,
+        max_pages=1
     )
+    print(f"\nFound {len(events)} events in total")
     
     # Mostrar información de eventos
     print(f"\nFound {len(events)} events")
     for i, event in enumerate(events[:5]):
         print(f"\n--- Event {i+1} ---")
-        print(f"Nombre: {event['nombre']}")
-        print(f"Lugar: {event['lugar']}")
-        print(f"Ubicación: {event['ubicacion']}")
-        print(f"Coordenadas: {event['coordenadas']}")
-        print(f"Fechas: {event['fechas']}")
-        print(f"Descripción: {event['descripcion']}")
-        print(f"Clasificaciones: {event['clasificaciones']}")
+        print(f"Nombre: {event['title']}")
+        print(f"Lugar: {event['place']}")
+        print(f"Ubicación: {event['location']}")
+        print(f"Coordenadas: {event['coordinates']}")
+        print(f"Fechas: {event['dates']}")
+        print(f"Descripción: {event['description']}")
+        print(f"Clasificaciones: {event['classification']}")
+        print(f"URL: {event['url']}")
     
     # Guardar eventos en JSON
-    filename = f"ticketmaster_events.json"
+    filename = f"ticketmaster_events_min.json"
     save_events_to_json(events, filename)
