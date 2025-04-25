@@ -26,12 +26,12 @@ function Cards() {
    const url = "../eventos/" + title;
    return (
        <>
-                <Link to={url} className="flex flex-row flex-none p-2 h-auto w-48 drop-shadow-xl items-center lg:w-72">
+                <Link to={url} className="flex flex-row flex-none p-2 h-auto w-40 drop-shadow-xl items-center lg:w-72">
                    <div className="relative bg-white w-full rounded-xl flex flex-row flex p-1 shadow-md">
                        <div className='relative w-full h-full lg:h-48'>
                            <img 
                            src={imageUrl} 
-                           className="rounded-xl object-cover w-full h-42 lg:h-48 " 
+                           className="rounded-xl object-cover w-full h-40 lg:h-48 " 
                            alt={title} 
                            />
                            <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>

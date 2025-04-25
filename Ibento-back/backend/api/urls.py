@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import (crear_usuario, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
+                            EventoViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -13,7 +14,8 @@ from api.user.views import (crear_usuario,
                             obtener_matches_usuario,
                             obtener_conversacion,
                             obtener_mensajes,
-                            enviar_mensaje
+                            enviar_mensaje,
+                            importar_ticketmaster
                             )
 
 
@@ -21,6 +23,7 @@ router = DefaultRouter()
 
 router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
 router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
+router.register(r'eventos', EventoViewSet, basename='evento')
 
 urlpatterns = [
 
@@ -49,7 +52,11 @@ urlpatterns = [
 
     # Mensajes
     path('mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
-    path('mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes_usuario')
+    path('mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes_usuario'),
+
+    #Otras
+    path('', include(router.urls)),
+    path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster')
 
 ]
 

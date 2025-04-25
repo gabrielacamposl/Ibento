@@ -111,7 +111,7 @@ export function EventCard({ id, imageUrl, title, date, location, price, url }) {
     const urls = "../eventos/" + id;
     return (
         <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
-            <div className="bg-white w-full rounded-lg flex flex-row">
+            <div className="bg-white w-full rounded-lg flex flex-row items-center">
                 <img
                 src={`/${imageUrl}`}
                 className="rounded-lg object-cover w-40 h-40" 
