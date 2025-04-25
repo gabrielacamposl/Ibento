@@ -5,7 +5,7 @@
 interface ListEvent {
     _id: string;
     title: string;
-    img: string;
+    imgs: [];
     fecha: string;
     //numLikes: number;
 
@@ -55,7 +55,7 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
             <div className="flex flex-row space-x-1 w-full h-auto p-2">  
                 {listEvents.map((event, index) => (
                     console.log(index),
-                    <Card key={event._id} id = {event._id} img={event.img} title={event.title} likes={200} />
+                    <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={200} />
                 ))}
             </div>
             </div>
@@ -65,13 +65,13 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
   
   interface CardProps {
     id : string;
-    img: string;
+    imgs: string[];
     title: string;
     key: string;
     likes: number
   }
 
-  function Card({ id, img, title, key, likes }: CardProps) {
+  function Card({ id, imgs, title, key, likes }: CardProps) {
     const url = "../eventos/" + id;
 
     let likeString = "";
@@ -89,7 +89,7 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
             <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
                 <div className='relative w-full h-36 lg:h-48'>
                     <img 
-                    src={`/${img}`} 
+                    src={`/${imgs[0]}`} 
                     className="rounded-xl object-cover w-full h-36 lg:h-48 " 
                     alt={title} 
                     />
