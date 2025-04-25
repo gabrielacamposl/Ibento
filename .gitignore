@@ -18,5 +18,7 @@ Ibento-backend/backend/ibento-8e4fc.json
 .idea/
 *.sublime-workspace
 
-modelo-algoritmos/INEValidation/dataset/
+
+modelos-algoritmos/INEValidation/dataset/
 node_modules/
+modelos-algoritmos/face-recognition-comp/envface/
