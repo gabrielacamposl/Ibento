@@ -15,7 +15,10 @@ function Page() {
     <div className="w-full">
       {/* Mobile View */}
       <div className="md:hidden min-h-screen flex flex-col gap-1 items-center w-screen h-auto bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100">
-        <div className="mt-10 w-11/12">
+        <div className="flex">
+          <h3 id="titulo" className="mt-5 text-xl font-bold text-black text-left">Buscar</h3>
+        </div>
+        <div className="w-11/12">
           <Search placeholder="Buscar eventos..." />
         </div>
         <Suspense fallback={<CardsSkeleton />}>

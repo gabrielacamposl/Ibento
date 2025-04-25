@@ -205,3 +205,24 @@ class Subcategoria(models.Model):
 
     def __str__(self):
         return self.nombre_subcategoria
+    
+
+#   Clase para los eventos
+
+class Evento(models.Model):
+    _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
+    title = models.CharField(max_length=100)
+    place = models.CharField(max_length=100)
+    price = models.JSONField(default=list, null=True, blank=True)
+    location = models.CharField(max_length=100)
+    coordenates = models.JSONField(default=list, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    classifications = models.JSONField(default=list, null=True, blank=True)
+    dates =  models.JSONField(default=list, null=True, blank=True)
+    imgs = models.JSONField(default=list, null=True, blank=True)
+    url = models.CharField(max_length=100)
+    numLike = models.IntegerField(default=0)
+    numSaves = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.title
