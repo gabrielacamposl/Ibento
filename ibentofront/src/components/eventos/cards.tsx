@@ -2,7 +2,17 @@
  import React from 'react';
  import { Link } from 'react-router-dom';
 
-function Cards() {
+interface ListEvent {
+    _id: string;
+    title: string;
+    img: string;
+    fecha: string;
+    //numLikes: number;
+
+
+}
+
+function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) {
 
     const populares = [
         {
@@ -43,9 +53,9 @@ function Cards() {
             <div className="w-full overflow-x-auto">   
             {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
             <div className="flex flex-row space-x-1 w-full h-auto p-2">  
-                {populares.map((event, index) => (
+                {listEvents.map((event, index) => (
                     console.log(index),
-                    <Card key={event.id} id = {event.id} img={event.img} title={event.title} likes={event.numLikes} />
+                    <Card key={event._id} id = {event._id} img={event.img} title={event.title} likes={200} />
                 ))}
             </div>
             </div>

@@ -105,8 +105,8 @@ export default function EventList({onResultCount }) {
     }, [filteredEvents.length, onResultCount]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+        <div className="container mx-auto px-4">
+            <div className="flex flex-row flex-wrap items-center justify-center py-4 gap-4">
                 {filteredEvents.map((event) => (
                     <EventCard
                         key={event.id}

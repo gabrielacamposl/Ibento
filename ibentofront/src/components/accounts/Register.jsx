@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../api";
+import api from '../../axiosConfig';
 import { InputText } from "primereact/inputtext";
 import { inputStyles } from "../../styles/styles";
 import Container from "@mui/material/Container";
@@ -56,27 +57,24 @@ export default function Register() {
     }
 
     try {
-      const response = await registerUser({
-        nombre: form.nombre,
-        apellido: form.apellido,
-        email: form.email,
-        password: form.password,
-      });
-
-      console.log("Respuesta del servidor:", response);
-
-      if (response.mensaje) {
-        setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta." + response.mensaje);
-        localStorage.setItem("email", form.email);
-        localStorage.setItem("password", form.password);
-        localStorage.setItem("usuario_id", response.usuarioId);  // Guarda el usuarioId
+      const res = await api.post('crear-cuenta/', form);
+    
+      console.log("Respuesta del servidor:", res.data);
+    
+      if (res.data.mensaje) {
+        setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta. " + res.data.mensaje);
+    
         setTimeout(() => navigate("/verificar-correo"), 2000);
       } else {
         setMessage("Error al registrar usuario");
       }
-    } catch (error) {
-      setMessage("Hubo un error en el servidor");
+    
+    } catch (err) {
+      console.error("Error en la creación de cuenta:", err);
+      const mensajeError = err.response?.data?.mensaje || 'Hubo un error en el servidor';
+      setMessage("Error creando cuenta: " + mensajeError);
     }
+    
   }
 
   return (

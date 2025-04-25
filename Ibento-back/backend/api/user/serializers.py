@@ -11,7 +11,8 @@ from api.models import (Usuario,
                         Matches, 
                         Conversacion, 
                         Mensaje, 
-                        CategoriaEvento)
+                        CategoriaEvento,
+                        Evento)
 
 
 
@@ -206,4 +207,15 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoriaEvento
         fields = ['_id', 'nombre', 'subcategorias']
+
+# ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
+
+class EventoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = '__all__'
+
+    
+
+
 

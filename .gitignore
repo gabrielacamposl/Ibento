@@ -1,22 +1,24 @@
-# Ignorar entorno virtual de Python
+#Ignorar entorno virtual de Python
 env/
 backend/venv/
-ibento-backend/backend/__pycache__/
+ibento-backend/backend/pycache/
 ibento-backend/backend/*.pyc
 ibento-backend/backend/db.sqlite3
 
-# Ignorar dependencias de Node.js
+#Ignorar dependencias de Node.js
 ibento-front/node_modules/
 
 #Claves Firebase
 Ibento-backend/backend/ibento-8e4fc.json
 
-# Archivos de entorno
+#Archivos de entorno
 *.env
 
 .vscode/
 .idea/
 *.sublime-workspace
 
-modelo-algoritmos/INEValidation/dataset/
+
+modelos-algoritmos/INEValidation/dataset/
 node_modules/
+modelos-algoritmos/face-recognition-comp/envface/
