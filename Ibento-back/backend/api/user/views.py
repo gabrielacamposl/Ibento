@@ -384,13 +384,18 @@ def obtener_mensajes(request, conversacion_id):
 
 
 # -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
-    
-    
+
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
 
-
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        for evento in queryset:
+            print("imgs:", evento.imgs, type(evento.imgs))
+        serializer = self.get_serializer(queryset, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
 
 # --------- Crear evento
 @api_view(['POST'])

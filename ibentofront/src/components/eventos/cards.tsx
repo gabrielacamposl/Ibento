@@ -5,11 +5,16 @@
 interface ListEvent {
     _id: string;
     title: string;
+    place: string;
+    cost: [];
+    location: string;
+    coordenates: [];
+    description: string;
+    dates: [];
     imgs: [];
-    fecha: string;
+    url: string;
+    avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
     //numLikes: number;
-
-
 }
 
 function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) {
@@ -45,6 +50,8 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
             numLikes: 250,
         }
     ];
+
+    console.log(listEvents[0])
 
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border p-4">
@@ -89,7 +96,7 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
             <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
                 <div className='relative w-full h-36 lg:h-48'>
                     <img 
-                    src={`/${imgs[0]}`} 
+                    src={`${imgs[0]}`} 
                     className="rounded-xl object-cover w-full h-36 lg:h-48 " 
                     alt={title} 
                     />

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth import get_user_model
@@ -214,6 +215,26 @@ class EventoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evento
         fields = '__all__'
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        # Lista de campos que deberían ser arrays
+        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'cost']
+        
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+                    
+        return data
 
     
 

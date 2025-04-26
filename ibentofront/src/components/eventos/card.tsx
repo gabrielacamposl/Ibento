@@ -6,11 +6,29 @@ import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
 
 
+interface ListEvent {
+    _id: string;
+    title: string;
+    place: string;
+    cost: string[];
+    location: string;
+    coordenates: string[];
+    description: string;
+    dates: string[];
+    imgs: ([]);
+    url: string;
+    avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
+    //numLikes: number;
+    //numSaves: number;
+  }
+
 export default function CardWrapper(
     {
-        name
+        name,
+        listEvents,
     }: {
         name: string;
+        listEvents: ListEvent[] 
     }
 ) {
 
@@ -164,21 +182,21 @@ export default function CardWrapper(
         <>
         <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
-                {name === "Cercanos a mí" && cercanos.map((event, index) => (
-                    console.log(event.id),
-                    <Card key={event.id} id={event.id} img={event.img} title={event.title} fecha={event.fecha} numLikes={event.numLikes} avatars={event.avatars} />
+                {name === "Cercanos a mí" && listEvents.map((event, index) => (
+                    console.log(event.dates),
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
-                {name === "Próximos eventos" && proximos.map((event, index) => (
-                    console.log(event.id),
-                    <Card key={event.id} id={event.id} img={event.img} title={event.title} fecha={event.fecha} numLikes={event.numLikes} avatars={event.avatars} />
+                {name === "Próximos eventos" && listEvents.map((event, index) => (
+                    console.log(event._id),
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
-                {name === "Culturales" && culturales.map((event, index) => (   
-                    console.log(event.id), 
-                    <Card key={event.id} id={event.id} img={event.img} title={event.title} fecha={event.fecha} numLikes={event.numLikes} avatars={event.avatars} />
+                {name === "Culturales" && listEvents.map((event, index) => (   
+                    console.log(event._id), 
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
-                {name === "Musicales" && musicales.map((event, index) => (
-                    console.log(event.id),
-                    <Card key={event.id} id={event.id} img={event.img} title={event.title} fecha={event.fecha} numLikes={event.numLikes} avatars={event.avatars} />
+                {name === "Musicales" && listEvents.map((event, index) => (
+                    console.log(event._id),
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
                 ))}
             </div>
         </div>
@@ -191,7 +209,7 @@ export default function CardWrapper(
 export function Card({
     key,
     id,
-    img, 
+    imgs, 
     title,
     numLikes,
     fecha,
@@ -199,16 +217,16 @@ export function Card({
     }: {
     key: string;
     id: string;
-    img: string;
+    imgs: string[];
     title: string;
     numLikes: number;
-    fecha: string;
+    fecha: string[];
     avatars: string[];
     }) {
 
 
-    if (!img) {
-        img = "imgIcon.jpeg";
+    if (!imgs) {
+        imgs = ["imgIcon.jpeg"];
     }
 
     if (!title) {
@@ -235,7 +253,8 @@ export function Card({
     }
 
     const hoy = new Date();
-    const fechaObjetivo = new Date(fecha);
+    console.log(fecha)
+    const fechaObjetivo = new Date(fecha[0]);
     hoy.setHours(0, 0, 0, 0);
     fechaObjetivo.setHours(0, 0, 0, 0);
     const diferenciaMs = fechaObjetivo.getTime() - hoy.getTime();
@@ -262,7 +281,7 @@ export function Card({
     return (
         <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-76 w-48 drop-shadow-xl ">
             <img
-            src={`/${img}`}
+            src={`${imgs[0]}`}
             className="rounded-lg object-cover w-full h-48" 
             alt={title}/>
             <h2 className="text-base font-medium text-black text-left my-2">{title}</h2>
