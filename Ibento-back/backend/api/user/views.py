@@ -469,10 +469,6 @@ def obtener_mensajes(request, conversacion_id):
     serializer = MensajesSerializer(resultado_paginado, many=True)
     return paginator.get_paginated_response(serializer.data)
 
-
-
-# ----------------------------------- CREAR EVENTOS ---------------------------------------------
-
 # # --------- Crear evento
 @api_view(['POST'])
 def importar_ticketmaster(request):
