@@ -1,13 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import 'primereact/resources/primereact.min.css'; //core css
+
+
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
 import Logout from "./components/accounts/logout";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
 import EventosPreferencias from "./components/preferences/EventosPreferencias";
-
-
+// Recuperar Cuenta
+import RecuperarContrasena from "./components/accounts/resetPassword/recuperarContrasena";
+import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
+import NuevaContrasena from "./components/accounts/resetPassword/nuevaContrasena";  
 
 import Perfil from "./components/usuario/Perfil";
 import SideBar from "./components/usuario/sidebar";
@@ -30,9 +35,6 @@ import Chat from "./components/match/chat";
 
 import EventoPage from "./components/eventos/eventoPage";  
 import PrincipalEventos from "./components/eventos/principalEventos";
-import RecuperarContrasena from "./recuperarContrasena";
-import IngresarCodigo from "./ingresarCodigo";
-import NuevaContrasena from "./nuevaContrasena";  
 import MainLayout from "./layouts/MainLayout";
 import Busqueda  from "./components/eventos/busqueda";
 
@@ -44,7 +46,7 @@ export default function App() {
     <Routes>
       {/* Auth & Register*/}
       <Route path="/" element={<Login/>} />
-      <Route path="/registrar" element={<Register />} />
+      <Route path="/crear-cuenta" element={<Register />} />
       <Route path="/verificar-correo" element={<VerificarCorreo />} />
       <Route path="/confirmar/:token" element={<Confirm/>} />
 
@@ -56,7 +58,7 @@ export default function App() {
         {/* Matches*/}
 
         
-        <Route path="/principal" element={<MainLayout />}>
+        <Route path="/ibento" element={<MainLayout />}>
 
           {/*Eventos*/}
           <Route path="eventos" element={<PrincipalEventos />}/>
@@ -78,12 +80,12 @@ export default function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="profileVerify" element={<PerfilCheck />} />
           <Route path="profileRepeat" element={<PerfilRepetido />} />
-          <Route path="sidebar" element={<SideBar />} />
           {/* Recuperar Contraseña */}
-          
-          <Route path = "recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>
-          <Route path="ingresarCodigo" element={<IngresarCodigo />} />
-          <Route path="nuevaContrasena" element={<NuevaContrasena />} />
+          <Route path = "recuperar-cuenta" element = {<RecuperarContrasena/>}/>
+          <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />
+          <Route path="recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
+
+
           <Route path="verificar" element={<VerificarPerfil />} />
 
         </Route>

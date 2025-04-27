@@ -41,6 +41,11 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_confirmed = models.BooleanField(default=False)
     preferencias_evento = models.JSONField(default=list, blank=True, null=True)
 
+    # Cmabiar contraseña
+    codigo_reset_password = models.CharField(max_length=6, null=True, blank=True)
+    codigo_reset_password_expiration = models.DateTimeField(null=True, blank=True)
+
+
      # Preferenicas de eventos
     save_events = models.JSONField(default=list, blank=True, null=True)
     favourite_events = models.JSONField(default=list, blank=True, null=True)
@@ -141,31 +146,27 @@ class Mensaje(models.Model):
         return f"{self.remitente} -> {self.receptor}: {self.mensaje}"
 
 
-# Envío de Mensajes -> Notificaciones Push
-
-# class UserDevice(models.Model):
-#     user = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-#     device = models.OneToOneField(GCMDevice, on_delete=models.CASCADE)
-
-
-# class Evento(models.Model):
-#     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-#     organizador = models.ForeignKey(
-#         Usuario, on_delete=models.CASCADE, related_name="eventos", to_field="_id")
-#     nombre_evento = models.CharField(max_length=100, null=True, blank=True)
-#     descripcion_evento = models.TextField(null=True, blank=True)
-#     lugar_maps = models.CharField(max_length=100, null=True, blank=True)
-#     fecha_evento= models.DateField(null=True, blank=True)
-#     hora_evento = models.TimeField(null=True, blank=True)
-#     categorias_tags = models.JSONField(default=list, blank=True, null=True)
-#     foto_evento = models.ImageField(upload_to='fotos_evento/', null=True, blank=True)
-#     is_boletos = models.BooleanField(default=False)
-#     boletos = models.JSONField(default=list, blank=True, null=True)
-
-#     def _str_(self):
-#         return self.nombre_evento
     
-    
+#-------------------------------------- CREACIÓN DE EVENTOS ---------------------------------------------------
+
+#   Clase para los eventos
+class Evento(models.Model):
+    _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
+    title = models.CharField(max_length=100, default="")
+    place = models.CharField(max_length=100, default="")
+    price = models.JSONField(default=list, null=True, blank=True)
+    location = models.CharField(max_length=100)
+    coordenates = models.JSONField(default=list, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    classifications = models.JSONField(default=list, null=True, blank=True)
+    dates =  models.JSONField(default=list, null=True, blank=True)
+    imgs = models.JSONField(default=list, null=True, blank=True)
+    url = models.CharField(max_length=100, default="")
+    numLike = models.IntegerField(default=0)
+    numSaves = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.title
     
 # ------------------------------------------- FUNCIONES PARA ADMIN -------------------------------------------    
     
@@ -207,22 +208,3 @@ class Subcategoria(models.Model):
         return self.nombre_subcategoria
     
 
-#   Clase para los eventos
-
-class Evento(models.Model):
-    _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
-    title = models.CharField(max_length=100)
-    place = models.CharField(max_length=100)
-    price = models.JSONField(default=list, null=True, blank=True)
-    location = models.CharField(max_length=100)
-    coordenates = models.JSONField(default=list, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    classifications = models.JSONField(default=list, null=True, blank=True)
-    dates =  models.JSONField(default=list, null=True, blank=True)
-    imgs = models.JSONField(default=list, null=True, blank=True)
-    url = models.CharField(max_length=100)
-    numLike = models.IntegerField(default=0)
-    numSaves = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.title

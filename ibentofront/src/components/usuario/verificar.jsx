@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { buttonStyle } from "../../styles/styles";
-import Webcam from 'react-webcam';
+//import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
 const verificar = () => {
     const navigate = useNavigate();

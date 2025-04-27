@@ -11,6 +11,49 @@ load_dotenv()
 # Cargar variables de entorno desde el archivo .env
 TICKETMASTER_API_KEY = os.getenv("API_KEY_TICKETMASTER")
 
+classification_translations = {
+    'Arts & Theatre': 'Arte y Teatro',
+    'Concerts': 'Conciertos',
+    'Sports': 'Deportes',
+    'Family': 'Familia',
+    'Concerts' : 'Conciertos',
+    'Music': 'Música', # Puede que necesites este si 'Concerts' es un subtipo
+    'Pop': 'Pop',
+    'Rock': 'Rock',
+    'Hip-Hop/Rap': 'Hip-Hop/Rap',
+    'Electronic': 'Electrónica',
+    'Classical': 'Música Clásica',
+    'Jazz': 'Jazz',
+    'Blues': 'Blues',
+    'R&B': 'R&B',
+    'Country': 'Country',
+    'Latin': 'Música Latina',
+    'Alternative': 'Alternativa',
+    'Comedy': 'Comedia',
+    'Theater': 'Teatro',
+    'Arts & Theatre' : 'Artes y Teatro',
+    'Musical': 'Musical',
+    'Opera': 'Ópera',
+    'Ballet': 'Ballet',
+    'Dance': 'Danza',
+    'Broadway': 'Broadway',
+    'Circus': 'Circo',
+    'Exhibition': 'Exposición',
+    'Festival': 'Festival',
+    'NCAA Football': 'Fútbol Americano NCAA',
+    'NBA Basketball': 'Baloncesto NBA',
+    'MLB Baseball': 'Béisbol MLB',
+    'NHL Hockey': 'Hockey NHL',
+    'Soccer': 'Fútbol',
+    'MMA': 'MMA',
+    'WWE': 'WWE',
+    'Boxing': 'Boxeo',
+    'Tennis': 'Tenis',
+    'Golf': 'Golf',
+    'Motorsports': 'Deportes de Motor',
+    # Agrega más traducciones según las clasificaciones que encuentres en la API
+}
+
 def format_event_data(events):
     
     if not events:
@@ -41,12 +84,20 @@ def format_event_data(events):
                 if additional_dates > 1:
                     dates.append(f"+{additional_dates - 1} más fechas")
         
-        # Extraer imagen
-        image_url = None
+        # Extraer imagen (obtener 3 imágenes en lugar de 1)
+        image_urls = []
         if 'images' in event and event['images']:
-            imgs = next((img for img in event['images'] if img.get('ratio') == '16_9' and img.get('width', 0) > 500), None)
-            image_url = imgs['url'] if imgs else event['images'][0]['url']
-        
+            # Prioritize 16_9 ratio images > 500px width
+            primary_images = [img for img in event['images'] if img.get('ratio') == '16_9' and img.get('width', 0) > 500]
+            if primary_images:
+                image_urls.extend([img['url'] for img in primary_images[:3]])
+            
+            # If not enough primary images, add other images
+            if len(image_urls) < 3:
+                other_images = [img['url'] for img in event['images'] if img not in primary_images]
+                image_urls.extend(other_images[:3 - len(image_urls)])
+
+
         # Extraer coordenadas geográficas
         coordinates = None
         if '_embedded' in event and 'venues' in event['_embedded'] and event['_embedded']['venues']:
@@ -58,38 +109,37 @@ def format_event_data(events):
                 }
         
         # Construir ubicación
+        location = 'Ubicación no especificada'
         if '_embedded' in event and 'venues' in event['_embedded'] and event['_embedded']['venues']:
             venue = event['_embedded']['venues'][0]
             city = venue.get('city', {}).get('name', '')
             state = venue.get('state', {}).get('name', '')
             country = venue.get('country', {}).get('name', '')
             address = venue.get('address', {}).get('line1', '')
-            location = ""
-            if address:
-                location = address + ", "
-            if city:
-                location += city + ", "
-            if state:
-                location += state + ", "
-            if country:
-                location += country
-            if location == "":
-                location = 'Ubicación no especificada'
+            location_parts = [part for part in [address, city, state, country] if part]
+            if location_parts:
+                location = ", ".join(location_parts)
                 
-        #Clasificaciones
+        # Clasificaciones
         classi = []
         if 'classifications' in event:
             classifications = event['classifications']
             for classification in classifications:
                 if 'segment' in classification:
                     segment = classification['segment'].get('name', 'Sin clasificación')
-                    classi.append(segment)
+                    # Traducir el segmento si existe en el diccionario
+                    translated_segment = classification_translations.get(segment, segment) # Si no encuentra traducción, usa el original
+                    classi.append(translated_segment)
                 if 'genre' in classification:
                     genre = classification['genre'].get('name', 'Sin género')
-                    classi.append(genre)
+                    # Traducir el género si existe en el diccionario
+                    translated_genre = classification_translations.get(genre, genre)
+                    classi.append(translated_genre)
                 if 'subGenre' in classification:
                     sub_genre = classification['subGenre'].get('name', 'Sin subgénero')
-                    classi.append(sub_genre)
+                    # Traducir el subgénero si existe en el diccionario
+                    translated_sub_genre = classification_translations.get(sub_genre, sub_genre)
+                    classi.append(translated_sub_genre)
 
 
         # Construir el objeto formateado
@@ -102,7 +152,7 @@ def format_event_data(events):
             "description": event.get('info') or event.get('pleaseNote') or 'Sin descripción disponible',
             "classification": classi if classi else ['Sin clasificaciones'],
             "dates": dates if dates else ['Fecha no especificada'],
-            "img_url": image_url,
+            "img_urls": image_urls,  # Changed from img_url to img_urls
             "url": event.get('url', 'URL no disponible')
         }
         
@@ -179,7 +229,7 @@ if __name__ == "__main__":
     print("Fetching all events from Ticketmaster (with pagination)...")
     events = get_all_ticketmaster_events(
         size=200,
-        max_pages=1
+        max_pages=10
     )
     print(f"\nFound {len(events)} events in total")
     
@@ -194,8 +244,9 @@ if __name__ == "__main__":
         print(f"Fechas: {event['dates']}")
         print(f"Descripción: {event['description']}")
         print(f"Clasificaciones: {event['classification']}")
+        print(f"URLs de Imagen: {event['img_urls']}") # Changed to print the list of URLs
         print(f"URL: {event['url']}")
     
     # Guardar eventos en JSON
-    filename = f"ticketmaster_events_min.json"
+    filename = f"ticketmaster_events_max.json"
     save_events_to_json(events, filename)
