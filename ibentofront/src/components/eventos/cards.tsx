@@ -14,57 +14,41 @@ interface ListEvent {
     imgs: [];
     url: string;
     avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
-    //numLikes: number;
+    numLikes: number;
 }
 
-function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) {
-
-    const populares = [
-        {
-            id: "ECIP1-1",
-            title: "Populares 1: League of legends Finals",
-            img: "lolicon.jpeg",
-            fecha: "2025-04-27",
-            numLikes: 1500,
-        },
-        {
-            id: "ECIP1-2",
-            title: "Populares 2: Morat",
-            img: "moraticon.jpg",
-            fecha: "2025-05-05",
-            numLikes: 1000000,
-
-        },
-        {
-            id: "ECIP1-3",
-            title: "Populares 3: The Bities",
-            img: "btsicon.jpg",
-            fecha: "2025-06-12",
-            numLikes: 10000,
-        },
-        {
-            id: "ECIP1-4",
-            title: "Populares 4: Harry Styles todo precioso",
-            img: "harryicon.jpg",
-            fecha: "2025-04-21",
-            numLikes: 250,
-        }
-    ];
-
-    console.log(listEvents[0])
+function Cards({ 
+    listEvents,
+    name,
+ }: { 
+    listEvents: ListEvent[];
+    name : string;
+  } 
+) {
 
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border p-4">
+            <h3 className="mb-4 text-xl font-bold text-black text-left">Recomendados para ti</h3>
+            {/* Contenedor con scroll horizontal */}
+            <div className="w-full overflow-x-auto">   
+                {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
+                <div className="flex flex-row space-x-1 w-full h-auto p-2">  
+                    {listEvents.map((event, index) => (
+                        console.log(index),
+                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLikes} />
+                    ))}
+                </div>
+            </div>
             <h3 className="mb-4 text-xl font-bold text-black text-left">Populares</h3>
             {/* Contenedor con scroll horizontal */}
             <div className="w-full overflow-x-auto">   
-            {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-            <div className="flex flex-row space-x-1 w-full h-auto p-2">  
-                {listEvents.map((event, index) => (
-                    console.log(index),
-                    <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={200} />
-                ))}
-            </div>
+                {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
+                <div className="flex flex-row space-x-1 w-full h-auto p-2">  
+                    {listEvents.map((event, index) => (
+                        console.log(index),
+                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLikes} />
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -96,7 +80,7 @@ function Cards({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] })
             <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
                 <div className='relative w-full h-36 lg:h-48'>
                     <img 
-                    src={`${imgs[0]}`} 
+                    src={`${imgs[0][0]}`} 
                     className="rounded-xl object-cover w-full h-36 lg:h-48 " 
                     alt={title} 
                     />
