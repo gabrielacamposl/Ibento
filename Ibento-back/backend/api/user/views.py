@@ -16,14 +16,14 @@ import random
 # from scipy.spatial import distance
 
 #Servicio de ticketmaster
-#from api.services.ticketmaster import guardar_eventos_desde_json
+from api.services.ticketmaster import guardar_eventos_desde_json
 from django.utils import timezone
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 # Importar modelos 
-from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
+from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria, Evento
 from api.models import CategoriaEvento, TokenBlackList
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
@@ -48,6 +48,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Seriallizer para añadir categorías y sucategorías de los eventos
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
+                          # Seriallizer de Eventos
+                          EventoSerializer
                           )
 
 # face_detector = dlib.get_frontal_face_detector()
@@ -58,19 +60,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 
 # --------- Crear un nuevo usuario
-
-# class UsuarioViewSet(viewsets.ModelViewSet):
-#     queryset = Usuario.objects.all()
-#     serializer_class = UsuarioSerializer
-
-#     def create(self, request, *args, **kwargs):
-#         usuario = UsuarioSerializer(data=request.data)
-#         if usuario.is_valid():
-#             nuevo_usuario = usuario.save()
-#             enviar_email_confirmacion(nuevo_usuario)  # Enviar email con el token
-#             return Response({"mensaje": "Usuario registrado. Revisa tu correo para confirmarlo."}, status=status.HTTP_201_CREATED)
-#         return Response(usuario.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -148,7 +137,6 @@ def logout_usuario(request):
 
 
 # ------------- CAMBIAR CONTRASEÑA -----------------------------------------------------------------
-
 
 # ---- Enviar Token al correo
 @api_view(['POST'])
@@ -482,17 +470,35 @@ def obtener_mensajes(request, conversacion_id):
     return paginator.get_paginated_response(serializer.data)
 
 
-# -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
-    
 
+# ----------------------------------- CREAR EVENTOS ---------------------------------------------
 
 # # --------- Crear evento
-# @api_view(['POST'])
-# def importar_ticketmaster(request):
-#     with open("api/user/ticketmaster_events_min.json", "r", encoding="utf-8") as f:
-#         eventos_json = json.load(f)
-#     guardar_eventos_desde_json(eventos_json)
-#     return Response({'mensaje': 'Eventos importados correctamente'})
+@api_view(['POST'])
+def importar_ticketmaster(request):
+    with open("api/user/ticketmaster_events_max.json", "r", encoding="utf-8") as f:
+        eventos_json = json.load(f)
+    guardar_eventos_desde_json(eventos_json)
+    return Response({'mensaje': 'Eventos importados correctamente'})
+
+
+class EventoViewSet(viewsets.ModelViewSet):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        for evento in queryset:
+            print("imgs:", evento.imgs, type(evento.imgs))
+        serializer = self.get_serializer(queryset, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+
+
+
+
+# -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
+
 
 # -------  Categorías de Eventos
 class CategoriaEventoViewSet(viewsets.ModelViewSet):

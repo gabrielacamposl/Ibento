@@ -5,7 +5,7 @@ from api.user.views import password_reset_request, password_reset_validate, pass
 from api.user.views import (crear_usuario, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
-                           # EventoViewSet,
+                            EventoViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -16,7 +16,7 @@ from api.user.views import (crear_usuario,
                             obtener_conversacion,
                             obtener_mensajes,
                             enviar_mensaje,
-                            #importar_ticketmaster
+                            importar_ticketmaster
                             )
 
 
@@ -24,7 +24,7 @@ router = DefaultRouter()
 
 router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
 router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
-# router.register(r'eventos', EventoViewSet, basename='evento')
+router.register(r'eventos', EventoViewSet, basename='evento')
 
 urlpatterns = [
 
@@ -63,8 +63,8 @@ urlpatterns = [
     path('mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes_usuario'),
 
     #Otras
-  #  path('', include(router.urls)),
- #   path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster')
+    path('', include(router.urls)),
+    path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster')
 
 ]
 

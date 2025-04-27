@@ -12,6 +12,7 @@ from api.models import (Usuario,
                         Conversacion, 
                         Mensaje, 
                         CategoriaEvento,
+                        Evento
                         )
 
 
@@ -216,7 +217,34 @@ class ConversacionSerializer (serializers.ModelSerializer):
        fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]
        
        
-    
+# ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
+
+class EventoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = 'all'
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        #Lista de campos que deberían ser arrays
+        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'price']
+
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+
+        return data
+
+
+
 # ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
 
 class SubcategoriaSerializer(serializers.ModelSerializer):
@@ -231,14 +259,6 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
         model = CategoriaEvento
         fields = ['_id', 'nombre', 'subcategorias']
 
-# ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
-
-# class EventoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Evento
-#         fields = '__all__'
-
-    
 
 
 
