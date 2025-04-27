@@ -43,7 +43,7 @@ function BottomNav() {
       </NavLink>
 
       {/* Explore Link */}
-      <NavLink to="/principal/verPerfil" className={getNavLinkClass}>
+      <NavLink to="/principal/matches" className={getNavLinkClass}>
         <FaceSmileOutline className="mb-1 h-6 w-6" />
       </NavLink>
 
