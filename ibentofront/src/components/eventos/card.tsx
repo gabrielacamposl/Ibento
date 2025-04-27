@@ -17,9 +17,9 @@ interface ListEvent {
     dates: string[];
     imgs: ([]);
     url: string;
-    avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
-    //numLikes: number;
-    //numSaves: number;
+    avatars: ["/avatar1.jpg", "/avatar2.png", "/avatar3.png"];
+    numLikes : number;
+    numSaves : number;
   }
 
 export default function CardWrapper(
@@ -34,169 +34,25 @@ export default function CardWrapper(
 
     console.log(name)
 
-    const cercanos = [
-        {
-            id: "ECIP1-1",
-            title: "Cercano 1: League of legends Finals",
-            img: "lolicon.jpeg",
-            fecha: "2025-04-27",
-            numLikes: 1500,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "ECIP1-2",
-            title: "Cercano 2: Morat",
-            img: "moraticon.jpg",
-            fecha: "2025-05-05",
-            numLikes: 1000000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-
-        },
-        {
-            id: "ECIP1-3",
-            title: "Cercano 3: The Bities",
-            img: "btsicon.jpg",
-            fecha: "2025-06-12",
-            numLikes: 10000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "ECIP1-4",
-            title: "Cercano 4: Harry Styles todo precioso",
-            img: "harryicon.jpg",
-            fecha: "2025-04-21",
-            numLikes: 250,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        }
-    ];
-
-    const proximos = [
-        {
-            id: "EPIP1-1",
-            title: "Proximos 1: League of legends Finals",
-            img: "lolicon.jpeg",
-            fecha: "2025-04-27",
-            numLikes: 1500,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "EPIP1-2",
-            title: "Proximos 2: Morat",
-            img: "moraticon.jpg",
-            fecha: "2025-05-05",
-            numLikes: 1000000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-
-        },
-        {
-            id: "EPIP1-3",
-            title: "Proximos 3: The Bities",
-            img: "btsicon.jpg",
-            fecha: "2025-06-12",
-            numLikes: 10000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "EPIP1-4",
-            title: "Proximos 4: Harry Styles todo precioso",
-            img: "harryicon.jpg",
-            fecha: "2025-04-21",
-            numLikes: 250,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        }
-    ];
-
-    const culturales = [
-        {
-            id: "ECUIP1-1",
-            title: "Culturales 1: League of legends Finals",
-            img: "lolicon.jpeg",
-            fecha: "2025-04-27",
-            numLikes: 1500,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "ECUIP1-2",
-            title: "Culturales 2: Morat",
-            img: "moraticon.jpg",
-            fecha: "2025-05-05",
-            numLikes: 3000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-
-        },
-        {
-            id: "ECUIP1-3",
-            title: "Culturales 3: The Bities",
-            img: "btsicon.jpg",
-            fecha: "2025-06-12",
-            numLikes: 10000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "ECUIP1-4",
-            title: "Culturales 4: Harry Styles todo precioso",
-            img: "harryicon.jpg",
-            fecha: "2025-04-21",
-            numLikes: 250,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        }
-    ];
-
-    const musicales = [
-        {
-            id: "EMUIP1-1",
-            title: "Musicales 1: League of legends Finals",
-            img: "lolicon.jpeg",
-            fecha: "2025-04-27",
-            numLikes: 1500,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "EMUIP1-2",
-            title: "Musicales 2: Morat",
-            img: "moraticon.jpg",
-            fecha: "2025-05-05",
-            numLikes: 3000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-
-        },
-        {
-            id: "EMUIP1-2",
-            title: "Musicales 3: The Bities",
-            img: "btsicon.jpg",
-            fecha: "2025-06-12",
-            numLikes: 10000,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        },
-        {
-            id: "EMUIP1-2",
-            title: "Musicales 4: Harry Styles todo precioso",
-            img: "harryicon.jpg",
-            fecha: "2025-04-21",
-            numLikes: 250,
-            avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"],
-        }
-    ];
-
     return (
         <>
         <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
                 {name === "Cercanos a mí" && listEvents.map((event, index) => (
                     console.log(event.dates),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
                 {name === "Próximos eventos" && listEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
                 {name === "Culturales" && listEvents.map((event, index) => (   
                     console.log(event._id), 
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
                 {name === "Musicales" && listEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={1000} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
                 ))}
             </div>
         </div>
@@ -281,7 +137,7 @@ export function Card({
     return (
         <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-76 w-48 drop-shadow-xl ">
             <img
-            src={`${imgs[0]}`}
+            src={`${imgs[0][0]}`}
             className="rounded-lg object-cover w-full h-48" 
             alt={title}/>
             <h2 className="text-base font-medium text-black text-left my-2">{title}</h2>
@@ -303,8 +159,4 @@ export function Card({
         </Link>
         
     );
-}
-
-export function Pictures(){
-
 }

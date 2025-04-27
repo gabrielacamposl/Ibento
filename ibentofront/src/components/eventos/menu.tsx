@@ -14,9 +14,9 @@ interface ListEvent {
   dates: string[];
   imgs: ([]);
   url: string;
-  avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
-  //numLikes: number;
-  //numSaves: number;
+  avatars: ["/avatar1.jpg", "/avatar2.png", "/avatar3.png"];
+  numLikes: number;
+  numSaves: number;
 }
 
 const Menu = ({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) => {

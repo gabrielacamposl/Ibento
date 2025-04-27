@@ -9,6 +9,7 @@ function Page(){
 
 
     const [eventos, setEventos] = useState([]);
+    const [position, setPosition] = useState<GeolocationPosition | null>(null);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -20,11 +21,29 @@ function Page(){
         .catch(error => console.error('Error:', error));
     }, []);
 
+    useEffect(() => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log("Latitud:", position.coords.latitude);
+              console.log("Longitud:", position.coords.longitude);
+              setPosition(position)
+            },
+            (error) => {
+              console.error("Error al obtener la ubicación:", error);
+            }
+          );
+        } else {
+          console.error("Geolocalización no soportada.");
+        }
+      }, []);
+
     return(
         <>
         <div className="flex flex-col gap-4 min-h-screen justify-center w-full items-center bg-white lg:max-w-3/4">
             <Carousel />
-            <Cards listEvents = {eventos} />
+            <Cards listEvents = {eventos} name = {"recomendados"} />
+            <Cards listEvents = {eventos} name = {"populares"} />
             <SearchMenu listEvents = {eventos}/>
             <div className='h-16'></div>
         </div>
