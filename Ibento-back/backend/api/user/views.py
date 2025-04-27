@@ -496,9 +496,7 @@ class EventoViewSet(viewsets.ModelViewSet):
 
 
 
-
 # -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
-
 
 # -------  Categorías de Eventos
 class CategoriaEventoViewSet(viewsets.ModelViewSet):
