@@ -2,7 +2,24 @@ import React from "react";
 import { motion } from "framer-motion";
 import CardWrapper from "./card";
 
-const Menu = () => {
+
+interface ListEvent {
+  _id: string;
+  title: string;
+  place: string;
+  cost: string[];
+  location: string;
+  coordenates: string[];
+  description: string;
+  dates: string[];
+  imgs: ([]);
+  url: string;
+  avatars: ["/avatar1.jpg", "/avatar2.png", "/avatar3.png"];
+  numLikes: number;
+  numSaves: number;
+}
+
+const Menu = ({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) => {
   const [index, setIndex] = React.useState(0);
 
   const tabs = ["Próximos eventos", "Cercanos a mí", "Culturales", "Musicales"];
@@ -35,7 +52,7 @@ const Menu = () => {
         />
       </div>
       
-      <CardWrapper name={tabs[index]} />
+      <CardWrapper listEvents = {listEvents} name={tabs[index]} />
 
     </div>
   );
