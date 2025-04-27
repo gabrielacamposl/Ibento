@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 import json
-
+import random
 
 # Imports para eñ reconocimiento facial
 # import base64
@@ -16,19 +16,24 @@ import json
 # from scipy.spatial import distance
 
 #Servicio de ticketmaster
-from api.services.ticketmaster import guardar_eventos_desde_json
-
-from api.utils import enviar_email_confirmacion
+#from api.services.ticketmaster import guardar_eventos_desde_json
+from django.utils import timezone
+from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 # Importar modelos 
-from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria, Evento
+from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria
 from api.models import CategoriaEvento, TokenBlackList
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
                           Logout, 
                           # Serializer para selección de categorías de eventos
                           UsuarioPreferences, 
+                          # Cambiar contraseña
+                          PasswordResetRequestSerializer,
+                          PasswordResetCodeValidationSerializer,
+                          PasswordResetSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           PersonalData,
@@ -43,7 +48,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Seriallizer para añadir categorías y sucategorías de los eventos
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
-                          EventoSerializer
                           )
 
 # face_detector = dlib.get_frontal_face_detector()
@@ -130,14 +134,6 @@ def login_usuario(request):
 
 # ------------- Logout
 
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def logout_usuario(request):
-#     serializer = Logout(data=request.data)
-#     if serializer.is_valid():
-#         return Response({"mensaje": "Sesión cerrada correctamente."}, status=200)
-#     return Response(serializer.errors, status=400)
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_usuario(request):
@@ -149,6 +145,109 @@ def logout_usuario(request):
         return Response({"mensaje": "Sesión cerrada correctamente."}, status=status.HTTP_205_RESET_CONTENT)
 
     return Response({"error": "Token no proporcionado"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ------------- CAMBIAR CONTRASEÑA -----------------------------------------------------------------
+
+
+# ---- Enviar Token al correo
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    serializer = PasswordResetRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        try:
+            user = Usuario.objects.get(email=email)
+            codigo = str(random.randint(100000, 999999))  # 6 dígitos
+            user.codigo_reset_password = codigo
+            user.codigo_reset_password_expiration = timezone.now() + timezone.timedelta(minutes=10)
+            user.save()
+
+            enviar_codigo_recuperacion(email, codigo)
+
+            return Response({"message": "Código enviado al correo."}, status=status.HTTP_200_OK)
+        except Usuario.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ---- Validar código 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_validate(request):
+    serializer = PasswordResetCodeValidationSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        codigo = serializer.validated_data['codigo']
+        try:
+            user = Usuario.objects.get(email=email)
+            if user.codigo_reset_password != codigo:
+                return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
+            if timezone.now() > user.codigo_reset_password_expiration:
+                return Response({"error": "El código ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Código válido."}, status=status.HTTP_200_OK)
+        except Usuario.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ----- Cambiar contraseña
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    serializer = PasswordResetSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        new_password = serializer.validated_data['new_password']
+        codigo = serializer.validated_data['codigo']
+        try:
+            user = Usuario.objects.get(email=email)
+            if user.codigo_reset_password != codigo:
+                return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
+            if timezone.now() > user.codigo_reset_password_expiration:
+                return Response({"error": "El código ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.password = make_password(new_password)
+            user.codigo_reset_password = None
+            user.codigo_reset_password_expiration = None
+            user.save()
+            return Response({"message": "Contraseña actualizada correctamente."}, status=status.HTTP_200_OK)
+        except Usuario.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ----- Reeenviar token nuevemente
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_resend(request):
+    serializer = PasswordResetRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        try:
+            user = Usuario.objects.get(email=email)
+
+            # Verificamos si pasaron al menos 2 minutos desde que pidió el primer código
+            if user.codigo_reset_password_expiration:
+                tiempo_transcurrido = timezone.now() - (user.codigo_reset_password_expiration - timezone.timedelta(minutes=10))
+                if tiempo_transcurrido.total_seconds() < 120:  # 120 segundos = 2 minutos
+                    return Response({"error": "Debes esperar 2 minutos para reenviar el código."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generar un nuevo código
+            nuevo_codigo = str(random.randint(100000, 999999))
+            user.codigo_reset_password = nuevo_codigo
+            user.codigo_reset_password_expiration = timezone.now() + timezone.timedelta(minutes=10)
+            user.save()
+
+            enviar_codigo_recuperacion(email, nuevo_codigo)
+
+            return Response({"message": "Nuevo código enviado al correo."}, status=status.HTTP_200_OK)
+        except Usuario.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 
@@ -385,20 +484,15 @@ def obtener_mensajes(request, conversacion_id):
 
 # -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
     
-    
-class EventoViewSet(viewsets.ModelViewSet):
-    queryset = Evento.objects.all()
-    serializer_class = EventoSerializer
 
 
-
-# --------- Crear evento
-@api_view(['POST'])
-def importar_ticketmaster(request):
-    with open("api/user/ticketmaster_events_min.json", "r", encoding="utf-8") as f:
-        eventos_json = json.load(f)
-    guardar_eventos_desde_json(eventos_json)
-    return Response({'mensaje': 'Eventos importados correctamente'})
+# # --------- Crear evento
+# @api_view(['POST'])
+# def importar_ticketmaster(request):
+#     with open("api/user/ticketmaster_events_min.json", "r", encoding="utf-8") as f:
+#         eventos_json = json.load(f)
+#     guardar_eventos_desde_json(eventos_json)
+#     return Response({'mensaje': 'Eventos importados correctamente'})
 
 # -------  Categorías de Eventos
 class CategoriaEventoViewSet(viewsets.ModelViewSet):

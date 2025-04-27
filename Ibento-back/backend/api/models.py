@@ -41,6 +41,11 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_confirmed = models.BooleanField(default=False)
     preferencias_evento = models.JSONField(default=list, blank=True, null=True)
 
+    # Cmabiar contraseña
+    codigo_reset_password = models.CharField(max_length=6, null=True, blank=True)
+    codigo_reset_password_expiration = models.DateTimeField(null=True, blank=True)
+
+
      # Preferenicas de eventos
     save_events = models.JSONField(default=list, blank=True, null=True)
     favourite_events = models.JSONField(default=list, blank=True, null=True)
@@ -209,20 +214,20 @@ class Subcategoria(models.Model):
 
 #   Clase para los eventos
 
-class Evento(models.Model):
-    _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
-    title = models.CharField(max_length=100)
-    place = models.CharField(max_length=100)
-    price = models.JSONField(default=list, null=True, blank=True)
-    location = models.CharField(max_length=100)
-    coordenates = models.JSONField(default=list, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    classifications = models.JSONField(default=list, null=True, blank=True)
-    dates =  models.JSONField(default=list, null=True, blank=True)
-    imgs = models.JSONField(default=list, null=True, blank=True)
-    url = models.CharField(max_length=100)
-    numLike = models.IntegerField(default=0)
-    numSaves = models.IntegerField(default=0)
+# class Evento(models.Model):
+#     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
+#     title = models.CharField(max_length=100)
+#     place = models.CharField(max_length=100)
+#     price = models.JSONField(default=list, null=True, blank=True)
+#     location = models.CharField(max_length=100)
+#     coordenates = models.JSONField(default=list, null=True, blank=True)
+#     description = models.TextField(null=True, blank=True)
+#     classifications = models.JSONField(default=list, null=True, blank=True)
+#     dates =  models.JSONField(default=list, null=True, blank=True)
+#     imgs = models.JSONField(default=list, null=True, blank=True)
+#     url = models.CharField(max_length=100)
+#     numLike = models.IntegerField(default=0)
+#     numSaves = models.IntegerField(default=0)
 
-    def __str__(self):
-        return self.title
+#     def __str__(self):
+#         return self.title

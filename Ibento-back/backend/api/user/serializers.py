@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import check_password
 import cloudinary.uploader
 from api.models import (Usuario, 
                         TokenBlackList,
@@ -12,7 +12,7 @@ from api.models import (Usuario,
                         Conversacion, 
                         Mensaje, 
                         CategoriaEvento,
-                        Evento)
+                        )
 
 
 
@@ -98,6 +98,29 @@ class Logout(serializers.Serializer):
         return {}
     
 
+
+
+#-------------------------------------------   REESTABLECER CONTRASEÑA ------------------------------------------------------------
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetCodeValidationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    codigo = serializers.CharField(max_length=6)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    codigo = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("Las contraseñas no coinciden.")
+        return attrs
 
 
 # -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
@@ -210,10 +233,10 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
 
 # ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
 
-class EventoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Evento
-        fields = '__all__'
+# class EventoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Evento
+#         fields = '__all__'
 
     
 

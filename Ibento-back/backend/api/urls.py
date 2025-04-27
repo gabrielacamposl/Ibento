@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from api.user.views import password_reset_request, password_reset_validate, password_reset_confirm, password_reset_resend
 from api.user.views import (crear_usuario, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
-                            EventoViewSet,
+                           # EventoViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -15,7 +16,7 @@ from api.user.views import (crear_usuario,
                             obtener_conversacion,
                             obtener_mensajes,
                             enviar_mensaje,
-                            importar_ticketmaster
+                            #importar_ticketmaster
                             )
 
 
@@ -23,7 +24,7 @@ router = DefaultRouter()
 
 router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
 router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
-router.register(r'eventos', EventoViewSet, basename='evento')
+# router.register(r'eventos', EventoViewSet, basename='evento')
 
 urlpatterns = [
 
@@ -41,6 +42,13 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
+    # Cambiar contraseña
+    path('password-reset/request/', password_reset_request, name='password_reset_request'),
+    path('password-reset/validate/', password_reset_validate, name='password_reset_validate'),
+    path('password-reset/confirm/', password_reset_confirm, name='password_reset_confirm'),
+    path('password-reset/resend/', password_reset_resend, name='password_reset_resend'),
+
+
     # Matches
     path('matches/crear/', crear_match, name='crear_match'),
     path('matches/<str:usuario_id>/', obtener_matches_usuario, name='obtener_matches_usuario'),
@@ -55,8 +63,8 @@ urlpatterns = [
     path('mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes_usuario'),
 
     #Otras
-    path('', include(router.urls)),
-    path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster')
+  #  path('', include(router.urls)),
+ #   path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster')
 
 ]
 
