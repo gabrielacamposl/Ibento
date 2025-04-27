@@ -10,6 +10,7 @@ import EventosPreferencias from "./components/preferences/EventosPreferencias";
 
 
 import Perfil from "./components/usuario/Perfil";
+import SideBar from "./components/usuario/sidebar";
 import EditarPerfil from "./components/usuario/EditarPerfil";
 import EditarIntereses from "./components/usuario/Intereses";
 import Favoritos from "./components/usuario/Favoritos";
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="profileVerify" element={<PerfilCheck />} />
           <Route path="profileRepeat" element={<PerfilRepetido />} />
+          <Route path="sidebar" element={<SideBar />} />
           {/* Recuperar Contraseña */}
           
           <Route path = "recuperarContraseÃ±a" element = {<RecuperarContrasena/>}/>

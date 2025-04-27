@@ -4,7 +4,7 @@ backend/venv/
 ibento-backend/backend/pycache/
 ibento-backend/backend/*.pyc
 ibento-backend/backend/db.sqlite3
-
+*.pyc
 #Ignorar dependencias de Node.js
 ibento-front/node_modules/
 
