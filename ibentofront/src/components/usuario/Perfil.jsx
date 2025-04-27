@@ -5,6 +5,7 @@ import { Carousel } from 'primereact/carousel';
 import { Button } from 'primereact/button';
 import Favoritos from './Favoritos'; // Asegúrate de que la ruta sea correcta
 import Guardados from './Guardados'; // Asegúrate de que la ruta sea correcta
+import SideBar from '../usuario/sidebar'; // Asegúrate de que la ruta sea correcta
 const Perfil = () => {
 
     
@@ -115,11 +116,11 @@ const Perfil = () => {
         }
     ];
     return (
-        <div className="flex justify-center items-center  overflow-x-auto" style={{ width: '100vw' }}>
-            <div className="degradadoPerfil relative flex flex-col items-center  shadow-md p-5 shadow-t max-w-lg w-full">
-      
+        <div  className="flex justify-center  min-h-screen overflow-x-auto" style={{ width: '100vw' }}>
+            
+            <div className="relative degradadoPerfil  flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
                 
-                <div className="relative w-full h-60 mt-1 ">
+                <div className=" relative w-full h-60 ">
                 {/* Carrusel */}
                 <div className="carousel rounded-box w-full h-60">
                     {user.pictures.map((picture, index) => (
@@ -134,7 +135,7 @@ const Perfil = () => {
                 </div>
 
                 {/* Imagen de perfil sobrepuesta */}
-                <div className="absolute bottom-[-2rem] right-0 z-10 flex justify-end items-end">
+                <div className="mr-5 absolute bottom-[-2rem] right-0 z-10 flex justify-end items-end">
                     <img
                     src="/minovio.jpeg"
                     className="border-4 w-30 h-30 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover"
@@ -142,30 +143,23 @@ const Perfil = () => {
                     />
                     <Link
                     to="../editarPerfil"
-                    className="border-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 absolute bottom-0 right-0 bg-purple-300 text-white p-2 rounded-full"
+                    className="fondoFavorito border-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 absolute bottom-0 right-0 bg-purple-300 text-white p-2 rounded-full"
                     >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                    >
-                        <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                        />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sm:size-7 md:size-6  size-4 ">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+</svg>
+
                     </Link>
-                </div>
+                    
+                </div> 
+                <SideBar className=""  />
                 </div>
 
-      
+                <div className='p-5'>
                 <div className="text-black w-full">
                     <h1 className="mt-5 text-3xl mb-3 font-semibold">{user.name}</h1>
                     <div className='space-x-2'>
-                    <h1 className="flex space-x-2 text-2xl ">
+                    <h1 className="flex space-x-2 text-lg ">
                         <div className="flex ">
                         {user.genero === 'H' ? (
                             <i className="pi pi-mars mt-1" style={{ color: 'slateblue' }}></i>
@@ -185,7 +179,7 @@ const Perfil = () => {
                         <h1 className="text-lg">{user.cumpleanos}</h1>
                     </div>
                 </div>
-                <div className="bg-white  w-full mt-5" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="  w-full mt-5" >
                 <div>
                     <h2 className="w-full text-black text-lg mt-3 font-semibold">Mis intereses</h2>
                     <div className="mt-2 flex flex-wrap">
@@ -227,6 +221,7 @@ const Perfil = () => {
                     )}
                 </div>
                 </div>
+            </div>
             </div>
         </div>
     );

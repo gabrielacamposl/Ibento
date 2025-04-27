@@ -135,7 +135,7 @@ const buscarMatchx = () => {
                                 ))}
                             </div>
 
-                            <div className="flex flex-wrap justify-center mt-5 space-x-10">
+                            <div className="flex flex-wrap justify-center mt-3 space-x-10">
                                 <button onClick={handleNextUser} className="botonTransparente text-white p-2 rounded-full size-14">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="0.7" stroke="currentColor" className="size-10 w-auto">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />

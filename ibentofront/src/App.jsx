@@ -15,6 +15,7 @@ import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
 import NuevaContrasena from "./components/accounts/resetPassword/nuevaContrasena";  
 
 import Perfil from "./components/usuario/Perfil";
+import SideBar from "./components/usuario/sidebar";
 import EditarPerfil from "./components/usuario/EditarPerfil";
 import EditarIntereses from "./components/usuario/Intereses";
 import Favoritos from "./components/usuario/Favoritos";
@@ -79,7 +80,6 @@ export default function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="profileVerify" element={<PerfilCheck />} />
           <Route path="profileRepeat" element={<PerfilRepetido />} />
-
           {/* Recuperar Contraseña */}
           <Route path = "recuperar-cuenta" element = {<RecuperarContrasena/>}/>
           <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />

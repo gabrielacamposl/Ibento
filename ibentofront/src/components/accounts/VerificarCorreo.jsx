@@ -83,12 +83,13 @@ export default function VerificarCorreo() {
             }}
           >
             <CssBaseline />
-            <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
-              Verifica tu Cuenta
+            <Typography className="text-bold" variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
+            Confirma tu cuenta
             </Typography>
-            <Typography variant="h5" component="h2">
-            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
-            </Typography>
+            <p className="text-center text-gray-700 mb-4">
+            Para verificar tu cuenta, por favor revisa tu bandeja de entrada.
+            En caso de no encontrar el correo, te recomendamos revisar también tu carpeta de spam o correo no deseado.
+            </p>
           </Container>
         </Box>
       </motion.div>
@@ -97,7 +98,7 @@ export default function VerificarCorreo() {
       {/* Formulario para móviles */}
       <div className="block md:hidden">
 
-        <div className="block md:hidden w-full h-screen flex flex-col">
+        <div className="block md:hidden w-full h-screen flex flex-col justify">
           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
           <div className="absolute inset-0 z-10">
             {[...Array(9)].map((_, i) => {
@@ -140,12 +141,13 @@ export default function VerificarCorreo() {
         >
           <Grid container component="main" maxWidth="xs" className="w-full h-full">
             <CssBaseline />
-            <Typography variant="h5" component="h1" className="text-center font-bold text-gray-700 mb-4">
-              Crear Cuenta
+            <Typography className="text-bold" variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
+            Confirma tu cuenta
             </Typography>
-            <Typography variant="h5" component="h2">
-            Para verificar tu cuenta por favor revisa tu bandeja en el cuál se te hizo llegar un correo.
-            </Typography>
+            <p className="text-center text-gray-700 mb-4">
+            Para verificar tu cuenta, por favor revisa tu bandeja de entrada.
+            En caso de no encontrar el correo, te recomendamos revisar también tu carpeta de spam o correo no deseado.
+            </p>
           </Grid>
         </Box>
       </div>
