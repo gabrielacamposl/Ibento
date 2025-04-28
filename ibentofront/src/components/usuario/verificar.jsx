@@ -133,6 +133,7 @@ const verificar = () => {
         }
     ];
 
+    
     const handleAnswerSelect = (question, answer) => {
         setSelectedAnswers((prev) => ({
             ...prev,

@@ -19,5 +19,5 @@ def guardar_eventos_desde_json(eventos_json):
             classifications=evento.get("classification", []),
             dates = evento.get("dates", []),
             imgs= evento.get("img_urls") if evento.get("img_urls") else [],
-            url = [evento.get("url", "")] if evento.get("url") else None
+            url = evento.get("url", "") if evento.get("url") else None
         )

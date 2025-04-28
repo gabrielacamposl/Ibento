@@ -17,7 +17,7 @@ interface ListEvent {
   _id: string;
   title: string;
   place: string;
-  cost: string[];
+  price: string[];
   location: string;
   coordenates: string[];
   classifications: string[];
@@ -25,8 +25,8 @@ interface ListEvent {
   dates: string[];
   imgs: string[];
   url: string;
-  //numLikes: number;
-  //numSaves: number;
+  numLikes: number;
+  numSaves: number;
 }
 
 function Page() {
@@ -92,7 +92,7 @@ function Page() {
   const {
     title,
     place,
-    cost,
+    price,
     location,
     coordenates,
     description,
@@ -102,8 +102,8 @@ function Page() {
     url,
   } = currentEvent;
 
-  const numLikes = 200; // Placeholder
-  const numSaves = 200; // Placeholder
+  const numLikes = 200;
+  const numSaves = 200;
 
 
   const toggleLike = () => {
@@ -165,7 +165,7 @@ function Page() {
           {/* Imagen y botones en la esquina */}
           <div className="relative w-full h-80">
             <img
-              src={`${imgs[0]}`}
+              src={`${imgs[0][0]}`}
               alt="Evento"
               className="w-full h-80 object-cover rounded-lg4"
             />

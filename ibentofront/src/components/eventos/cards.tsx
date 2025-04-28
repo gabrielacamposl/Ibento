@@ -6,15 +6,15 @@ interface ListEvent {
     _id: string;
     title: string;
     place: string;
-    cost: [];
+    prices: [];
     location: string;
     coordenates: [];
     description: string;
     dates: [];
     imgs: [];
     url: string;
-    avatars: ["avatar1.jpg", "avatar2.jpg", "avatar3.jpg"]
     numLikes: number;
+    numSaves : number;
 }
 
 function Cards({ 
@@ -25,6 +25,8 @@ function Cards({
     name : string;
   } 
 ) {
+
+    console.log("Ïmprimiendo evento 1:  " + listEvents[0])
 
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border p-4">
