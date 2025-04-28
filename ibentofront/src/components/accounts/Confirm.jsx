@@ -10,42 +10,27 @@ import { buttonStyle } from "../../styles/styles";
 import { motion } from "framer-motion";
 import "../../assets/css/mascota.css";
 export default function Confirm() {
+ 
   const { token } = useParams();
-  const [estado, setEstado] = useState("exito"); // 'verificando' | 'exito' | 'error'
+  const [estado, setEstado] = useState("verificando"); // 'verificando' | 'exito' | 'error'
   const [mensaje, setMensaje] = useState("");  // Mensaje de error o éxito
+  const [isConfirmed, setIsConfirmed] = useState(false); // Estado para saber si la cuenta ya fue confirmada
   const navigate = useNavigate();
   const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
+
   useEffect(() => {
-    
+    // Evitar hacer la petición si ya fue confirmada
+    if (isConfirmed) return;
+
     const confirmarCuenta = async () => {
       try {
         // Hacemos la llamada al backend para confirmar el token
         const response = await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
 
-        // Si la confirmación es exitosa, se guarda email y password desde localStorage
         if (response.data.success) {
           setEstado("exito");
-
-          // Realizar login automático para el seguimiento de la creación de la cuenta
-          const email = localStorage.getItem("email");
-          const password = localStorage.getItem("password");
-
-          if (email && password) {
-            const loginResponse = await axios.post("http://127.0.0.1:8000/api/login/", { email, password });
-
-            if (loginResponse.data.token) {
-              // Guardamos el token y redirigimos a preferencias
-              localStorage.setItem("token", loginResponse.data.token);
-              navigate("/preferencias"); // Redirigir a la página de preferencias
-            } else {
-              setEstado("error");
-              setMensaje("No se pudo iniciar sesión automáticamente.");
-            }
-          } else {
-            setEstado("error");
-            setMensaje("No se encontraron las credenciales para login.");
-          }
+          setIsConfirmed(true); // Marcamos que ya se confirmó
         } else {
           // Si la respuesta del backend indica que la confirmación falló
           setEstado("error");
@@ -53,13 +38,14 @@ export default function Confirm() {
         }
       } catch (error) {
         // Si hubo un error en la comunicación con el backend
-        setEstado("error");
+        setEstado("exito");
         setMensaje("Hubo un error al intentar confirmar tu cuenta.");
       }
     };
 
     confirmarCuenta();
-  }, [token, navigate]);
+  }, [token, isConfirmed]); // Dependencia para controlar si ya se confirmó
+
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -153,7 +139,7 @@ export default function Confirm() {
 
             <Button className={buttonStyle} type="submit" 
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate("/preferencias")}> Siguiente </Button>
+                onClick={() => navigate("/")}> Inicia Sesión </Button>
           </Container>
         </Box>
       </motion.div>
@@ -230,7 +216,7 @@ export default function Confirm() {
             )}
             <Button className={buttonStyle} type="submit" 
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate("/preferencias")}> Siguiente </Button>
+                onClick={() => navigate("/")}> Inicia Sesión </Button>
           </Grid>
         </Box>
       </div>

@@ -23,35 +23,22 @@ from api.models import (Usuario,
 # -------- Creación del usuario
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    preferencias_evento = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        required=False
+    )
+
     class Meta:
         model = Usuario
-        fields = ["_id",'nombre', 'apellido', 'email', 'password']
+        fields = ["_id", "nombre", "apellido", "email", "password", "preferencias_evento"]
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        return Usuario.objects.create_user(**validated_data)
-
-    # def create(self, validated_data):
-    #     validated_data['password'] = make_password(validated_data['password'])  
-    #     return Usuario.objects.create(**validated_data)  
-    
-
-# -------- Selección de preferencias para la recomendación de eventos
-class UsuarioPreferences (serializers.ModelSerializer):
-    preferencias_evento = serializers.PrimaryKeyRelatedField(
-    many=True,  # Porque es una lista de referencias
-    queryset=Subcategoria.objects.all()
-)
-
-    class Meta:
-        model = Usuario
-        fields = ['preferencias_evento']
-
-        def update(self, instance, validated_data):
-            #instance.preferencias_evento.set(validated_data.get('preferencias_evento', instance.preferencias_evento.all()))
-            instance.preferencias_evento = [sub._id for sub in validated_data['preferencias_evento']]
-            instance.save()
-            return instance
+        preferencias = validated_data.pop('preferencias_evento', [])
+        usuario = Usuario.objects.create_user(**validated_data)
+        usuario.preferencias_evento = preferencias
+        usuario.save()
+        return usuario
 
 
     

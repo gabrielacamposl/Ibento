@@ -2,7 +2,8 @@ import clsx from "clsx";
 
 export const inputStyles = clsx(
   "mt-1 w-full rounded-3xl bg-white border border-purple-600",
-  "focus:border-purple-500 focus:outline-none p-1 "
+  "focus:border-purple-500 focus:outline-none p-1 ",
+  "w-full flex justify-center items-center",
 );
 
 export const buttonStyle = clsx(
