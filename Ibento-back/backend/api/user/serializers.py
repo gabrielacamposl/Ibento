@@ -244,7 +244,69 @@ class EventoSerializer(serializers.ModelSerializer):
 
         return data
 
+class EventoSerializerLimitado(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        # Define la lista explícita de campos que quieres incluir
+        fields = ['_id', 'title', 'imgs', 'numLike']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        #Lista de campos que deberían ser arrays
+        json_fields = ['imgs']
+
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+        return data 
+
+class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        # Define la lista explícita de campos que quieres incluir
+        fields = ['_id', 'title', 'imgs', 'numLike', 'dates']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        #Lista de campos que deberían ser arrays
+        json_fields = ['imgs']
+
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+        return data     
+
+class EventoWithDistanceSerializer(serializers.Serializer):
+
+    distance = serializers.FloatField()
+
+    def to_representation(self, instance):
+            # instance aquí es el diccionario {'event': event_object, 'distance': calculated_distance}
+
+            # Usa tu serializer limitado para obtener la representación del objeto Evento
+            event_data = EventoSerializerLimitadoWithFecha(instance['event']).data
+
+            # Crea la representación final y añade la distancia
+            representation = event_data
+            representation['distance'] = instance['distance']
+
+            return representation
 
 # ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
 

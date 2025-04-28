@@ -4,12 +4,14 @@ import Search from "./Search";
 import Cards from "./CategoryCard";
 import EventWrapper from "./SearchCard";
 import { CardsSkeleton } from "../extras/skeletons";
+import useFetchEvents from "../../hooks/fetchEvents";
 // import EventWrapperWParams from "./SearchCard2";
 const EventWrapperWParams = React.lazy(() => import('./SearchCard2'));
 
 function Page() {
 
     const [eventCount, setEventCount] = useState(null);
+   
 
   return (
     <div className="w-full">
@@ -27,15 +29,15 @@ function Page() {
         />
         </Suspense>
         {eventCount === 0 && (
-        <>
-          <div className="w-11/12">
-            <Cards />
-          </div>
-          <div className="w-11/12">
-            <EventWrapper />
-          </div>
-        </>
-      )}
+          <>
+            <div className="w-11/12">
+              <Cards />
+            </div>
+            <div className="w-11/12">
+              <EventWrapper />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Desktop View */}

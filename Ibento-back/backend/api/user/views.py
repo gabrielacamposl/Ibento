@@ -3,9 +3,11 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 import json
 import random
+from datetime import datetime, timezone, timedelta
+from math import radians, sin, cos, sqrt, atan2
 
 # Imports para eñ reconocimiento facial
 # import base64
@@ -49,7 +51,10 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           CategoriaEventoSerializer, 
                           SubcategoriaSerializer,
                           # Seriallizer de Eventos
-                          EventoSerializer
+                          EventoSerializer,
+                          EventoSerializerLimitado,
+                          EventoSerializerLimitadoWithFecha,
+                          EventoWithDistanceSerializer
                           )
 
 # face_detector = dlib.get_frontal_face_detector()
@@ -469,7 +474,8 @@ def obtener_mensajes(request, conversacion_id):
     serializer = MensajesSerializer(resultado_paginado, many=True)
     return paginator.get_paginated_response(serializer.data)
 
-# # --------- Crear evento
+
+# --------- Crear evento
 @api_view(['POST'])
 def importar_ticketmaster(request):
     with open("api/user/ticketmaster_events_max.json", "r", encoding="utf-8") as f:
@@ -478,17 +484,130 @@ def importar_ticketmaster(request):
     return Response({'mensaje': 'Eventos importados correctamente'})
 
 
+def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # Radio promedio de la Tierra en km
+
+    # Convertir grados a radianes
+    lat1_rad = radians(lat1)
+    lon1_rad = radians(lon1)
+    lat2_rad = radians(lat2)
+    lon2_rad = radians(lon2)
+
+    # Diferencia de longitudes y latitudes
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+
+    # Aplicar la fórmula de Haversine
+    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        for evento in queryset:
-            print("imgs:", evento.imgs, type(evento.imgs))
         serializer = self.get_serializer(queryset, many=True)
-        print(serializer.data)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def most_liked(self, request):
+
+        queryset = self.get_queryset().order_by('-numLike')[:100]
+        serializer = EventoSerializerLimitado(queryset, many=True)
+        return Response(serializer.data)
+    
+
+    @action(detail=False, methods=['get'])
+    def upcoming_events(self, request):
+
+        now = datetime.now(timezone.utc)
+        fecha_mas_siete_dias = now + timedelta(days=7)
+        
+        eventosProximos = []
+
+        for event in self.get_queryset():
+            cadena_primera_fecha = None
+            objeto_primera_fecha = None
+
+            if event.dates and isinstance(event.dates, list) and event.dates:
+                cadena_primera_fecha = event.dates[0]
+
+            if cadena_primera_fecha and isinstance(cadena_primera_fecha, str):
+                try:
+                    date_obj = datetime.fromisoformat(cadena_primera_fecha.replace('Z', '+00:00'))
+
+                    if date_obj.tzinfo is None:
+                        date_obj = date_obj.replace(tzinfo = timezone.utc)
+                    objeto_primera_fecha = date_obj
+                
+                except (ValueError, TypeError):
+                    pass
+
+            if objeto_primera_fecha and now <= objeto_primera_fecha <= fecha_mas_siete_dias:
+                eventosProximos.append({'event': event, 'date_to_sort_by': objeto_primera_fecha})
+
+        sorted_events = sorted(eventosProximos, key=lambda x: x['date_to_sort_by'])
+
+        upcoming_events = [item['event'] for item in sorted_events]
+
+        serializer = EventoSerializerLimitadoWithFecha(upcoming_events, many=True)
+
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def nearest(self, request):
+        
+        # Obtener latitud y longitud de los parámetros de consulta
+        latitude = request.query_params.get('lat')
+        longitude = request.query_params.get('lon')
+
+        if not latitude or not longitude:
+            return Response(
+                {"detail": "Se requieren los parámetros de consulta 'lat' y 'lon'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not latitude or not longitude:
+            return Response(
+                {"detail": "Se requieren los parámetros de consulta 'lat' y 'lon'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user_lat = float(latitude)
+            user_lon = float(longitude)
+        except ValueError:
+            return Response(
+                {"detail": "Los parámetros 'lat' y 'lon' deben ser números válidos."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        eventos_distancia = []
+
+        for event in self.get_queryset():
+            if event.coordenates and isinstance(event.coordenates, list) and len(event.coordenates) == 2:
+                event_lat, event_lon = event.coordenates
+                try:
+                    event_lat_float = float(event_lat)
+                    event_lon_float = float(event_lon)
+
+                    distance = haversine_distance(user_lat, user_lon, event_lat_float, event_lon_float)
+                    eventos_distancia.append({'event': event, 'distance': distance})
+                except (TypeError, ValueError):
+                    pass
+        eventos_ordenados = sorted(eventos_distancia, key = lambda x: x['distance'])
+
+        eventos_mas_cercanos = [item['event'] for item in eventos_ordenados]
+
+        serializer = EventoWithDistanceSerializer(eventos_mas_cercanos, many=True)
+        
+        return Response(serializer.data)
+#----------------- Obtención de eventos
+
 
 
 

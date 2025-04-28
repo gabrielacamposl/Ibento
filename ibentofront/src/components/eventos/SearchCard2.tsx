@@ -2,11 +2,14 @@ import React, {useMemo, useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { useLocation } from "react-router-dom";
+import useFetchEvents from "../../hooks/fetchEvents";
 
 function useQuery() {
     const { search } = useLocation();
     return new URLSearchParams(search);
 }
+
+
 
 const events = [
     {
@@ -86,6 +89,8 @@ const events = [
 
 export default function EventList({onResultCount }) {
 
+    const { data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/');
+
     const queryParams = useQuery();
     const query = queryParams.get("query") || "";
     
@@ -93,7 +98,7 @@ export default function EventList({onResultCount }) {
     const filteredEvents = useMemo(() => {
       if (!query) return [];
       const lowerQuery = query.toLowerCase();
-      return events.filter(event =>
+      return eventos.filter(event =>
         Object.values(event).some(value =>
           String(value).toLowerCase().includes(lowerQuery)
         )
@@ -109,14 +114,12 @@ export default function EventList({onResultCount }) {
             <div className="flex flex-row flex-wrap items-center justify-center py-4 gap-4">
                 {filteredEvents.map((event) => (
                     <EventCard
-                        key={event.id}
-                        id={event.id}
-                        imageUrl={event.imageUrl}
+                        key={event._id}
+                        id={event._id}
+                        imageUrl={event.imgs}
                         title={event.title}
-                        date={event.date}
+                        date={event.dates}
                         location={event.location}
-                        price={event.price}
-                        url={event.url}
                     />
                 ))}
             </div>
@@ -125,14 +128,14 @@ export default function EventList({onResultCount }) {
 }
 
 
-export function EventCard({ id, imageUrl, title, date, location, price, url }) {
+export function EventCard({ id, imageUrl, title, date, location }) {
 
     const urls = "../eventos/" + id;
     return (
         <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
             <div className="bg-white w-full rounded-lg flex flex-row">
                 <img
-                src={`/${imageUrl}`}
+                src={`/${imageUrl[0][0]}`}
                 className="rounded-lg object-cover w-40 h-40" 
                 alt={title}/>
                 
