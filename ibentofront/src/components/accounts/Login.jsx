@@ -183,7 +183,7 @@ const Login = () => {
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
 
                     <Link
-                      to="/registrar"
+                      to="/crear-cuenta"
                       component="button"
                       variant="body2" sx={{
                         fontWeight: "bold",
@@ -288,7 +288,7 @@ const Login = () => {
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
 
                     <Link
-                      to="/registrar"
+                      to="/crear-cuenta"
                       component="button"
                       variant="body2" sx={{
                         fontWeight: "bold",

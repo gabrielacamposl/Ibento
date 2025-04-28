@@ -31,7 +31,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           LoginSerializer,
                           Logout, 
                           # Serializer para selección de categorías de eventos
-                          UsuarioPreferences, 
                           # Cambiar contraseña
                           PasswordResetRequestSerializer,
                           PasswordResetCodeValidationSerializer,
@@ -76,41 +75,29 @@ def crear_usuario(request):
         return Response({"mensaje": "Usuario registrado, revisa tu correo."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 # --------- Confirmación de cuenta
 
-@api_view(['GET'])  # GET para confirmar la cuenta / POST colocar en el body el token
+@api_view(['GET'])  # GET para confirmar la cuenta
 def confirmar_usuario(request, token):
-    usuario = get_object_or_404(Usuario, token=token)
-
-    if usuario.is_confirmed:
-        return JsonResponse({"mensaje": "Este usuario ya ha sido confirmado."}, status=status.HTTP_400_BAD_REQUEST)
-
-    usuario.is_confirmed = True
-    usuario.save()
-    return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)
-
-
-# ------------- Preferencias de Eventos del Usuario
-
-@api_view(["GET", "PUT"])
-def usuario_preferencias(request, usuario_id):
     try:
-        usuario = Usuario.objects.get(id=usuario_id)
+        # Intentamos obtener el usuario usando el token
+        usuario = get_object_or_404(Usuario, token=token)
+        
+        # Verificamos si ya está confirmado
+        if usuario.is_confirmed:
+            return JsonResponse({"mensaje": "Este usuario ya ha sido confirmado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Confirmar la cuenta
+        usuario.is_confirmed = True
+        usuario.save()
+        return JsonResponse({"mensaje": "Cuenta confirmada exitosamente."}, status=status.HTTP_200_OK)
+
     except Usuario.DoesNotExist:
-        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({"mensaje": "El token no es válido o ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Obtener preferencias (GET)
-    if request.method == "GET":
-        serializer = UsuarioPreferences(usuario)
-        return Response(serializer.data)
 
-    # Actualizar preferencias (PUT)
-    if request.method == "PUT":
-        serializer = UsuarioPreferences(usuario, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # -------------------------------------------- LOGIN Y LOGOUT DEL USUARIO  ----------------------------------------------

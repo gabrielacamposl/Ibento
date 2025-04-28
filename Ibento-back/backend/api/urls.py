@@ -9,14 +9,13 @@ from api.user.views import (crear_usuario,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
-                            usuario_preferencias,
                             crear_match,
                             eliminar_match,
                             obtener_matches_usuario,
                             obtener_conversacion,
                             obtener_mensajes,
                             enviar_mensaje,
-                            importar_ticketmaster
+                            importar_ticketmaster,
                             )
 
 
@@ -35,8 +34,7 @@ urlpatterns = [
     path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
-    path('usuarios/<str:usuario_id>/preferencias-eventos/', usuario_preferencias, name='usuario_preferencias'),
-   # path('usuarios/<int:usuario_id>/preferencias/', guardar_preferencias, name='guardar-preferencias'),
+    
     
     # JWT Tokens
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
