@@ -8,7 +8,7 @@ import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
 import Logout from "./components/accounts/logout";
 import VerificarCorreo from "./components/accounts/VerificarCorreo";
-import EventosPreferencias from "./components/preferences/EventosPreferencias";
+
 // Recuperar Cuenta
 import RecuperarContrasena from "./components/accounts/resetPassword/recuperarContrasena";
 import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
@@ -52,11 +52,8 @@ export default function App() {
 
       <Route path="/logout" element={<Logout/>}/>
       
-      {/* Preferencias del Usuario para sugerencia de Eventos*/}
-      <Route path="/preferencias" element={<EventosPreferencias />} />
 
         {/* Matches*/}
-
         
         <Route path="/ibento" element={<MainLayout />}>
 
@@ -80,6 +77,7 @@ export default function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="profileVerify" element={<PerfilCheck />} />
           <Route path="profileRepeat" element={<PerfilRepetido />} />
+
           {/* Recuperar Contraseña */}
           <Route path = "recuperar-cuenta" element = {<RecuperarContrasena/>}/>
           <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />
