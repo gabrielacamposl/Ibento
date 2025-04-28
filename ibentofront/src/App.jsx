@@ -55,7 +55,7 @@ export default function App() {
 
         {/* Matches*/}
         
-        <Route path="/ibento" element={<MainLayout />}>
+        <Route path="/principal" element={<MainLayout />}>
 
           {/*Eventos*/}
           <Route path="eventos" element={<PrincipalEventos />}/>

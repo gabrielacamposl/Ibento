@@ -2,18 +2,27 @@ import { HeartIcon, ClockIcon } from '@heroicons/react/24/solid';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const categories = [
+  { imageUrl: "/musica.jpg", title: "Conciertos", id: "1" },
+  { imageUrl: "/deportes.jpg", title: "Deportes", id: "2" },
+  { imageUrl: "/teatro.jpg", title: "Artes y teatro", id: "3" },
+  { imageUrl: "/Familia.jpg", title: "Familia", id: "4" },
+];
+
+
 function Cards() {
-   return (
-           <div>   
-            {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-            <div className="flex flex-row flex-wrap items-center justify-center gap-1">  
-                <Card imageUrl="/musica.jpg" title="Conciertos" id="1" />
-                <Card imageUrl="/deportes.jpg" title="Deportes" id="2" />
-                <Card imageUrl="/teatro.jpg" title="Artes y teatro" id="3" />
-                <Card imageUrl="/Familia.jpg" title="Familia" id="4"/>
-            </div>
-           </div>
-   );
+  return (
+   <div className="flex flex-row flex-wrap items-center justify-center gap-1">
+   {categories.map((category) => (
+    <Card
+      key={category.id}
+      imageUrl={category.imageUrl}
+      title={category.title}
+      id={category.id}
+    />
+   ))}
+  </div>
+  );
  }
  
  interface CardProps {
