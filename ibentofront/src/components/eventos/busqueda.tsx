@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useParams } from "react-router-dom";
 
 import { CardsSkeleton } from "../extras/skeletons";
+import useFetchEvents from "../../hooks/fetchEvents";
 // import EventWrapperWParams from "./SearchCard2";
 const EventWrapperWParams = React.lazy(() => import('./SearchCard2'));
 
@@ -36,6 +37,7 @@ console.log("ID del evento:", eventId);
 
 
     const [eventCount, setEventCount] = useState(null);
+   
 
 
     const [eventos, setEventos] = useState<ListEvent[]>([]);
@@ -81,6 +83,7 @@ console.log("ID del evento:", eventId);
         </Suspense>
         
         {eventCount === 0 && (
+
         <>
           <div className="w-11/12">
             <Cards />
@@ -93,6 +96,7 @@ console.log("ID del evento:", eventId);
             <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">Event Count: {eventCount}</p>
             </div>
+
       </div>
 
     

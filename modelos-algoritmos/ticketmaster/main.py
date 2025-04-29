@@ -13,19 +13,32 @@ TICKETMASTER_API_KEY = os.getenv("API_KEY_TICKETMASTER")
 
 classification_translations = {
     'Arts & Theatre': 'Arte y Teatro',
+    'Miscellaneous' : 'Diverso',
+    'Miscellaneous Theatre' : 'Teatro diverso',
     'Concerts': 'Conciertos',
     'Sports': 'Deportes',
     'Family': 'Familia',
     'Concerts' : 'Conciertos',
-    'Music': 'Música', # Puede que necesites este si 'Concerts' es un subtipo
+    'Music': 'Música',
+    'Symphonic' : 'Sinfónica',
+    "Children's Theatre" : 'Teatro para niños',
+    'Other' : 'Otro',
+    'Equestrian' : 'Equitación',
+    'Horse Racing' : 'Carrera de caballos',
     'Pop': 'Pop',
+    'Professional' : 'Profesional',
     'Rock': 'Rock',
+    'Theatre' : 'Teatro',
     'Hip-Hop/Rap': 'Hip-Hop/Rap',
     'Electronic': 'Electrónica',
     'Classical': 'Música Clásica',
+    'Magic & Illusion' : 'Magia e ilusión',
+    'Magic' : 'Magia',
+    'Ballads/Romantic' : 'Balada/Romantica',
     'Jazz': 'Jazz',
     'Blues': 'Blues',
     'R&B': 'R&B',
+    'Film' : 'Película',
     'Country': 'Country',
     'Latin': 'Música Latina',
     'Alternative': 'Alternativa',
@@ -51,7 +64,6 @@ classification_translations = {
     'Tennis': 'Tenis',
     'Golf': 'Golf',
     'Motorsports': 'Deportes de Motor',
-    # Agrega más traducciones según las clasificaciones que encuentres en la API
 }
 
 def format_event_data(events):
