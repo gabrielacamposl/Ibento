@@ -32,13 +32,13 @@ export default function EventWrapper({ eventos }: { eventos: ListEvent[] }) {
                     <EventCard 
                         key={event._id}
                         id={event._id}
-                        imageUrl={event.imgs[0][0]}
+                        imageUrl={event.imgs[0]}
                         title={event.title}
                         date={event.dates}
                         location={event.location}
                         price={event.cost}
                         url={event.url}
-                        Category={event.classifications[0]}
+                        Category={event.classifications}
                     />
                 ))}
             </div>
