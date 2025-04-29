@@ -4,6 +4,7 @@ import { Box, Container, CssBaseline, Typography, Grid} from "@mui/material";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext"; 
 import { buttonStyle, inputStyles} from "../../../styles/styles";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
@@ -12,6 +13,7 @@ export default function PasswordResetRequest() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +23,11 @@ export default function PasswordResetRequest() {
     try {
       const response = await axios.post("http://localhost:8000/password-reset/request/", {email});
       setMessage(response.data.message);
+      // Espera 1 segundo antes de redirigir
+      localStorage.setItem("emailReset", email);
+      setTimeout(() => {
+       navigate("/ibento/recuperar-cuenta-codigo");
+    }, 1000); 
     } catch (err) {
       setError(err.response?.data?.error || "Error al enviar la solicitud.");
     }
