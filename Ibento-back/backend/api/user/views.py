@@ -39,7 +39,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
-                          UploadINE,
+                          IneValidationSerializer,
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
@@ -273,55 +273,25 @@ def save_personal_data(request):
 
 # --------- Subir INE para Validar el Perfil 
 
+
 @api_view(['POST'])
-def upload_ine(request):
-    usuario = request.user
-    serializer = UploadINE(data=request.data)
-
+@permission_classes([IsAuthenticated])
+def ine_validation_view(request):
+    serializer = IneValidationSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        ine_f = serializer.validated_data['ine_f']
-        ine_m = serializer.validated_data['ine_m']
-        
-        # Simulación de API externa que valida la INE
-        #ine_validada = validar_ine_con_api(ine_f, ine_m)
-        ine_validada = True
+        user = serializer.save()
+        return Response({
+            "message": "Validación completada",
+            "is_ine_validated": user.is_ine_validated,
+            "curp": user.curp
+        })
+    return Response(serializer.errors, status=400)
 
-        if ine_validada:
-            usuario.is_ine_validated = True
-            usuario.save()
-            return Response({"mensaje": "INE validada correctamente."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "INE no válida."}, status=status.HTTP_400_BAD_REQUEST)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ----------- Comparación de Rostros 
 
-# def get_face_descriptor(image, face):
-#     shape = shape_predictor(image, face)
-#     return face_rec_model.compute_face_descriptor(image, shape)
 
-# @api_view(['POST'])
-# def comparar_rostros(request):
-#     usuario = request.user
-#     serializer = CompararRostroSerializer(data=request.data)
-
-#     if serializer.is_valid():
-#         foto_camara = serializer.validated_data['foto_camara']
-        
-#         # Simulación de API externa que compara rostros
-#         # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
-#         rostro_coincide = True
-#         if rostro_coincide:
-#             usuario.is_validated_camera = True
-#             usuario.save()
-#             return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+# ----------- Resumen del perfil
 @api_view(['POST'])
 def completar_perfil(request):
     usuario = request.user
