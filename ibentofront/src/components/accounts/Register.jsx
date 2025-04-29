@@ -383,75 +383,99 @@ export default function Register() {
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
 
           {/* Formulario */}
+          {step === 1 && (
+              <> 
           <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
             <form className="space-y-5" onSubmit={handleSubmit}>
               {/* Nombre y Apellido */}
               <div className="flex space-x-3">
                 <div className="w-1/2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
-                  <InputText className={inputStyles} name="nombre" required />
+                  <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
                 </div>
                 <div className="w-1/2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
-                  <InputText className={inputStyles} name="apellido" required />
+                  <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
                 </div>
               </div>
 
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                <InputText className="w-full border-2 rounded-full px-4 py-2 text-sm" name="email" required />
+                <InputText className={inputStyles} name="email" onChange={handleChange} required />
               </div>
 
               {/* Contraseña */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
-                <InputText
-                  className={inputStyles}
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-4 flex items-center top-8"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                </button>
+                <div className="relative">
+                    <InputText
+                      className={`${inputStyles} pr-10`}
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      onChange={handleChange}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-2 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                    </button>
+                  </div>
               </div>
 
               {/* Confirmar Contraseña */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
-                <InputText
-                  className={inputStyles}
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-4 flex items-center top-8"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                </button>
+                <div className="relative">
+                    <InputText
+                      className={`${inputStyles} pr-10`}
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      onChange={handleChange}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-2 flex items-center"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                    </button>
+                  </div>
               </div>
 
               {/* Checkbox términos */}
               <div className="flex items-start">
-                <Checkbox color="primary" />
-                <span className="text-xs text-gray-600 ml-2 leading-tight">
-                  He leído y acepto el <strong className="text-purple-500">Aviso de privacidad</strong> y los <strong className="text-purple-500">Términos y condiciones</strong>.
-                </span>
+              <FormControlLabel
+                  control={
+                    <Checkbox
+                      value="allowPrivTerm"
+                      color="primary"
+                      checked={isTermsAccepted}
+                      onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                    />
+                  }
+                  label={
+                    <span style={{ fontSize: "18px" }}>
+                      He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
+                    </span>
+                  }
+                />
               </div>
 
               {/* Botón de Siguiente */}
 
-              <Button type="submit" className={buttonStyle} variant="contained">
-                Siguiente
-              </Button>
+              <Button
+                    type="button"
+                    onClick={() => setStep(2)} // Cambiar al paso 2
+                    className={buttonStyle}
+                    variant="contained"
+                  >
+                    Siguiente
+                  </Button>
 
               {/* Botón Google */}
               <button
@@ -463,6 +487,52 @@ export default function Register() {
               </button>
             </form>
           </div>
+          </>)}
+          {step === 2 && (
+              <>
+              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
+                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
+                  ¿Qué tipo de eventos te gustan?
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <div className="intereses-container">
+                    {categorias.map((categoria) => (
+                      <div key={categoria.id} className="categoria mb-5">
+                        <div className={buttonStyle} style={{ cursor: 'default' }}>
+                          {categoria.nombre}
+                        </div>
+                        <ul className="flex flex-wrap">
+                          {categoria.valores.map((valor) => (
+                            <li
+                              key={valor}
+                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${
+                                selectedEvents.includes(valor)
+                                  ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                  : 'btn-off'
+                              }`}
+                              onClick={() => toggleSeleccionado(valor)}
+                            >
+                              {valor}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </Grid>
+
+                <Button onClick={handleSubmit} className={buttonStyle} variant="contained">
+                  Crear Cuenta
+                </Button>
+                
+                </div>
+              </>
+            )}
+          
+
+          
+
         </div>
       </div>
 
