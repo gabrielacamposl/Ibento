@@ -53,7 +53,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializer,
                           EventoSerializerLimitado,
                           EventoSerializerLimitadoWithFecha,
-                          EventoWithDistanceSerializer
                           )
 
 # face_detector = dlib.get_frontal_face_detector()
@@ -501,6 +500,12 @@ class EventoViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
+    def everything(self, request):
+        queryset = self.get_queryset()
+        serializer = EventoSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
     def most_liked(self, request):
 
         queryset = self.get_queryset().order_by('-numLike')[:100]
@@ -547,8 +552,7 @@ class EventoViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def nearest(self, request):
-        
-        # Obtener latitud y longitud de los parámetros de consulta
+
         latitude = request.query_params.get('lat')
         longitude = request.query_params.get('lon')
 
@@ -558,12 +562,6 @@ class EventoViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not latitude or not longitude:
-            return Response(
-                {"detail": "Se requieren los parámetros de consulta 'lat' y 'lon'."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
         try:
             user_lat = float(latitude)
             user_lon = float(longitude)
@@ -573,26 +571,125 @@ class EventoViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        eventos_distancia = []
+        now = datetime.now(timezone.utc)
+
+        events_with_distance = []
 
         for event in self.get_queryset():
-            if event.coordenates and isinstance(event.coordenates, list) and len(event.coordenates) == 2:
+
+            # --- Validación de Fecha (solo considerar eventos futuros) ---
+            is_upcoming = False
+            if event.dates and isinstance(event.dates, list) and event.dates:
+                first_date_str = event.dates[0] # Tomar solo el primer elemento
+                if isinstance(first_date_str, str):
+                    try:
+                        # Parsear la primera fecha ISO 8601 con zona horaria
+                        date_obj = datetime.fromisoformat(first_date_str.replace('Z', '+00:00'))
+                        # Asegurarse de que la fecha parseada tenga información de zona horaria
+                        if date_obj.tzinfo is None:
+                            date_obj = date_obj.replace(tzinfo=timezone.utc)
+
+                        # Verificar si la fecha es igual o posterior a la hora actual
+                        if date_obj >= now:
+                            is_upcoming = True
+                    except (ValueError, TypeError):
+                        # Si hay un error al parsear la fecha, el evento no se considera "upcoming"
+                        pass
+
+            if is_upcoming and event.coordenates and isinstance(event.coordenates, list) and len(event.coordenates) == 2:
                 event_lat, event_lon = event.coordenates
                 try:
                     event_lat_float = float(event_lat)
                     event_lon_float = float(event_lon)
-
                     distance = haversine_distance(user_lat, user_lon, event_lat_float, event_lon_float)
-                    eventos_distancia.append({'event': event, 'distance': distance})
+                    # Almacenamos el objeto evento y la distancia calculada en un diccionario
+                    events_with_distance.append({'event': event, 'distance': distance})
                 except (TypeError, ValueError):
-                    pass
-        eventos_ordenados = sorted(eventos_distancia, key = lambda x: x['distance'])
+                    pass # Ignorar eventos con coordenadas inválidas
 
-        eventos_mas_cercanos = [item['event'] for item in eventos_ordenados]
+        # Ordenar los eventos por distancia
+        sorted_events_data = sorted(events_with_distance, key=lambda x: x['distance'])
 
-        serializer = EventoWithDistanceSerializer(eventos_mas_cercanos, many=True)
+        # --- Limitar a los 50 eventos más cercanos ---
+        limited_sorted_events_data = sorted_events_data[:50]
+
+        # Extraer solo los objetos de evento para serializar
+        sorted_events = [item['event'] for item in limited_sorted_events_data]
+
+        # Serializar la lista de objetos Evento usando el serializer limitado
+        serializer = EventoSerializerLimitadoWithFecha(sorted_events, many=True)
+
+        # Obtener los datos serializados (una lista de diccionarios de eventos)
+        serialized_data = serializer.data
+
+        # Ahora, recorremos los datos serializados y añadimos la distancia
+        # Aseguramos que el orden sea el mismo que el de sorted_events_data
+        final_response_data = []
+        for i, event_data in enumerate(serialized_data):
+             # event_data es el diccionario serializado de un evento
+             # Accedemos a la distancia calculada del diccionario original en sorted_events_data
+             event_data['distance'] = sorted_events_data[i]['distance']
+             final_response_data.append(event_data)
+
+
+        return Response(final_response_data)
+    
+    @action(detail=False, methods=['get'])
+    def by_category(self, request):
+        # Obtener la categoría del parámetro de consulta
+        category_name = request.query_params.get('category')
+
+        # Validar que el parámetro de categoría esté presente
+        if not category_name:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'category'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        now = datetime.now(timezone.utc)
+
+        filtered_events = []
+
+        for event in self.get_queryset():
+
+            # --- Validar Categoría (primer elemento del array classifications) ---
+            matches_category = False
+            if event.classifications and isinstance(event.classifications, list) and event.classifications:
+                 if isinstance(event.classifications[0], str):
+                     if event.classifications[0].lower() == category_name.lower():
+                         matches_category = True
+
+
+            # --- Validación de Fecha (solo considerar eventos futuros) ---
+            is_upcoming = False
+            if event.dates and isinstance(event.dates, list) and event.dates:
+                first_date_str = event.dates[0] # Tomar solo el primer elemento
+                if isinstance(first_date_str, str):
+                    try:
+                        # Parsear la primera fecha ISO 8601 con zona horaria
+                        date_obj = datetime.fromisoformat(first_date_str.replace('Z', '+00:00'))
+                        # Asegurarse de que la fecha parseada tenga información de zona horaria
+                        if date_obj.tzinfo is None:
+                            date_obj = date_obj.replace(tzinfo=timezone.utc)
+
+                        # Verificar si la fecha es igual o posterior a la hora actual
+                        if date_obj >= now:
+                            is_upcoming = True
+                    except (ValueError, TypeError):
+                        # Si hay un error al parsear la fecha, el evento no se considera "upcoming"
+                        pass
+
+            # --- Agregar el evento si cumple ambos criterios ---
+            if matches_category and is_upcoming:
+                filtered_events.append(event)
+            
+            limited_events = filtered_events[:50]
         
+            serializer = EventoSerializerLimitadoWithFecha(limited_events, many=True)
+
         return Response(serializer.data)
+
+
 #----------------- Obtención de eventos
 
 
