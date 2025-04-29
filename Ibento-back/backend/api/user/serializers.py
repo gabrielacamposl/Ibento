@@ -287,22 +287,6 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
                     pass
         return data     
 
-class EventoWithDistanceSerializer(serializers.Serializer):
-
-    distance = serializers.FloatField()
-
-    def to_representation(self, instance):
-            # instance aquí es el diccionario {'event': event_object, 'distance': calculated_distance}
-
-            # Usa tu serializer limitado para obtener la representación del objeto Evento
-            event_data = EventoSerializerLimitadoWithFecha(instance['event']).data
-
-            # Crea la representación final y añade la distancia
-            representation = event_data
-            representation['distance'] = instance['distance']
-
-            return representation
-
 # ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
 
 class SubcategoriaSerializer(serializers.ModelSerializer):

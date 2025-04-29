@@ -13,7 +13,7 @@ interface ListEvent {
     dates: [];
     imgs: [];
     url: string;
-    numLikes: number;
+    numLike: number;
     numSaves : number;
 }
 
@@ -30,25 +30,14 @@ function Cards({
 
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border p-4">
-            <h3 className="mb-4 text-xl font-bold text-black text-left">Recomendados para ti</h3>
+            <h3 className="mb-4 text-xl font-bold text-black text-left">{name}</h3>
             {/* Contenedor con scroll horizontal */}
             <div className="w-full overflow-x-auto">   
                 {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
                 <div className="flex flex-row space-x-1 w-full h-auto p-2">  
                     {listEvents.map((event, index) => (
                         console.log(index),
-                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLikes} />
-                    ))}
-                </div>
-            </div>
-            <h3 className="mb-4 text-xl font-bold text-black text-left">Populares</h3>
-            {/* Contenedor con scroll horizontal */}
-            <div className="w-full overflow-x-auto">   
-                {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-                <div className="flex flex-row space-x-1 w-full h-auto p-2">  
-                    {listEvents.map((event, index) => (
-                        console.log(index),
-                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLikes} />
+                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLike} />
                     ))}
                 </div>
             </div>
@@ -82,7 +71,7 @@ function Cards({
             <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
                 <div className='relative w-full h-36 lg:h-48'>
                     <img 
-                    src={`${imgs[0][0]}`} 
+                    src={`${imgs[0]}`} 
                     className="rounded-xl object-cover w-full h-36 lg:h-48 " 
                     alt={title} 
                     />

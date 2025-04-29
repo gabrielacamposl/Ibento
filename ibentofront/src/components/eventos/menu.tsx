@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import CardWrapper from "./card";
 
 
+
 interface ListEvent {
   _id: string;
   title: string;
@@ -14,14 +15,15 @@ interface ListEvent {
   dates: string[];
   imgs: ([]);
   url: string;
-  numLikes: number;
+  numLike: number;
   numSaves: number;
+  distance: number
 }
 
-const Menu = ({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) => {
+const Menu = () => {
   const [index, setIndex] = React.useState(0);
 
-  const tabs = ["Próximos eventos", "Cercanos a mí", "Culturales", "Musicales"];
+  const tabs = ["Próximos eventos", "Cercanos a mí", "Deportes", "Musicales"];
 
   return (
     <div className="w-full">
@@ -51,7 +53,7 @@ const Menu = ({ listEvents }: { listEvents: ListEvent[] } = { listEvents: [] }) 
         />
       </div>
       
-      <CardWrapper listEvents = {listEvents} name={tabs[index]} />
+      <CardWrapper name={tabs[index]} />
 
     </div>
   );

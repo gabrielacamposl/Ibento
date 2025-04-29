@@ -12,8 +12,9 @@ interface Event {
     dates: [];
     imgs: [];
     url: string;
-    numLikes: number;
+    numLike: number;
     numSaves : number;
+    distance : number;
 }
 
 const useFetchEvents = (url: string) => {
@@ -40,4 +41,6 @@ const useFetchEvents = (url: string) => {
     return { data, loading, error };
 };
 
-export default useFetchEvents;
+
+
+export { useFetchEvents };

@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
 
+import {useFetchEvents} from '../../hooks/usefetchEvents';
+
 
 interface ListEvent {
     _id: string;
@@ -17,41 +19,65 @@ interface ListEvent {
     dates: string[];
     imgs: ([]);
     url: string;
-    numLikes : number;
+    numLike : number;
     numSaves : number;
   }
 
 export default function CardWrapper(
     {
         name,
-        listEvents,
+
     }: {
         name: string;
-        listEvents: ListEvent[] 
     }
 ) {
 
+
+    const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('http://127.0.0.1:8000/eventos/upcoming_events/');
+  
+    //const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchEvents('http://127.0.0.1:8000/eventos/nearest?lat=' + coords?.coords.latitude + '&long=' + coords?.coords.longitude);
+
+    const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Deportes');
+
+    const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Música');
+
+    if (sportsLoading || musicalLoading || upcomingLoading) {
+        return (
+            <div className="flex min-h-screen justify-center items-center">
+                <p>Cargando...</p> {/* Puedes usar un spinner o un mensaje más elaborado */}
+            </div>
+        );
+    }
+  
+    if (upcomingError || sportsError || musicalError) {
+        return (
+            <div className="flex min-h-screen justify-center items-center text-red-600">
+                <p>Error al cargar eventos: {upcomingError || sportsError || musicalError} </p>
+            </div>
+        );
+    }
+    
     console.log(name)
 
     return (
         <>
         <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
-                {name === "Cercanos a mí" && listEvents.map((event, index) => (
+                {/* {name === "Cercanos a mí" && listEvents.map((event, index) => (
                     console.log(event.dates),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
-                ))}
-                {name === "Próximos eventos" && listEvents.map((event, index) => (
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                ))} */}
+                {name === "Próximos eventos" && upcomingEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
-                {name === "Culturales" && listEvents.map((event, index) => (   
+                {name === "Deportes" && sportsEvents.map((event, index) => (   
                     console.log(event._id), 
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
                 ))}
-                {name === "Musicales" && listEvents.map((event, index) => (
+                {name === "Musicales" && musicalEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLikes} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
                 ))}
             </div>
         </div>
