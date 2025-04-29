@@ -125,15 +125,16 @@ export default function EventList({ onResultCount, eventos }: { onResultCount: (
     useEffect(() => {
         onResultCount(filteredEvents.length);
     }, [filteredEvents.length, onResultCount]);
-
+   
     return (
         <div className="container mx-auto px-4">
             <div className="flex flex-row flex-wrap items-center justify-center py-4 gap-4">
                 {filteredEvents.map((event) => (
+                  
                     <EventCard
                         key={event._id}
                         id={event._id}
-                        imageUrl={event.imgs[0][0]}
+                        imageUrl={event.imgs[0]}
                         title={event.title}
                         date={event.dates}
                         location={event.location}
