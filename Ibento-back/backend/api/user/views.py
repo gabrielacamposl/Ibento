@@ -33,13 +33,13 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para selección de categorías de eventos
                           # Cambiar contraseña
                           PasswordResetRequestSerializer,
+                          PasswordResetChangeSerializer,
                           PasswordResetCodeValidationSerializer,
-                          PasswordResetSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           PersonalData,
                           PersonalPreferences,
-                          UploadINE,
+                          IneValidationSerializer,
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
@@ -171,21 +171,21 @@ def password_reset_validate(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ----- Cambiar contraseña
+# ------ Reesetear contraseña
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def password_reset_confirm(request):
-    serializer = PasswordResetSerializer(data=request.data)
+def password_reset_change(request):
+    serializer = PasswordResetChangeSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
         new_password = serializer.validated_data['new_password']
-        codigo = serializer.validated_data['codigo']
         try:
             user = Usuario.objects.get(email=email)
-            if user.codigo_reset_password != codigo:
-                return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
-            if timezone.now() > user.codigo_reset_password_expiration:
-                return Response({"error": "El código ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Asegúrate de que el usuario haya validado un código antes
+            if not user.codigo_reset_password:
+                return Response({"error": "No autorizado para cambiar contraseña."}, status=status.HTTP_403_FORBIDDEN)
 
             user.password = make_password(new_password)
             user.codigo_reset_password = None
@@ -272,55 +272,25 @@ def save_personal_data(request):
 
 # --------- Subir INE para Validar el Perfil 
 
+
 @api_view(['POST'])
-def upload_ine(request):
-    usuario = request.user
-    serializer = UploadINE(data=request.data)
-
+@permission_classes([IsAuthenticated])
+def ine_validation_view(request):
+    serializer = IneValidationSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        ine_f = serializer.validated_data['ine_f']
-        ine_m = serializer.validated_data['ine_m']
-        
-        # Simulación de API externa que valida la INE
-        #ine_validada = validar_ine_con_api(ine_f, ine_m)
-        ine_validada = True
+        user = serializer.save()
+        return Response({
+            "message": "Validación completada",
+            "is_ine_validated": user.is_ine_validated,
+            "curp": user.curp
+        })
+    return Response(serializer.errors, status=400)
 
-        if ine_validada:
-            usuario.is_ine_validated = True
-            usuario.save()
-            return Response({"mensaje": "INE validada correctamente."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "INE no válida."}, status=status.HTTP_400_BAD_REQUEST)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ----------- Comparación de Rostros 
 
-# def get_face_descriptor(image, face):
-#     shape = shape_predictor(image, face)
-#     return face_rec_model.compute_face_descriptor(image, shape)
 
-# @api_view(['POST'])
-# def comparar_rostros(request):
-#     usuario = request.user
-#     serializer = CompararRostroSerializer(data=request.data)
-
-#     if serializer.is_valid():
-#         foto_camara = serializer.validated_data['foto_camara']
-        
-#         # Simulación de API externa que compara rostros
-#         # rostro_coincide = comparar_rostro_con_ine(usuario, foto_camara)
-#         rostro_coincide = True
-#         if rostro_coincide:
-#             usuario.is_validated_camera = True
-#             usuario.save()
-#             return Response({"mensaje": "Rostro validado exitosamente."}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({"error": "El rostro no coincide con la INE."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+# ----------- Resumen del perfil
 @api_view(['POST'])
 def completar_perfil(request):
     usuario = request.user
@@ -340,6 +310,18 @@ def completar_perfil(request):
 
     return Response({"mensaje": "Perfil completado exitosamente."}, status=status.HTTP_200_OK)
 
+
+# -------------------------------------- PERFIL MATCH - USER ----------------------------------------
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def estado_validacion_view(request):
+    user = request.user
+
+    return Response({
+        "is_ine_validated": user.is_ine_validated,
+        "is_validated_camera": user.is_validated_camera
+    })
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 
