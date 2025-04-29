@@ -99,18 +99,9 @@ class PasswordResetCodeValidationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     codigo = serializers.CharField(max_length=6)
 
-
-class PasswordResetSerializer(serializers.Serializer):
+class PasswordResetChangeSerializer(serializers.Serializer):
     email = serializers.EmailField()
     new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
-    codigo = serializers.CharField(max_length=6)
-
-    def validate(self, attrs):
-        if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError("Las contraseñas no coinciden.")
-        return attrs
-
 
 # -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
 

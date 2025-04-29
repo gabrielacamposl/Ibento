@@ -31,8 +31,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para selección de categorías de eventos
                           # Cambiar contraseña
                           PasswordResetRequestSerializer,
+                          PasswordResetChangeSerializer,
                           PasswordResetCodeValidationSerializer,
-                          PasswordResetSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           PersonalData,
@@ -167,21 +167,21 @@ def password_reset_validate(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ----- Cambiar contraseña
+# ------ Reesetear contraseña
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def password_reset_confirm(request):
-    serializer = PasswordResetSerializer(data=request.data)
+def password_reset_change(request):
+    serializer = PasswordResetChangeSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
         new_password = serializer.validated_data['new_password']
-        codigo = serializer.validated_data['codigo']
         try:
             user = Usuario.objects.get(email=email)
-            if user.codigo_reset_password != codigo:
-                return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
-            if timezone.now() > user.codigo_reset_password_expiration:
-                return Response({"error": "El código ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Asegúrate de que el usuario haya validado un código antes
+            if not user.codigo_reset_password:
+                return Response({"error": "No autorizado para cambiar contraseña."}, status=status.HTTP_403_FORBIDDEN)
 
             user.password = make_password(new_password)
             user.codigo_reset_password = None
