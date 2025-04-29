@@ -10,14 +10,13 @@ interface ListEvent {
     _id: string;
     title: string;
     place: string;
-    cost: string[];
+    prices: string[];
     location: string;
     coordenates: string[];
     description: string;
     dates: string[];
     imgs: ([]);
     url: string;
-    avatars: ["/avatar1.jpg", "/avatar2.png", "/avatar3.png"];
     numLikes : number;
     numSaves : number;
   }
@@ -109,7 +108,6 @@ export function Card({
     }
 
     const hoy = new Date();
-    console.log(fecha)
     const fechaObjetivo = new Date(fecha[0]);
     hoy.setHours(0, 0, 0, 0);
     fechaObjetivo.setHours(0, 0, 0, 0);
@@ -129,9 +127,6 @@ export function Card({
     if (dias <= 0){
         fechaString = "HOY"
     }
-
-    console.log(title)
-    console.log(dias);
 
     const url = "../eventos/" + id;
     return (

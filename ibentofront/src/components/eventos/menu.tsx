@@ -7,14 +7,13 @@ interface ListEvent {
   _id: string;
   title: string;
   place: string;
-  cost: string[];
+  prices: string[];
   location: string;
   coordenates: string[];
   description: string;
   dates: string[];
   imgs: ([]);
   url: string;
-  avatars: ["/avatar1.jpg", "/avatar2.png", "/avatar3.png"];
   numLikes: number;
   numSaves: number;
 }
