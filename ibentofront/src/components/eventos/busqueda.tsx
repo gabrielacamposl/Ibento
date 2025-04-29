@@ -36,7 +36,7 @@ console.log("ID del evento:", eventId);
 
 
 
-    const [eventCount, setEventCount] = useState(null);
+    const [eventCount, setEventCount] = useState<number | null>(null);
    
 
 
