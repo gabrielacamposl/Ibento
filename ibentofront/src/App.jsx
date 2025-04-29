@@ -87,8 +87,6 @@ export default function App() {
           <Route path="verificar" element={<VerificarPerfil />} />
 
         </Route>
-
-        
       </Routes>
     </Router>
   );

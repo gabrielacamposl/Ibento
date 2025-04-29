@@ -43,7 +43,7 @@ const Login = () => {
   
       // Redirigir a vista principal
       // navigate("/principal/eventos");
-      window.location.href = '/principal/eventos'; 
+      window.location.href = '/ibento/eventos'; 
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       const mensajeError = err.response?.data?.detail || "Correo o contraseña incorrectos";

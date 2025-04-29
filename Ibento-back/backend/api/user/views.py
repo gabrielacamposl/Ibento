@@ -342,6 +342,18 @@ def completar_perfil(request):
     return Response({"mensaje": "Perfil completado exitosamente."}, status=status.HTTP_200_OK)
 
 
+# -------------------------------------- PERFIL MATCH - USER ----------------------------------------
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def estado_validacion_view(request):
+    user = request.user
+
+    return Response({
+        "is_ine_validated": user.is_ine_validated,
+        "is_validated_camera": user.is_validated_camera
+    })
+
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 
 # ------- Crear Match
