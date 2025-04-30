@@ -11,7 +11,7 @@ const verificar = () => {
         ine: ["/ine.jpg"],
     });
 
-    const [activeIndex, setActiveIndex] = useState(3);
+    const [activeIndex, setActiveIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({}); // Estado para respuestas seleccionadas
 
     // Desplazar al inicio de la página al cargar el componente
