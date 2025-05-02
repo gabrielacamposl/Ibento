@@ -18,7 +18,7 @@ import { buttonStyle, inputStyles } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
-
+import { email_regex, password_regex } from "../../utils/regex";
 
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
@@ -31,6 +31,12 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+     // Validar campos
+
+  if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
+      setMessage("El correo electrónico o contraseña son incorrectos.");
+      return;
+  }
   
     try {
       const res = await api.post("login/", { email, password });
