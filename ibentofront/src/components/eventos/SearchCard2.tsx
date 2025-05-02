@@ -86,7 +86,7 @@ export function EventCard({ id, imageUrl, title, date, location}) {
         <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
             <div className="bg-white w-full rounded-lg flex flex-row">
                 <img
-                src={`/${imageUrl[0][0]}`}
+                src={`${imageUrl}`}
 
                 className="rounded-lg object-cover w-40 h-40" 
                 alt={title}/>
