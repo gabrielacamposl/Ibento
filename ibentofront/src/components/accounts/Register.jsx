@@ -17,6 +17,7 @@ import { buttonStyle } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { name_regex, email_regex, password_regex } from "../../utils/regex";
 
 
 
@@ -87,15 +88,54 @@ export default function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+     // Validar campos
+     if (!name_regex.test(form.nombre)) {
+      setMessage("El nombre debe contener solo letras y tener entre 3 y 50 caracteres.");
+      return;
+  }
+  if (!name_regex.test(form.apellido)) {
+      setMessage("El apellido debe contener solo letras y tener entre 3 y 50 caracteres.");
+      return;
+  }
+  if (!email_regex.test(form.email)) {
+      setMessage("El correo electrónico no es válido.");
+      return;
+  }
+  if (!password_regex.test(form.password)) {
+      setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+      return;
+  }
+    // Verificar si las contraseñas coinciden
+    if (form.password !== form.confirmPassword) {
+      setMessage("Las contraseñas no coinciden");
+      return;
+  }
+
+  // Verificar si se han seleccionado preferencias
+  if (selectedEvents.length === 0) {
+      setMessage("Debes seleccionar al menos una preferencia de evento.");
+      return;
+  }
+  if (selectedEvents.length < 3) {
+      setMessage("Debes seleccionar como mínimo 3 preferencias de evento.");
+      return;
+  }
+  // Validar que todos los campos estén llenos
+  for (const key in form) {
+      if (form[key] === "") {
+          setMessage("Por favor completa todos los campos.");
+          return;
+      }
+  }
+  if (form.name === "" || form.apellido === "" || form.email === "" || form.password === "") {
+      setMessage("Por favor completa todos los campos.");
+      return;
+  }
+  // Validar que el correo no esté en uso
+
     // Verificar si los términos están aceptados
     if (!isTermsAccepted) {
         setMessage("Debes aceptar los términos y condiciones para continuar.");
-        return;
-    }
-
-    // Verificar si las contraseñas coinciden
-    if (form.password !== form.confirmPassword) {
-        setMessage("Las contraseñas no coinciden");
         return;
     }
 
