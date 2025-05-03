@@ -1,3 +1,24 @@
+import axios from "axios";
+
+
+// ------------------ CONFIGURACIÓN GLOBAL ------------------
+// Configuración de la URL base
+
+const api = axios.create({
+  baseURL: "https://localhost", // cambia a tu dominio real
+});
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem("token"); // O como almacenes el JWT
+  if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
+
+
 // Verifica que esta línea esté presente para exportar la función
 export async function registerUser(userData) {
   try {
