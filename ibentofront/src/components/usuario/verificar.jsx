@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Button } from "primereact/button";
 import { useNavigate } from 'react-router-dom';
 import { buttonStyle } from "../../styles/styles";
 import "../../assets/css/botones.css";
@@ -6,35 +7,71 @@ import "../../assets/css/botones.css";
 import api from "../../api";
 
 
-const verificar = () => {
+const Verificar = () => {
     const navigate = useNavigate();
 
+
+    const [user, setUser] = useState({
+        pictures: [],
+        ine: []
+    });
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({}); // Estado para respuestas seleccionadas
 
-    // Desplazar al inicio de la página al cargar el componente
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            // Redirige si no hay token
+            navigate("/login");
+        }
         window.scrollTo(0, 0);
     }, []);
 
-    const handleImageChange = (e, index) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newPictures = [...user.pictures];
-                newPictures[index] = reader.result;
-                setUser({ ...user, pictures: newPictures });
-            };
-            reader.readAsDataURL(file);
+    // Desplazar al inicio de la página al cargar el componente
+    // useEffect(() => {
+    //     window.scrollTo(0, 0);
+    // }, []);
+
+    // ------------- Subir fotos de perfil
+
+    const handleUploadPictures = async () => {
+        if (user.pictures.length < 3 || user.pictures.length > 6) {
+            alert("Debes subir entre 3 y 6 fotos.");
+            return;
+        }
+
+        const formData = new FormData();
+        user.pictures.forEach((picture) => {
+            formData.append("pictures", picture);
+        });
+
+        try {
+            const response = await api.post("api/upload-profile-pictures/", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            console.log("Fotos subidas:", response.data.pictures);
+            alert("¡Fotos subidas con éxito!");
+        } catch (error) {
+            console.error("Error al subir fotos:", error.response?.data || error);
+            alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         }
     };
 
-    const handleImageDelete = (index) => {
-        const newPictures = user.pictures.filter((_, i) => i !== index);
-        setUser({ ...user, pictures: newPictures });
+    const handleImageDelete = (indexToDelete) => {
+        setUser((prev) => {
+            const newPictures = [...prev.pictures];
+            newPictures.splice(indexToDelete, 1);
+            return {
+                ...prev,
+                pictures: newPictures,
+            };
+        });
     };
+    
 
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
@@ -123,42 +160,7 @@ const verificar = () => {
             question: '¿Bebes alcohol con frecuencia?',
             answers: ['Sí, bebo con frecuencia', 'No me gusta beber', 'Solo en ocasiones especiales', 'Lo hago para socializar', 'Trato de dejarlo']
         },
-        {
-            question: '¿En qué momento del día sueles ser más activo?',
-            answers: ['En las mañanas', 'En las tardes', 'En las noches', 'Durante todo el día']
-        },
-        {
-            question: '¿Qué tipo de música prefieres?',
-            answers: ['Pop', 'Rock', 'Clásica', 'Electrónica', 'Latina', 'Jazz', 'Otro']
-        },
-        {
-            question: '¿Tienes mascotas?',
-            answers: ['Perros', 'Gatos', 'Peces', 'Aves', 'Reptiles', 'Roedores', 'Otro', 'Me gustaría uno', 'Soy alergico', 'No me gustan']
-        },
-        {
-            question: '¿Cuáles son tús intereses?',
-            answers: ['Música', 'Deportes', 'Cine', 'Viajar', 'Cocinar', 'Leer', 'Tecnología', 'Dibujo/Pintar', 'Arte', 'Otro']
-        },
-        {
-            question: '¿Qué tan activo eres en redes?',
-            answers: ['Muy activo', 'Activo', 'Poco activo', 'No uso redes']
-        },
-        {
-            question: '¿Qué medio de transporte sueles usar?',
-            answers: ['Auto', 'Bicicleta', 'Transporte público', 'Caminar', 'Moto', 'Uber', 'Otro']
-        },
-        {
-            question: '¿Cómo te sientes respecto a planes espontáneos',
-            answers: ['Me encantan', 'Depende del plan', 'No me gustan', 'Prefiero planear con anticipación']
-        },
-        {
-            question: '¿Qué valoras más en una compañía?',
-            answers: ['Buena conversación', 'Sentido del humor', 'Inteligencia', 'Honestidad', 'Empatía', 'Lealtad', 'Otro']
-        },
-        {
-            question: '¿Qué tipo de interacción esperas durante un evento?',
-            answers: ['Risas y diversión', 'Compartir intereses mutuos', 'Disfrutar el momento', 'Conocer gente nueva', 'Conversaciones profundas']
-        },
+
         {
             question: '¿Cuál es su tipo de personalidad?',
             answers: ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP']
@@ -226,7 +228,11 @@ const verificar = () => {
                                             <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
                                                 {user.pictures[index] ? (
                                                     <img
-                                                        src={user.pictures[index]}
+                                                        src={
+                                                            typeof user.pictures[index] === "string"
+                                                                ? user.pictures[index]
+                                                                : URL.createObjectURL(user.pictures[index])
+                                                        }
                                                         alt={`Imagen ${index + 1}`}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -238,6 +244,7 @@ const verificar = () => {
                                                         <span className="block mt-2 colorTexto">Agregar</span>
                                                     </label>
                                                 )}
+
                                                 {user.pictures[index] && (
                                                     <button
                                                         className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
@@ -252,6 +259,9 @@ const verificar = () => {
                                             </div>
                                         </div>
                                     ))}
+                                    <Button className={buttonStyle} onClick={handleUploadPictures}>
+                                        Siguiente
+                                    </Button>
                                 </div>
                             </React.Fragment>
                         </div>)}
@@ -403,34 +413,36 @@ const verificar = () => {
                 </div>
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
-                    <button className={buttonStyle}
+                    <Button className={buttonStyle}
                         onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
                         disabled={activeIndex === 0}
                     >
                         Anterior
-                    </button>
-                    {activeIndex === 3 ? (
-                        <button
-                            className={buttonStyle}
-                            onClick={() => handdleVerify()}
+                    </Button>
 
-                        >
+                    {activeIndex === 0 ? (
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                            Siguiente
+                        </Button>
+                    ) : activeIndex === 2 ? (
+                        <Button className={buttonStyle} onClick={handleIneValidation}>
                             Verificar
-                        </button>
+                        </Button>
                     ) : (
-                        <button
+                        <Button
                             className={buttonStyle}
-                            onClick={() => handdleNavigate(Math.min(activeIndex + 1, items.length - 1))}
+                            onClick={() => handdleNavigate(activeIndex + 1)}
                             disabled={activeIndex === items.length - 1}
                         >
                             Siguiente
-                        </button>
+                        </Button>
                     )}
                 </div>
+
             </div>
 
         </div>
     );
 };
 
-export default verificar;
+export default Verificar;
