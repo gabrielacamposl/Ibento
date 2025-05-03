@@ -31,32 +31,36 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-     // Validar campos
+    // Validar campos
 
-  if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
+    if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
       setMessage("El correo electrónico o contraseña son incorrectos.");
       return;
-  }
-  
+    }
+
     try {
       const res = await api.post("login/", { email, password });
-  
+
       // Guardar tokens
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
-  
-      alert("Sesión iniciada correctamente");
-  
+      // Opcionalmente, guarda más datos del usuario
+      localStorage.setItem("user", JSON.stringify({
+        id: data.id,
+        email: data.email,
+        nombre: data.nombre,
+      }));
+
       // Redirigir a vista principal
       // navigate("/principal/eventos");
-      window.location.href = '/ibento/eventos'; 
+      window.location.href = '/ibento/eventos';
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       const mensajeError = err.response?.data?.detail || "Correo o contraseña incorrectos";
       alert("Error al iniciar sesión: " + mensajeError);
     }
   };
-  
+
 
   return (
 
@@ -168,7 +172,7 @@ const Login = () => {
 
                 <Grid item xs={12} container justifyContent="left" alignItems="left">
 
-                  <Link  to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </Grid>
@@ -224,93 +228,93 @@ const Login = () => {
                 <Box component="img" src={ibentoLogo} alt="Ibento Logo" sx={{ width: 100, height: "auto", mb: 2 }} />
 
                 <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
-                Inicia Sesión
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    className={`${inputStyles} pr-10`}
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-
-                </Grid>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
+                  Inicia Sesión
+                </Typography>
+                <Box component="form" sx={{ mt: 1 }}>
+                  <Grid item xs={12}>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Correo electrónico<span className="text-red-500">*</span>
+                    </label>
                     <InputText
                       className={`${inputStyles} pr-10`}
                       required
                       fullWidth
-                      name="password"
-                      label="Contraseña"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      id="email"
+                      label="Email Address"
+                      name="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
-                  </div>
-                </Grid>
 
-                <Grid item xs={12} container justifyContent="left" alignItems="left">
+                  </Grid>
+                  <Grid item xs={12}>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Correo electrónico<span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <InputText
+                        className={`${inputStyles} pr-10`}
+                        required
+                        fullWidth
+                        name="password"
+                        label="Contraseña"
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-2 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                      </button>
+                    </div>
+                  </Grid>
 
-                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Grid>
+                  <Grid item xs={12} container justifyContent="left" alignItems="left">
 
-
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Recordar cuenta"
-                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
-                />
-
-                <Button className={buttonStyle} type="submit"
-                  fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}>
-                  Iniciar Sesión
-                </Button>
-                <Grid container justifyContent="center" alignItems="center">
-                  <Grid item xs={12} container justifyContent="center" alignItems="center">
-
-                    <Link
-                      to="/crear-cuenta"
-                      component="button"
-                      variant="body2" sx={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        color: "rgb(129, 45, 177)",
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "rgb(164, 96, 203)",
-                        },
-                      }}>
-                      Crear cuenta
+                    <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                      ¿Olvidaste tu contraseña?
                     </Link>
                   </Grid>
-                </Grid>
-              </Box>
+
+
+                  <FormControlLabel
+                    control={<Checkbox value="remember" color="primary" />}
+                    label="Recordar cuenta"
+                    sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+                  />
+
+                  <Button className={buttonStyle} type="submit"
+                    fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                    onClick={handleLogin}>
+                    Iniciar Sesión
+                  </Button>
+                  <Grid container justifyContent="center" alignItems="center">
+                    <Grid item xs={12} container justifyContent="center" alignItems="center">
+
+                      <Link
+                        to="/crear-cuenta"
+                        component="button"
+                        variant="body2" sx={{
+                          fontWeight: "bold",
+                          fontSize: 18,
+                          color: "rgb(129, 45, 177)",
+                          textDecoration: "none",
+                          "&:hover": {
+                            textDecoration: "underline",
+                            color: "rgb(164, 96, 203)",
+                          },
+                        }}>
+                        Crear cuenta
+                      </Link>
+                    </Grid>
+                  </Grid>
+                </Box>
               </Box>
             </Grid>
           </Grid>

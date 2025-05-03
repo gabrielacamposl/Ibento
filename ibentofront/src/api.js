@@ -5,11 +5,11 @@ import axios from "axios";
 // Configuración de la URL base
 
 const api = axios.create({
-  baseURL: "https://localhost", // cambia a tu dominio real
+  baseURL: "http://127.0.0.1:8000/", 
 });
 
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem("token"); // O como almacenes el JWT
+  const token = localStorage.getItem("token"); 
   if (token) {
       config.headers.Authorization = `Bearer ${token}`;
   }
