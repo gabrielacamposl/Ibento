@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import password_reset_request, password_reset_validate, password_reset_resend, password_reset_change
-from api.user.views import estado_validacion_view
+from api.user.views import estado_validacion_view, ine_validation_view
 from api.user.views import (crear_usuario, 
                             CategoriaEventoViewSet,
                             SubcategoriaViewSet,
@@ -47,12 +47,12 @@ urlpatterns = [
     path('password-reset/validate/', password_reset_validate, name='password_reset_validate'),
     path('password-reset/resend/', password_reset_resend, name='password_reset_resend'),
 
-
-
-    # Matches
+    # Creación de perfil para acompañantes
     # ---- Está validado
     path('estado-validacion/', estado_validacion_view, name='estado-validacion'),
+    path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
+    # Matches
     path('matches/crear/', crear_match, name='crear_match'),
     path('matches/<str:usuario_id>/', obtener_matches_usuario, name='obtener_matches_usuario'),
     path('matches/eliminar/<str:match_id>/', eliminar_match, name='eliminar_match'),

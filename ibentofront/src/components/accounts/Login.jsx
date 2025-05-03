@@ -57,7 +57,7 @@ const Login = () => {
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
       <div className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden ">
-        <Grid container component="main" sx={{ height: "100vh", width: "100vw" }}>
+        <Grid container component="main" sx={{ height: "100vh", width: "100vw" }} className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden">
           <CssBaseline />
           {/* Animación */}
           <Grid item xs={false} sm={4} md={7} sx={{ position: "relative", overflow: "hidden" }}>
@@ -209,9 +209,9 @@ const Login = () => {
       <div className="block md:hidden relative w-full h-screen flex justify-center items-center overflow-hidden">
         {/* Fondo con degradado */}
         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-purple-400 via-purple-200 to-transparent z-0"></div>
-
+ 
         <div className="h-screen flex justify-center items-center bg-gray-100 relative z-10">
-          <Grid container component="main" sx={{ height: "100vh", width: "100vw" }}>
+          <Grid container component="main" sx={{ height: "100vh", width: "100vw" }} className=" w-full  flex justify-center overflow-hidden">
             <Grid item xs={12} component={Paper} elevation={6} square sx={{ borderRadius: 4, p: 3 }}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 {/* Logo */}

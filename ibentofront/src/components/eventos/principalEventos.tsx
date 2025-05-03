@@ -4,61 +4,62 @@ import Cards from './cards';
 import SearchMenu from './menu';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import useFetchEvents from '../../hooks/fetchEvents';
+import {useFetchEvents} from '../../hooks/usefetchEvents';
 import useGeolocation from '../../hooks/useGeolocation';
 
 function Page(){
 
 
-    const { data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/');
+    //const {data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/everything/');
+    const {data : popularEvents, loading : popularLoading, error : popularError} = useFetchEvents('http://127.0.0.1:8000/eventos/most_liked/');
 
-    const { position, error: geoError, loading: geoLoading } = useGeolocation();
+    //const { position, error: geoError, loading: geoLoading } = useGeolocation();
 
-    useEffect(() => {
-      if (position) {
-          console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
-          // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
-      }
-  }, [position]); // Este efecto se ejecutará cuando la posición cambie (es decir, cuando se obtenga)
+//     useEffect(() => {
+//       if (position) {
+//           console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
+//           // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
+//       }
+//   }, [position]); // Este efecto se ejecutará cuando la posición cambie (es decir, cuando se obtenga)
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+//     useEffect(() => {
+//         window.scrollTo(0, 0);
+//     }, []);
 
     
-    if (loading || geoLoading) {
-      return (
+    if (popularLoading) {
+        return (
           <div className="flex min-h-screen justify-center items-center">
-              <p>Cargando...</p> {/* Puedes usar un spinner o un mensaje más elaborado */}
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-      );
-  }
+        );
+    }
 
-  if (error) {
+  if (popularError) {
       return (
           <div className="flex min-h-screen justify-center items-center text-red-600">
-              <p>Error al cargar eventos: {error}</p>
+              <p>Error al cargar eventos: {popularError}</p>
           </div>
       );
   }
 
-  if (geoError) {
-       return (
-          <div className="flex min-h-screen justify-center items-center text-yellow-600">
-              <p>Error al obtener ubicación: {geoError.message}</p>
-              {/* Opcional: renderizar la página sin geolocalización */}
-              {/* ... renderiza el resto de la página aquí ... */}
-          </div>
-      );
-  }
+//   if (geoError) {
+//        return (
+//           <div className="flex min-h-screen justify-center items-center text-yellow-600">
+//               <p>Error al obtener ubicación: {geoError.message}</p>
+//               {/* Opcional: renderizar la página sin geolocalización */}
+//               {/* ... renderiza el resto de la página aquí ... */}
+//           </div>
+//       );
+//   }
 
     return(
         <>
         <div className="flex flex-col gap-4 min-h-screen justify-center w-full items-center bg-white lg:max-w-3/4">
             <Carousel />
-            <Cards listEvents = {eventos} name = {"recomendados"} />
-            <Cards listEvents = {eventos} name = {"populares"} />
-            <SearchMenu listEvents = {eventos}/>
+            {/* <Cards listEvents = {eventos} name = {"recomendados"} /> */}
+            <Cards listEvents = {popularEvents} name = {"Populares"} />
+            <SearchMenu/>
             <div className='h-16'></div>
         </div>
         

@@ -5,6 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 import cloudinary.uploader
+from api.utils import validate_ine_with_kiban
 from api.models import (Usuario, 
                         TokenBlackList,
                         Subcategoria, 
@@ -151,12 +152,28 @@ class PersonalPreferences(serializers.ModelSerializer):
         usuario.save()
         return usuario
     
-# ------- Validación de INE
+# ------- Validación de INE con API de KIBAN
 
-class UploadINE(serializers.ModelSerializer):
-    ine_f = serializers.ImageField()
-    ine_m = serializers.ImageField()
+class IneValidationSerializer(serializers.Serializer):
+    ine_front_url = serializers.URLField()
+    ine_back_url = serializers.URLField()
 
+    def validate(self, data):
+        # Opcional: validar que vengan de Cloudinary u otro dominio confiable
+        return data
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        front_url = self.validated_data['ine_front_url']
+        back_url = self.validated_data['ine_back_url']
+
+        # Validar con Kiban
+        result = validate_ine_with_kiban(front_url, back_url)
+        user.is_ine_validated = result["is_valid"]
+        user.curp = result["curp"]
+        user.save()
+        return user
+    
 #---------- Comparación de rostros segundo filtro
 
 class ValidacionRostro(serializers.ModelSerializer):
@@ -269,22 +286,6 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
                     # Mantener el valor original si falla la conversión
                     pass
         return data     
-
-class EventoWithDistanceSerializer(serializers.Serializer):
-
-    distance = serializers.FloatField()
-
-    def to_representation(self, instance):
-            # instance aquí es el diccionario {'event': event_object, 'distance': calculated_distance}
-
-            # Usa tu serializer limitado para obtener la representación del objeto Evento
-            event_data = EventoSerializerLimitadoWithFecha(instance['event']).data
-
-            # Crea la representación final y añade la distancia
-            representation = event_data
-            representation['distance'] = instance['distance']
-
-            return representation
 
 # ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
 
