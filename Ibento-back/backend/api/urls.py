@@ -10,6 +10,7 @@ from api.user.views import (crear_usuario,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
+                            upload_profile_pictures,
                             crear_match,
                             eliminar_match,
                             obtener_matches_usuario,
@@ -48,6 +49,8 @@ urlpatterns = [
     path('password-reset/resend/', password_reset_resend, name='password_reset_resend'),
 
     # Creación de perfil para acompañantes
+    # ---- Subir imágenes de perfil
+     path('perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
     # ---- Está validado
     path('estado-validacion/', estado_validacion_view, name='estado-validacion'),
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),

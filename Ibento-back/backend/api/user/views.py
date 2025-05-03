@@ -5,33 +5,28 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.parsers import MultiPartParser
-
 # Utils Django
 from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
-
 # Libraries
 import json
 import random
 from datetime import datetime, timezone, timedelta
 from math import radians, sin, cos, sqrt, atan2
-
+# Cloudinary
+import cloudinary.uploader
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
-
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
-
 # Servicio de INES
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
-
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Matches,  Conversacion, Mensaje
 from api.models import CategoriaEvento,  Subcategoria
-
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
@@ -230,17 +225,44 @@ def password_reset_resend(request):
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 
-# Upload Photos
+# ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def upload_profile_pictures(request):
-    usuario = request.user  # Se obtiene el usuario autenticado
+    usuario = request.user
     serializer = UploadProfilePicture(data=request.data)
 
-    if serializer.is_valid():
-        serializer.save(usuario)
-        return Response({"mensaje": "Fotos de perfil guardadas correctamente."}, status=status.HTTP_200_OK)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    new_images = serializer.validated_data['pictures']
+    current_photos = usuario.profile_pic or []
+
+    if len(current_photos) + len(new_images) > 6:
+        return Response(
+            {"error": "No puedes tener más de 6 fotos de perfil."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    uploaded_urls = []
+
+    for image in new_images:
+        result = cloudinary.uploader.upload(
+            image,
+            folder="usuarios/perfiles",
+            transformation=[
+                {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+            ]
+        )
+        uploaded_urls.append(result['secure_url'])
+
+    usuario.profile_pic = current_photos + uploaded_urls
+    usuario.save()
+
+    return Response({
+        "message": "Fotos subidas correctamente.",
+        "pictures": usuario.profile_pic
+    }, status=status.HTTP_200_OK)
 
 
 

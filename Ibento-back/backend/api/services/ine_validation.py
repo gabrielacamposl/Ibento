@@ -6,7 +6,7 @@ import cloudinary.uploader
 from dotenv import load_dotenv
 load_dotenv()
 
-API_KEY_KIBAN = os.getenv("API_KEY_KIBAN")
+API_KEY_KIBAN = os.getenv("KIBAN_API")
 
 def upload_image_to_cloudinary(file, name="temp_image"):
     response = cloudinary.uploader.upload(

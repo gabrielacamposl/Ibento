@@ -3,6 +3,8 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -141,10 +143,11 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 # Cloudinary para el guardado de fotos
 cloudinary.config( 
-  cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
+  cloud_name = os.getenv("CLOUDINARY_NAME"), 
   api_key = os.getenv("CLOUDINARY_API_KEY"), 
   api_secret = os.getenv("CLOUDINARY_API_SECRET")
 )
+
 
 
 LANGUAGE_CODE = 'en-us'
