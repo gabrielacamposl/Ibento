@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
-import { HeartIcon, ClockIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from "react";
+import { HeartIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
 
 import {useFetchEvents} from '../../hooks/usefetchEvents';
+import useGeolocation from '../../hooks/useGeolocation';
 
 
 interface ListEvent {
@@ -33,26 +34,57 @@ export default function CardWrapper(
 ) {
 
 
+    const { position, error: geoError, loading: geoLoading } = useGeolocation();
+        const [liga, setLiga] = useState<string | null>(null);
+        useEffect(() => {
+          if (position) {
+              console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
+              setLiga('http://127.0.0.1:8000/eventos/nearest?lat=' + position?.coords.latitude + '&lon=' + position?.coords.longitude);
+              // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
+          }
+      }, [position]); // Este efecto se ejecutará cuando la posición cambie (es decir, cuando se obtenga)
+
     const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('http://127.0.0.1:8000/eventos/upcoming_events/');
+    
+    const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Música');
   
-    //const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchEvents('http://127.0.0.1:8000/eventos/nearest?lat=' + coords?.coords.latitude + '&long=' + coords?.coords.longitude);
+    const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchEvents(liga || 'http://127.0.0.1:8000/eventos/nearest?lat=0&lon=0');
 
     const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Deportes');
 
-    const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Música');
+    
 
-    if (sportsLoading || musicalLoading || upcomingLoading) {
+
+    console.log(upcomingEvents)
+
+    if (upcomingLoading) {
         return (
             <div className="flex min-h-screen justify-center items-center">
-                <p>Cargando...</p> {/* Puedes usar un spinner o un mensaje más elaborado */}
+                <p>Cargando...</p>
             </div>
         );
     }
   
-    if (upcomingError || sportsError || musicalError) {
+    if (sportsError) {
         return (
             <div className="flex min-h-screen justify-center items-center text-red-600">
-                <p>Error al cargar eventos: {upcomingError || sportsError || musicalError} </p>
+                <p>Error al cargar eventos: Error de deportes </p>
+            </div>
+        );
+    }
+
+    if (upcomingError) {
+        return (
+            <div className="flex min-h-screen justify-center items-center text-red-600">
+                <p>Error al cargar eventos: Error de proximos </p>
+            </div>
+        );
+    }
+
+    if (musicalError) {
+        return (
+            <div className="flex min-h-screen justify-center items-center text-red-600">
+                <p>Error al cargar eventos: Error de musicales </p>
             </div>
         );
     }
@@ -63,10 +95,10 @@ export default function CardWrapper(
         <>
         <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
-                {/* {name === "Cercanos a mí" && listEvents.map((event, index) => (
+                {name === "Cercanos a mí" && nearestEvents.map((event, index) => (
                     console.log(event.dates),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
-                ))} */}
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} distance={event.distance} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                ))}
                 {name === "Próximos eventos" && upcomingEvents.map((event, index) => (
                     console.log(event._id),
                     <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
@@ -94,7 +126,8 @@ export function Card({
     title,
     numLikes,
     fecha,
-    avatars
+    avatars,
+    distance
     }: {
     key: string;
     id: string;
@@ -103,6 +136,7 @@ export function Card({
     numLikes: number;
     fecha: string[];
     avatars: string[];
+    distance?:number;
     }) {
 
 
@@ -122,7 +156,7 @@ export function Card({
     //     key = "ECIP1-1";
     // }
 
-    console.log(id)
+    console.log("Fecha: " + fecha)
 
     let likeString = "";
     if (numLikes >= 1000000) {
@@ -137,6 +171,8 @@ export function Card({
     const fechaObjetivo = new Date(fecha[0]);
     hoy.setHours(0, 0, 0, 0);
     fechaObjetivo.setHours(0, 0, 0, 0);
+    console.log("Hoy: " + hoy)
+    console.log("FechaObjetivo: " + fechaObjetivo)
     const diferenciaMs = fechaObjetivo.getTime() - hoy.getTime();
     const dias = Math.round(diferenciaMs / (1000 * 60 * 60 * 24));
 
@@ -158,10 +194,13 @@ export function Card({
     return (
         <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-76 w-48 drop-shadow-xl ">
             <img
-            src={`${imgs[0][0]}`}
+            src={`${imgs[0]}`}
             className="rounded-lg object-cover w-full h-48" 
             alt={title}/>
-            <h2 className="text-base font-medium text-black text-left my-2">{title}</h2>
+            <div className="h-8">
+                <h2 className="text-base font-medium text-black text-left my-2 truncate">{title}</h2>
+            </div>
+            
 
             <div className='flex flex-row items-center justify-center gap-4 my-4'>
                 <div className='flex w-full space-x-1 items-center justify-center'>
@@ -174,7 +213,12 @@ export function Card({
                     <p className='text-black'>{likeString}</p>
                     <ClockIcon className='h-6 w-6 text-black' />
                     <p className='text-black'>{fechaString}</p>
-                    
+                    {/* {distance !== undefined && (
+                        <>
+                            <MapPinIcon className='h-6 w-6 text-black' />
+                            <p className='text-black'>{distance}</p>
+                        </>
+                    )} */}
                 </div>
             </div>   
         </Link>

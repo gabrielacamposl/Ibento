@@ -13,24 +13,15 @@ function Page(){
     //const {data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/everything/');
     const {data : popularEvents, loading : popularLoading, error : popularError} = useFetchEvents('http://127.0.0.1:8000/eventos/most_liked/');
 
-    //const { position, error: geoError, loading: geoLoading } = useGeolocation();
-
-//     useEffect(() => {
-//       if (position) {
-//           console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
-//           // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
-//       }
-//   }, [position]); // Este efecto se ejecutará cuando la posición cambie (es decir, cuando se obtenga)
-
-//     useEffect(() => {
-//         window.scrollTo(0, 0);
-//     }, []);
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     
     if (popularLoading) {
         return (
           <div className="flex min-h-screen justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="loading loading-ring loading-xl"></span>
           </div>
         );
     }
@@ -55,9 +46,9 @@ function Page(){
 
     return(
         <>
-        <div className="flex flex-col gap-4 min-h-screen justify-center w-full items-center bg-white lg:max-w-3/4">
+        <div className="flex flex-col gap-4 min-h-screen justify-center w-full  items-center bg-white lg:max-w-3/4">
             <Carousel />
-            {/* <Cards listEvents = {eventos} name = {"recomendados"} /> */}
+            {/* <Cards listEvents = {eventosRecomendados} name = {"Recomendados para ti"} /> */}
             <Cards listEvents = {popularEvents} name = {"Populares"} />
             <SearchMenu/>
             <div className='h-16'></div>

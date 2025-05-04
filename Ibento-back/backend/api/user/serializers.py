@@ -4,15 +4,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
+from api.services import ine_validation
 import cloudinary.uploader
 from api.models import (Usuario, 
                         TokenBlackList,
-                        Subcategoria, 
-                        SubcategoriaPerfil, 
                         Matches, 
                         Conversacion, 
                         Mensaje, 
-                        CategoriaEvento,
                         Evento
                         )
 
@@ -116,56 +114,7 @@ class UploadProfilePicture(serializers.Serializer):
     )
 
 
-# ---------- Datos Personales para el perfil
 
-class PersonalData(serializers.ModelSerializer):
-    model = Usuario
-    fields = ["description", "birthday", "gender", "curp"]
-
-    def update(self, instance, validated_data):
-        instance.description = validated_data.get("description", instance.description)
-        instance.birthday = validated_data.get("birthday", instance.birthday)
-        instance.gender = validated_data.get("gender", instance.gender)
-        instance.curp = validated_data.get("curp", instance.curp)
-        instance.save()
-        return instance
-      
-
-#----------- Selección de respuestas para conocer más al usuarios
-
-class PersonalPreferences(serializers.ModelSerializer):
-    preferences = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=SubcategoriaPerfil.objects.all(),
-    )
-
-    def save(self, usuario):
-        usuario.preferencias_generales = [p.id for p in self.validated_data["preferences"]]
-        usuario.save()
-        return usuario
-    
-# ------- Validación de INE con API de KIBAN
-
-class IneValidationSerializer(serializers.Serializer):
-    ine_front_url = serializers.URLField()
-    ine_back_url = serializers.URLField()
-
-    def validate(self, data):
-        # Opcional: validar que vengan de Cloudinary u otro dominio confiable
-        return data
-
-    def save(self, **kwargs):
-        user = self.context['request'].user
-        front_url = self.validated_data['ine_front_url']
-        back_url = self.validated_data['ine_back_url']
-
-        # Validar con Kiban
-        result = validate_ine_with_kiban(front_url, back_url)
-        user.is_ine_validated = result["is_valid"]
-        user.curp = result["curp"]
-        user.save()
-        return user
-    
 #---------- Comparación de rostros segundo filtro
 
 class ValidacionRostro(serializers.ModelSerializer):
@@ -264,7 +213,7 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs']
+        json_fields = ['imgs', 'dates']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):

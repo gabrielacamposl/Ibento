@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil, SubcategoriaPerfil
+from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil
 
 
 # -------------- Categorias para Eventos --------------
@@ -21,17 +21,9 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
 
 
 # ------------------------------ CATEGORÍAS PARA LAS PREGUNTAS DEL PERFIL -----------------------------------
-# ------- Respuestas para el perfil
-class SubcategoriaPerfilSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubcategoriaPerfil
-        fields = ['_id', 'nombre_subcategoria_perfil', 'categoria_perfil']
-
 # ----- Preguntas para el perfil
 class CategoriaPerfilSerializer(serializers.ModelSerializer):
-    subcategorias_perfil = SubcategoriaSerializer(many=True, read_only=True)
-
     class Meta:
         model = CategoriasPerfil
-        fields = ['_id', 'categoria_perfil', 'subcategorias_perfil']
-     
+        fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
+    

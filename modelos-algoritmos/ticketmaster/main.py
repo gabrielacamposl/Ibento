@@ -185,7 +185,6 @@ def format_event_data(events):
                 if additional_dates > 1:
                     dates.append(f"+{additional_dates - 1} más fechas")
         
-        # Extraer imagen (obtener 3 imágenes en lugar de 1)
         image_urls = []
         if 'images' in event and event['images']:
             # Prioritize 16_9 ratio images > 500px width
@@ -193,11 +192,9 @@ def format_event_data(events):
             if primary_images:
                 image_urls.extend([img['url'] for img in primary_images[:3]])
             
-            # If not enough primary images, add other images
             if len(image_urls) < 3:
                 other_images = [img['url'] for img in event['images'] if img not in primary_images]
                 image_urls.extend(other_images[:3 - len(image_urls)])
-
 
         # Extraer coordenadas geográficas
         coordinates = None
@@ -242,6 +239,7 @@ def format_event_data(events):
                     translated_sub_genre = classification_translations.get(sub_genre, sub_genre)
                     classi.append(translated_sub_genre)
 
+        
 
         # Construir el objeto formateado
         formatted_event = {

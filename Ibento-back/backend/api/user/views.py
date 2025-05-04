@@ -37,9 +37,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           PasswordResetCodeValidationSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
-                          PersonalData,
-                          PersonalPreferences,
-                          IneValidationSerializer,
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,

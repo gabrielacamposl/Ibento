@@ -63,6 +63,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Para permitir peticiones externas
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,7 +72,7 @@ MIDDLEWARE = [
     'api.user.middleware.JWTBlacklistMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Para permitir peticiones externas
+    
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -106,11 +107,15 @@ DATABASES = {
 }
 
 # CORS (permite conexión con el frontend)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  
-    "http://127.0.0.1:5173",
-    "http://192.168.1.70:5173"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  
+#     "http://127.0.0.1:5173",
+#     "http://192.168.1.70:5173"
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 AUTH_PASSWORD_VALIDATORS = [

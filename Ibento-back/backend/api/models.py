@@ -170,19 +170,12 @@ class Evento(models.Model):
 
 class CategoriasPerfil(models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.CharField(max_length=50)
+    question = models.CharField(max_length=150)
+    answers = models.JSONField(default=list, null=True, blank=True)
+    multi_option =  models.BooleanField(default=False)
+    optional = models.BooleanField(default=False)
     def __str__(self):
-        return self.categoria_perfil
-
-class SubcategoriaPerfil(models.Model):
-    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid)
-    categoria_perfil = models.ForeignKey(
-        CategoriasPerfil, on_delete = models.CASCADE, related_name="subcategorias_perfiles", to_field="_id"
-    )
-    nombre_subcategoria_perfil = models.CharField(max_length=70)
-    def __str__(self):
-        return self.nombre_subcategoria_perfil
-    
+        return self.question
     
 # Clases para las Categorias y Subcategorías de los Eventos
 
