@@ -24,7 +24,7 @@ class CategoriaEventoSerializer(serializers.ModelSerializer):
 # ------- Respuestas para el perfil
 class SubcategoriaPerfilSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subcategoria
+        model = SubcategoriaPerfil
         fields = ['_id', 'nombre_subcategoria_perfil', 'categoria_perfil']
 
 # ----- Preguntas para el perfil
@@ -33,5 +33,5 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CategoriasPerfil
-        fields = ['_id', 'categoria_perfil']
+        fields = ['_id', 'categoria_perfil', 'subcategorias_perfil']
      
