@@ -5,7 +5,6 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 import cloudinary.uploader
-from api.utils import validate_ine_with_kiban
 from api.models import (Usuario, 
                         TokenBlackList,
                         Subcategoria, 
@@ -279,21 +278,6 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
                     # Mantener el valor original si falla la conversión
                     pass
         return data     
-
-# ---------------------------------- CREACIÓN DE CATEGORÍAS PARA EVENTOS ----------------- --------------
-
-class SubcategoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subcategoria
-        fields = ['_id', 'categoria', 'nombre_subcategoria']
-
-class CategoriaEventoSerializer(serializers.ModelSerializer):
-    subcategorias = SubcategoriaSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = CategoriaEvento
-        fields = ['_id', 'nombre', 'subcategorias']
-
 
 # ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
 
