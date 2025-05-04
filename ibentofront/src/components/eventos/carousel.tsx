@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import './carousel.css';
 
 
 const Carousel = () => {
@@ -40,7 +41,7 @@ const Carousel = () => {
         <div className="carousel rounded-box max-h-72">
         {populares.map((event, index) => (
             console.log(index),
-            <div className="carousel-item w-full relative h-92">
+            <div className="carousel-item w-full relative h-92 animacion-deslizamiento">
               <img
                 src={`/${event.img}`}
                 className="w-full h-92"

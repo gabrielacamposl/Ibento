@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
 
-import {useFetchEvents} from '../../hooks/usefetchEvents';
+import {useFetchEvents, useFetchNearestEvents} from '../../hooks/usefetchEvents';
 import useGeolocation from '../../hooks/useGeolocation';
 
 
@@ -34,21 +34,32 @@ export default function CardWrapper(
 ) {
 
 
-    const { position, error: geoError, loading: geoLoading } = useGeolocation();
-        const [liga, setLiga] = useState<string | null>(null);
-        useEffect(() => {
-          if (position) {
-              console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
-              setLiga('http://127.0.0.1:8000/eventos/nearest?lat=' + position?.coords.latitude + '&lon=' + position?.coords.longitude);
-              // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
-          }
-      }, [position]); // Este efecto se ejecutará cuando la posición cambie (es decir, cuando se obtenga)
+    // const { position, error: geoError, loading: geoLoading } = useGeolocation();
+    //     const [liga, setLiga] = useState<string | null>(null);
+    //     useEffect(() => {
+    //       if (position) {
+    //           console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
+    //           setLiga('http://127.0.0.1:8000/eventos/nearest?lat=' + position?.coords.latitude + '&lon=' + position?.coords.longitude);
+    //           // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
+    //       }
+    //   }, [position]);
+
+    const {position, error: geoError, loading: geoLoading} = useGeolocation();
+    const [liga, setLiga] = useState<string | null>(null);
+
+    const lat = position?.coords.latitude;
+    const lon = position?.coords.longitude;
+
+    useEffect(() => {
+        setLiga('http://127.0.0.1:8000/eventos/nearest?lat=' + lat + '&lon=' + lon);
+      }, [lat, lon]);
+    
 
     const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('http://127.0.0.1:8000/eventos/upcoming_events/');
     
     const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Música');
   
-    const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchEvents(liga || 'http://127.0.0.1:8000/eventos/nearest?lat=0&lon=0');
+    const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchNearestEvents(liga || '');
 
     const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Deportes');
 
@@ -167,6 +178,10 @@ export function Card({
         likeString = numLikes + "";
     }
 
+    const distanceString = distance?.toFixed(2) + "km";
+
+
+
     const hoy = new Date();
     const fechaObjetivo = new Date(fecha[0]);
     hoy.setHours(0, 0, 0, 0);
@@ -205,20 +220,29 @@ export function Card({
             <div className='flex flex-row items-center justify-center gap-4 my-4'>
                 <div className='flex w-full space-x-1 items-center justify-center'>
                     <AvatarGroup>
-                        <Avatar image={avatars[0]} size="large" shape="circle" />
-                        <Avatar image={avatars[1]} size="large" shape="circle" />
-                        <Avatar image={avatars[2]} size="large" shape="circle" />
+                        <Avatar image={avatars[1]} size="normal" shape="circle" />
+                        <Avatar image={avatars[1]} size="normal" shape="circle" />
+                        <Avatar image={avatars[1]} size="normal" shape="circle" />
                     </AvatarGroup>
                     <HeartIcon className='h-6 w-6 text-black' />
                     <p className='text-black'>{likeString}</p>
-                    <ClockIcon className='h-6 w-6 text-black' />
-                    <p className='text-black'>{fechaString}</p>
-                    {/* {distance !== undefined && (
+                    {distance == undefined && (
                         <>
-                            <MapPinIcon className='h-6 w-6 text-black' />
-                            <p className='text-black'>{distance}</p>
+                        <div className="flex flex-row items-center justify-center">
+                            <ClockIcon className='h-4 w-4 text-black' />
+                            <p className='text-black'>{fechaString}</p>
+                        </div>
+                            
                         </>
-                    )} */}
+                    )}
+                    {distance !== undefined && (
+                        <>
+                        <div className="flex flex-row items-center justify-center">
+                            <MapPinIcon className='h-4 w-4 text-black' />
+                            <p className='text-black'>{distanceString}</p>
+                        </div>
+                        </>
+                    )}
                 </div>
             </div>   
         </Link>

@@ -33,10 +33,10 @@ const Login = () => {
     e.preventDefault();
     // Validar campos
 
-    if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
-      setMessage("El correo electrónico o contraseña son incorrectos.");
-      return;
-    }
+    // if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
+    //   setMessage("El correo electrónico o contraseña son incorrectos.");
+    //   return;
+    // }
 
     try {
       const res = await api.post("login/", { email, password });
@@ -46,9 +46,9 @@ const Login = () => {
       localStorage.setItem("refresh", res.data.refresh);
       // Opcionalmente, guarda más datos del usuario
       localStorage.setItem("user", JSON.stringify({
-        id: data.id,
-        email: data.email,
-        nombre: data.nombre,
+        id: res.data.id,
+        email: res.data.email,
+        nombre: res.data.nombre,
       }));
 
       // Redirigir a vista principal
