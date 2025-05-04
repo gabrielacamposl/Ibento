@@ -2,7 +2,7 @@ import React, {useMemo, useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { useLocation } from "react-router-dom";
-import useFetchEvents from "../../hooks/fetchEvents";
+
 
 function useQuery() {
     const { search } = useLocation();
@@ -86,7 +86,7 @@ export function EventCard({ id, imageUrl, title, date, location}) {
         <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
             <div className="bg-white w-full rounded-lg flex flex-row">
                 <img
-                src={`/${imageUrl[0][0]}`}
+                src={`${imageUrl}`}
 
                 className="rounded-lg object-cover w-40 h-40" 
                 alt={title}/>
@@ -102,7 +102,7 @@ export function EventCard({ id, imageUrl, title, date, location}) {
                         <MapPinIcon className='text-black h-4 w-4' />
                         <p className='text-sm font-bold text-black text-left'>{location}</p>
                     </div>
-                    <p className='text-sm font-bold text-black text-left'>{imageUrl}</p>
+                 
                     
                 </div>
             </div>

@@ -6,7 +6,7 @@ import BottomNav from "../components/BottomNav";
 function MainLayout() {
     return (
       <div className="layout">
-        <main>
+        <main className="w-full lg:flex lg:items-center lg:justify-center lg:flex-col lg:min-h-screen">
           <Outlet />
         </main>
         <BottomNav />
