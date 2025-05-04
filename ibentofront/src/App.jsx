@@ -79,7 +79,7 @@ export default function App() {
           <Route path="profileRepeat" element={<PerfilRepetido />} />
 
           {/* Recuperar Contraseña */}
-          <Route path = "recuperar-cuenta" element = {<RecuperarContrasena/>}/>
+          <Route path ="recuperar-cuenta" element = {<RecuperarContrasena/>}/>
           <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />
           <Route path="recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
 
