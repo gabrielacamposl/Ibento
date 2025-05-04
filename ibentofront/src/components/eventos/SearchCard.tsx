@@ -50,6 +50,18 @@ function DateFormat(date: string): string {
     return fecha;
 }
 
+function CategoryFormat(category: string): string {
+    if (category[0] ==="[") {
+        const categoria = category.match(/'([^']+)'/g)?.map(p => p.replace(/'/g, ''));// Extrae la primera categoría
+        return categoria ? categoria[0] : category[0];
+    }
+    return category[0];
+}
+
+function AddressFormat(address: string): string {
+    const formattedAddress = address.split(",").toString()
+    return formattedAddress;
+}
 export function EventCard({ id, imageUrl, title, date, location, price, url, Category }) {
 
     const urls = "../eventos/" + id;
@@ -71,10 +83,10 @@ export function EventCard({ id, imageUrl, title, date, location, price, url, Cat
                     
                     <div className='flex flex-row space-x-2'>
                         <MapPinIcon className='text-black h-4 w-4' />
-                        <p className='text-sm font-bold text-black text-left'>{location}</p>
+                        <p className='text-sm font-bold text-black text-left'>{AddressFormat(location)}</p>
                     </div>
                     <div className='flex flex-row space-x-2'>
-                    <p className='text-sm font-bold text-black text-left'>{Category}</p>
+                    <p className='text-sm font-bold text-black text-left'>{CategoryFormat(Category)}</p>
                     </div>
                 </div>
             </div>
