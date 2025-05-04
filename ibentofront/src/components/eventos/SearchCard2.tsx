@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { useLocation } from "react-router-dom";
 
+// import useFetchEvents from "../../hooks/fetchEvents";
+
 
 function useQuery() {
     const { search } = useLocation();

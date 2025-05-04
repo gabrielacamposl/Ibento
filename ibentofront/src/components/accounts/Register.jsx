@@ -15,7 +15,11 @@ import { buttonStyle } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+
+import ibentoLogo from "/images/ibentoLogo.png";
+
 import { name_regex, email_regex, password_regex } from "../../utils/regex";
+
 
 
 
@@ -39,6 +43,7 @@ export default function Register() {
   const [selectedEvents, setSelectedEvents] = useState([]);
   const [categorias, setCategorias] = useState([]);
 
+  const [disable , setDisable] = useState(false);
   const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
 
   const [message, setMessage] = useState("");
@@ -193,6 +198,7 @@ export default function Register() {
           >
             <CssBaseline />
             {step === 1 && (
+
               <>
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
                   Crear Cuenta
@@ -422,7 +428,12 @@ export default function Register() {
         {/* Contenido */}
         <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
           {/* Logo */}
-          <img src="/logo.png" alt="Logo" className="w-20 h-20 mb-4" />
+          <Box
+                component="img"
+                src={ibentoLogo}
+                alt="Ibento Logo"
+                sx={{ width: 80, height: "auto", mb: 2 }}
+              />
 
           {/* Título */}
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
