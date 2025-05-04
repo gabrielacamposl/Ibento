@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
 # Utils Django
 from django.utils import timezone
@@ -46,9 +46,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para los chats de los matches
                           MensajesSerializer,
                           ConversacionSerializer,
-                          # Seriallizer para añadir categorías y sucategorías de los eventos
-                          CategoriaEventoSerializer, 
-                          SubcategoriaSerializer,
                           # Seriallizer de Eventos
                           EventoSerializer,
                           EventoSerializerLimitado,
@@ -68,8 +65,6 @@ def crear_usuario(request):
         enviar_email_confirmacion(usuario)
         return Response({"mensaje": "Usuario registrado, revisa tu correo."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 # --------- Confirmación de cuenta
 
@@ -91,9 +86,6 @@ def confirmar_usuario(request, token):
     except Usuario.DoesNotExist:
         return JsonResponse({"mensaje": "El token no es válido o ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
 # -------------------------------------------- LOGIN Y LOGOUT DEL USUARIO  ----------------------------------------------
 
 # ------------- Login
@@ -105,7 +97,6 @@ def login_usuario(request):
     if serializer.is_valid():
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # ------------- Logout
 
@@ -684,21 +675,3 @@ class EventoViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-
-#----------------- Obtención de eventos
-
-
-
-
-# -------------------------------------- CATEGORÍAS Y SUBCATEGORÍAS DE EVENTOS -------------------------------------------
-
-# -------  Categorías de Eventos
-class CategoriaEventoViewSet(viewsets.ModelViewSet):
-    queryset = CategoriaEvento.objects.all()
-    serializer_class = CategoriaEventoSerializer
-    
-# ------- Subcategorías de Eventos
-
-class SubcategoriaViewSet(viewsets.ModelViewSet):
-    queryset = Subcategoria.objects.all()
-    serializer_class = SubcategoriaSerializer
