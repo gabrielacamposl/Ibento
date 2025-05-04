@@ -264,7 +264,7 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs']
+        json_fields = ['imgs', 'dates']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
