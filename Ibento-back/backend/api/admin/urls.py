@@ -12,7 +12,7 @@ router = DefaultRouter()
 router.register(r'eventos/categorias/subcategorias', SubcategoriaViewSet, basename='subcategoria')
 router.register(r'eventos/categorias', CategoriaEventoViewSet, basename='categoria')
 # --- Urls para la creación de Preguntas y respuestas para la parte de intereses del usuario
-router.register(r'perfil/respuestas', SubcategoriasPerfilViewSet, basename='subcategoria_perfil')
+router.register(r'perfil/preguntas/respuestas', SubcategoriasPerfilViewSet, basename='subcategoria_perfil')
 router.register(r'perfil/preguntas', CategoriasPerfilViewSet, basename='categoria_perfil')
 
 

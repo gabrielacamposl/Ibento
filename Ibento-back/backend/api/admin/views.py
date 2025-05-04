@@ -1,9 +1,9 @@
 from rest_framework import viewsets
-from api.models import CategoriaEvento, Subcategoria
+from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil, SubcategoriaPerfil
 from .serializers import (CategoriaEventoSerializer, 
                           SubcategoriaSerializer, 
-                          CategoriasPerfil, 
-                          SubcategoriaPerfil)
+                          CategoriaPerfilSerializer, 
+                          SubcategoriaPerfilSerializer)
 
 
 
@@ -21,11 +21,11 @@ class SubcategoriaViewSet(viewsets.ModelViewSet):
 # ----------------------------------- CATEGORÍAS PARA LAS PREGUNTAS DEL PERFIL -----------------------------------
 # ------- Preguntas para el perfil
 class CategoriasPerfilViewSet(viewsets.ModelViewSet):
-    queryset = CategoriaEvento.objects.all()
-    serializer_class = CategoriasPerfil
+    queryset = CategoriasPerfil.objects.all()
+    serializer_class = CategoriaPerfilSerializer
 
 # ------- Respuestas para el perfil
 class SubcategoriasPerfilViewSet(viewsets.ModelViewSet):
-    queryset = Subcategoria.objects.all()
-    serializer_class = SubcategoriaPerfil
+    queryset = SubcategoriaPerfil.objects.all()
+    serializer_class = SubcategoriaPerfilSerializer
 
