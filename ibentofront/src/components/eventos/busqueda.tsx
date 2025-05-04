@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useParams } from "react-router-dom";
 
 import { CardsSkeleton } from "../extras/skeletons";
-import useFetchEvents from "../../hooks/fetchEvents";
+
 // import EventWrapperWParams from "./SearchCard2";
 const EventWrapperWParams = React.lazy(() => import('./SearchCard2'));
 

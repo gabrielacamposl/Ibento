@@ -21,24 +21,26 @@ export default function Confirm() {
 
   useEffect(() => {
     // Evitar hacer la petición si ya fue confirmada
-    if (isConfirmed) return;
-
     const confirmarCuenta = async () => {
+      if (isConfirmed) {return};
       try {
         // Hacemos la llamada al backend para confirmar el token
         const response = await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
-
-        if (response.data.success) {
+      
+        if (response.status === 200) {
+          console.log("ENTRE PRIMERO EN EXITO");
           setEstado("exito");
           setIsConfirmed(true); // Marcamos que ya se confirmó
         } else {
           // Si la respuesta del backend indica que la confirmación falló
+          console.log("ENTRE PRIMERO EN ELSE");
           setEstado("error");
           setMensaje("El enlace de confirmación es inválido o ha expirado.");
         }
       } catch (error) {
         // Si hubo un error en la comunicación con el backend
-        setEstado("exito");
+        console.log("ENTRE EN ERROR");
+        setEstado("error");
         setMensaje("Hubo un error al intentar confirmar tu cuenta.");
       }
     };

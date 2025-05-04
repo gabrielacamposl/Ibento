@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const buscarMatchx = () => {
     const navigate = useNavigate();
+     const [verificar, setVerificar] = useState(true);
     const users = [
         {
             name: 'Lee Know',
@@ -62,19 +63,16 @@ const buscarMatchx = () => {
         setTimeout(() => navigate("../match"), 0);
     }
 
+    const handdleVerificar = () => {
+        setTimeout(() => navigate("../verificar"), 0);
+    }
+
     
     if (currentUserIndex >= users.length) {
         return (
             <div className="text-black flex justify-center items-center min-h-screen">
-                <div className="w-full   relative flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full ">
-                <div className=" left-2 top-10  space-x-5 font-bold flex justify-between items-center ">
-                        <button  className="cursor-pointer BuscarMatch text-white ">
-                            Buscar Match
-                        </button>
-                        <button onClick={handdleMessage} className="cursor-pointer text-black font-bold rounded-full">
-                            Mensajes
-                        </button>
-                    </div>
+                <div className="w-full   relative flex flex-col items-center   max-w-lg w-full ">
+                
 
                     <div className="flex justify-center items-center mt-auto mb-auto font-bold text-2xl">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -93,18 +91,10 @@ const buscarMatchx = () => {
 
     return (
         <div className="flex justify-center items-center min-h-screen ">
+            
             <div className="relative flex flex-col items-center  shadow-md shadow-t max-w-lg w-full ">
                 <div className="relative w-full min-h-screen  overflow-hidden ">
-                
-                <div className="absolute  z-5 left-2 top-10  space-x-5 transform font-bold flex justify-between items-center ">
-                        <button onClick  className="cursor-pointer BuscarMatch text-white ">
-                            Buscar Match
-                        </button>
-                        <button onClick={handdleMessage}  className="cursor-pointer text-white font-bold rounded-full">
-                            Mensajes
-                        </button>
-                    </div>
-
+             
                     <div className="absolute inset-0 z-3 flex justify-between items-center ">
                         <button onClick={handlePrev} className="btnTransparente text-white p-2 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -117,7 +107,19 @@ const buscarMatchx = () => {
                             </svg>
                         </button>
                     </div>
-                
+
+
+                    {verificar == false && (
+                    <div className="min-h-screen fixed inset-0 z-50 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
+                    <div className="text-center text-white">
+                        <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
+                        <p className="mt-2">¡Créalo ahora!.</p>
+                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
+                    </div>
+                    </div>
+                        )}
+
+
                     <div className="absolute text-white ml-3 inset-0 z-4 right-0 top-55 transform translate-x-1 translate-y-1/2">
                         <h1 className="mt-1 mb-2 text-2xl font-semibold ">{user.name}, {user.age}</h1>
                         <div className=" w-full">
