@@ -1,62 +1,131 @@
 import React, { useState, useEffect, useRef } from 'react';
-import "../../assets/css/botones.css";
-import { buttonStyle } from "../../styles/styles";
-//import Webcam from 'react-webcam';
+import { Button } from "primereact/button";
 import { useNavigate } from 'react-router-dom';
-const verificar = () => {
-    const navigate = useNavigate();
-    
-    const [user, setUser] = useState({
-        pictures: ["/jin.jpeg", "/jin2.png","/jin3.jpeg"],
-        ine: ["/ine.jpg"],
-    });
+import { buttonStyle } from "../../styles/styles";
+import "../../assets/css/botones.css";
+//import Webcam from 'react-webcam';
+import api from "../../api";
 
+
+const Verificar = () => {
+    const navigate = useNavigate();
+
+
+    const [user, setUser] = useState({
+        pictures: [],
+        ine: []
+    });
+    const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({}); // Estado para respuestas seleccionadas
 
-    // Desplazar al inicio de la página al cargar el componente
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            // Redirige si no hay token
+            navigate("/login");
+        }
         window.scrollTo(0, 0);
     }, []);
 
-    const handleImageChange = (e, index) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newPictures = [...user.pictures];
-                newPictures[index] = reader.result;
-                setUser({ ...user, pictures: newPictures });
-            };
-            reader.readAsDataURL(file);
+    // Desplazar al inicio de la página al cargar el componente
+    // useEffect(() => {
+    //     window.scrollTo(0, 0);
+    // }, []);
+
+    // ------------- Subir fotos de perfil
+
+    const handleUploadPictures = async () => {
+        if (user.pictures.length < 3 || user.pictures.length > 6) {
+            alert("Debes subir entre 3 y 6 fotos.");
+            return;
+        }
+
+        const formData = new FormData();
+        user.pictures.forEach((picture) => {
+            formData.append("pictures", picture);
+        });
+
+        try {
+            const response = await api.post("api/upload-profile-pictures/", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            console.log("Fotos subidas:", response.data.pictures);
+            alert("¡Fotos subidas con éxito!");
+        } catch (error) {
+            console.error("Error al subir fotos:", error.response?.data || error);
+            alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         }
     };
 
-    const handleImageDelete = (index) => {
-        const newPictures = user.pictures.filter((_, i) => i !== index);
-        setUser({ ...user, pictures: newPictures });
+    const handleImageDelete = (indexToDelete) => {
+        setUser((prev) => {
+            const newPictures = [...prev.pictures];
+            newPictures.splice(indexToDelete, 1);
+            return {
+                ...prev,
+                pictures: newPictures,
+            };
+        });
     };
+    
+
+    // ---------------------------- VALIDACION DE INE -----------------------------
+    // ------ Manejo de imagenes de INE ------
 
     const handleImageINE = (e, index) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newPictures = [...user.ine];
-                newPictures[index] = reader.result;
-                setUser({ ...user, ine: newPictures });
-            };
-            reader.readAsDataURL(file);
+            const newImages = [...ineImages];
+            newImages[index] = file;
+            setIneImages(newImages);
         }
     };
 
     const handleImageDeleteINE = (index) => {
-        const newPictures = user.ine.filter((_, i) => i !== index);
-        setUser({ ...user, ine: newPictures });
+        const newImages = [...ineImages];
+        newImages[index] = null;
+        setIneImages(newImages);
     };
 
+    // ------ Conexión con el backend ------
+
+    const handleIneValidation = async () => {
+        if (!ineImages[0] || !ineImages[1]) {
+            setMessage('Por favor, sube ambas imágenes de tu INE.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("ine_front", ineImages[0]);
+        formData.append("ine_back", ineImages[1]);
+
+        try {
+            const response = await api.post("validar-ine/", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                }
+            });
+
+            if (response.data.is_valid) {
+                setMessage('Tu identidad mediante la INE ha sido validada.');
+                setActiveIndex(3); // avanzar de sección
+            } else {
+                setMessage('La validación de la INE ha fallado. Por favor, verifica las imágenes.');
+            }
+        } catch (error) {
+            console.error('Error al validar la INE:', error);
+            setMessage('Hubo un error al validar la INE. Por favor, intenta nuevamente.');
+        }
+    };
+
+
+
     const handdleNavigate = (index) => {
-        
+
         if (index === 1) {
             if (user.pictures.length < 3) {
                 alert('Debes seleccionar al menos 3 fotos');
@@ -91,49 +160,14 @@ const verificar = () => {
             question: '¿Bebes alcohol con frecuencia?',
             answers: ['Sí, bebo con frecuencia', 'No me gusta beber', 'Solo en ocasiones especiales', 'Lo hago para socializar', 'Trato de dejarlo']
         },
-        {
-            question: '¿En qué momento del día sueles ser más activo?',
-            answers: ['En las mañanas', 'En las tardes', 'En las noches', 'Durante todo el día']
-        },
-        {
-            question: '¿Qué tipo de música prefieres?',
-            answers: ['Pop', 'Rock', 'Clásica', 'Electrónica', 'Latina', 'Jazz', 'Otro']
-        },
-        {
-            question: '¿Tienes mascotas?',
-            answers: ['Perros', 'Gatos', 'Peces', 'Aves', 'Reptiles', 'Roedores', 'Otro', 'Me gustaría uno', 'Soy alergico', 'No me gustan']
-        },
-        {
-            question: '¿Cuáles son tús intereses?',
-            answers: ['Música', 'Deportes', 'Cine', 'Viajar', 'Cocinar', 'Leer', 'Tecnología', 'Dibujo/Pintar', 'Arte', 'Otro']
-        },
-        {
-            question: '¿Qué tan activo eres en redes?',
-            answers: ['Muy activo', 'Activo', 'Poco activo', 'No uso redes']
-        },
-        {
-            question: '¿Qué medio de transporte sueles usar?',
-            answers: ['Auto', 'Bicicleta', 'Transporte público', 'Caminar', 'Moto', 'Uber', 'Otro']
-        },
-        {
-            question: '¿Cómo te sientes respecto a planes espontáneos',
-            answers: ['Me encantan', 'Depende del plan', 'No me gustan', 'Prefiero planear con anticipación']
-        },
-        {
-            question: '¿Qué valoras más en una compañía?',
-            answers: ['Buena conversación', 'Sentido del humor', 'Inteligencia', 'Honestidad', 'Empatía', 'Lealtad', 'Otro']
-        },
-        {
-            question: '¿Qué tipo de interacción esperas durante un evento?',
-            answers: ['Risas y diversión', 'Compartir intereses mutuos', 'Disfrutar el momento', 'Conocer gente nueva', 'Conversaciones profundas']
-        },
+
         {
             question: '¿Cuál es su tipo de personalidad?',
             answers: ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP']
         }
     ];
 
-    
+
     const handleAnswerSelect = (question, answer) => {
         setSelectedAnswers((prev) => ({
             ...prev,
@@ -146,22 +180,22 @@ const verificar = () => {
     const webcamRef = useRef(null);
 
     const foto = () => {
-    const captura = webcamRef.current.getScreenshot();
-    setCapturedPhoto(captura);
+        const captura = webcamRef.current.getScreenshot();
+        setCapturedPhoto(captura);
     }
 
     const handdleVerify = () => {
         const user = "Repetido";
-      
+
         console.log("Verificando perfil desde back...");
-        if(user=== "Verificado"){
+        if (user === "Verificado") {
             alert("Tu perfil ha sido verificado con éxito.");
             navigate("../profileVerify");
-            
-        }else if(user === "Repetido"){
+
+        } else if (user === "Repetido") {
             navigate("../profileRepeat");
         }
-        else{
+        else {
             alert("Tu perfil no ha podido ser verificado.");
             return;
         }
@@ -184,45 +218,53 @@ const verificar = () => {
                 <div className="w-full  overflow-y-auto gap-2 custom-scrollbar">
                     {/*VENTANA PARA INGRESAR IMAGENES */}
                     {activeIndex === 0 && (
-                                            <div className="">
-                                                <h1 className='mt-2 text-3xl font-bold miPerfil'>Editar Perfil</h1>
-                                                <React.Fragment>
-                                                    <h2 className="mt-2">Elige tus mejores fotos, elige como mínimo 3 fotografías</h2>
-                                                    <div className="grid grid-cols-2 md:grid-cols-3 ">
-                                                        {Array.from({ length: 6 }).map((_, index) => (
-                                                            <div key={index} className="relative">
-                                                                <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
-                                                                    {user.pictures[index] ? (
-                                                                        <img
-                                                                            src={user.pictures[index]}
-                                                                            alt={`Imagen ${index + 1}`}
-                                                                            className="w-full h-full object-cover"
-                                                                        />
-                                                                    ) : (
-                                                                        <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                                            </svg>
-                                                                            <span className="block mt-2 colorTexto">Agregar</span>
-                                                                        </label>
-                                                                    )}
-                                                                    {user.pictures[index] && (
-                                                                        <button
-                                                                            className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
-                                                                            onClick={() => handleImageDelete(index)}
-                                                                        >
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-7 h-7 ">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    )}
-                                                                    <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </React.Fragment>
-                                            </div>)}
+                        <div className="">
+                            <h1 className='mt-2 text-3xl font-bold miPerfil'>Editar Perfil</h1>
+                            <React.Fragment>
+                                <h2 className="mt-2">Elige tus mejores fotos, elige como mínimo 3 fotografías</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-3 ">
+                                    {Array.from({ length: 6 }).map((_, index) => (
+                                        <div key={index} className="relative">
+                                            <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
+                                                {user.pictures[index] ? (
+                                                    <img
+                                                        src={
+                                                            typeof user.pictures[index] === "string"
+                                                                ? user.pictures[index]
+                                                                : URL.createObjectURL(user.pictures[index])
+                                                        }
+                                                        alt={`Imagen ${index + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                        </svg>
+                                                        <span className="block mt-2 colorTexto">Agregar</span>
+                                                    </label>
+                                                )}
+
+                                                {user.pictures[index] && (
+                                                    <button
+                                                        className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
+                                                        onClick={() => handleImageDelete(index)}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-7 h-7 ">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <Button className={buttonStyle} onClick={handleUploadPictures}>
+                                        Siguiente
+                                    </Button>
+                                </div>
+                            </React.Fragment>
+                        </div>)}
 
                     {/*VENTANA PARA VERIFICAR INFORMACIÓN */}
                     {activeIndex === 1 && (
@@ -282,7 +324,7 @@ const verificar = () => {
                         </React.Fragment>
                     )}
 
-           
+
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 2 && (
                         <div className='h-180'>
@@ -354,51 +396,53 @@ const verificar = () => {
                                     }}
                                         
                                   />*/}
-                                  <button onClick={foto} className="Capturar w-10 h-10 rounded-full" />
-                                  <p className="text-center">Capturar imagen</p>
-                                  {capturedPhoto ? (
-                                    <img src={capturedPhoto} alt="Captura" />
-                                  ) : (
-                                    <p className="text-center text-red-500">No se ha capturado ninguna imagen.</p>
-                                  )}
+                                    <button onClick={foto} className="Capturar w-10 h-10 rounded-full" />
+                                    <p className="text-center">Capturar imagen</p>
+                                    {capturedPhoto ? (
+                                        <img src={capturedPhoto} alt="Captura" />
+                                    ) : (
+                                        <p className="text-center text-red-500">No se ha capturado ninguna imagen.</p>
+                                    )}
                                 </div>
                             </React.Fragment>
                         </div>
                     )}
 
 
-                   
+
                 </div>
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
-                    <button className={buttonStyle}
+                    <Button className={buttonStyle}
                         onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
                         disabled={activeIndex === 0}
                     >
                         Anterior
-                    </button>
-                    {activeIndex === 3 ?(
-                    <button
-                        className={buttonStyle}
-                        onClick={() => handdleVerify()}
-                        
-                    >
-                        Verificar
-                    </button>
+                    </Button>
+
+                    {activeIndex === 0 ? (
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                            Siguiente
+                        </Button>
+                    ) : activeIndex === 2 ? (
+                        <Button className={buttonStyle} onClick={handleIneValidation}>
+                            Verificar
+                        </Button>
                     ) : (
-                        <button
+                        <Button
                             className={buttonStyle}
-                            onClick={() => handdleNavigate(Math.min(activeIndex + 1, items.length - 1))}
+                            onClick={() => handdleNavigate(activeIndex + 1)}
                             disabled={activeIndex === items.length - 1}
                         >
                             Siguiente
-                        </button>
+                        </Button>
                     )}
                 </div>
+
             </div>
-            
+
         </div>
     );
 };
 
-export default verificar;
+export default Verificar;

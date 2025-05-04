@@ -89,7 +89,6 @@ class Logout(serializers.Serializer):
     
 
 
-
 #-------------------------------------------   REESTABLECER CONTRASEÑA ------------------------------------------------------------
 
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -108,21 +107,15 @@ class PasswordResetChangeSerializer(serializers.Serializer):
 
 #---------- Subir imágenes de perfil para la busqueda de acompañantes
 
+
 class UploadProfilePicture(serializers.Serializer):
-    images = serializers.ListField(
-        child = serializers.ImageField(),
-        min_length = 3,
-        max_length = 6,
+    pictures = serializers.ListField(
+        child=serializers.ImageField(),
+        min_length=3,
+        max_length=6,
+        allow_empty=False
     )
 
-    def save (self, usuario):
-        urls = []
-        for image in self.validated_data['images']:
-            result = cloudinary.uploader.upload(image)
-            urls.append(result['secure_url'])
-        usuario.profile_pic = urls
-        usuario.save()
-        return usuario
 
 # ---------- Datos Personales para el perfil
 

@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../../api";
-import api from '../../axiosConfig';
 import { InputText } from "primereact/inputtext";
-import { inputStyles } from "../../styles/styles";
+import { buttonStyleCategoria, inputStyles, verifyStyle } from "../../styles/styles";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
@@ -17,6 +15,7 @@ import { buttonStyle } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { name_regex, email_regex, password_regex } from "../../utils/regex";
 
 
 
@@ -33,6 +32,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const requiredFields = ['nombre', 'apellido', 'email', 'password', 'confirmPassword'];
 
   // Seleccionar preferencias de eventos
   const [step, setStep] = useState(1); // 1 -> Registro, 2 -> Preferencias
@@ -87,42 +87,42 @@ export default function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Verificar si los términos están aceptados
-    if (!isTermsAccepted) {
-        setMessage("Debes aceptar los términos y condiciones para continuar.");
-        return;
+    // Verificar si se han seleccionado preferencias
+    if (selectedEvents.length === 0) {
+      setMessage("Debes seleccionar al menos una preferencia de evento.");
+      return;
+    }
+    if (selectedEvents.length < 3) {
+      setMessage("Debes seleccionar como mínimo 3 preferencias de evento.");
+      return;
     }
 
-    // Verificar si las contraseñas coinciden
-    if (form.password !== form.confirmPassword) {
-        setMessage("Las contraseñas no coinciden");
-        return;
-    }
+    // Validar que el correo no esté en uso
 
     // Los datos a enviar
     const data = {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        email: form.email,
-        password: form.password,
-        preferencias_evento: selectedEvents, // Enviar preferencias seleccionadas
+      nombre: form.nombre,
+      apellido: form.apellido,
+      email: form.email,
+      password: form.password,
+      preferencias_evento: selectedEvents, // Enviar preferencias seleccionadas
     };
 
     try {
-        const res = await axios.post('http://localhost:8000/api/crear-cuenta/', data);
+      const res = await axios.post('http://localhost:8000/api/crear-cuenta/', data);
 
-        if (res.data.mensaje) {
-            setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta. " + res.data.mensaje);
+      if (res.data.mensaje) {
+        setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta. " + res.data.mensaje);
 
-            setTimeout(() => navigate("/verificar-correo"), 2000);
-        } else {
-            setMessage("Error al registrar usuario");
-        }
+        setTimeout(() => navigate("/verificar-correo"), 2000);
+      } else {
+        setMessage("Error al registrar usuario");
+      }
 
     } catch (err) {
-        console.error("Error en la creación de cuenta:", err);
-        const mensajeError = err.response?.data?.mensaje || 'Hubo un error en el servidor';
-        setMessage("Error creando cuenta: " + mensajeError);
+      console.error("Error en la creación de cuenta:", err);
+      const mensajeError = err.response?.data?.mensaje || 'Hubo un error en el servidor';
+      setMessage("Error creando cuenta: " + mensajeError);
     }
   }
 
@@ -193,113 +193,159 @@ export default function Register() {
           >
             <CssBaseline />
             {step === 1 && (
-              <> 
-            <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
-              Crear Cuenta
-            </Typography>
+              <>
+                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
+                  Crear Cuenta
+                </Typography>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="flex justify-center">
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nombre<span className="text-red-500">*</span>
-                  </label>
-                  <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
-                </Grid>
-              </div>
-              <div className="flex justify-center">
-                <Grid item xs={12} >
-                  <label className="block text-sm font-medium text-gray-700">
-                    Apellido<span className="text-red-500">*</span>
-                  </label>
-                  <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
-                </Grid>
-              </div>
-              <div className="flex justify-center">
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText className={inputStyles} name="email" onChange={handleChange} required />
-                </Grid>
-              </div>
-              <div className="flex justify-center">
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Contraseña<span className="text-red-500">*</span>
-                  </label>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
+                  {/* Nombre y Apellido */}
+                  <div className="flex space-x-3">
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:<span className="text-red-500">*</span></label>
+                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                    </div>
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:<span className="text-red-500">*</span></label>
+                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
+                    </div>
+                  </div>          
                   </div>
-                </Grid>
-              </div>
-
-              <div className="flex justify-center">
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Confirmar Contraseña<span className="text-red-500">*</span>
-                  </label>
                   <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
+                    <Grid item xs={12}>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Correo electrónico<span className="text-red-500">*</span>
+                      </label>
+                      <InputText className={inputStyles} name="email" onChange={handleChange} required />
+                    </Grid>
                   </div>
-                </Grid>
-              </div>
+                  <div className="relative flex justify-center">
+                    <Grid item xs={12}>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Contraseña<span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <InputText
+                          className={`${inputStyles} pr-10`}
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          onChange={handleChange}
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-2 flex items-center"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                        </button>
+                      </div>
+                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                      La contraseña debe tener al menos 8 caracteres, una mayúscula  y un número.
+                      </Typography>
+                    </Grid>
+                  </div>
 
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      value="allowPrivTerm"
-                      color="primary"
-                      checked={isTermsAccepted}
-                      onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                  <div className="relative">
+                    <Grid item xs={12}>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Confirmar Contraseña<span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <InputText
+                          className={`${inputStyles} pr-10`}
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          onChange={handleChange}
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-2 flex items-center"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                        </button>
+                      </div>
+                    </Grid>
+                  </div>
+
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          value="allowPrivTerm"
+                          color="primary"
+                          checked={isTermsAccepted}
+                          onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                        />
+                      }
+                      label={
+                        <span style={{ fontSize: "12px" }} className={verifyStyle}>
+                          He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
+                        </span>
+                      }
                     />
-                  }
-                  label={
-                    <span style={{ fontSize: "18px" }}>
-                      He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
-                    </span>
-                  }
-                />
-              </Grid>
+                  </Grid>
 
-              <Button
+                  {message && (
+                    <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+                      {message}
+                    </Typography>
+                  )}
+
+
+                  <Button
                     type="button"
-                    onClick={() => setStep(2)} // Cambiar al paso 2
+                    onClick={() => {
+                      // Validar campos
+                      
+                      // Validar que todos los campos estén llenos
+                      for (const field of requiredFields) {
+                          if (!form[field]) {
+                            setMessage("Por favor completa todos los campos obligatorios.");
+                            return;
+                          }
+                        }
+                      if (!name_regex.test(form.nombre)) {
+                        setMessage("El nombre debe contener solo letras.");
+                        return;
+                      }
+                      if (!name_regex.test(form.apellido)) {
+                        setMessage("El apellido debe contener solo letras.");
+                        return;
+                      }
+                      if (!email_regex.test(form.email)) {
+                        setMessage("El correo electrónico no es válido.");
+                        return;
+                      }
+                      if (!password_regex.test(form.password)) {
+                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+                        return;
+                      }
+                      if (form.password !== form.confirmPassword) {
+                        setMessage("Las contraseñas no coinciden");
+                        return;
+                      }
+                      if (!isTermsAccepted) {
+                        setMessage("Debes aceptar los términos y condiciones para continuar.");
+                        return;
+                      }
+                    
+
+                      // Si todas las validaciones pasan, avanzar al siguiente paso
+                      setMessage(""); // Limpia el mensaje si todo está bien
+                      setStep(2);
+                    }} // Cambiar al paso 2
                     className={buttonStyle}
                     variant="contained"
                   >
                     Siguiente
                   </Button>
 
-            </form>
-            </>)}
+                </form>
+              </>)}
             {step === 2 && (
               <>
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
@@ -317,11 +363,10 @@ export default function Register() {
                           {categoria.valores.map((valor) => (
                             <li
                               key={valor}
-                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${
-                                selectedEvents.includes(valor)
-                                  ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                  : 'btn-off'
-                              }`}
+                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                : 'btn-off'
+                                }`}
                               onClick={() => toggleSeleccionado(valor)}
                             >
                               {valor}
@@ -333,7 +378,7 @@ export default function Register() {
                   </div>
                 </Grid>
 
-                <Button onClick={handleSubmit} className={buttonStyle} variant="contained">
+                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
                   Crear Cuenta
                 </Button>
               </>
@@ -384,112 +429,159 @@ export default function Register() {
 
           {/* Formulario */}
           {step === 1 && (
-              <> 
-          <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Nombre y Apellido */}
-              <div className="flex space-x-3">
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
-                  <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
-                </div>
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
-                  <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                <InputText className={inputStyles} name="email" onChange={handleChange} required />
-              </div>
-
-              {/* Contraseña */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
-                <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
+            <>
+              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  {/* Nombre y Apellido */}
+                  <div className="flex space-x-3">
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
+                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                    </div>
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
+                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
+                    </div>
                   </div>
-              </div>
 
-              {/* Confirmar Contraseña */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
-                <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+                    <InputText className={inputStyles} name="email" onChange={handleChange} required />
                   </div>
-              </div>
 
-              {/* Checkbox términos */}
-              <div className="flex items-start">
-              <FormControlLabel
-                  control={
-                    <Checkbox
-                      value="allowPrivTerm"
-                      color="primary"
-                      checked={isTermsAccepted}
-                      onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                  {/* Contraseña */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
+                    <div className="relative">
+                      <InputText
+                        className={`${inputStyles} pr-10`}
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        onChange={handleChange}
+                        required
+                      />
+                      
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-2 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                      </button>
+                    </div>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                      La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
+                      </Typography>
+                  </div>
+
+                  {/* Confirmar Contraseña */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
+                    <div className="relative">
+                      <InputText
+                        className={`${inputStyles} pr-10`}
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        onChange={handleChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-2 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Checkbox términos */}
+                  <div className="flex items-start">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          value="allowPrivTerm"
+                          color="primary"
+                          checked={isTermsAccepted}
+                          onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                        />
+                      }
+                      label={
+                        <span style={{ fontSize: "12px" }} className={verifyStyle}>
+                          He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
+                        </span>
+                      }
                     />
-                  }
-                  label={
-                    <span style={{ fontSize: "18px" }}>
-                      He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
-                    </span>
-                  }
-                />
-              </div>
+                  </div>
 
-              {/* Botón de Siguiente */}
+                  {/* Botón de Siguiente */}
+                  {message && (
+                    <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+                      {message}
+                    </Typography>
+                  )}
 
-              <Button
+
+                  <Button
                     type="button"
-                    onClick={() => setStep(2)} // Cambiar al paso 2
+                    onClick={() => {
+                      // Validar que todos los campos estén llenos
+                      for (const field of requiredFields) {
+                        if (!form[field]) {
+                          setMessage("Por favor completa todos los campos obligatorios.");
+                          return;
+                        }
+                      }
+
+                      // Validar campos
+                      if (!name_regex.test(form.nombre)) {
+                        setMessage("El nombre debe contener solo letras.");
+                        return;
+                      }
+                      if (!name_regex.test(form.apellido)) {
+                        setMessage("El apellido debe contener solo letras.");
+                        return;
+                      }
+                      if (!email_regex.test(form.email)) {
+                        setMessage("El correo electrónico no es válido.");
+                        return;
+                      }
+                      if (!password_regex.test(form.password)) {
+                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+                        return;
+                      }
+                      if (form.password !== form.confirmPassword) {
+                        setMessage("Las contraseñas no coinciden");
+                        return;
+                      }
+                      if (!isTermsAccepted) {
+                        setMessage("Debes aceptar los términos y condiciones para continuar.");
+                        return;
+                      }
+                      
+                      // Si todas las validaciones pasan, avanzar al siguiente paso
+                      setMessage(""); // Limpia el mensaje si todo está bien
+                      setStep(2);
+                    }} // Cambiar al paso 2
                     className={buttonStyle}
                     variant="contained"
                   >
                     Siguiente
                   </Button>
-
-              {/* Botón Google */}
-              <button
-                type="button"
-                className="flex items-center justify-center w-full border border-gray-300 text-gray-700 rounded-full py-2 mt-4"
-              >
-                <img src="/google-icon.png" alt="Google" className="w-6 h-6 mr-2" />
-                Iniciar con Google
-              </button>
-            </form>
-          </div>
-          </>)}
+                  {/* Botón Google
+                  <button
+                    type="button"
+                    className="flex items-center justify-center w-full border border-gray-300 text-gray-700 rounded-full py-2 mt-4"
+                  >
+                    <img src="/images/Google_G.png" alt="Google" className="w-6 h-6 mr-2" />
+                    Iniciar con Google
+                  </button> */}
+                </form>
+              </div>
+            </>)}
           {step === 2 && (
-              <>
+            <>
               <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
                   ¿Qué tipo de eventos te gustan?
@@ -499,18 +591,17 @@ export default function Register() {
                   <div className="intereses-container">
                     {categorias.map((categoria) => (
                       <div key={categoria.id} className="categoria mb-5">
-                        <div className={buttonStyle} style={{ cursor: 'default' }}>
+                        <div className={buttonStyleCategoria} style={{ cursor: 'default' }}>
                           {categoria.nombre}
                         </div>
                         <ul className="flex flex-wrap">
                           {categoria.valores.map((valor) => (
                             <li
                               key={valor}
-                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${
-                                selectedEvents.includes(valor)
-                                  ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                  : 'btn-off'
-                              }`}
+                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                : 'btn-off'
+                                }`}
                               onClick={() => toggleSeleccionado(valor)}
                             >
                               {valor}
@@ -522,16 +613,16 @@ export default function Register() {
                   </div>
                 </Grid>
 
-                <Button onClick={handleSubmit} className={buttonStyle} variant="contained">
+                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
                   Crear Cuenta
                 </Button>
-                
-                </div>
-              </>
-            )}
-          
 
-          
+              </div>
+            </>
+          )}
+
+
+
 
         </div>
       </div>

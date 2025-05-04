@@ -1,35 +1,35 @@
-from django.shortcuts import render
+# Rest Framework Django
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.parsers import MultiPartParser
+# Utils Django
+from django.utils import timezone
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.hashers import make_password
+# Libraries
 import json
 import random
 from datetime import datetime, timezone, timedelta
 from math import radians, sin, cos, sqrt, atan2
-
-# Imports para eñ reconocimiento facial
-# import base64
-# import numpy as np
-# from PIL import Image
-# from io import BytesIO
-# import dlib
-# from scipy.spatial import distance
-
+# Cloudinary
+import cloudinary.uploader
+# Envio de correos
+from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
-from django.utils import timezone
-from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.hashers import make_password
-from django.http import JsonResponse
+# Servicio de INES
+from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
-from api.models import Usuario, Mensaje, Matches, Conversacion, Subcategoria, Evento
-from api.models import CategoriaEvento, TokenBlackList
+from api.models import Usuario, Evento, TokenBlackList
+from api.models import Matches,  Conversacion, Mensaje
+from api.models import CategoriaEvento,  Subcategoria
+# Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
-                          Logout, 
                           # Serializer para selección de categorías de eventos
                           # Cambiar contraseña
                           PasswordResetRequestSerializer,
@@ -54,11 +54,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializerLimitado,
                           EventoSerializerLimitadoWithFecha,
                           )
-
-# face_detector = dlib.get_frontal_face_detector()
-# shape_predictor = dlib.shape_predictor("modelos/shape_predictor_68_face_landmarks.dat")
-# face_rec_model = dlib.face_recognition_model_v1("modelos/dlib_face_recognition_resnet_model_v1.dat")
-
 
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 
@@ -230,85 +225,103 @@ def password_reset_resend(request):
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 
-# Upload Photos
+# ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def upload_profile_pictures(request):
-    usuario = request.user  # Se obtiene el usuario autenticado
+    usuario = request.user
     serializer = UploadProfilePicture(data=request.data)
 
-    if serializer.is_valid():
-        serializer.save(usuario)
-        return Response({"mensaje": "Fotos de perfil guardadas correctamente."}, status=status.HTTP_200_OK)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    new_images = serializer.validated_data['pictures']
+    current_photos = usuario.profile_pic or []
 
-# Save Personal Preferences
-@api_view(['POST'])
-def save_personal_preferences(request):
-    usuario = request.user
-    serializer = PersonalPreferences(data=request.data)
+    if len(current_photos) + len(new_images) > 6:
+        return Response(
+            {"error": "No puedes tener más de 6 fotos de perfil."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    if serializer.is_valid():
-        serializer.save(usuario)
-        return Response({"mensaje": "Preferencias guardadas exitosamente."}, status=status.HTTP_200_OK)
+    uploaded_urls = []
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    for image in new_images:
+        result = cloudinary.uploader.upload(
+            image,
+            folder="usuarios/perfiles",
+            transformation=[
+                {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+            ]
+        )
+        uploaded_urls.append(result['secure_url'])
 
-# Save Personal Data
+    usuario.profile_pic = current_photos + uploaded_urls
+    usuario.save()
 
-@api_view(['POST'])
-def save_personal_data(request):
-    usuario = request.user
-    serializer = PersonalData(data=request.data)
+    return Response({
+        "message": "Fotos subidas correctamente.",
+        "pictures": usuario.profile_pic
+    }, status=status.HTTP_200_OK)
 
-    if serializer.is_valid():
-        serializer.save(usuario)
-        return Response({"mensaje": "Datos personales guardados correctamente."}, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
-
 # --------- Subir INE para Validar el Perfil 
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
 def ine_validation_view(request):
-    serializer = IneValidationSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        user = serializer.save()
-        return Response({
-            "message": "Validación completada",
-            "is_ine_validated": user.is_ine_validated,
-            "curp": user.curp
-        })
-    return Response(serializer.errors, status=400)
+    ine_front = request.FILES.get('ine_front')
+    ine_back = request.FILES.get('ine_back')
+    
+    if not ine_front or not ine_back:
+        return Response({"error": "Ambas imágenes de la INE son requeridas."}, status=status.HTTP_400_BAD_REQUEST)
+    # Subir imágenes a Cloudinary
+    
+    try: 
+        #Subir imágenes a Cloudinary de manera temporal
+        front_url, front_id = upload_image_to_cloudinary(ine_front, name="front_ine")
+        back_url, back_id = upload_image_to_cloudinary(ine_back, name="ine_back")
+        
+        # Convertir URLs a base64
+        front_b64 = url_to_base64(front_url)
+        back_b64 = url_to_base64(back_url)
+        
+        # Extraer datos de la INE
+        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        if not cic or not id_ciudadano:
+            return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validar la INE
+        is_valid = validate_ine(cic, id_ciudadano)
+        if not is_valid:
+            return Response({"error": "La INE no es válida."}, status=status.HTTP_400_BAD_REQUEST)
+        # Guardar datos en el usuario
+        user : Usuario = request.user
+        user.is_ine_validated = is_valid
+        if curp:
+            user.curp = curp
+        user.save()
+
+        return Response({"mensaje": "INE validada exitosamente."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    finally:
+        # Eliminar imágenes de Cloudinary
+        if front_id:
+            delete_image_from_cloudinary(front_id)
+        if back_id:
+            delete_image_from_cloudinary(back_id)
+
 
 
 # ----------- Comparación de Rostros 
 
 
-# ----------- Resumen del perfil
-@api_view(['POST'])
-def completar_perfil(request):
-    usuario = request.user
-    data = request.data
-
-    usuario.profile_pic = data.get('profile_pictures', usuario.profile_pic)
-    usuario.preferencias_generales = data.get('preferences', usuario.preferencias_generales)
-    usuario.description = data.get('description', usuario.description)
-    usuario.birthday = data.get('birthday', usuario.birthday)
-    usuario.gender = data.get('gender', usuario.gender)
-    usuario.curp = data.get('curp', usuario.curp)
-
-    usuario.is_ine_validated = data.get('is_ine_validated', usuario.is_ine_validated)
-    usuario.is_validated_camera = data.get('is_validated_camera', usuario.is_validated_camera)
-
-    usuario.save()
-
-    return Response({"mensaje": "Perfil completado exitosamente."}, status=status.HTTP_200_OK)
 
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------

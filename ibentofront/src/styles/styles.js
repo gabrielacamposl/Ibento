@@ -24,7 +24,6 @@ export const buttonStyleSecondary = clsx(
   );
   
   export const verifyStyle = clsx(
-    "flex justify-center items-center",
-    "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
-    "font-bold shadow-lg hover:text-purple hover:bg-white"
+    "text-purple-600",
+    "text-sm"
     );
