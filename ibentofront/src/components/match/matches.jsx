@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 const matches = () => {
     const navigate = useNavigate();
-    const [verificar, setVerificar] = useState(false);
+    const [verificar, setVerificar] = useState(true);
     const [user, setUser] = useState({
         
         pictures: ["/minovio.jpeg", "/juas.webp"],
@@ -123,6 +123,14 @@ const matches = () => {
                                 </div>
                             </div>
 
+
+
+                          
+
+
+
+
+
                             {users.map((user, index) => (
                                 <div key={index} className="m-1 flex-shrink-0 relative">
                                     <div className="rounded-full">
@@ -133,6 +141,11 @@ const matches = () => {
                         </React.Fragment>
                     </div>
                     <h1 className="font-bold">Mensajes</h1>
+
+                
+
+
+
                     <div className="mt-4">
                         {users.map((user, index) => (
                             user.ultimoMensaje !== '' && (
