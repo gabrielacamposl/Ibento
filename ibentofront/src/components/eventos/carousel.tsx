@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 
 
 const Carousel = () => {
@@ -36,13 +37,13 @@ const Carousel = () => {
 ];
 
     return (
-        <div className="carousel rounded-box mx-2 max-h-92 lg:max-w-3/4">
+        <div className="carousel rounded-box max-h-72">
         {populares.map((event, index) => (
             console.log(index),
             <div className="carousel-item w-full relative h-92">
               <img
                 src={`/${event.img}`}
-                className="w-full"
+                className="w-full h-92"
                 alt="Tailwind CSS Carousel component" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
             </div>

@@ -4,12 +4,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import password_reset_request, password_reset_validate, password_reset_resend, password_reset_change
 from api.user.views import estado_validacion_view, ine_validation_view
 from api.user.views import (crear_usuario, 
-                            CategoriaEventoViewSet,
-                            SubcategoriaViewSet,
                             EventoViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
+                            upload_profile_pictures,
                             crear_match,
                             eliminar_match,
                             obtener_matches_usuario,
@@ -22,8 +21,6 @@ from api.user.views import (crear_usuario,
 
 router = DefaultRouter()
 
-router.register(r'categorias', CategoriaEventoViewSet, basename='categoria')
-router.register(r'subcategorias', SubcategoriaViewSet, basename='subcategoria')
 router.register(r'eventos', EventoViewSet, basename='evento')
 
 urlpatterns = [
@@ -48,8 +45,11 @@ urlpatterns = [
     path('password-reset/resend/', password_reset_resend, name='password_reset_resend'),
 
     # Creación de perfil para acompañantes
+    # ---- Subir imágenes de perfil
+     path('perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
     # ---- Está validado
     path('estado-validacion/', estado_validacion_view, name='estado-validacion'),
+    #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
     # Matches

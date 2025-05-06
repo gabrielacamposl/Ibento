@@ -67,7 +67,7 @@ function Page() {
 
 
   useEffect(() => {
-    // Find the event once events are loaded or eventId changes
+    
     if (eventos.length > 0 && eventId) {
       const foundEvent = eventos.find((ev) => ev._id === eventId);
       setCurrentEvent(foundEvent || null);
@@ -165,7 +165,7 @@ function Page() {
           {/* Imagen y botones en la esquina */}
           <div className="relative w-full h-80">
             <img
-              src={`${imgs[0][0]}`}
+              src={`${imgs[0]}`}
               alt="Evento"
               className="w-full h-80 object-cover rounded-lg4"
             />
@@ -300,6 +300,12 @@ function Page() {
           <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xl font-bold w-90 h-auto rounded-full m-4">
             Buscar acompañante
           </button>
+          <div className="mockup-phone border-primary">
+            <div className="mockup-phone-camera"></div>
+            <div className="mockup-phone-display">
+              <img alt="wallpaper" src="https://img.daisyui.com/images/stock/453966.webp"/>
+            </div>
+          </div>
         </div>
       </div>
 
