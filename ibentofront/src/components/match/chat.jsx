@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 const Chat = () => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([
-        { sender: 'Harry Styles', text: 'Hola, ¿cómo estás?' ,image: "/harry.jpeg"},
-        { sender: 'Tú', text: '¡Hola! Estoy bien, ¿y tú?' ,image: "/isaac.jpeg"},
+        { sender: 'Harry Styles', text: ['Hola, ¿cómo estás?'] ,image: "/minovio.jpeg"},
+        { sender: 'Tú', text: '¡Hola! Estoy bien, ¿y tú?' ,image: "/jin3.jpeg"},
     ]);
     const [newMessage, setNewMessage] = useState('');
     const [showDialogBlock, setShowDialogBlock] = useState(false);
@@ -34,8 +34,8 @@ const Chat = () => {
         navigate("../verPerfil");
     }
     return (
-        <div className="text-black flex flex-col items-center min-h-screen">
-            <div className="relative flex w-full flex-col items-center p-5 shadow-t max-w-lg w-full flex-grow">
+        <div className="min-h-screen text-black flex flex-col items-center ">
+            <div className=" items-center p-5   w-full ">
                 <div className="w-full">
                     <div className="">
                         <div className="mb-2 flex justify-end items-end font-bold text-2xl w-full">
@@ -45,13 +45,17 @@ const Chat = () => {
                                 </svg>
                             </button>
                         </div>
-                        <div className="overflow-y-auto">
+                        <div className="overflow-y-auto scrollbar-always-visible">
                             <div className="flex">
                                 <img src="/minovio.jpeg" className="w-10 h-10 object-cover rounded-full mr-2" />
                                 <h1 className="text-xl font-semibold">{messages[0].sender}</h1>
                             </div>
                         </div>
-                        <div className="h-full bg-white mt-3 w-full h-full">
+
+
+
+                        <div className='min-h-screen scrollbar overflow-y-auto h-96 scrollbar-always-visible'>
+                        <div className="h-full bg-white  w-full h-full">
                             <div className="mt-5 mb-5 flex justify-center items-center">
                                 <div className="relative">
                                     <img src={messages[0].image} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={messages[0].sender} />
@@ -68,6 +72,7 @@ const Chat = () => {
                                         </svg>
                                     </div>
                                 </div>
+                        
                                 <div className="relative">
                                     <img src={messages[1].image} className="sombraMatch2 w-20 h-20 object-cover rounded-full" alt={messages[1].sender} />
                                     <div className="absolute top-2 right-2 w-full flex justify-center items-center">
@@ -100,15 +105,20 @@ const Chat = () => {
                         </div>
                     </div>
                 </div>
-                <div className="w-full flex justify-end    sticky bottom-16">
+                </div>
+
+
+
+
+                <div className="w-full flex justify-end    items-center">
                 <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="flex-grow p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-grow p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Escribe un mensaje..."
                 />
-                <button onClick={handleSendMessage} className="p-2 bg-blue-500 text-white ">Enviar</button>
+                <button onClick={handleSendMessage} className="bg-none p-2 text-blue-500 ">Enviar</button>
             </div>
             </div>
             
