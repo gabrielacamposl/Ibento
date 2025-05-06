@@ -13,14 +13,19 @@ const Verificar = () => {
 
     const [user, setUser] = useState({
         pictures: [],
-        ine: []
+        interest: [],
+        ine: [],
+        facePhoto: null,
     });
+    const [isUploading, setIsUploading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [selectedAnswers, setSelectedAnswers] = useState({}); // Estado para respuestas seleccionadas
+    const [itemsAboutMe, setItemsAboutMe] = useState([]);
+    const [selectedAnswers, setSelectedAnswers] = useState({});
+
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("access");
         if (!token) {
             // Redirige si no hay token
             navigate("/login");
@@ -28,37 +33,26 @@ const Verificar = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // Desplazar al inicio de la página al cargar el componente
-    // useEffect(() => {
-    //     window.scrollTo(0, 0);
-    // }, []);
 
     // ------------- Subir fotos de perfil
 
-    const handleUploadPictures = async () => {
-        if (user.pictures.length < 3 || user.pictures.length > 6) {
-            alert("Debes subir entre 3 y 6 fotos.");
+    const handleImageChange = (e, index) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Por favor selecciona una imagen válida.");
             return;
         }
 
-        const formData = new FormData();
-        user.pictures.forEach((picture) => {
-            formData.append("pictures", picture);
+        setUser((prev) => {
+            const newPictures = [...prev.pictures];
+            newPictures[index] = file;
+            return {
+                ...prev,
+                pictures: newPictures,
+            };
         });
-
-        try {
-            const response = await api.post("api/upload-profile-pictures/", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            console.log("Fotos subidas:", response.data.pictures);
-            alert("¡Fotos subidas con éxito!");
-        } catch (error) {
-            console.error("Error al subir fotos:", error.response?.data || error);
-            alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
-        }
     };
 
     const handleImageDelete = (indexToDelete) => {
@@ -71,7 +65,78 @@ const Verificar = () => {
             };
         });
     };
-    
+
+    const handleUploadPictures = async () => {
+        if (user.pictures.length < 3 || user.pictures.length > 6) {
+            alert("Debes subir entre 3 y 6 fotos.");
+            return;
+        }
+
+        const formData = new FormData();
+        user.pictures.forEach((picture) => {
+            formData.append("pictures", picture);
+        });
+        setIsUploading(true);
+
+        try {
+            const response = await api.post("perfil/subir-fotos/", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+
+            console.log("Fotos subidas:", response.data.pictures);
+            alert("¡Fotos subidas con éxito!");
+        } catch (error) {
+            console.error("Error al subir fotos:", error.response?.data || error);
+            alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+
+
+    // ---------------------------- Intereses -----------------------------
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await api.get('categorias-perfil/');
+                console.log("categorias recibidas:", response.data);
+                setItemsAboutMe(response.data);
+            } catch (error) {
+                console.error("Error al cargar las preguntas", error);
+            }
+        };
+
+        fetchQuestions();
+    }, []);
+
+    const handleSavePreferences = async () => {
+        try {
+            const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
+                categoria_id,
+                respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
+            }));
+
+            // Validación: asegurarse de que todas las obligatorias estén contestadas
+            const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
+                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
+            });
+
+            if (obligatoriasNoRespondidas.length > 0) {
+                alert("Por favor responde todas las preguntas obligatorias marcadas con *.");
+                return;
+            }
+
+            await api.post("/api/guardar-respuestas/", { respuestas });
+            alert("Preferencias guardadas correctamente.");
+        } catch (err) {
+            console.error("Error al guardar preferencias", err);
+            alert("Hubo un error al guardar tus preferencias.");
+        }
+    };
 
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
@@ -151,21 +216,6 @@ const Verificar = () => {
         { label: 'Paso 4' },
     ];
 
-    const itemsAboutMe = [
-        {
-            question: '¿Fumas con frecuencia?',
-            answers: ['Sí, fumo con frecuencia', 'No me gusta fumar', 'Solo en ocasiones especiales', 'Lo hago para socializar', 'Trato de dejarlo']
-        },
-        {
-            question: '¿Bebes alcohol con frecuencia?',
-            answers: ['Sí, bebo con frecuencia', 'No me gusta beber', 'Solo en ocasiones especiales', 'Lo hago para socializar', 'Trato de dejarlo']
-        },
-
-        {
-            question: '¿Cuál es su tipo de personalidad?',
-            answers: ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP']
-        }
-    ];
 
 
     const handleAnswerSelect = (question, answer) => {
@@ -266,63 +316,76 @@ const Verificar = () => {
                             </React.Fragment>
                         </div>)}
 
-                    {/*VENTANA PARA VERIFICAR INFORMACIÓN */}
-                    {activeIndex === 1 && (
-                        <React.Fragment>
-                            <div
-                                className='h-180 gap-2 custom-scrollbar'
+                    {/* SELECCIÓN DE INTERESES */}
+                    <div className="grid grid-cols-1 gap-4 mt-2">
+                        {itemsAboutMe.map((item, index) => (
+                            <div key={index} className="flex flex-col">
+                                {item.question === '¿Cuál es su tipo de personalidad?' ? (
+                                    <div className="flex space-x-1 items-center">
+                                        <p className="text-black font-semibold">
+                                            {item.question}
+                                            {!item.optional && <span className="text-red-500"> *</span>}
+                                        </p>
+                                        <a
+                                            className="botonLink"
+                                            href="https://www.16personalities.com/es/test-de-personalidad"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Hacer test de personalidad
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <p className="font-semibold">
+                                        {item.question}
+                                        {!item.optional && <span className="text-red-500"> *</span>}
+                                    </p>
+                                )}
 
-                            >
-                                <h1 className='text-3xl mt-2 font-bold miPerfil'>Más sobre mí</h1>
-                                <h2 className="mt-2">Completa tu información</h2>
-                                <div className="grid grid-cols-1 gap-4 mt-2 ">
-                                    {itemsAboutMe.map((item, index) => (
-                                        <div key={index} className="flex flex-col">
+                                <div className="grid grid-cols-2 gap-2 mt-2 flex">
+                                    {Array.isArray(item.answers) && item.answers.map((answer, i) => {
+                                        const isSelected = selectedAnswers[item._id]?.includes(answer);
 
-                                            {item.question === '¿Cuál es su tipo de personalidad?' ? (
+                                        return (
+                                            <button
+                                                key={i}
+                                                className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
+                                                onClick={() => {
+                                                    setSelectedAnswers((prev) => {
+                                                        const currentAnswers = prev[item._id] || [];
 
-                                                <div className="flex space-x-1">
-                                                    <p className="text-black font-semibold">{item.question}</p>
-                                                    <a className="botonLink" href='https://www.16personalities.com/es/test-de-personalidad' target="_blank"
-                                                        rel="noopener noreferrer">Hacer test de personalidad</a>
-                                                </div>
-                                            )
-                                                : (
-                                                    <p className="font-semibold">{item.question}</p>)
-                                            }
+                                                        if (item.multi_option) {
+                                                            return {
+                                                                ...prev,
+                                                                [item._id]: currentAnswers.includes(answer)
+                                                                    ? currentAnswers.filter((a) => a !== answer)
+                                                                    : [...currentAnswers, answer]
+                                                            };
+                                                        } else {
+                                                            return {
+                                                                ...prev,
+                                                                [item._id]: [answer]
+                                                            };
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                {answer}
+                                            </button>
+                                        );
+                                    })}
 
-                                            <div className="grid grid-cols-2 gap-2 mt-2 flex">
-                                                {item.answers.map((answer, i) => (
-                                                    <button
-                                                        key={i}
-                                                        className={`rounded-full ${selectedAnswers[item.question]?.includes(answer) ? 'btn-active' : 'btn-inactive'}`}
-                                                        onClick={() => {
-                                                            setSelectedAnswers((prev) => {
-                                                                const currentAnswers = prev[item.question] || [];
-                                                                if (currentAnswers.includes(answer)) {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item.question]: currentAnswers.filter((a) => a !== answer)
-                                                                    };
-                                                                } else {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item.question]: [...currentAnswers, answer]
-                                                                    };
-                                                                }
-                                                            });
-                                                        }}
-                                                    >
-                                                        {answer}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
                                 </div>
                             </div>
-                        </React.Fragment>
-                    )}
+                        ))}
+
+                        <Button
+                            onClick={handleSavePreferences} className={buttonStyle}
+                        >
+                            Guardar respuestas
+                        </Button>
+                    </div>
+
 
 
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}

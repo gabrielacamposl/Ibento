@@ -58,7 +58,7 @@ export default function Register() {
   // Función para obtener categorías de eventos
   const fetchCategorias = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/categorias/');
+      const res = await axios.get('http://localhost:8000/adminuser/eventos/categorias/');
       const categoriasFormateadas = res.data.map(cat => ({
         id: cat._id,
         nombre: cat.nombre,

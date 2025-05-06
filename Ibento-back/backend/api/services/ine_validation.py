@@ -25,6 +25,7 @@ def delete_image_from_cloudinary(public_id):
         resource_type = "image"
     )
 
+
 def url_to_base64(url):
     image_response = requests.get(url)
     return base64.b64encode(image_response.content).decode('utf-8')
@@ -70,4 +71,3 @@ def validate_ine(cic, id_ciudadano):
         return True
     else:
         return False
-    
