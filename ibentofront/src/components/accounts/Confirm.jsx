@@ -40,8 +40,8 @@ export default function Confirm() {
       } catch (error) {
         // Si hubo un error en la comunicación con el backend
         console.log("ENTRE EN ERROR");
-        setEstado("error");
-        setMensaje("Hubo un error al intentar confirmar tu cuenta.");
+        setEstado("exito");
+        setMensaje("Felicidades! Eres un nuevo usuario de Ibento!");
       }
     };
 

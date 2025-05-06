@@ -13,7 +13,7 @@ const matches = () => {
     });
     
         useEffect(() => {
-            const token = localStorage.getItem("token");
+            const token = localStorage.getItem("access");
             if (!token) {
                 // Redirige si no hay token
                 navigate("/login");
