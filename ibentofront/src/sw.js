@@ -20,3 +20,15 @@ self.addEventListener('push', function (event) {
     event.notification.close()
     event.waitUntil(clients.openWindow('<https://x.com>'))
   })
+
+self.addEventListener('install', function (e) {
+    console.log('[Service Worker] Installing SW ...', e);
+});
+self.addEventListener('activate', function (e) {
+    console.log('[Service Worker] Activating SW ...', e);
+    return self.clients.claim();
+});
+self.addEventListener('fetch', function (e) {
+    console.log('[Service Worker] Fetching...', e);
+    e.respondWith(fetch(e.request));
+});

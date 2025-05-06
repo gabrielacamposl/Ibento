@@ -240,22 +240,33 @@ def format_event_data(events):
                     classi.append(translated_sub_genre)
 
         
+        existencia_evento = False
 
+        for eventos in formatted_events:
+            if eventos.get('title') == event.get('name'):
+                eventos['dates'].append(dates[0])
+                existencia_evento = True
+
+
+        if not existencia_evento:
         # Construir el objeto formateado
-        formatted_event = {
-            "title": event.get('name', 'Sin nombre'),
-            "place": event.get('_embedded', {}).get('venues', [{}])[0].get('name', 'Lugar no especificado'),
-            "price": prices if prices else ['Precio no disponible'],
-            "location": location,
-            "coordinates": coordinates,
-            "description": event.get('info') or event.get('pleaseNote') or 'Sin descripción disponible',
-            "classification": classi if classi else ['Sin clasificaciones'],
-            "dates": dates if dates else ['Fecha no especificada'],
-            "img_urls": image_urls,  # Changed from img_url to img_urls
-            "url": event.get('url', 'URL no disponible')
-        }
+            formatted_event = {
+                "title": event.get('name', 'Sin nombre'),
+                "place": event.get('_embedded', {}).get('venues', [{}])[0].get('name', 'Lugar no especificado'),
+                "price": prices if prices else ['Precio no disponible'],
+                "location": location,
+                "coordinates": coordinates,
+                "description": event.get('info') or event.get('pleaseNote') or 'Sin descripción disponible',
+                "classification": classi if classi else ['Sin clasificaciones'],
+                "dates": dates if dates else ['Fecha no especificada'],
+                "img_urls": image_urls,  # Changed from img_url to img_urls
+                "url": event.get('url', 'URL no disponible'),
+                "source": "www.ticketmaster.com.mx"
+            }
+            
+            formatted_events.append(formatted_event)
         
-        formatted_events.append(formatted_event)
+        existencia_evento = False
     
     return formatted_events
 
