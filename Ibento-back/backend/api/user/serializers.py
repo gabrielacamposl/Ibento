@@ -8,6 +8,7 @@ from api.services import ine_validation
 import cloudinary.uploader
 from api.models import (Usuario, 
                         TokenBlackList,
+                        CategoriasPerfil,
                         Matches, 
                         Conversacion, 
                         Mensaje, 
@@ -38,10 +39,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
         usuario.save()
         return usuario
 
-
     
-# -------------------------------------- LOGIN / LOGOUT ----------------------------------------
-    
+# -------------------------------------- LOGIN / LOGOUT ----------------------------------------    
 # ------ Login / Inicio de Sesión    
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -104,7 +103,6 @@ class PasswordResetChangeSerializer(serializers.Serializer):
 
 #---------- Subir imágenes de perfil para la busqueda de acompañantes
 
-
 class UploadProfilePicture(serializers.Serializer):
     pictures = serializers.ListField(
         child=serializers.ImageField(),
@@ -112,6 +110,18 @@ class UploadProfilePicture(serializers.Serializer):
         max_length=6,
         allow_empty=False
     )
+
+
+# ----- Preguntas para el perfil
+class CategoriaPerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriasPerfil
+        fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
+        
+        
+class RespuestaPerfilSerializer(serializers.Serializer):
+    categoria_id = serializers.CharField()
+    respuesta = serializers.JSONField()
 
 
 

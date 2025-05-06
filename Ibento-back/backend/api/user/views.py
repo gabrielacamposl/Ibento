@@ -13,7 +13,7 @@ from django.contrib.auth.hashers import make_password
 # Libraries
 import json
 import random
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 # Cloudinary
 import cloudinary.uploader
@@ -26,7 +26,7 @@ from api.services.ine_validation import (upload_image_to_cloudinary, delete_imag
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Matches,  Conversacion, Mensaje
-from api.models import CategoriaEvento,  Subcategoria
+from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
@@ -37,6 +37,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           PasswordResetCodeValidationSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
+                          CategoriaPerfilSerializer,
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
@@ -212,6 +213,61 @@ def password_reset_resend(request):
 
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
+
+# ------- Seleccionar intereses para el perfil
+# Mostrar Intereses
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_categorias_perfil(request):
+    categorias = CategoriasPerfil.objects.all()
+    serializer = CategoriaPerfilSerializer(categorias, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# Guardar respuestas del perfil
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def guardar_respuestas_perfil(request):
+    usuario = request.user
+    respuestas = request.data.get("respuestas", [])
+
+    preferencias = []
+
+    for r in respuestas:
+        categoria_id = r.get("categoria_id")
+        respuesta = r.get("respuesta")
+
+        try:
+            categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+        except CategoriasPerfil.DoesNotExist:
+            continue  # o devuelve error ?
+
+        # Validación: si multi_option es False, la respuesta debe ser una sola
+        if not categoria.multi_option and isinstance(respuesta, list):
+            return Response(
+                {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validación opcional: ¿es obligatoria u opcional?
+        if not respuesta and not categoria.optional:
+            return Response(
+                {"error": f"La pregunta '{categoria.question}' es obligatoria."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        preferencias.append({
+            "categoria_id": categoria._id,
+            "pregunta": categoria.question,
+            "respuesta": respuesta
+        })
+
+    # Guardamos en el campo preferencias_generales
+    usuario.preferencias_generales = preferencias
+    usuario.save()
+
+    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
