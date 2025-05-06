@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
 import { AvatarGroup } from 'primereact/avatargroup';
 
-import {useFetchEvents, useFetchNearestEvents} from '../../hooks/usefetchEvents';
-import useGeolocation from '../../hooks/useGeolocation';
+import {useFetchEvents, useFetchNearestEvents} from '../../../hooks/usefetchEvents';
+import useGeolocation from '../../../hooks/useGeolocation';
 
 
 interface ListEvent {

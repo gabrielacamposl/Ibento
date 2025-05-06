@@ -29,27 +29,26 @@ function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-gray-200 bg-white shadow-lg">
       {/* Home Link */}
       <NavLink to="/ibento/eventos" end className={getNavLinkClass}>
-        <HomeOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Search Link */}
-      <NavLink to="/ibento/busqueda" className={getNavLinkClass}>
-        <MGOutline className="mb-1 h-6 w-6" />
-      </NavLink>
-
-      {/* Chat Link */}
-      <NavLink to="/ibento/match" className={getNavLinkClass}>
-        <ChatOutline className="mb-1 h-6 w-6" />
+      {isActive => isActive ? <HomeSolid className="mb-1 h-6 w-6" /> : <HomeOutline className="mb-1 h-6 w-6" />}
+        {/* <HomeOutline className="mb-1 h-6 w-6" /> */}
       </NavLink>
 
       {/* Explore Link */}
       <NavLink to="/ibento/matches" className={getNavLinkClass}>
-        <FaceSmileOutline className="mb-1 h-6 w-6" />
+      {isActive => isActive ? <FaceSmileSolid className="mb-1 h-6 w-6" /> : <FaceSmileOutline className="mb-1 h-6 w-6" />}
+        {/* <FaceSmileOutline className="mb-1 h-6 w-6" /> */}
       </NavLink>
 
+      {/* Chat Link */}
+      <NavLink to="/ibento/match" className={getNavLinkClass}>
+      {isActive => isActive ? <ChatSolid className="mb-1 h-6 w-6" /> : <ChatOutline className="mb-1 h-6 w-6" />}
+        {/* <ChatOutline className="mb-1 h-6 w-6" /> */}
+      </NavLink>
+      
       {/* Profile Link */}
       <NavLink to="/ibento/perfil" className={getNavLinkClass}>
-        <UserOutline className="mb-1 h-6 w-6" />
+      {isActive => isActive ? <UserSolid className="mb-1 h-6 w-6" /> : <UserOutline className="mb-1 h-6 w-6" />}
+        {/* <UserOutline className="mb-1 h-6 w-6" /> */}
       </NavLink>
     </nav>
   );

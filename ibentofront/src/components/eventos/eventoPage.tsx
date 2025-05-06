@@ -7,11 +7,12 @@ import { HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid } from '@heroico
 import { ArrowLeftIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
-import Carousel from './carousel';
+import Carousel from './components/carousel';
+import "cally";
 
 import axios from 'axios';
 
-import {useParams} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface ListEvent {
   _id: string;
@@ -45,7 +46,8 @@ function Page() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [date, setDate] = useState<Date | null>(null); // Initialize date state
 
-  
+
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -67,7 +69,7 @@ function Page() {
 
 
   useEffect(() => {
-    
+
     if (eventos.length > 0 && eventId) {
       const foundEvent = eventos.find((ev) => ev._id === eventId);
       setCurrentEvent(foundEvent || null);
@@ -80,12 +82,12 @@ function Page() {
 
   // If there's an error, show an error message
   if (error) {
-  return <div>{error}</div>;
+    return <div>{error}</div>;
   }
 
   // If event is not found after loading, show not found message
   if (!currentEvent) {
-  return <div>Evento no encontrado</div>;
+    return <div>Evento no encontrado</div>;
   }
 
   // Now that we are sure `currentEvent` exists, we can use it
@@ -115,28 +117,55 @@ function Page() {
   };
 
   let likeString = "";
-    if (numLikes >= 1000000) {
-        likeString = (numLikes / 1000000).toFixed(1) + "M";
-    } else if (numLikes >= 1000) {
-        likeString = (numLikes / 1000).toFixed(1) + "k";
-    } else {
-        likeString = numLikes + "";
-    }
+  if (numLikes >= 1000000) {
+    likeString = (numLikes / 1000000).toFixed(1) + "M";
+  } else if (numLikes >= 1000) {
+    likeString = (numLikes / 1000).toFixed(1) + "k";
+  } else {
+    likeString = numLikes + "";
+  }
 
   let saveString = "";
   if (numSaves >= 1000000) {
-      saveString = (numSaves / 1000000).toFixed(1) + "M";
+    saveString = (numSaves / 1000000).toFixed(1) + "M";
   } else if (numSaves >= 1000) {
-      saveString = (numSaves / 1000).toFixed(1) + "k";
+    saveString = (numSaves / 1000).toFixed(1) + "k";
   } else {
-      saveString = numSaves.toString();
+    saveString = numSaves.toString();
   }
 
+  let dateString = dates[0].toString().split("T")[0];
+  let timeString = dates[0].toString().split("T")[1].split(".")[0];
+
+  const datesToMark: Date[] = dates.map(dateString => new Date(dateString));
+
+  const dateTemplate = (dateInfo: any) => {
+    if (datesToMark.some(markedDate =>
+        markedDate.getFullYear() === dateInfo.year &&
+        markedDate.getMonth() === dateInfo.month &&
+        markedDate.getDate() === dateInfo.day
+    )) {
+        // Si la fecha está en el array de fechas a marcar
+        return (
+            <div className="text-white bg-purple-700 rounded-full text-center" style={{width: '2em', height: '2em', lineHeight: '2em'}}>
+
+                {dateInfo.day}
+            </div>
+        );
+    } else {
+        // Para las fechas que no están en el array
+        return dateInfo.day;
+    }
+  };
+
+  console.log("Fecha: " + date);
+
+
   const urls = "../busqueda/"
-  
+
   const coor = {
-    lat:coordenates[0], 
-    lng:coordenates[1]
+    lat: coordenates[0],
+    lng: coordenates[1]
   }
 
   console.log(currentEvent)
@@ -150,17 +179,17 @@ function Page() {
       {/* Mobile View */}
       <div className="md:hidden flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white">
         {/* Botón de retroceso */}
-          <Link
-            to={urls}
-            onClick={e => {
-              e.preventDefault();
-              window.history.back();
-            }}
-            className="absolute top-4 left-4 z-20 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100 transition"
-            aria-label="Regresar"
-            >
-            <ArrowLeftIcon className="h-6 w-6 text-black" />
-          </Link>
+        <Link
+          to={urls}
+          onClick={e => {
+            e.preventDefault();
+            window.history.back();
+          }}
+          className="absolute top-4 left-4 z-20 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100 transition"
+          aria-label="Regresar"
+        >
+          <ArrowLeftIcon className="h-6 w-6 text-black" />
+        </Link>
         <div className="flex flex-col items-center w-full h-full bg-white rounded-lg shadow-lg">
           {/* Imagen y botones en la esquina */}
           <div className="relative w-full h-80">
@@ -218,11 +247,11 @@ function Page() {
           <div className="flex flex-row my-4 flex-wrap gap-4 items-center justify-center w-full h-auto">
             <div className="flex flex-row space-x-1 items-center justify-center">
               <CalendarIcon className="h-8 w-8 text-black" />
-              <p className="text-black font-bold">{dates[0]}</p>
+              <p className="text-black font-bold">{dateString}</p>
             </div>
             <div className="flex flex-row space-x-1 items-center justify-center">
               <ClockIcon className="h-6 w-6 text-black" />
-              <p className="text-black font-bold">{dates[0]}</p>
+              <p className="text-black font-bold">{timeString}</p>
             </div>
             <div className="flex flex-row space-x-1 items-center justify-center">
               <MapPinIcon className="h-6 w-6 text-black" />
@@ -255,7 +284,14 @@ function Page() {
                 onChange={(e) => setDate(e.value || null)}
                 inline
                 showWeek
+                dateTemplate={dateTemplate}
               />
+              {/* <calendar-date class="cally bg-base-100 border border-base-300 shadow-lg rounded-box">
+                <svg aria-label="Previous" className="fill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
+                <svg aria-label="Next" className="fill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
+                <calendar-month></calendar-month>
+              </calendar-date> */}
+
             </div>
           </div>
           <div className="w-full px-6">
@@ -284,28 +320,9 @@ function Page() {
             </article>
             <EventMap location={coor} />
           </div>
-
-          <div className="w-full px-6 my-4">
-            <p
-              id="titulo"
-              className="mb-1 text-xl font-bold text-black text-left"
-            >
-              Galeria
-            </p>
-            <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
-            <div className="w-auto h-auto mt-4">
-              <Carousel />
-            </div>
-          </div>
           <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xl font-bold w-90 h-auto rounded-full m-4">
             Buscar acompañante
           </button>
-          <div className="mockup-phone border-primary">
-            <div className="mockup-phone-camera"></div>
-            <div className="mockup-phone-display">
-              <img alt="wallpaper" src="https://img.daisyui.com/images/stock/453966.webp"/>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -364,8 +381,8 @@ function Page() {
                     Eventos
                   </button>
                   <div className="w-full hidden md:block"> {/* Agregar hidden md:block */}
-                     <EventMap location={coordenates} />
-                   </div>
+                    <EventMap location={coordenates} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -375,6 +392,6 @@ function Page() {
     </div>
   );
 }
-  
-  export default Page;
-  
+
+export default Page;
+

@@ -1,15 +1,15 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useLocation } from "react-router-dom";
-import Search from "./Search";
-import Cards from "./CategoryCard";
-import EventWrapper from "./SearchCard";
+import Search from "./components/Search";
+import Cards from "./components/CategoryCard";
+import EventWrapper from "./components/SearchCard";
 import axios from 'axios';
 import { useParams } from "react-router-dom";
 
 import { CardsSkeleton } from "../extras/skeletons";
 
 // import EventWrapperWParams from "./SearchCard2";
-const EventWrapperWParams = React.lazy(() => import('./SearchCard2'));
+const EventWrapperWParams = React.lazy(() => import('./components/SearchCard2'));
 
 interface ListEvent {
   _id: string;
