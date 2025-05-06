@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 const matches = () => {
     const navigate = useNavigate();
-    const [verificar, setVerificar] = useState(false);
+    const [verificar, setVerificar] = useState(true);
     const [user, setUser] = useState({
         
         pictures: ["/minovio.jpeg", "/juas.webp"],
@@ -29,6 +29,7 @@ const matches = () => {
             asistir: ['EDC', 'FlowFest'],
             eventosComun: ['Fiesta de disfraces', 'Karaoke'],
             ultimoMensaje:'Hola,¿Cómo estás?',
+            idChat: 1,
         },
         {
             name: 'Felix',
@@ -37,6 +38,7 @@ const matches = () => {
             asistir: ['Lollapalooza', 'Tomorrowland'],
             eventosComun: ['Concierto de rock', 'Festival de cine'],
             ultimoMensaje:'',
+            idChat: 2,
         },
         {
             name: 'Hyunjin',
@@ -45,6 +47,7 @@ const matches = () => {
             asistir: ['Ultra Music Festival', 'Coachella'],
             eventosComun: ['Exposición de arte', 'Torneo de videojuegos'],
             ultimoMensaje:'Te amoooo <3',
+            idChat: 3,
         },
         {
             name: 'Harry',
@@ -53,6 +56,7 @@ const matches = () => {
             asistir: ['SXSW', 'Burning Man'],
             eventosComun: ['Concierto de pop', 'Festival de comida'],
             ultimoMensaje:'Te invito a mi concierto',
+            idChat: 4,
         },
         {
             name: 'Chinos',
@@ -61,6 +65,7 @@ const matches = () => {
             asistir: ['Glastonbury', 'Reading Festival'],
             eventosComun: ['Desfile de moda', 'Fiesta en la playa'],
             ultimoMensaje:'',
+            idChat: 5,
         },
         {
             name: 'Jung',
@@ -69,6 +74,7 @@ const matches = () => {
             asistir: ['Primavera Sound', 'Rock in Rio'],
             eventosComun: ['Concierto de hip-hop', 'Competencia de baile'],
             ultimoMensaje:'',
+            idChat: 6,
         }
     ];
 
@@ -81,6 +87,10 @@ const matches = () => {
     const handdleFuture = () => {
         navigate("../verMatches");
         }
+
+    const handdleChat = () => {
+        setTimeout(() => navigate("../chat"), 0);
+    }
 
        
     const handdleVerificar = () => {
@@ -133,6 +143,14 @@ const matches = () => {
                                 </div>
                             </div>
 
+
+
+                          
+
+
+
+
+
                             {users.map((user, index) => (
                                 <div key={index} className="m-1 flex-shrink-0 relative">
                                     <div className="rounded-full">
@@ -143,15 +161,22 @@ const matches = () => {
                         </React.Fragment>
                     </div>
                     <h1 className="font-bold">Mensajes</h1>
+
+                
+
+
+
                     <div className="mt-4">
                         {users.map((user, index) => (
                             user.ultimoMensaje !== '' && (
                                 <div key={index} className="bordeBajo mb-4 p-2">
+                                    <button onClick={handdleChat} className="w-full ">
                                     <div className="flex justify-start items-center space-x-2">
                                         <img src={user.pictures[0]} className="w-10 h-10 object-cover rounded-full" alt={user.name} />
                                         <h2 className="font-bold">{user.name}</h2>
                                     </div>
-                                    <p>{user.ultimoMensaje}</p>
+                                    <p className='flex justify-start mt-2'>{user.ultimoMensaje}</p>
+                                    </button>
                                 </div>
                             )
                         ))}
