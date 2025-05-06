@@ -13,10 +13,11 @@ from django.contrib.auth.hashers import make_password
 # Libraries
 import json
 import random
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 # Cloudinary
 import cloudinary.uploader
+import PIL
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
@@ -26,7 +27,7 @@ from api.services.ine_validation import (upload_image_to_cloudinary, delete_imag
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Matches,  Conversacion, Mensaje
-from api.models import CategoriaEvento,  Subcategoria
+from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,
@@ -37,9 +38,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           PasswordResetCodeValidationSerializer,
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
-                          PersonalData,
-                          PersonalPreferences,
-                          IneValidationSerializer,
+                          CategoriaPerfilSerializer,
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
@@ -216,6 +215,61 @@ def password_reset_resend(request):
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 
+# ------- Seleccionar intereses para el perfil
+# Mostrar Intereses
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_categorias_perfil(request):
+    categorias = CategoriasPerfil.objects.all()
+    serializer = CategoriaPerfilSerializer(categorias, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# Guardar respuestas del perfil
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def guardar_respuestas_perfil(request):
+    usuario = request.user
+    respuestas = request.data.get("respuestas", [])
+
+    preferencias = []
+
+    for r in respuestas:
+        categoria_id = r.get("categoria_id")
+        respuesta = r.get("respuesta")
+
+        try:
+            categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+        except CategoriasPerfil.DoesNotExist:
+            continue  # o devuelve error ?
+
+        # Validación: si multi_option es False, la respuesta debe ser una sola
+        if not categoria.multi_option and isinstance(respuesta, list):
+            return Response(
+                {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validación opcional: ¿es obligatoria u opcional?
+        if not respuesta and not categoria.optional:
+            return Response(
+                {"error": f"La pregunta '{categoria.question}' es obligatoria."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        preferencias.append({
+            "categoria_id": categoria._id,
+            "pregunta": categoria.question,
+            "respuesta": respuesta
+        })
+
+    # Guardamos en el campo preferencias_generales
+    usuario.preferencias_generales = preferencias
+    usuario.save()
+
+    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -230,32 +284,60 @@ def upload_profile_pictures(request):
     current_photos = usuario.profile_pic or []
 
     if len(current_photos) + len(new_images) > 6:
+        max_allowed = 6 - len(current_photos)
         return Response(
-            {"error": "No puedes tener más de 6 fotos de perfil."},
+            {"error": f"Solo puedes subir {max_allowed} foto(s) más."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     uploaded_urls = []
 
     for image in new_images:
-        result = cloudinary.uploader.upload(
-            image,
-            folder="usuarios/perfiles",
-            transformation=[
-                {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
-            ]
-        )
-        uploaded_urls.append(result['secure_url'])
+        try:
+            result = cloudinary.uploader.upload(
+                image,
+                folder="usuarios/perfiles",
+                transformation=[
+                    {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+                ]
+            )
+            uploaded_urls.append(result['secure_url'])
+        except Exception as e:
+            return Response(
+                {"error": "Error al subir una imagen.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     usuario.profile_pic = current_photos + uploaded_urls
-    usuario.save()
+    usuario.save(update_fields=['profile_pic'])
 
     return Response({
         "message": "Fotos subidas correctamente.",
         "pictures": usuario.profile_pic
     }, status=status.HTTP_200_OK)
 
+# Eliminar fotos de la nube
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_profile_picture(request, photo_url):
+    usuario = request.user
+    current_photos = usuario.profile_pic or []
 
+    if photo_url not in current_photos:
+        return Response(
+            {"error": "La foto no existe."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Eliminar la URL de la foto
+    current_photos.remove(photo_url)
+    usuario.profile_pic = current_photos
+    usuario.save(update_fields=['profile_pic'])
+
+    return Response({
+        "message": "Foto eliminada correctamente.",
+        "pictures": usuario.profile_pic
+    }, status=status.HTTP_200_OK)
 
 
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------

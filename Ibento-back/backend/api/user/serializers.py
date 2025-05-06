@@ -4,15 +4,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
+from api.services import ine_validation
 import cloudinary.uploader
 from api.models import (Usuario, 
                         TokenBlackList,
-                        Subcategoria, 
-                        SubcategoriaPerfil, 
+                        CategoriasPerfil,
                         Matches, 
                         Conversacion, 
                         Mensaje, 
-                        CategoriaEvento,
                         Evento
                         )
 
@@ -40,10 +39,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
         usuario.save()
         return usuario
 
-
     
-# -------------------------------------- LOGIN / LOGOUT ----------------------------------------
-    
+# -------------------------------------- LOGIN / LOGOUT ----------------------------------------    
 # ------ Login / Inicio de Sesión    
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -106,7 +103,6 @@ class PasswordResetChangeSerializer(serializers.Serializer):
 
 #---------- Subir imágenes de perfil para la busqueda de acompañantes
 
-
 class UploadProfilePicture(serializers.Serializer):
     pictures = serializers.ListField(
         child=serializers.ImageField(),
@@ -115,57 +111,25 @@ class UploadProfilePicture(serializers.Serializer):
         allow_empty=False
     )
 
+    def validate_pictures(self, value):
+        for img in value:
+            if img.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
+                raise serializers.ValidationError("Solo se permiten imágenes JPG, PNG o WebP.")
+        return value
 
-# ---------- Datos Personales para el perfil
+# ----- Preguntas para el perfil
+class CategoriaPerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriasPerfil
+        fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
+        
+        
+class RespuestaPerfilSerializer(serializers.Serializer):
+    categoria_id = serializers.CharField()
+    respuesta = serializers.JSONField()
 
-class PersonalData(serializers.ModelSerializer):
-    model = Usuario
-    fields = ["description", "birthday", "gender", "curp"]
 
-    def update(self, instance, validated_data):
-        instance.description = validated_data.get("description", instance.description)
-        instance.birthday = validated_data.get("birthday", instance.birthday)
-        instance.gender = validated_data.get("gender", instance.gender)
-        instance.curp = validated_data.get("curp", instance.curp)
-        instance.save()
-        return instance
-      
 
-#----------- Selección de respuestas para conocer más al usuarios
-
-class PersonalPreferences(serializers.ModelSerializer):
-    preferences = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=SubcategoriaPerfil.objects.all(),
-    )
-
-    def save(self, usuario):
-        usuario.preferencias_generales = [p.id for p in self.validated_data["preferences"]]
-        usuario.save()
-        return usuario
-    
-# ------- Validación de INE con API de KIBAN
-
-class IneValidationSerializer(serializers.Serializer):
-    ine_front_url = serializers.URLField()
-    ine_back_url = serializers.URLField()
-
-    def validate(self, data):
-        # Opcional: validar que vengan de Cloudinary u otro dominio confiable
-        return data
-
-    def save(self, **kwargs):
-        user = self.context['request'].user
-        front_url = self.validated_data['ine_front_url']
-        back_url = self.validated_data['ine_back_url']
-
-        # Validar con Kiban
-        result = validate_ine_with_kiban(front_url, back_url)
-        user.is_ine_validated = result["is_valid"]
-        user.curp = result["curp"]
-        user.save()
-        return user
-    
 #---------- Comparación de rostros segundo filtro
 
 class ValidacionRostro(serializers.ModelSerializer):

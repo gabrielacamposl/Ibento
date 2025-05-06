@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,16 @@ const matches = () => {
         likes: 20,
         
     });
+    
+        useEffect(() => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                // Redirige si no hay token
+                navigate("/login");
+            }
+        }, []);
+    
+    
     const users = [
         {
             name: 'Lee Know',
