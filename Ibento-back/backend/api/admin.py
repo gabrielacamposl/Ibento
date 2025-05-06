@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Usuario, CategoriaEvento, Subcategoria, CategoriasPerfil, SubcategoriaPerfil
+from .models import Usuario, CategoriaEvento, Subcategoria, CategoriasPerfil
 
 @admin.register(Usuario)
 class UsuarioAdmin(admin.ModelAdmin):
@@ -33,22 +33,11 @@ admin.site.register(Subcategoria, SubcategoriasEventoAdmin)
 
 @admin.register(CategoriasPerfil)
 class CategoriaPreguntasAdmin(admin.ModelAdmin):
-    list_display = ['_id', 'categoria_perfil']
-    search_fields = ['categoria_perfil']
+    list_display = ['_id', 'question', 'answers', 'multi_option', 'optional']
+    search_fields = ['question']
 
 
-class SubcategoriasRespuestasAdmin(admin.ModelAdmin):
-    list_display = ['_id', 'nombre_subcategoria_perfil', "categoria_perfil"]
-    search_fields = ['nombre_subcategoria_perfil']
-    list_filter = ['categoria_perfil']
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "nombre_subcategoria_perfil":
-            kwargs["queryset"] = CategoriaEvento.objects.all()
-            kwargs["to_field_name"] = "_id"  # Asegurar que usa el campo correcto
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-admin.site.register(SubcategoriaPerfil, SubcategoriasRespuestasAdmin)
+admin.site.register(CategoriaPreguntasAdmin)
 
 
 
