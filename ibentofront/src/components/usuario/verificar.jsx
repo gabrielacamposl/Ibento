@@ -17,12 +17,14 @@ const Verificar = () => {
         ine: [],
         facePhoto: null,
     });
+
     const [isUploading, setIsUploading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
 
+    
 
     useEffect(() => {
         const token = localStorage.getItem("access");

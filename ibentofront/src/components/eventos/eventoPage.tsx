@@ -8,7 +8,6 @@ import { ArrowLeftIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './components/carousel';
-import "cally";
 
 import axios from 'axios';
 
