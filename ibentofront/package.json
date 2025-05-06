@@ -17,7 +17,6 @@
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.1",
-    "cally": "^0.8.0",
     "clsx": "^2.1.1",
     "daisyui": "^5.0.0",
     "framer-motion": "^12.5.0",

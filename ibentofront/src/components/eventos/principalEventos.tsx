@@ -96,7 +96,6 @@ function Page() {
                     </div>
                 </div>
                 <CircularDemo />
-                {/* <Carousel /> */}
                 {/* <Cards listEvents = {eventosRecomendados} name = {"Recomendados para ti"} /> */}
                 <Cards listEvents={popularEvents} name={"Populares"} />
                 <SearchMenu />

@@ -354,6 +354,8 @@ export default function Register() {
               </>)}
             {step === 2 && (
               <>
+              <div className="scroll-x-overflow">
+              
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
                   ¿Qué tipo de eventos te gustan?
                 </Typography>
@@ -387,6 +389,7 @@ export default function Register() {
                 <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
                   Crear Cuenta
                 </Button>
+                </div>
               </>
             )}
           </Container>
@@ -593,7 +596,7 @@ export default function Register() {
             </>)}
           {step === 2 && (
             <>
-              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
+              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
                   ¿Qué tipo de eventos te gustan?
                 </Typography>

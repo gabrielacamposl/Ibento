@@ -29,8 +29,8 @@ function Cards({
     console.log("Ïmprimiendo evento 1:  " + listEvents[0])
 
     return (
-        <div className="h-auto flex w-full flex-col justify-center box-border p-4">
-            <h3 className="mb-4 text-xl font-bold text-black text-left">{name}</h3>
+        <div className="h-auto flex w-full flex-col justify-center box-border">
+            <h3 className="mb-4 text-xl font-bold text-black text-left mx-2">{name}</h3>
             {/* Contenedor con scroll horizontal */}
             <div className="w-full overflow-x-auto">   
                 {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
@@ -85,7 +85,7 @@ function Cards({
                 </div>
             </div>
             <div className="mt-2 p-2">
-                <h3 className="font-medium text-black">{title}</h3>
+                <h3 className="font-medium text-black truncate">{title}</h3>
             </div>
         </Link>
         </>
