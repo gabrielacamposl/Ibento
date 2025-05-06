@@ -111,6 +111,11 @@ class UploadProfilePicture(serializers.Serializer):
         allow_empty=False
     )
 
+    def validate_pictures(self, value):
+        for img in value:
+            if img.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
+                raise serializers.ValidationError("Solo se permiten imágenes JPG, PNG o WebP.")
+        return value
 
 # ----- Preguntas para el perfil
 class CategoriaPerfilSerializer(serializers.ModelSerializer):

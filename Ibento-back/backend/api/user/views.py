@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 # Cloudinary
 import cloudinary.uploader
+import PIL
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
@@ -283,32 +284,60 @@ def upload_profile_pictures(request):
     current_photos = usuario.profile_pic or []
 
     if len(current_photos) + len(new_images) > 6:
+        max_allowed = 6 - len(current_photos)
         return Response(
-            {"error": "No puedes tener más de 6 fotos de perfil."},
+            {"error": f"Solo puedes subir {max_allowed} foto(s) más."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     uploaded_urls = []
 
     for image in new_images:
-        result = cloudinary.uploader.upload(
-            image,
-            folder="usuarios/perfiles",
-            transformation=[
-                {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
-            ]
-        )
-        uploaded_urls.append(result['secure_url'])
+        try:
+            result = cloudinary.uploader.upload(
+                image,
+                folder="usuarios/perfiles",
+                transformation=[
+                    {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+                ]
+            )
+            uploaded_urls.append(result['secure_url'])
+        except Exception as e:
+            return Response(
+                {"error": "Error al subir una imagen.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     usuario.profile_pic = current_photos + uploaded_urls
-    usuario.save()
+    usuario.save(update_fields=['profile_pic'])
 
     return Response({
         "message": "Fotos subidas correctamente.",
         "pictures": usuario.profile_pic
     }, status=status.HTTP_200_OK)
 
+# Eliminar fotos de la nube
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_profile_picture(request, photo_url):
+    usuario = request.user
+    current_photos = usuario.profile_pic or []
 
+    if photo_url not in current_photos:
+        return Response(
+            {"error": "La foto no existe."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Eliminar la URL de la foto
+    current_photos.remove(photo_url)
+    usuario.profile_pic = current_photos
+    usuario.save(update_fields=['profile_pic'])
+
+    return Response({
+        "message": "Foto eliminada correctamente.",
+        "pictures": usuario.profile_pic
+    }, status=status.HTTP_200_OK)
 
 
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
