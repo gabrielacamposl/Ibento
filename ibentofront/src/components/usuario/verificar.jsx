@@ -24,7 +24,7 @@ const Verificar = () => {
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
 
-    
+
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -132,7 +132,7 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("/api/guardar-respuestas/", { respuestas });
+            await api.post("api/guardar-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
         } catch (err) {
             console.error("Error al guardar preferencias", err);
@@ -320,73 +320,84 @@ const Verificar = () => {
 
                     {/* SELECCIÓN DE INTERESES */}
                     <div className="grid grid-cols-1 gap-4 mt-2">
-                        {itemsAboutMe.map((item, index) => (
-                            <div key={index} className="flex flex-col">
-                                {item.question === '¿Cuál es su tipo de personalidad?' ? (
-                                    <div className="flex space-x-1 items-center">
-                                        <p className="text-black font-semibold">
+                        {itemsAboutMe.map((item, index) => {
+                            // 👇 Parseamos "answers" por si vienen mal como string
+                            let answers = [];
+                            try {
+                                answers = Array.isArray(item.answers)
+                                    ? item.answers
+                                    : JSON.parse(item.answers.replace(/'/g, '"'));
+                            } catch (e) {
+                                console.error("No se pudo parsear answers para:", item.question);
+                                answers = [];
+                            }
+
+                            return (
+                                <div key={index} className="flex flex-col">
+                                    {item.question === '¿Cuál es tu personalidad?' ? (
+                                        <div className="flex space-x-1 items-center">
+                                            <p className="text-black font-semibold">
+                                                {item.question}
+                                                {!item.optional && <span className="text-red-500"> *</span>}
+                                            </p>
+                                            <a
+                                                className="botonLink"
+                                                href="https://www.16personalities.com/es/test-de-personalidad"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                Hacer test de personalidad
+                                            </a>
+                                        </div>
+                                    ) : (
+                                        <p className="font-semibold">
                                             {item.question}
                                             {!item.optional && <span className="text-red-500"> *</span>}
                                         </p>
-                                        <a
-                                            className="botonLink"
-                                            href="https://www.16personalities.com/es/test-de-personalidad"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            Hacer test de personalidad
-                                        </a>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        {answers.map((answer, i) => {
+                                            const isSelected = selectedAnswers[item._id]?.includes(answer);
+
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
+                                                    onClick={() => {
+                                                        setSelectedAnswers((prev) => {
+                                                            const currentAnswers = prev[item._id] || [];
+
+                                                            if (item.multi_option) {
+                                                                return {
+                                                                    ...prev,
+                                                                    [item._id]: currentAnswers.includes(answer)
+                                                                        ? currentAnswers.filter((a) => a !== answer)
+                                                                        : [...currentAnswers, answer]
+                                                                };
+                                                            } else {
+                                                                return {
+                                                                    ...prev,
+                                                                    [item._id]: [answer]
+                                                                };
+                                                            }
+                                                        });
+                                                    }}
+                                                >
+                                                    {answer}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
-                                ) : (
-                                    <p className="font-semibold">
-                                        {item.question}
-                                        {!item.optional && <span className="text-red-500"> *</span>}
-                                    </p>
-                                )}
-
-                                <div className="grid grid-cols-2 gap-2 mt-2 flex">
-                                    {Array.isArray(item.answers) && item.answers.map((answer, i) => {
-                                        const isSelected = selectedAnswers[item._id]?.includes(answer);
-
-                                        return (
-                                            <button
-                                                key={i}
-                                                className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
-                                                onClick={() => {
-                                                    setSelectedAnswers((prev) => {
-                                                        const currentAnswers = prev[item._id] || [];
-
-                                                        if (item.multi_option) {
-                                                            return {
-                                                                ...prev,
-                                                                [item._id]: currentAnswers.includes(answer)
-                                                                    ? currentAnswers.filter((a) => a !== answer)
-                                                                    : [...currentAnswers, answer]
-                                                            };
-                                                        } else {
-                                                            return {
-                                                                ...prev,
-                                                                [item._id]: [answer]
-                                                            };
-                                                        }
-                                                    });
-                                                }}
-                                            >
-                                                {answer}
-                                            </button>
-                                        );
-                                    })}
-
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
 
-                        <Button
-                            onClick={handleSavePreferences} className={buttonStyle}
-                        >
+                        <Button onClick={handleSavePreferences} className={buttonStyle}>
                             Guardar respuestas
                         </Button>
                     </div>
+
 
 
 
