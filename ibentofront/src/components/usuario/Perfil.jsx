@@ -1,6 +1,7 @@
 import React from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
+
 import { Carousel } from 'primereact/carousel';
 import { Button } from 'primereact/button';
 import Favoritos from './Favoritos'; // Asegúrate de que la ruta sea correcta
@@ -21,7 +22,29 @@ const Perfil = () => {
        
     };
 
-   
+    const responsiveOptions = [
+        {
+            breakpoint: '1400px',
+            numVisible: 1,
+            numScroll: 1
+        },
+        {
+            breakpoint: '1199px',
+            numVisible: 1,
+            numScroll: 1
+        },
+        {
+            breakpoint: '767px',
+            numVisible: 2,
+            numScroll: 1
+        },
+        {
+            breakpoint: '575px',
+            numVisible: 1,
+            numScroll: 1
+        }
+    ];
+
 
     const handleTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -88,40 +111,24 @@ const Perfil = () => {
             }
         ];
 
-    
+        const productTemplate = (product) => {
+            return (
+                <div className='relative '>
+                    <img src={product} alt={product.title} className="w-full h-72 object-cover " />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent "></div>
+                </div>
+            );
+        };
 
-   
 
-  
-    const responsiveOptions = [
-        {
-            breakpoint: '1400px',
-            numVisible: 2,
-            numScroll: 1
-        },
-        {
-            breakpoint: '1199px',
-            numVisible: 3,
-            numScroll: 1
-        },
-        {
-            breakpoint: '767px',
-            numVisible: 2,
-            numScroll: 1
-        },
-        {
-            breakpoint: '575px',
-            numVisible: 1,
-            numScroll: 1
-        }
-    ];
+
     return (
         <div  className="flex justify-center  min-h-screen overflow-x-auto" style={{ width: '100vw' }}>
             
             <div className="relative degradadoPerfil  flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
                 
                 <div className=" relative w-full h-60 ">
-                {/* Carrusel */}
+                {/* Carrusel 
                 <div className="carousel rounded-box w-full h-60">
                     {user.pictures.map((picture, index) => (
                     <div className="carousel-item w-full" key={index}>
@@ -133,6 +140,13 @@ const Perfil = () => {
                     </div>
                     ))}
                 </div>
+*/} 
+
+                <div className="">
+                    <Carousel value={user.pictures} numVisible={1} numScroll={5} responsiveOptions={responsiveOptions} className="custom-carousel rounded-lg w-full" circular
+                    autoplayInterval={3000} itemTemplate={productTemplate} showNavigators={false}/>
+                </div>
+
 
                 {/* Imagen de perfil sobrepuesta */}
                 <div className="mr-5 absolute bottom-[-2rem] right-0 z-10 flex justify-end items-end">
@@ -155,7 +169,7 @@ const Perfil = () => {
                 <SideBar className=""  />
                 </div>
 
-                <div className='p-5'>
+                <div className='p-5 mt-5'>
                 <div className="text-black w-full">
                     <h1 className="mt-5 text-3xl mb-3 font-semibold">{user.name}</h1>
                     <div className='space-x-2'>

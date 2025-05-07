@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 # Cloudinary
 import cloudinary.uploader
-import PIL
+
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
