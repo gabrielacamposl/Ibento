@@ -14,6 +14,7 @@ from api.user.views import (crear_usuario,
                             crear_match,
                             eliminar_match,
                             obtener_matches_usuario,
+                            matches_con_y_sin_mensajes,
                             obtener_conversacion,
                             obtener_mensajes,
                             enviar_mensaje,
@@ -34,11 +35,6 @@ urlpatterns = [
     path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
-    
-    
-    # JWT Tokens
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Cambiar contraseña
     path('password-reset/request/', password_reset_request, name='password_reset_request'),
@@ -61,6 +57,8 @@ urlpatterns = [
     path('matches/crear/', crear_match, name='crear_match'),
     path('matches/<str:usuario_id>/', obtener_matches_usuario, name='obtener_matches_usuario'),
     path('matches/<str:usuario_id>/<str:match_id>/delete/', eliminar_match, name='eliminar_match'),
+
+    path('matches/<str:usuario_id>/mensajes_estado/',matches_con_y_sin_mensajes, name='matches_con_y_sin_mensajes'),
 
 
     # Conversaciones

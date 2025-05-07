@@ -456,7 +456,6 @@ def crear_match(request):
 
 # ------- Ver Matches
 
-
 @api_view(["GET"])
 def obtener_matches_usuario(request, usuario_id):
     try:
@@ -477,6 +476,7 @@ def obtener_matches_usuario(request, usuario_id):
         return Response({"error": "No matches found for this user."}, status=status.HTTP_404_NOT_FOUND)
 
 
+# ------ Eliminar match
 @api_view(["DELETE"])
 def eliminar_match(request, usuario_id, match_id):
     # Buscar el match por su _id
@@ -507,6 +507,70 @@ def eliminar_match(request, usuario_id, match_id):
     match.delete()
 
     return Response({"message": "Match eliminado con éxito."}, status=status.HTTP_200_OK)
+
+
+# --------------------------------------  CONVERSACIONES ------------------------------------------------
+
+
+@api_view(["GET"])
+def matches_con_y_sin_mensajes(request, usuario_id):
+    matches = Matches.objects.filter(
+        Q(usuario_a_id=usuario_id) | Q(usuario_b_id=usuario_id)
+    )
+
+    con_mensajes = []
+    sin_mensajes = []
+
+    for match in matches:
+        try:
+            conversacion = Conversacion.objects.get(match=match)
+            tiene_mensajes = Mensaje.objects.filter(conversacion=conversacion).exists()
+
+            # Identificar el "otro" usuario
+            otro_usuario = match.usuario_b if match.usuario_a._id == usuario_id else match.usuario_a
+
+            if tiene_mensajes:
+                con_mensajes.append(otro_usuario)
+            else:
+                sin_mensajes.append(otro_usuario)
+
+        except Conversacion.DoesNotExist:
+            # Podrías también decidir incluir matches sin conversación
+            continue
+
+    return Response({
+        "con_mensajes": UsuarioSerializer(con_mensajes, many=True).data,
+        "sin_mensajes": UsuarioSerializer(sin_mensajes, many=True).data
+    }, status=status.HTTP_200_OK)
+
+
+# ----- Crear conversación
+@api_view(["POST"])
+def crear_conversacion(request):
+    match_id = request.data.get("match_id")
+
+    # Validar que el match existe
+    try:
+        match = Matches.objects.get(_id=match_id)
+    except Matches.DoesNotExist:
+        return Response({"error": "El match no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Validar que aún no existe una conversación
+    if Conversacion.objects.filter(match=match).exists():
+        return Response({"message": "Ya existe una conversación para este match."}, status=status.HTTP_200_OK)
+
+    # Crear la conversación
+    conversacion = Conversacion.objects.create(
+        match=match,
+        usuario_a=match.usuario_a,
+        usuario_b=match.usuario_b
+    )
+
+    return Response({
+        "message": "Conversación creada con éxito.",
+        "conversacion_id": conversacion._id
+    }, status=status.HTTP_201_CREATED)
+
 
 # -------------------------------------- MENSAJERÍA CON MATCHES -------------------------------------------
 
