@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 # Libraries
 import json
 import random
@@ -412,7 +413,6 @@ def estado_validacion_view(request):
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 
 # ------- Crear Match
-
 @api_view(["POST"])
 def crear_match(request):
     
@@ -420,7 +420,7 @@ def crear_match(request):
     usuario_b_id = request.data.get("usuario_b")
 
     if usuario_a_id == usuario_b_id:
-        return Response({"error": "No puedes hacer match."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "No puedes hacer match contigo mismo."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Evitar duplicados (match en ambos sentidos)
     match_existente = Matches.objects.filter(
@@ -431,34 +431,82 @@ def crear_match(request):
     if match_existente:
         return Response({"message": "El match ya existe."}, status=status.HTTP_200_OK)
 
-    # Crear Match y Conversación
+    # Crear Match
     match = Matches.objects.create(usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
+
+    # Obtener usuarios
+    usuario_a = Usuario.objects.get(_id=usuario_a_id)
+    usuario_b = Usuario.objects.get(_id=usuario_b_id)
+
+    # Agregar el match a ambos usuarios (si no está ya en la lista)
+    if match._id not in usuario_a.matches:
+        usuario_a.matches.append(match._id)
+    if match._id not in usuario_b.matches:
+        usuario_b.matches.append(match._id)
+
+    # Guardar los usuarios con el nuevo match
+    usuario_a.save()
+    usuario_b.save()
+
+    # Crear Conversación
     Conversacion.objects.create(match=match, usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
 
-    return Response({"message": "Match y Conversación creados"}, status=status.HTTP_201_CREATED)
+    return Response({"message": "Match y Conversación creados y reflejados en ambos usuarios."}, status=status.HTTP_201_CREATED)
 
 
 # ------- Ver Matches
 
+
 @api_view(["GET"])
 def obtener_matches_usuario(request, usuario_id):
-    
-    matches = Matches.objects.filter(models.Q(usuario_a_id=usuario_id) | models.Q(usuario_b_id=usuario_id))
-    serializer = MatchSerializer(matches, many=True)
-    return Response(serializer.data)
-
-# ------- Eliminar Match
-
-@api_view(['DELETE'])
-def eliminar_match(request, match_id):
     try:
-        match = Matches.objects.get(id=match_id)
-        match.delete()
-        return Response({'mensaje': 'Match eliminado correctamente'}, status=204)
-    except Matches.DoesNotExist:
-        return Response({'error': 'Match no encontrado'}, status=404)
-    
+        # Obtener todos los matches donde el usuario sea el usuario_a o usuario_b
+        matches_usuario_a = Matches.objects.filter(usuario_a=usuario_id)
+        matches_usuario_b = Matches.objects.filter(usuario_b=usuario_id)
 
+        # Unir ambos conjuntos de matches
+        matches = matches_usuario_a | matches_usuario_b
+
+        # Serializar los matches
+        serializer = MatchSerializer(matches, many=True)
+
+        # Devolver la respuesta con los matches
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Matches.DoesNotExist:
+        return Response({"error": "No matches found for this user."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["DELETE"])
+def eliminar_match(request, usuario_id, match_id):
+    # Buscar el match por su _id
+    match = get_object_or_404(Matches, _id=match_id)
+    
+    # Verificar si el usuario está involucrado en este match
+    if match.usuario_a._id != usuario_id and match.usuario_b._id != usuario_id:
+        return Response({"error": "Este usuario no está involucrado en el match."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Eliminar el match de la lista de matches de ambos usuarios
+    usuario_a = match.usuario_a
+    usuario_b = match.usuario_b
+    
+    # Eliminar el match de los campos 'matches' de ambos usuarios
+    if match._id in usuario_a.matches:
+        usuario_a.matches.remove(match._id)
+    if match._id in usuario_b.matches:
+        usuario_b.matches.remove(match._id)
+    
+    # Guardar los cambios en los usuarios
+    usuario_a.save()
+    usuario_b.save()
+
+    # Eliminar la conversación asociada (si también deseas eliminarla)
+    Conversacion.objects.filter(match=match).delete()
+
+    # Eliminar el match de la base de datos
+    match.delete()
+
+    return Response({"message": "Match eliminado con éxito."}, status=status.HTTP_200_OK)
 
 # -------------------------------------- MENSAJERÍA CON MATCHES -------------------------------------------
 

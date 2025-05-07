@@ -10,6 +10,7 @@ from api.user.views import (crear_usuario,
                             logout_usuario,
                             upload_profile_pictures,
                             get_categorias_perfil,
+                            guardar_respuestas_perfil,
                             crear_match,
                             eliminar_match,
                             obtener_matches_usuario,
@@ -50,14 +51,16 @@ urlpatterns = [
      path('perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
     # ---- Está validado
     path('estado-validacion/', estado_validacion_view, name='estado-validacion'),
+    # ---- Obtener intereses
     path('categorias-perfil/', get_categorias_perfil, name='categorias-perfil'),
+    path('api/guardar-respuestas/', guardar_respuestas_perfil, name='guardar-respuestas'),
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
     # Matches
     path('matches/crear/', crear_match, name='crear_match'),
     path('matches/<str:usuario_id>/', obtener_matches_usuario, name='obtener_matches_usuario'),
-    path('matches/eliminar/<str:match_id>/', eliminar_match, name='eliminar_match'),
+    path('matches/<str:usuario_id>/<str:match_id>/delete/', eliminar_match, name='eliminar_match'),
 
 
     # Conversaciones
