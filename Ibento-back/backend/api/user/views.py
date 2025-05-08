@@ -550,29 +550,67 @@ def sugerencia_usuarios(request):
     
 # --------------------------------------  CONVERSACIONES ------------------------------------------------
 # -------- Ver conversiones
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def mis_conversaciones(request):
+    usuario = request.user
+
+    conversaciones = Conversacion.objects.filter(
+        Q(usuario_a=usuario) | Q(usuario_b=usuario)
+    ).select_related("usuario_a", "usuario_b")
+
+    data = []
+    for conv in conversaciones:
+        otro_usuario = conv.usuario_b if conv.usuario_a == usuario else conv.usuario_a
+        data.append({
+            "conversacion_id": conv._id,
+            "usuario": {
+                "id": otro_usuario._id,
+                "nombre": otro_usuario.nombre,
+                "email": otro_usuario.email,
+                "foto_perfil": otro_usuario.profile_pic.url if otro_usuario.profile_pic else None,
+            }
+        })
+
+    return Response(data)
 
 #--------- Enviar mensaje
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def enviar_mensaje(request):
-    remitente = request.user
-    data = request.data.copy()
-    data['remitente'] = remitente._id
+    remitente = request.user  # El usuario que envía el mensaje
 
-    conversacion_id = data.get('conversacion')
-    receptor_id = data.get('receptor')
+    # Obtenemos los datos de la solicitud
+    conversacion_id = request.data.get('conversacion')
+    receptor_id = request.data.get('receptor')
+    mensaje = request.data.get('mensaje')
 
+    # Verificar si la conversación existe
     try:
         conversacion = Conversacion.objects.get(_id=conversacion_id)
-        if remitente._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
-            return Response({'error': 'No puedes enviar mensajes en esta conversación'}, status=403)
     except Conversacion.DoesNotExist:
         return Response({'error': 'Conversación no encontrada'}, status=404)
 
-    serializer = MensajesSerializer(data=data)
+    # Verificar que el remitente esté en la conversación
+    if remitente._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({'error': 'No puedes enviar mensajes en esta conversación'}, status=403)
+
+    # Verificar que el receptor sea parte de la conversación
+    if receptor_id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({'error': 'El receptor no pertenece a esta conversación'}, status=403)
+
+    # Crear el mensaje
+    mensaje_data = {
+        'conversacion': conversacion_id,
+        'remitente': remitente._id,
+        'receptor': receptor_id,
+        'mensaje': mensaje,
+    }
+
+    serializer = MensajesSerializer(data=mensaje_data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
+        serializer.save()  # Guardamos el mensaje
+        return Response(serializer.data, status=201)  # Devolvemos el mensaje guardado
     return Response(serializer.errors, status=400)
 
 # ------- Obtener mensajes
