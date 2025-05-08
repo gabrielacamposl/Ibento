@@ -25,7 +25,7 @@ interface ListEvent {
   dates: string[];
   imgs: string[];
   url: string;
-  numLikes: number;
+  numLike: number;
   numSaves: number;
 }
 
