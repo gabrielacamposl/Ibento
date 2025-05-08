@@ -10,6 +10,7 @@ from api.models import (Usuario,
                         TokenBlackList,
                         CategoriasPerfil,
                         Matches, 
+                        Interaccion,
                         Conversacion, 
                         Mensaje, 
                         Evento
@@ -123,7 +124,7 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
         model = CategoriasPerfil
         fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
         
-        
+# ----- Respuestas para el perfil (Selección de opciones)   
 class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
     respuesta = serializers.JSONField()
@@ -136,39 +137,33 @@ class ValidacionRostro(serializers.ModelSerializer):
     foto_camara = serializers.ImageField(required=True)
 
 # ----------------------------------------------- MATCHES ------------------------------------------------
+# ------ Interacción con matches
+class IntereccionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interaccion
+        fields = '__all__'
+        read_only_fields = ['usuario_origen', 'fecha_interaccion']
 
 # ------Generar Match
 class MatchSerializer (serializers.ModelSerializer):
-    usuario_a = UsuarioSerializer(read_only=True)
-    usuario_b = UsuarioSerializer(read_only = True)
-
     class Meta:
         model = Matches
-        fields = ["_id", "usuario_a", "usuario_b", "fecha_match"]
-
-
-#---------- Mensajería con matches
-
-class MensajesSerializer(serializers.ModelSerializer):
-    remitente_nombre = serializers.CharField(source="remitente.nombre", read_only= True)
-    receptor_nombre = serializers.CharField(source="receptor.nombre", read_only=True)
-
-    class Meta:
-        model = Mensaje
-        fields = ["_id", "conversacion", "remitente", "receptor", "mensaje", "fecha_envio"]
+        fields = '__all__'
 
 # --------- Conversaciones con matches
-
 class ConversacionSerializer (serializers.ModelSerializer):
-   usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only = True)
-   usuario_b_nombre = serializers.CharField(source = "usuario_b.nombre", read_only = True)
-   mensajes = MensajesSerializer (many= True, read_only=True) # Se inicializan los mensajes
-
+    class Meta:
+        model = Conversacion
+        fields = '__all__'
+        
+#---------- Mensajería con matches
+class MensajesSerializer(serializers.ModelSerializer):
    class Meta:
-       model = Conversacion
-       fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]
-       
-       
+         model = Mensaje
+         fields = '__all__'
+         read_only_fields = ['remitente','fecha_envio']
+
+
 # ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
 
 class EventoSerializer(serializers.ModelSerializer):
@@ -269,8 +264,3 @@ class EventoSerializer(serializers.ModelSerializer):
                     pass
                     
         return data
-
- 
-
-
-
