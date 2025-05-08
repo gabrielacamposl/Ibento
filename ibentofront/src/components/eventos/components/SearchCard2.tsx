@@ -19,7 +19,7 @@ interface ListEvent {
     _id: string;
     title: string;
     place: string;
-    cost: string[];
+    price: string[];
     location: string;
     coordenates: string[];
     classifications: string[];
@@ -27,8 +27,8 @@ interface ListEvent {
     dates: string[];
     imgs: string[];
     url: string;
-    //numLikes: number;
-    //numSaves: number;
+    numLike: number;
+    numSaves: number;
   }
   
 export default function EventList({ onResultCount, eventos }: { onResultCount: (count: number) => void; eventos: ListEvent[] }) {
@@ -57,7 +57,7 @@ export default function EventList({ onResultCount, eventos }: { onResultCount: (
    
     return (
         <div className="container mx-auto px-4">
-            <div className="flex flex-row flex-wrap items-center justify-center py-4 gap-4">
+            <div className="flex flex-row flex-wrap items-center justify-center gap-4">
                 {filteredEvents.map((event) => (
                   
                     <EventCard

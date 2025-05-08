@@ -223,12 +223,12 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
     class Meta:
         model = Evento
         # Define la lista explícita de campos que quieres incluir
-        fields = ['_id', 'title', 'imgs', 'numLike', 'dates']
+        fields = ['_id', 'title', 'imgs', 'numLike', 'dates', 'location', 'classifications']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs', 'dates']
+        json_fields = ['imgs', 'dates', 'classifications']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):

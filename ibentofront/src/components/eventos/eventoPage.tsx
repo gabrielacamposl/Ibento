@@ -8,8 +8,7 @@ import { ArrowLeftIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './components/carousel';
-
-import axios from 'axios';
+import { useFetchEvents } from "../../hooks/usefetchEvents";
 
 import { useParams } from 'react-router-dom';
 
@@ -25,7 +24,7 @@ interface ListEvent {
   dates: string[];
   imgs: string[];
   url: string;
-  numLikes: number;
+  numLike: number;
   numSaves: number;
 }
 
@@ -34,77 +33,54 @@ function Page() {
   const { eventId } = useParams<{ eventId: string }>();
   console.log("ID del evento:", eventId);
 
-  const [eventos, setEventos] = useState<ListEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // State for the current event, initialized to null
-  const [currentEvent, setCurrentEvent] = useState<ListEvent | null>(null);
-
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [date, setDate] = useState<Date | null>(null); // Initialize date state
-
-
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/eventos/");
-        setEventos(response.data);
-        setIsLoading(false);
-      } catch (err) {
-        setError("Error fetching events.");
-        setIsLoading(false);
-        console.error("Error:", err);
-      }
-    };
-    fetchEvents();
-  }, []);
+  const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/eventos/event_by_id?eventId=" + eventId);
 
-
-  useEffect(() => {
-
-    if (eventos.length > 0 && eventId) {
-      const foundEvent = eventos.find((ev) => ev._id === eventId);
-      setCurrentEvent(foundEvent || null);
-    }
-  }, [eventos, eventId]);
-
-  if (isLoading) {
-    return <div>Cargando...</div>;
+  if (loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <span className="text-black loading loading-ring loading-xl"></span>
+      </div>
+    );
   }
 
-  // If there's an error, show an error message
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="flex min-h-screen justify-center items-center text-red-600">
+        <p>Error al cargar eventos: {error}</p>
+      </div>
+    );
   }
 
-  // If event is not found after loading, show not found message
-  if (!currentEvent) {
-    return <div>Evento no encontrado</div>;
-  }
+  if (!evento) return <div>No hay datos</div>;
 
-  // Now that we are sure `currentEvent` exists, we can use it
+  console.log("Evento:", evento);
+
+
+  const eventData = Array.isArray(evento) ? evento[0] : evento || {};
+
   const {
     title,
     place,
     price,
     location,
-    coordenates,
+    coordenates = [],
     description,
-    classifications,
-    dates,
-    imgs,
+    classifications = [],
+    dates = [],
+    imgs = [],
     url,
-  } = currentEvent;
+    numLike,
+    numSaves,
+  } = eventData;
 
-  const numLikes = 200;
-  const numSaves = 200;
 
 
   const toggleLike = () => {
@@ -115,13 +91,14 @@ function Page() {
     setIsBookmarked(!isBookmarked);
   };
 
+
   let likeString = "";
-  if (numLikes >= 1000000) {
-    likeString = (numLikes / 1000000).toFixed(1) + "M";
-  } else if (numLikes >= 1000) {
-    likeString = (numLikes / 1000).toFixed(1) + "k";
+  if (numLike >= 1000000) {
+    likeString = (numLike / 1000000).toFixed(1) + "M";
+  } else if (numLike >= 1000) {
+    likeString = (numLike / 1000).toFixed(1) + "k";
   } else {
-    likeString = numLikes + "";
+    likeString = numLike + "";
   }
 
   let saveString = "";
@@ -133,6 +110,7 @@ function Page() {
     saveString = numSaves.toString();
   }
 
+ 
   let dateString = dates[0].toString().split("T")[0];
   let timeString = dates[0].toString().split("T")[1].split(".")[0];
 
@@ -140,20 +118,20 @@ function Page() {
 
   const dateTemplate = (dateInfo: any) => {
     if (datesToMark.some(markedDate =>
-        markedDate.getFullYear() === dateInfo.year &&
-        markedDate.getMonth() === dateInfo.month &&
-        markedDate.getDate() === dateInfo.day
+      markedDate.getFullYear() === dateInfo.year &&
+      markedDate.getMonth() === dateInfo.month &&
+      markedDate.getDate() === dateInfo.day
     )) {
-        // Si la fecha está en el array de fechas a marcar
-        return (
-            <div className="text-white bg-purple-700 rounded-full text-center" style={{width: '2em', height: '2em', lineHeight: '2em'}}>
+      // Si la fecha está en el array de fechas a marcar
+      return (
+        <div className="text-white bg-purple-700 rounded-full text-center" style={{ width: '2em', height: '2em', lineHeight: '2em' }}>
 
-                {dateInfo.day}
-            </div>
-        );
+          {dateInfo.day}
+        </div>
+      );
     } else {
-        // Para las fechas que no están en el array
-        return dateInfo.day;
+      // Para las fechas que no están en el array
+      return dateInfo.day;
     }
   };
 
@@ -167,9 +145,8 @@ function Page() {
     lng: coordenates[1]
   }
 
-  console.log(currentEvent)
-  console.log(coordenates)
-  console.log(classifications)
+  console.log("Coordenadas: " + coordenates)
+  console.log("Clasificaciones: " + classifications)
 
   const cleanedUrl = url ? url.replace(/^\[?'|'\]?$/g, '') : '';
 
@@ -193,7 +170,7 @@ function Page() {
           {/* Imagen y botones en la esquina */}
           <div className="relative w-full h-80">
             <img
-              src={`${imgs[0]}`}
+              src={`${imgs[0]}`}  
               alt="Evento"
               className="w-full h-80 object-cover rounded-lg4"
             />
@@ -209,7 +186,7 @@ function Page() {
                     <HeartOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{200}</p>
+                <p className="text-white font-bold">{likeString}</p>
               </div>
               {/* Guardado */}
               <div className="flex flex-col items-center">
@@ -220,7 +197,7 @@ function Page() {
                     <BookmarkOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{200}</p>
+                <p className="text-white font-bold">{saveString}</p>
               </div>
             </div>
           </div>
@@ -282,15 +259,8 @@ function Page() {
                 value={date}
                 onChange={(e) => setDate(e.value || null)}
                 inline
-                showWeek
                 dateTemplate={dateTemplate}
               />
-              {/* <calendar-date class="cally bg-base-100 border border-base-300 shadow-lg rounded-box">
-                <svg aria-label="Previous" className="fill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
-                <svg aria-label="Next" className="fill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
-                <calendar-month></calendar-month>
-              </calendar-date> */}
-
             </div>
           </div>
           <div className="w-full px-6">

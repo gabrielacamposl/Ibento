@@ -757,3 +757,28 @@ class EventoViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def event_by_id(self, request):
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Filtrar el evento por ID
+        try:
+            event = self.get_queryset().get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serializar el evento
+        serializer = EventoSerializer(event)
+        return Response(serializer.data)
