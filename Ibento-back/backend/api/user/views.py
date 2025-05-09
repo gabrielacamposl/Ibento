@@ -364,7 +364,7 @@ def ine_validation_view(request):
         back_b64 = url_to_base64(back_url)
         
         # Extraer datos de la INE
-        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        cic, id_ciudadano = ocr_ine(front_b64, back_b64)
         if not cic or not id_ciudadano:
             return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -375,8 +375,8 @@ def ine_validation_view(request):
         # Guardar datos en el usuario
         user : Usuario = request.user
         user.is_ine_validated = is_valid
-        if curp:
-            user.curp = curp
+        # if curp:
+        #     user.curp = curp
         user.save()
 
         return Response({"mensaje": "INE validada exitosamente."}, status=status.HTTP_200_OK)
@@ -390,9 +390,8 @@ def ine_validation_view(request):
         if back_id:
             delete_image_from_cloudinary(back_id)
 
+
 # ----------- Comparación de Rostros 
-
-
 
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
