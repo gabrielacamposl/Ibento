@@ -19,8 +19,7 @@ from api.user.views import (crear_usuario,
                             importar_ticketmaster,
                             like_event,
                             obtener_evento_por_id,
-                            obtener_eventos_favoritos,
-                            eliminar_evento_favorito
+                            obtener_eventos_favoritos
                             
                             
                             )
@@ -80,8 +79,7 @@ urlpatterns = [
 
     #Acciones User
     path('eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
-    path('perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
-    path('favoritos/<str:evento_id>/eliminar/', eliminar_evento_favorito, name='eliminar_evento_favorito'),
+    path('eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
 
 ]
 
