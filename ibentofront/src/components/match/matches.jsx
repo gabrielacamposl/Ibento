@@ -12,13 +12,13 @@ const matches = () => {
         
     });
     
-        useEffect(() => {
-            const token = localStorage.getItem("access");
-            if (!token) {
-                // Redirige si no hay token
-                navigate("/login");
-            }
-        }, []);
+        // useEffect(() => {
+        //     const token = localStorage.getItem("access");
+        //     if (!token) {
+        //         // Redirige si no hay token
+        //         navigate("/login");
+        //     }
+        // }, []);
     
     
     const users = [

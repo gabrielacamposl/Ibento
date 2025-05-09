@@ -7,6 +7,7 @@ from api.user.views import obtener_mensajes, listar_conversaciones, mis_conversa
 from api.user.views import estado_validacion_view, ine_validation_view
 from api.user.views import (crear_usuario, 
                             EventoViewSet,
+                            UsuarioViewSet,
                             confirmar_usuario, 
                             login_usuario, 
                             logout_usuario,
@@ -20,6 +21,7 @@ from api.user.views import (crear_usuario,
 router = DefaultRouter()
 
 router.register(r'eventos', EventoViewSet, basename='evento')
+router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 
 urlpatterns = [
 

@@ -6,7 +6,7 @@ interface ListEvent {
     _id: string;
     title: string;
     place: string;
-    prices: [];
+    price: [];
     location: string;
     coordenates: [];
     description: string;

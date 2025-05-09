@@ -174,7 +174,7 @@ class EventoSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'price']
+        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'price', 'assistants']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -218,12 +218,12 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
     class Meta:
         model = Evento
         # Define la lista explícita de campos que quieres incluir
-        fields = ['_id', 'title', 'imgs', 'numLike', 'dates']
+        fields = ['_id', 'title', 'imgs', 'numLike', 'dates', 'location', 'classifications']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs', 'dates']
+        json_fields = ['imgs', 'dates', 'classifications']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -250,6 +250,63 @@ class EventoSerializer(serializers.ModelSerializer):
         
         # Lista de campos que deberían ser arrays
         json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'cost']
+        
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+                    
+        return data
+    
+# ---------------------------------- OBTENCIÓN DE INFORMACIÓN USUARIOS ----------------- --------------
+
+class UsuarioSerializerParaEventos(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['save_events', 'favourite_events']
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        # Lista de campos que deberían ser arrays
+        json_fields = ['save_events', 'favourite_events']
+        
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+                    
+        return data
+
+class UsuarioSerializerEdit(serializers.ModelSerializer):
+
+    class Meta:
+        model = Usuario
+        fields = ['nombre', 'apellido', 'password', 
+                  'preferencias_evento', 'save_events', 
+                  'favourite_events', 'profile_pic', 
+                  'preferencias_generales', 'birthday', 
+                  'gender', 'description']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        # Lista de campos que deberían ser arrays
+        json_fields = ['save_events', 'favourite_events', 'preferencias_evento', 'profile_pic', 'preferencias_generales']
         
         for field in json_fields:
             if field in data and isinstance(data[field], str):
