@@ -103,5 +103,19 @@ const useFetchNearestEvents = (url: string) => {
 
 }
 
+const saveEvent = (eventId: string) => {
+
+    const fetchData = async () => {
+        try{
+            const response = await axios.get("");
+            if(response.status != 200){
+                throw new Error(`HTTP error. Status: ${response.status}`)
+            }
+        } catch(e){
+            console.error('Error obteniendo eventos cercanos: ', e);
+        }finally{
+        }
+    }
+}
 
 export { useFetchEvents, useFetchNearestEvents, useFetchEvent};

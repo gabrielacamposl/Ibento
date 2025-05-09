@@ -50,6 +50,9 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializer,
                           EventoSerializerLimitado,
                           EventoSerializerLimitadoWithFecha,
+                          # Serializers para la obtención de información de usuarios
+                          UsuarioSerializerEdit,
+                          UsuarioSerializerParaEventos
                           )
 
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
@@ -632,6 +635,8 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     distance = R * c
     return distance
 
+#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS EVENTOS -----------------------------------
+
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
@@ -856,3 +861,75 @@ class EventoViewSet(viewsets.ModelViewSet):
         # Serializar el evento
         serializer = EventoSerializer(event)
         return Response(serializer.data)
+
+    # ------- Guardar evento en guardado -----
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def save(self, request):
+        usuario = request.user
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        #Obtener id del usuario
+        id_user = usuario._id
+
+        #Añadir guardado a evento
+        try:
+            evento = Evento.objects.get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        
+
+        #Añadir evento a guardados del usuario
+        if usuario.save_events is None:
+            usuario.save_events = []
+
+        
+        if id_event not in usuario.save_events:
+            usuario.save_events.append(id_event)
+            evento.numSaves += 1
+
+            if evento.assistants is None:
+                evento.assistans = []
+
+            evento.assistants.append(id_user)
+            evento.save(update_fields=['assistants'])
+            evento.save(update_fields=['numSaves'])
+            usuario.save(update_fields=['save_events'])
+            return Response({"detail": "Evento guardado correctamente."}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"detail": "El evento ya está guardado."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
+
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def events(self, request):
+        usuario = request.user
+        serializer = UsuarioSerializerParaEventos(usuario)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def info_to_edit(self, request):
+        usuario = request.user
+        serializer = UsuarioSerializerEdit(usuario)
+        return Response(serializer.data)
+    

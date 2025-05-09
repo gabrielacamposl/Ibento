@@ -35,7 +35,7 @@ function Page() {
 
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [date, setDate] = useState<Date | null>(null); // Initialize date state
+  const [date, setDate] = useState<Date | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -87,11 +87,6 @@ function Page() {
     setIsLiked(!isLiked);
   };
 
-  const toggleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
-
-
   let likeString = "";
   if (numLike >= 1000000) {
     likeString = (numLike / 1000000).toFixed(1) + "M";
@@ -110,7 +105,7 @@ function Page() {
     saveString = numSaves.toString();
   }
 
- 
+
   let dateString = dates[0].toString().split("T")[0];
   let timeString = dates[0].toString().split("T")[1].split(".")[0];
 
@@ -150,6 +145,46 @@ function Page() {
 
   const cleanedUrl = url ? url.replace(/^\[?'|'\]?$/g, '') : '';
 
+  const handleSave = async (eventId: string): Promise<void> => {
+
+    //Validar que reciba una ID
+    if (!eventId) {
+      console.error("Error: Event ID is undefined or invalid.");
+      return;
+    }
+
+    //Obtenemos token de acceso
+    const token: string | null = localStorage.getItem("access");
+    if (!token) {
+      console.error("Error: User is not authenticated. Token is missing.");
+      return;
+    }
+
+    // Revertimos el estado de guardado
+    const originalIsBookmarked = isBookmarked;
+    setIsBookmarked(!originalIsBookmarked);
+
+
+    try {
+      console.log("Token:", token);
+      console.log("ID del evento:", eventId);
+      const response = await fetch(
+        `http://127.0.0.1:8000/eventos/save/?eventId=${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      if (response.status === 200) {
+        console.log("Evento save successfully");
+      } else {
+        console.log("Error saving event:", response);
+      }
+    } catch (error) {
+      console.error("Error saving event:", error);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Mobile View */}
@@ -170,7 +205,7 @@ function Page() {
           {/* Imagen y botones en la esquina */}
           <div className="relative w-full h-80">
             <img
-              src={`${imgs[0]}`}  
+              src={`${imgs[0]}`}
               alt="Evento"
               className="w-full h-80 object-cover rounded-lg4"
             />
@@ -190,7 +225,7 @@ function Page() {
               </div>
               {/* Guardado */}
               <div className="flex flex-col items-center">
-                <button onClick={toggleBookmark} className="focus:outline-none">
+                <button onClick={() => handleSave(eventId ?? '')} className="focus:outline-none">
                   {isBookmarked ? (
                     <BookmarkSolid className="h-8 w-8 text-blue-500" />
                   ) : (

@@ -66,8 +66,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-
-
 # ------------------ Tokens para Login 
 
 class TokenBlackList(models.Model):
@@ -167,6 +165,7 @@ class Evento(models.Model):
     url = models.CharField(max_length=100, default="")
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
+    assistants = models.JSONField(default=list, null=True, blank=True)
 
     def __str__(self):
         return self.title
