@@ -50,7 +50,7 @@ function Page() {
         <span className="text-black loading loading-ring loading-xl"></span>
       </div>
     );
-      
+  }
 interface LikeResponse {
   status: number;
 }

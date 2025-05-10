@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 const matches = () => {
     const navigate = useNavigate();
@@ -96,6 +97,31 @@ const matches = () => {
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
     } 
+
+
+    const [conversaciones, setConversaciones] = useState([]);
+    useEffect(() => async () => {
+        const token = localStorage.getItem('access');
+        try {
+            const response = await axios.get("http://127.0.0.1:8000/api/mis-conversaciones/", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                    
+                console.log(response.data);
+                setConversaciones(response.data);
+            }else{
+               console.log("No se pudo obtener la información de los mensajes.");
+            }
+        }catch (error) {
+            console.error("Error al obtener los mensajes:", error);
+        }
+    },[]);
+    
+
     return (
         <div className="justify-center text-black flex min-h-screen relative">
             <div className="">
@@ -111,7 +137,6 @@ const matches = () => {
                     <div className="miPerfil flex font-bold w-full">
                         <h1 className="miPerfil text-2xl">Mis Matches</h1>
                     </div>
-
 
                     {verificar == false && (
                     <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
@@ -143,14 +168,6 @@ const matches = () => {
                                 </div>
                             </div>
 
-
-
-                          
-
-
-
-
-
                             {users.map((user, index) => (
                                 <div key={index} className="m-1 flex-shrink-0 relative">
                                     <div className="rounded-full">
@@ -162,23 +179,21 @@ const matches = () => {
                     </div>
                     <h1 className="font-bold">Mensajes</h1>
 
-                
-
-
-
                     <div className="mt-4">
-                        {users.map((user, index) => (
-                            user.ultimoMensaje !== '' && (
-                                <div key={index} className="bordeBajo mb-4 p-2">
-                                    <button onClick={handdleChat} className="w-full ">
+                        {conversaciones.map((user, index) => (
+                            <div key={index} className="bordeBajo mb-4 p-2">
+                                <button onClick={() => navigate(`../chat/?room=${user.conversacion_id}`)} className="w-full">
                                     <div className="flex justify-start items-center space-x-2">
-                                        <img src={user.pictures[0]} className="w-10 h-10 object-cover rounded-full" alt={user.name} />
-                                        <h2 className="font-bold">{user.name}</h2>
+                                        {user.foto_perfil !== 'null' ? (
+                                            <img src={user.foto_perfil} className="w-10 h-10 object-cover rounded-full" alt={user.nombre} />
+                                        ) : (
+                                            <img src={'/profile_empty.webp'} className="w-10 h-10 object-cover rounded-full" alt={user.nombre} />
+                                        )}
+                                        <h2 className="font-bold">{user.usuario.nombre}</h2>
                                     </div>
-                                    <p className='flex justify-start mt-2'>{user.ultimoMensaje}</p>
-                                    </button>
-                                </div>
-                            )
+                                    <p className="flex justify-start mt-2">{user.conversacion_id}</p>
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
