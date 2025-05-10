@@ -23,8 +23,9 @@ const Verificar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [message, setMessage] = useState([]);
 
-    
+
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -73,6 +74,17 @@ const Verificar = () => {
             alert("Debes subir entre 3 y 6 fotos.");
             return;
         }
+        // Validar cada archivo
+        for (const picture of user.pictures) {
+            if (!["image/jpeg", "image/png", "image/jpg"].includes(picture.type)) {
+                alert("Solo se permiten imágenes JPG o PNG.");
+                return;
+            }
+            if (picture.size > 5 * 1024 * 1024) { // 5MB
+                alert("Cada imagen debe pesar menos de 5MB.");
+                return;
+            }
+        }
 
         const formData = new FormData();
         user.pictures.forEach((picture) => {
@@ -90,12 +102,14 @@ const Verificar = () => {
 
             console.log("Fotos subidas:", response.data.pictures);
             alert("¡Fotos subidas con éxito!");
+            setActiveIndex(prev => prev + 1);
         } catch (error) {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         } finally {
             setIsUploading(false);
         }
+
     };
 
 
@@ -132,12 +146,14 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("/api/guardar-respuestas/", { respuestas });
+            await api.post("api/guardar-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
+            setActiveIndex(prev => prev + 1);
         } catch (err) {
             console.error("Error al guardar preferencias", err);
             alert("Hubo un error al guardar tus preferencias.");
         }
+
     };
 
     // ---------------------------- VALIDACION DE INE -----------------------------
@@ -171,7 +187,7 @@ const Verificar = () => {
         formData.append("ine_back", ineImages[1]);
 
         try {
-            const response = await api.post("validar-ine/", formData, {
+            const response = await api.post("api/validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
@@ -311,84 +327,88 @@ const Verificar = () => {
                                             </div>
                                         </div>
                                     ))}
-                                    <Button className={buttonStyle} onClick={handleUploadPictures}>
-                                        Siguiente
-                                    </Button>
+
                                 </div>
                             </React.Fragment>
                         </div>)}
 
                     {/* SELECCIÓN DE INTERESES */}
-                    <div className="grid grid-cols-1 gap-4 mt-2">
-                        {itemsAboutMe.map((item, index) => (
-                            <div key={index} className="flex flex-col">
-                                {item.question === '¿Cuál es su tipo de personalidad?' ? (
-                                    <div className="flex space-x-1 items-center">
-                                        <p className="text-black font-semibold">
-                                            {item.question}
-                                            {!item.optional && <span className="text-red-500"> *</span>}
-                                        </p>
-                                        <a
-                                            className="botonLink"
-                                            href="https://www.16personalities.com/es/test-de-personalidad"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            Hacer test de personalidad
-                                        </a>
+                    {activeIndex === 1 && (
+                        <div className="grid grid-cols-1 gap-4 mt-2">
+                            {itemsAboutMe.map((item, index) => {
+                                // 👇 Parseamos "answers" por si vienen mal como string
+                                let answers = [];
+                                try {
+                                    answers = Array.isArray(item.answers)
+                                        ? item.answers
+                                        : JSON.parse(item.answers.replace(/'/g, '"'));
+                                } catch (e) {
+                                    console.error("No se pudo parsear answers para:", item.question);
+                                    answers = [];
+                                }
+
+                                return (
+                                    <div key={index} className="flex flex-col">
+                                        {item.question === '¿Cuál es tu personalidad?' ? (
+                                            <div className="flex space-x-1 items-center">
+                                                <p className="text-black font-semibold">
+                                                    {item.question}
+                                                    {!item.optional && <span className="text-red-500"> *</span>}
+                                                </p>
+                                                <a
+                                                    className="botonLink"
+                                                    href="https://www.16personalities.com/es/test-de-personalidad"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    Hacer test de personalidad
+                                                </a>
+                                            </div>
+                                        ) : (
+                                            <p className="font-semibold">
+                                                {item.question}
+                                                {!item.optional && <span className="text-red-500"> *</span>}
+                                            </p>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-2 mt-2">
+                                            {answers.map((answer, i) => {
+                                                const isSelected = selectedAnswers[item._id]?.includes(answer);
+
+                                                return (
+                                                    <button
+                                                        key={i}
+                                                        className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
+                                                        onClick={() => {
+                                                            setSelectedAnswers((prev) => {
+                                                                const currentAnswers = prev[item._id] || [];
+
+                                                                if (item.multi_option) {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: currentAnswers.includes(answer)
+                                                                            ? currentAnswers.filter((a) => a !== answer)
+                                                                            : [...currentAnswers, answer]
+                                                                    };
+                                                                } else {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: [answer]
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        {answer}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                ) : (
-                                    <p className="font-semibold">
-                                        {item.question}
-                                        {!item.optional && <span className="text-red-500"> *</span>}
-                                    </p>
-                                )}
-
-                                <div className="grid grid-cols-2 gap-2 mt-2 flex">
-                                    {Array.isArray(item.answers) && item.answers.map((answer, i) => {
-                                        const isSelected = selectedAnswers[item._id]?.includes(answer);
-
-                                        return (
-                                            <button
-                                                key={i}
-                                                className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
-                                                onClick={() => {
-                                                    setSelectedAnswers((prev) => {
-                                                        const currentAnswers = prev[item._id] || [];
-
-                                                        if (item.multi_option) {
-                                                            return {
-                                                                ...prev,
-                                                                [item._id]: currentAnswers.includes(answer)
-                                                                    ? currentAnswers.filter((a) => a !== answer)
-                                                                    : [...currentAnswers, answer]
-                                                            };
-                                                        } else {
-                                                            return {
-                                                                ...prev,
-                                                                [item._id]: [answer]
-                                                            };
-                                                        }
-                                                    });
-                                                }}
-                                            >
-                                                {answer}
-                                            </button>
-                                        );
-                                    })}
-
-                                </div>
-                            </div>
-                        ))}
-
-                        <Button
-                            onClick={handleSavePreferences} className={buttonStyle}
-                        >
-                            Guardar respuestas
-                        </Button>
-                    </div>
-
-
+                                );
+                            })}
+                        </div>
+                    )}
 
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 2 && (
@@ -398,15 +418,23 @@ const Verificar = () => {
                             <React.Fragment>
                                 <div className="w-full mt-2 items-center flex flex-col">
                                     {Array.from({ length: 2 }).map((_, index) => (
-                                        <div key={index} className="relative w-80 h-45 sm:w-80 sm:h-45 md:w-80 md:h-45 m-2 border-dashed divBorder flex items-center justify-center mt-6">
-                                            {user.ine[index] ? (
-                                                <img
-                                                    src={user.ine[index]}
-                                                    alt={`Imagen ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                        <div key={index} className="relative w-80 h-45 m-2 border-dashed divBorder flex items-center justify-center mt-6">
+                                            {ineImages[index] ? (
+                                                <>
+                                                    <img
+                                                        src={URL.createObjectURL(ineImages[index])}
+                                                        alt={`Imagen ${index + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <button
+                                                        className="w-7 h-7 btn-custom absolute top-0 right-0 text-white rounded-full"
+                                                        onClick={() => handleImageDeleteINE(index)}
+                                                    >
+                                                        {/* X icon */}
+                                                    </button>
+                                                </>
                                             ) : (
-                                                <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto flex">
+                                                <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto flex flex-col items-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                                     </svg>
@@ -415,25 +443,20 @@ const Verificar = () => {
                                                     </span>
                                                 </label>
                                             )}
-                                            {user.ine[index] && (
-                                                <button
-                                                    className="w-7 h-7 btn-custom absolute top-0 right-0 text-white rounded-full"
-                                                    onClick={() => handleImageDeleteINE(index)}
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-7 h-7">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            )}
-                                            <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageINE(e, index)} />
+                                            <input
+                                                id={`fileInput-${index}`}
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageINE(e, index)}
+                                            />
                                         </div>
                                     ))}
+
                                 </div>
                             </React.Fragment>
                         </div>
                     )}
-
-
 
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 3 && (
@@ -473,8 +496,6 @@ const Verificar = () => {
                         </div>
                     )}
 
-
-
                 </div>
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
@@ -489,9 +510,18 @@ const Verificar = () => {
                         <Button className={buttonStyle} onClick={handleUploadPictures}>
                             Siguiente
                         </Button>
+
+                    ) : activeIndex === 1 ? (
+                        <Button className={buttonStyle} onClick={handleSavePreferences}>
+                            Guardar Preferencias
+                        </Button>
                     ) : activeIndex === 2 ? (
                         <Button className={buttonStyle} onClick={handleIneValidation}>
                             Verificar
+                        </Button>
+                    ) : activeIndex === 3 ? (
+                        <Button className={buttonStyle} onClick={handleIneValidation}>
+                            Verificar Cuenta
                         </Button>
                     ) : (
                         <Button
