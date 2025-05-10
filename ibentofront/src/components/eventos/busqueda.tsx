@@ -15,7 +15,7 @@ interface ListEvent {
   _id: string;
   title: string;
   place: string;
-  cost: string[];
+  price: string[];
   location: string;
   coordenates: string[];
   classifications: string[];
@@ -23,8 +23,8 @@ interface ListEvent {
   dates: string[];
   imgs: string[];
   url: string;
-  //numLikes: number;
-  //numSaves: number;
+  numLike: number;
+  numSaves: number;
 }
 
 
@@ -32,7 +32,7 @@ interface ListEvent {
 function Page() {
 
   const { eventId } = useParams<{ eventId: string }>();
-console.log("ID del evento:", eventId);
+  console.log("ID del evento:", eventId);
 
 
 
@@ -88,7 +88,8 @@ console.log("ID del evento:", eventId);
           <div className="w-11/12">
             <Cards />
           </div>
-          <div className="w-11/12">
+          <div className="w-11/12 mt-10">
+            <h2 className="text-2xl text-black font-bold mb-6 text-center">Próximos Eventos</h2>
             <EventWrapper eventos={eventos} />
           </div>
         </>

@@ -10,6 +10,7 @@ from api.models import (Usuario,
                         TokenBlackList,
                         CategoriasPerfil,
                         Matches, 
+                        Interaccion,
                         Conversacion, 
                         Mensaje, 
                         Evento
@@ -123,7 +124,7 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
         model = CategoriasPerfil
         fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
         
-        
+# ----- Respuestas para el perfil (Selección de opciones)   
 class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
     respuesta = serializers.JSONField()
@@ -136,39 +137,33 @@ class ValidacionRostro(serializers.ModelSerializer):
     foto_camara = serializers.ImageField(required=True)
 
 # ----------------------------------------------- MATCHES ------------------------------------------------
+# ------ Interacción con matches
+class IntereccionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interaccion
+        fields = '__all__'
+        read_only_fields = ['usuario_origen', 'fecha_interaccion']
 
 # ------Generar Match
 class MatchSerializer (serializers.ModelSerializer):
-    usuario_a = UsuarioSerializer(read_only=True)
-    usuario_b = UsuarioSerializer(read_only = True)
-
     class Meta:
         model = Matches
-        fields = ["_id", "usuario_a", "usuario_b", "fecha_match"]
-
-
-#---------- Mensajería con matches
-
-class MensajesSerializer(serializers.ModelSerializer):
-    remitente_nombre = serializers.CharField(source="remitente.nombre", read_only= True)
-    receptor_nombre = serializers.CharField(source="receptor.nombre", read_only=True)
-
-    class Meta:
-        model = Mensaje
-        fields = ["_id", "conversacion", "remitente", "receptor", "mensaje", "fecha_envio"]
+        fields = '__all__'
 
 # --------- Conversaciones con matches
-
 class ConversacionSerializer (serializers.ModelSerializer):
-   usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only = True)
-   usuario_b_nombre = serializers.CharField(source = "usuario_b.nombre", read_only = True)
-   mensajes = MensajesSerializer (many= True, read_only=True) # Se inicializan los mensajes
-
+    class Meta:
+        model = Conversacion
+        fields = '__all__'
+        
+#---------- Mensajería con matches
+class MensajesSerializer(serializers.ModelSerializer):
    class Meta:
-       model = Conversacion
-       fields = ["_id", "usuario_a", "usuario_a.nombre",  "usuario_b", "usuario_b.nombre"]
-       
-       
+         model = Mensaje
+         fields = '__all__'
+         read_only_fields = ['remitente','fecha_envio']
+
+
 # ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
 
 class EventoSerializer(serializers.ModelSerializer):
@@ -179,7 +174,7 @@ class EventoSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'price']
+        json_fields = ['imgs', 'coordenates', 'classifications', 'dates', 'price', 'assistants']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -223,12 +218,12 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
     class Meta:
         model = Evento
         # Define la lista explícita de campos que quieres incluir
-        fields = ['_id', 'title', 'imgs', 'numLike', 'dates']
+        fields = ['_id', 'title', 'imgs', 'numLike', 'dates', 'location', 'classifications']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         #Lista de campos que deberían ser arrays
-        json_fields = ['imgs', 'dates']
+        json_fields = ['imgs', 'dates', 'classifications']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -269,7 +264,60 @@ class EventoSerializer(serializers.ModelSerializer):
                     pass
                     
         return data
+    
+# ---------------------------------- OBTENCIÓN DE INFORMACIÓN USUARIOS ----------------- --------------
 
- 
+class UsuarioSerializerParaEventos(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['save_events', 'favourite_events']
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        # Lista de campos que deberían ser arrays
+        json_fields = ['save_events', 'favourite_events']
+        
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+                    
+        return data
 
+class UsuarioSerializerEdit(serializers.ModelSerializer):
 
+    class Meta:
+        model = Usuario
+        fields = ['nombre', 'apellido', 'password', 
+                  'preferencias_evento', 'save_events', 
+                  'favourite_events', 'profile_pic', 
+                  'preferencias_generales', 'birthday', 
+                  'gender', 'description']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        # Lista de campos que deberían ser arrays
+        json_fields = ['save_events', 'favourite_events', 'preferencias_evento', 'profile_pic', 'preferencias_generales']
+        
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+                    
+        return data

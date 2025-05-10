@@ -30,7 +30,7 @@ def url_to_base64(url):
     image_response = requests.get(url)
     return base64.b64encode(image_response.content).decode('utf-8')
 
-def ocr_ine(front_b64, back_64):
+def ocr_ine(front_b64, back_b64):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
@@ -38,8 +38,8 @@ def ocr_ine(front_b64, back_64):
     }
     payload = {
         "files":[
-        {"name": "front", "data": front_b64},
-        {"name": "back", "data": back_64}
+        {"name": "front", "base64": front_b64},
+        {"name": "back", "base64": back_b64}
         ]
     }
     r = requests.post("https://link.kiban.com/api/v2/ine/data_extraction/", json=payload, headers=headers)
@@ -49,7 +49,8 @@ def ocr_ine(front_b64, back_64):
     # Verificar la extracción de la curp
     
     data = r.json().get("response", {})
-    return data.get("cic"), data.get("identificadorCiudadano"), data.get("curp")
+    return data.get("cic"), data.get("identificadorCiudadano")
+      #, data.get("curp")
 
 def validate_ine(cic, id_ciudadano):
     headars = {

@@ -37,6 +37,7 @@ import EventoPage from "./components/eventos/eventoPage";
 import PrincipalEventos from "./components/eventos/principalEventos";
 import MainLayout from "./layouts/MainLayout";
 import Busqueda  from "./components/eventos/busqueda";
+import BusquedaCategoria from "./components/eventos/searchCategories";
 
 
 
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="eventos" element={<PrincipalEventos />}/>
           <Route path="eventos/:eventId" element={<EventoPage />} />
           <Route path="busqueda" element={<Busqueda />} />
+          <Route path ="busqueda/:query" element = {<BusquedaCategoria/>} />
           
 
           <Route path="perfil" element={<Perfil />} />

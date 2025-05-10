@@ -3,10 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const categories = [
-  { imageUrl: "/musica.jpg", title: "Conciertos", id: "1" },
+  { imageUrl: "/musica.jpg", title: "Música", id: "1" },
   { imageUrl: "/deportes.jpg", title: "Deportes", id: "2" },
   { imageUrl: "/teatro.jpg", title: "Artes y teatro", id: "3" },
-  { imageUrl: "/Familia.jpg", title: "Familia", id: "4" },
+  { imageUrl: "/cine2.png", title: "Cine", id: "4" },
+  { imageUrl: "/diverso.jpg", title: "Diverso", id: "5"}
 ];
 
 
@@ -32,10 +33,10 @@ function Cards() {
  }
 
  function Card({ imageUrl, title, id }: CardProps) {
-   const url = "../eventos/" + title;
+   const url = "../busqueda/" + title;
    return (
        <>
-                <Link to={url} className="flex flex-row flex-none p-2 h-auto w-40 drop-shadow-xl items-center lg:w-72">
+                <Link to={url} className="flex flex-row flex-none gap-4 h-auto w-40 drop-shadow-xl items-center lg:w-72">
                    <div className="relative bg-white w-full rounded-xl flex flex-row flex p-1 shadow-md">
                        <div className='relative w-full h-full lg:h-48'>
                            <img 

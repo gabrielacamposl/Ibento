@@ -28,7 +28,7 @@ from api.services.ticketmaster import guardar_eventos_desde_json
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
-from api.models import Matches,  Conversacion, Mensaje
+from api.models import Interaccion, Matches,  Conversacion, Mensaje
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -44,6 +44,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
+                          IntereccionSerializer,
                           # Serializer para los chats de los matches
                           MensajesSerializer,
                           ConversacionSerializer,
@@ -51,6 +52,9 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializer,
                           EventoSerializerLimitado,
                           EventoSerializerLimitadoWithFecha,
+                          # Serializers para la obtención de información de usuarios
+                          UsuarioSerializerEdit,
+                          UsuarioSerializerParaEventos
                           )
 
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
@@ -220,7 +224,6 @@ def password_reset_resend(request):
 # ------- Seleccionar intereses para el perfil
 # Mostrar Intereses
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_categorias_perfil(request):
@@ -366,7 +369,7 @@ def ine_validation_view(request):
         back_b64 = url_to_base64(back_url)
         
         # Extraer datos de la INE
-        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        cic, id_ciudadano = ocr_ine(front_b64, back_b64)
         if not cic or not id_ciudadano:
             return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -377,8 +380,8 @@ def ine_validation_view(request):
         # Guardar datos en el usuario
         user : Usuario = request.user
         user.is_ine_validated = is_valid
-        if curp:
-            user.curp = curp
+        # if curp:
+        #     user.curp = curp
         user.save()
 
         return Response({"mensaje": "INE validada exitosamente."}, status=status.HTTP_200_OK)
@@ -393,10 +396,7 @@ def ine_validation_view(request):
             delete_image_from_cloudinary(back_id)
 
 
-
 # ----------- Comparación de Rostros 
-
-
 
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
@@ -413,124 +413,238 @@ def estado_validacion_view(request):
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 
-# ------- Crear Match
-
+## ------- Crear Match
 @api_view(["POST"])
-def crear_match(request):
-    
-    usuario_a_id = request.data.get("usuario_a")
-    usuario_b_id = request.data.get("usuario_b")
+@permission_classes([IsAuthenticated])
+def matches(request):
+    usuario_origen = request.user
+    usuario_destino = request.data.get("usuario_destino")
+    tipo_interaccion = request.data.get("tipo_interaccion")
 
-    if usuario_a_id == usuario_b_id:
-        return Response({"error": "No puedes hacer match."}, status=status.HTTP_400_BAD_REQUEST)
+    if tipo_interaccion not in ["like", "dislike"]:
+        return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Evitar duplicados (match en ambos sentidos)
-    match_existente = Matches.objects.filter(
-        Q(usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id) |
-        Q(usuario_a_id=usuario_b_id, usuario_b_id=usuario_a_id)
-    ).first()
+    try:
+        usuario_destino = Usuario.objects.get(_id=usuario_destino)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario destino no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-    if match_existente:
-        return Response({"message": "El match ya existe."}, status=status.HTTP_200_OK)
+    if usuario_destino == usuario_origen:
+        return Response({"error": "No puedes interactuar contigo mismo."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Crear Match y Conversación
-    match = Matches.objects.create(usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
-    Conversacion.objects.create(match=match, usuario_a_id=usuario_a_id, usuario_b_id=usuario_b_id)
+    # Crear la interacción
+    interaccion, created = Interaccion.objects.get_or_create(
+        usuario_origen=usuario_origen,
+        usuario_destino=usuario_destino,
+        defaults={"tipo_interaccion": tipo_interaccion}
+    )
 
-    return Response({"message": "Match y Conversación creados"}, status=status.HTTP_201_CREATED)
+    # Si la interacción es un like y hay like mutuo se genera el match
+    if tipo_interaccion == "like":
+        interaccion_mutua = Interaccion.objects.filter(
+            usuario_origen=usuario_destino,
+            usuario_destino=usuario_origen,
+            tipo_interaccion="like"
+        ).first()
 
+        if interaccion_mutua:
+            match, created = Matches.objects.get_or_create(
+                usuario_a=min(usuario_origen, usuario_destino, key=lambda x: x._id),
+                usuario_b=max(usuario_origen, usuario_destino, key=lambda x: x._id)
+            )
+            conversacion, created = Conversacion.objects.get_or_create(
+                match=match,
+                defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
+            )
+            return Response({"message": "¡Es un match!", "match_id": match._id}, status=201)
+
+
+    return Response({"message": "Interacción registrada correctamente."}, status=200)
+
+# ------- Personas que me dieron like
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def personas_que_me_dieron_like(request):
+    usuario_actual = request.user
+
+    interacciones = Interaccion.objects.filter(
+        usuario_destino=usuario_actual,
+        tipo_interaccion="like"
+    ).select_related("usuario_origen")
+
+    usuarios = [
+        {
+            "id": interaccion.usuario_origen._id,
+            "nombre": interaccion.usuario_origen.nombre,
+            "email": interaccion.usuario_origen.email,
+            # agrega aquí otros campos si los necesitas
+        }
+        for interaccion in interacciones
+    ]
+
+    return Response(usuarios, status=200)
 
 # ------- Ver Matches
 
 @api_view(["GET"])
-def obtener_matches_usuario(request, usuario_id):
-    
-    matches = Matches.objects.filter(models.Q(usuario_a_id=usuario_id) | models.Q(usuario_b_id=usuario_id))
+@permission_classes([IsAuthenticated])
+def obtener_matches(request):
+    usuario = request.user
+    matches = Matches.objects.filter(
+        Q(usuario_a=usuario) | Q(usuario_b=usuario)
+    )
     serializer = MatchSerializer(matches, many=True)
-    return Response(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-# ------- Eliminar Match
-
-@api_view(['DELETE'])
-def eliminar_match(request, match_id):
-    try:
-        match = Matches.objects.get(id=match_id)
-        match.delete()
-        return Response({'mensaje': 'Match eliminado correctamente'}, status=204)
-    except Matches.DoesNotExist:
-        return Response({'error': 'Match no encontrado'}, status=404)
+# ------ Eliminar match
+# @api_view(["DELETE"])
+# def eliminar_match(request, usuario_id, match_id):
+#     user = request.user
+#     # Buscar el match por su _id
+#     match = get_object_or_404(Matches, _id=match_id)
     
-
-
-# -------------------------------------- MENSAJERÍA CON MATCHES -------------------------------------------
-
-# ------- Ver chats 
-
-@api_view(["GET"])
-def obtener_conversacion(request, match_id):
+#     # Verificar si el usuario está involucrado en este match
+#     if match.usuario_a._id != usuario_id and match.usuario_b._id != usuario_id:
+#         return Response({"error": "Este usuario no está involucrado en el match."}, status=status.HTTP_400_BAD_REQUEST)
     
-    conversacion = Conversacion.objects.get(match_id=match_id)
-    serializer = ConversacionSerializer(conversacion)
-    return Response(serializer.data)
-
-# ------- Enviar Mensaje
-
-@api_view(["POST"])
-def enviar_mensaje(request):
+#     # Eliminar el match de la lista de matches de ambos usuarios
+#     usuario_a = match.usuario_a
+#     usuario_b = match.usuario_b
     
-    conversacion_id = request.data.get("conversacion_id")
-    remitente_id = request.data.get("remitente_id")
-    receptor_id = request.data.get("receptor_id")
-    contenido = request.data.get("contenido")
+#     # Eliminar el match de los campos 'matches' de ambos usuarios
+#     if match._id in usuario_a.matches:
+#         usuario_a.matches.remove(match._id)
+#     if match._id in usuario_b.matches:
+#         usuario_b.matches.remove(match._id)
+    
+#     # Guardar los cambios en los usuarios
+#     usuario_a.save()
+#     usuario_b.save()
 
-    conversacion = Conversacion.objects.get(_id=conversacion_id)
+#     # Eliminar la conversación asociada (si también deseas eliminarla)
+#     Conversacion.objects.filter(match=match).delete()
 
-    mensaje = Mensaje.objects.create(
-        conversacion=conversacion,
-        remitente_id=remitente_id,
-        receptor_id=receptor_id,
-        mensaje=contenido
+#     # Eliminar el match de la base de datos
+#     match.delete()
+
+#     return Response({"message": "Match eliminado con éxito."}, status=status.HTTP_200_OK)
+
+#--------------------------------------- OBTENER SUGERENCIAS DE MATCHES --------------------------------
+#--------- Obtener personas recomendadas
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sugerencia_usuarios(request):
+    usuario = request.user
+
+    # Obtener los IDs de los usuarios excluidos (usuarios con los que ya interactuó)
+    ids_excluidos = list(
+        Interaccion.objects.filter(usuario_origen=usuario).values_list('usuario_destino___id', flat=True)
     )
 
-    # # Enviar notificación push al receptor
-    # devices = FCMDevice.objects.filter(user_id=receptor_id)
-    # devices.send_message(
-    #     title="Nuevo Mensaje",
-    #     body=f"Tienes un nuevo mensaje de {mensaje.remitente.nombre}",
-    #     data={"conversacion_id": conversacion_id}
-    # )
+    # Añadir el ID del usuario a los excluidos para evitar que se sugiera a sí mismo
+    ids_excluidos.append(usuario._id)
 
-    serializer = MensajesSerializer(mensaje)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # Obtener todos los usuarios, excluyendo los que están en la lista de ids_excluidos
+    sugerencias = Usuario.objects.all()
+    sugerencias = [u for u in sugerencias if u._id not in ids_excluidos]
 
-
-#---------- Paginación de mensajes
-class MensajePagination(PageNumberPagination):
-    page_size = 10  # Cambia este número por la cantidad de mensajes por página
-    page_size_query_param = 'page_size'
-    max_page_size = 100  # Esto es opcional, define el máximo que puede pedir un cliente
-
-
- # ------- Obtener Mensajes de los Chats
+    # Serializar los usuarios sugeridos
+    serializer = UsuarioSerializer(sugerencias, many=True)
+    return Response({"sugerencias": serializer.data})
+    
+# --------------------------------------  CONVERSACIONES ------------------------------------------------
+# -------- Ver conversiones
 @api_view(["GET"])
-def obtener_mensajes(request, conversacion_id):
-    # # -------- Ver. convencional - sin paginación
-    # conversacion = Conversacion.objects.get(_id=conversacion_id)
-    # mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by('-fecha_creacion')
-    # serializer = MensajesSerializer(mensajes, many=True)
-    # return Response(serializer.data)
+@permission_classes([IsAuthenticated])
+def mis_conversaciones(request):
+    usuario = request.user
+
+    conversaciones = Conversacion.objects.filter(
+        Q(usuario_a=usuario) | Q(usuario_b=usuario)
+    ).select_related("usuario_a", "usuario_b")
+
+    data = []
+    for conv in conversaciones:
+        otro_usuario = conv.usuario_b if conv.usuario_a == usuario else conv.usuario_a
+        data.append({
+            "conversacion_id": conv._id,
+            "usuario": {
+                "id": otro_usuario._id,
+                "nombre": otro_usuario.nombre,
+                "email": otro_usuario.email,
+                "foto_perfil": otro_usuario.profile_pic.url if otro_usuario.profile_pic else None,
+            }
+        })
+
+    return Response(data)
+
+#--------- Enviar mensaje
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def enviar_mensaje(request):
+    remitente = request.user  # El usuario que envía el mensaje
+
+    # Obtenemos los datos de la solicitud
+    conversacion_id = request.data.get('conversacion')
+    receptor_id = request.data.get('receptor')
+    mensaje = request.data.get('mensaje')
+
+    # Verificar si la conversación existe
     try:
         conversacion = Conversacion.objects.get(_id=conversacion_id)
     except Conversacion.DoesNotExist:
-        return Response({"error": "Conversación no encontrada."}, status=404)
+        return Response({'error': 'Conversación no encontrada'}, status=404)
+
+    # Verificar que el remitente esté en la conversación
+    if remitente._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({'error': 'No puedes enviar mensajes en esta conversación'}, status=403)
+
+    # Verificar que el receptor sea parte de la conversación
+    if receptor_id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({'error': 'El receptor no pertenece a esta conversación'}, status=403)
+
+    # Crear el mensaje
+    mensaje_data = {
+        'conversacion': conversacion_id,
+        'remitente': remitente._id,
+        'receptor': receptor_id,
+        'mensaje': mensaje,
+    }
+
+    serializer = MensajesSerializer(data=mensaje_data)
+    if serializer.is_valid():
+        serializer.save()  # Guardamos el mensaje
+        return Response(serializer.data, status=201)  # Devolvemos el mensaje guardado
+    return Response(serializer.errors, status=400)
+
+# ------- Obtener mensajes
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_mensajes (request, conversacion_id):
+    try:
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+    except Conversacion.DoesNotExist:
+        return Response({"error": "Conversación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
     
-    mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by('fecha_creacion')
-    paginator = MensajePagination()
-    resultado_paginado = paginator.paginate_queryset(mensajes, request)
-    serializer = MensajesSerializer(resultado_paginado, many=True)
-    return paginator.get_paginated_response(serializer.data)
+    if request.user._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({"error": "No tienes permiso para ver esta conversación."}, status=status.HTTP_403_FORBIDDEN)
+    mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by("fecha_envio")
+    serializer = MensajesSerializer(mensajes, many=True)
+    return Response(serializer.data)
+
+# ------- Mostrar conversaciones
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def listar_conversaciones(request):
+    usuario = request.user
+    conversaciones = Conversacion.objects.filter(
+        Q(usuario_a=usuario) | Q(usuario_b=usuario)
+    ).select_related('match', 'usuario_a', 'usuario_b')
+    serializer = ConversacionSerializer(conversaciones, many=True)
+    return Response(serializer.data)
 
 
+# --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------
 # --------- Crear evento
 @api_view(['POST'])
 def importar_ticketmaster(request):
@@ -559,6 +673,8 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
     distance = R * c
     return distance
+
+#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS EVENTOS -----------------------------------
 
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
@@ -828,3 +944,100 @@ def obtener_evento_por_id(request, pk):
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 
+    @action(detail=False, methods=['get'])
+    def event_by_id(self, request):
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Filtrar el evento por ID
+        try:
+            event = self.get_queryset().get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serializar el evento
+        serializer = EventoSerializer(event)
+        return Response(serializer.data)
+
+    # ------- Guardar evento en guardado -----
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def save(self, request):
+        usuario = request.user
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        #Obtener id del usuario
+        id_user = usuario._id
+
+        #Añadir guardado a evento
+        try:
+            evento = Evento.objects.get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        
+
+        #Añadir evento a guardados del usuario
+        if usuario.save_events is None:
+            usuario.save_events = []
+
+        
+        if id_event not in usuario.save_events:
+            usuario.save_events.append(id_event)
+            evento.numSaves += 1
+
+            if evento.assistants is None:
+                evento.assistans = []
+
+            evento.assistants.append(id_user)
+            evento.save(update_fields=['assistants'])
+            evento.save(update_fields=['numSaves'])
+            usuario.save(update_fields=['save_events'])
+            return Response({"detail": "Evento guardado correctamente."}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"detail": "El evento ya está guardado."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
+
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def events(self, request):
+        usuario = request.user
+        serializer = UsuarioSerializerParaEventos(usuario)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def info_to_edit(self, request):
+        usuario = request.user
+        serializer = UsuarioSerializerEdit(usuario)
+        return Response(serializer.data)
+    

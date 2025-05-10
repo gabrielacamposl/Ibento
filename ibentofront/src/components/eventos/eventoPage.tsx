@@ -8,8 +8,7 @@ import { ArrowLeftIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './components/carousel';
-
-import axios from 'axios';
+import { useFetchEvents } from "../../hooks/usefetchEvents";
 
 import { useParams } from 'react-router-dom';
 
@@ -34,39 +33,24 @@ function Page() {
   const { eventId } = useParams<{ eventId: string }>();
   console.log("ID del evento:", eventId);
 
-  const [eventos, setEventos] = useState<ListEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // State for the current event, initialized to null
-  const [currentEvent, setCurrentEvent] = useState<ListEvent | null>(null);
-
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [date, setDate] = useState<Date | null>(null); // Initialize date state
-
-
+  const [date, setDate] = useState<Date | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/eventos/");
-        setEventos(response.data);
-        setIsLoading(false);
-      } catch (err) {
-        setError("Error fetching events.");
-        setIsLoading(false);
-        console.error("Error:", err);
-      }
-    };
-    fetchEvents();
-  }, []);
+  const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/eventos/event_by_id?eventId=" + eventId);
 
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <span className="text-black loading loading-ring loading-xl"></span>
+      </div>
+    );
+      
 interface LikeResponse {
   status: number;
 }
@@ -113,46 +97,41 @@ const Like = async (id_event: string): Promise<void> => {
     }
   }, [eventos, eventId]);
 
-  if (isLoading) {
-    return <div>Cargando...</div>;
-  }
-
-  // If there's an error, show an error message
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="flex min-h-screen justify-center items-center text-red-600">
+        <p>Error al cargar eventos: {error}</p>
+      </div>
+    );
   }
 
-  // If event is not found after loading, show not found message
-  if (!currentEvent) {
-    return <div>Evento no encontrado</div>;
-  }
+  if (!evento) return <div>No hay datos</div>;
 
-  // Now that we are sure `currentEvent` exists, we can use it
+  console.log("Evento:", evento);
+
+
+  const eventData = Array.isArray(evento) ? evento[0] : evento || {};
+
   const {
     _id,
     title,
     place,
     price,
     location,
-    coordenates,
+    coordenates = [],
     description,
-    classifications,
-    dates,
-    imgs,
+    classifications = [],
+    dates = [],
+    imgs = [],
     url,
     numLike,
-    numSaves
-  } = currentEvent;
+    numSaves,
+  } = eventData;
 
- 
 
 
   const toggleLike = () => {
     setIsLiked(!isLiked);
-  };
-
-  const toggleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
   };
 
   let likeString = "";
@@ -173,6 +152,7 @@ const Like = async (id_event: string): Promise<void> => {
     saveString = numSaves.toString();
   }
 
+
   let dateString = dates[0].toString().split("T")[0];
   let timeString = dates[0].toString().split("T")[1].split(".")[0];
 
@@ -180,20 +160,20 @@ const Like = async (id_event: string): Promise<void> => {
 
   const dateTemplate = (dateInfo: any) => {
     if (datesToMark.some(markedDate =>
-        markedDate.getFullYear() === dateInfo.year &&
-        markedDate.getMonth() === dateInfo.month &&
-        markedDate.getDate() === dateInfo.day
+      markedDate.getFullYear() === dateInfo.year &&
+      markedDate.getMonth() === dateInfo.month &&
+      markedDate.getDate() === dateInfo.day
     )) {
-        // Si la fecha está en el array de fechas a marcar
-        return (
-            <div className="text-white bg-purple-700 rounded-full text-center" style={{width: '2em', height: '2em', lineHeight: '2em'}}>
+      // Si la fecha está en el array de fechas a marcar
+      return (
+        <div className="text-white bg-purple-700 rounded-full text-center" style={{ width: '2em', height: '2em', lineHeight: '2em' }}>
 
-                {dateInfo.day}
-            </div>
-        );
+          {dateInfo.day}
+        </div>
+      );
     } else {
-        // Para las fechas que no están en el array
-        return dateInfo.day;
+      // Para las fechas que no están en el array
+      return dateInfo.day;
     }
   };
 
@@ -207,11 +187,50 @@ const Like = async (id_event: string): Promise<void> => {
     lng: coordenates[1]
   }
 
-  console.log(currentEvent)
-  console.log(coordenates)
-  console.log(classifications)
+  console.log("Coordenadas: " + coordenates)
+  console.log("Clasificaciones: " + classifications)
 
   const cleanedUrl = url ? url.replace(/^\[?'|'\]?$/g, '') : '';
+
+  const handleSave = async (eventId: string): Promise<void> => {
+
+    //Validar que reciba una ID
+    if (!eventId) {
+      console.error("Error: Event ID is undefined or invalid.");
+      return;
+    }
+
+    //Obtenemos token de acceso
+    const token: string | null = localStorage.getItem("access");
+    if (!token) {
+      console.error("Error: User is not authenticated. Token is missing.");
+      return;
+    }
+
+    // Revertimos el estado de guardado
+    const originalIsBookmarked = isBookmarked;
+    setIsBookmarked(!originalIsBookmarked);
+
+
+    try {
+      console.log("Token:", token);
+      console.log("ID del evento:", eventId);
+      const response = await fetch(
+        `http://127.0.0.1:8000/eventos/save/?eventId=${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      if (response.status === 200) {
+        console.log("Evento save successfully");
+      } else {
+        console.log("Error saving event:", response);
+      }
+    } catch (error) {
+      console.error("Error saving event:", error);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -251,21 +270,21 @@ const Like = async (id_event: string): Promise<void> => {
                     <HeartOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{numLike}</p>
+                <p className="text-white font-bold">{likeString}</p>
               </div>
 
 
 
               {/* Guardado */}
               <div className="flex flex-col items-center">
-                <button onClick={toggleBookmark} className="focus:outline-none">
+                <button onClick={() => handleSave(eventId ?? '')} className="focus:outline-none">
                   {isBookmarked ? (
                     <BookmarkSolid className="h-8 w-8 text-blue-500" />
                   ) : (
                     <BookmarkOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{numSaves}</p>
+                <p className="text-white font-bold">{saveString}</p>
               </div>
             </div>
           </div>
@@ -327,15 +346,8 @@ const Like = async (id_event: string): Promise<void> => {
                 value={date}
                 onChange={(e) => setDate(e.value || null)}
                 inline
-                showWeek
                 dateTemplate={dateTemplate}
               />
-              {/* <calendar-date class="cally bg-base-100 border border-base-300 shadow-lg rounded-box">
-                <svg aria-label="Previous" className="fill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
-                <svg aria-label="Next" className="fill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
-                <calendar-month></calendar-month>
-              </calendar-date> */}
-
             </div>
           </div>
           <div className="w-full px-6">

@@ -17,7 +17,7 @@ class UsuarioManager(BaseUserManager):
         if not email:
             raise ValueError("El email es obligatorio")
         email = self.normalize_email(email)
-        extra_fields["password"] = make_password(password)  # Hashea aquí
+        extra_fields["password"] = make_password(password)  # Hasheo
         user = self.model(email=email, **extra_fields)
         user.save(using=self._db)
         return user
@@ -40,8 +40,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     codigo_reset_password = models.CharField(max_length=6, null=True, blank=True)
     codigo_reset_password_expiration = models.DateTimeField(null=True, blank=True)
 
-
-     # Preferenicas de eventos
+    # Preferenicas de eventos
     save_events = models.JSONField(default=list, blank=True, null=True)
     favourite_events = models.JSONField(default=list, blank=True, null=True)
 
@@ -56,27 +55,16 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     # Campos para validación del INE
     is_ine_validated = models.BooleanField(default=False) # Verificación del perfil con INE
     is_validated_camera = models.BooleanField(default=False) # Verificación del perfil con la cámara
-
-    # Emparejamiento con acompañantes
-    matches = models.JSONField(default=list, blank=True, null=True)
-    futuros_matches = models.JSONField(default=list, blank=True, null=True)
-    blocked = models.JSONField(default = list, blank= True, null=True)
-
+    
     # Token para Firebase Cloud Messaging
     token_fcm = models.CharField(max_length=255, null=True, blank=True)
 
-    # def __str__(self):
-    #     return self.email
     objects = UsuarioManager()
-
     REQUIRED_FIELDS = ['nombre', 'apellido']
-
     USERNAME_FIELD = 'email'
 
     def __str__(self):
         return self.email
-
-
 
 # ------------------ Tokens para Login 
 
@@ -87,6 +75,24 @@ class TokenBlackList(models.Model):
     def __str__(self):
         return self.token[:50] + "..."
     
+
+# ------------------------------------------------------ MATCHES ------------------------------------------------
+# --------- Interacciones entre usuarios
+class Interaccion(models.Model):
+    TIPO_INTERACCION = (
+        ('like', 'Like'),
+        ('dislike', 'Dislike'),
+    )
+    usuario_origen = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="interacciones_origen", to_field="_id")
+    usuario_destino = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="interacciones_destino", to_field="_id")
+    tipo_interaccion = models.CharField(max_length=10, choices=TIPO_INTERACCION)
+    fecha_interaccion = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('usuario_origen', 'usuario_destino')
+        
+    def __str__(self):
+        return f"{self.usuario_origen.email} → {self.usuario_objetivo.email}: {self.tipo_interaccion}"
 
 # --------- Matches de acompañantes
 
@@ -159,6 +165,7 @@ class Evento(models.Model):
     url = models.CharField(max_length=100, default="")
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
+    assistants = models.JSONField(default=list, null=True, blank=True)
 
     def __str__(self):
         return self.title
