@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 
@@ -21,6 +21,37 @@ const Perfil = () => {
         interests: ['Música', 'Moda', 'Actuación', 'Viajes', 'Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
        
     };
+    const [favoritos, setFavoritos] = useState([]);
+   
+    useEffect(() => {
+        
+        const setFavorito = async () => {
+            try {
+                const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
+                const response = await fetch('http://127.0.0.1:8000/perfil/favoritos/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Agrega el token JWT al encabezado de autorización
+                    }
+                });
+                const data = await response.json();
+               
+                if(response.ok){
+                    console.log("Favoritos obtenidos correctamente");
+                    setFavoritos(data);
+                    console.log("Favoritos:",data);
+                   
+                }
+            }catch (error) {
+                console.error('Error al obtener los favoritos:', error);
+            }
+        
+
+        };
+   setFavorito();
+    
+} , []);
+        
+    
 
     const responsiveOptions = [
         {
@@ -45,6 +76,7 @@ const Perfil = () => {
         }
     ];
 
+    
 
     const handleTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -228,7 +260,7 @@ const Perfil = () => {
                     </div>
                     {index === 0 ? (
                         <div>
-                            <Favoritos events={events} />
+                            <Favoritos events={favoritos} />
                         </div>
                     ) : (
                         <Guardados events={eventsSaved} />

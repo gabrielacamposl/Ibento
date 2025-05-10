@@ -25,7 +25,7 @@ interface ListEvent {
   dates: string[];
   imgs: string[];
   url: string;
-  numLikes: number;
+  numLike: number;
   numSaves: number;
 }
 
@@ -67,6 +67,44 @@ function Page() {
   }, []);
 
 
+interface LikeResponse {
+  status: number;
+}
+
+const Like = async (id_event: string): Promise<void> => {
+  if (!id_event) {
+    console.error("Error: Event ID is undefined or invalid.");
+    return;
+  }
+
+  const token: string | null = localStorage.getItem("access");
+  if (!token) {
+    console.error("Error: User is not authenticated. Token is missing.");
+    return;
+  }
+
+  try {
+    console.log("Token:", token);
+    console.log("ID del evento:", id_event);
+    const response = await fetch(
+      `http://127.0.0.1:8000/eventos/${id_event}/like/`,{
+      method: 'POST',
+      headers: {
+          'Authorization': `Bearer ${token}` 
+      }
+  });
+
+    if (response.status === 200) {
+      console.log("Evento liked successfully");
+      setIsLiked(true);
+    } else {
+      console.log("Error liking event:", response);
+    }
+  } catch (error) {
+    console.error("Error liking event:", error);
+  }
+};
+
   useEffect(() => {
 
     if (eventos.length > 0 && eventId) {
@@ -91,6 +129,7 @@ function Page() {
 
   // Now that we are sure `currentEvent` exists, we can use it
   const {
+    _id,
     title,
     place,
     price,
@@ -101,10 +140,11 @@ function Page() {
     dates,
     imgs,
     url,
+    numLike,
+    numSaves
   } = currentEvent;
 
-  const numLikes = 200;
-  const numSaves = 200;
+ 
 
 
   const toggleLike = () => {
@@ -116,12 +156,12 @@ function Page() {
   };
 
   let likeString = "";
-  if (numLikes >= 1000000) {
-    likeString = (numLikes / 1000000).toFixed(1) + "M";
-  } else if (numLikes >= 1000) {
-    likeString = (numLikes / 1000).toFixed(1) + "k";
+  if (numLike >= 1000000) {
+    likeString = (numLike / 1000000).toFixed(1) + "M";
+  } else if (numLike >= 1000) {
+    likeString = (numLike / 1000).toFixed(1) + "k";
   } else {
-    likeString = numLikes + "";
+    likeString = numLike + "";
   }
 
   let saveString = "";
@@ -200,17 +240,22 @@ function Page() {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
             {/* Botones en la esquina inferior derecha */}
             <div className="absolute bottom-2 right-2 flex flex-col items-end space-y-4">
+              
+              
               {/* Like */}
               <div className="flex flex-col items-center">
-                <button onClick={toggleLike} className="focus:outline-none">
+                <button onClick ={() =>{toggleLike(); Like(_id);} } className="focus:outline-none">
                   {isLiked ? (
                     <HeartSolid className="h-8 w-8 text-red-500" />
                   ) : (
                     <HeartOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{200}</p>
+                <p className="text-white font-bold">{numLike}</p>
               </div>
+
+
+
               {/* Guardado */}
               <div className="flex flex-col items-center">
                 <button onClick={toggleBookmark} className="focus:outline-none">
@@ -220,7 +265,7 @@ function Page() {
                     <BookmarkOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{200}</p>
+                <p className="text-white font-bold">{numSaves}</p>
               </div>
             </div>
           </div>

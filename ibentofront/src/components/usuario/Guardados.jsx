@@ -36,7 +36,7 @@ const Guardados = ({events}) => {
                         <div key={event.id} className="flex items-center mb-3 p-2 rounded-lg Caja relative">
                             <img src={event.image} className="w-20 h-20 object-cover mr-4" alt={event.name} />
                             <div className="flex flex-col">
-                                <h2 className="text-xl font-semibold">{event.name}</h2>
+                                <h2 className="text-xl font-semibold">{event.title}</h2>
                                 <p>{event.date}</p>
                                 <p className='mb-7'>{event.ubication}</p>
                             </div>

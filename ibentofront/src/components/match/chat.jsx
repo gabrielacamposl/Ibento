@@ -29,6 +29,18 @@ const Chat = () => {
         navigate("../match");
     }
 
+
+    // Creamos un socket para el chat en tiempo real
+    const socketURL = 'ws://localhost:8080/ws/chat/room_name/';
+    if (socketURL) {
+        console.log('Conexión WebSocket establecida en:', socketURL);
+    } else {
+        console.error('WebSocket URL no existe');}
+    const Socket = new WebSocket(socketURL);
+    
+    
+    
+    
     return (
         <div className="text-black flex flex-col  items-center min-h-screen">
             <div className="relative flex flex-col shadow-lg justify-between w-full max-w-lg flex-grow">
