@@ -9,8 +9,7 @@ import api from "../../api";
 
 const Verificar = () => {
     const navigate = useNavigate();
-
-
+    const webcamRef = useRef(null);
     const [user, setUser] = useState({
         pictures: [],
         interest: [],
@@ -23,8 +22,14 @@ const Verificar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [message, setMessage] = useState([]);
-
+    const items = [
+        { label: 'Paso 1' },
+        { label: 'Paso 2' },
+        { label: 'Paso 3' },
+        { label: 'Paso 4' },
+    ];
 
 
     useEffect(() => {
@@ -36,9 +41,7 @@ const Verificar = () => {
         window.scrollTo(0, 0);
     }, []);
 
-
     // ------------- Subir fotos de perfil
-
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -57,7 +60,6 @@ const Verificar = () => {
             };
         });
     };
-
     const handleImageDelete = (indexToDelete) => {
         setUser((prev) => {
             const newPictures = [...prev.pictures];
@@ -68,7 +70,6 @@ const Verificar = () => {
             };
         });
     };
-
     const handleUploadPictures = async () => {
         if (user.pictures.length < 3 || user.pictures.length > 6) {
             alert("Debes subir entre 3 y 6 fotos.");
@@ -112,8 +113,6 @@ const Verificar = () => {
 
     };
 
-
-
     // ---------------------------- Intereses -----------------------------
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -128,7 +127,6 @@ const Verificar = () => {
 
         fetchQuestions();
     }, []);
-
     const handleSavePreferences = async () => {
         try {
             const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
@@ -155,7 +153,6 @@ const Verificar = () => {
         }
 
     };
-
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
 
@@ -167,15 +164,12 @@ const Verificar = () => {
             setIneImages(newImages);
         }
     };
-
     const handleImageDeleteINE = (index) => {
         const newImages = [...ineImages];
         newImages[index] = null;
         setIneImages(newImages);
     };
-
     // ------ Conexión con el backend ------
-
     const handleIneValidation = async () => {
         if (!ineImages[0] || !ineImages[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
@@ -199,14 +193,12 @@ const Verificar = () => {
             } else {
                 setMessage('La validación de la INE ha fallado. Por favor, verifica las imágenes.');
             }
+            setActiveIndex(prev => prev + 1);
         } catch (error) {
             console.error('Error al validar la INE:', error);
             setMessage('Hubo un error al validar la INE. Por favor, intenta nuevamente.');
         }
     };
-
-
-
     const handdleNavigate = (index) => {
 
         if (index === 1) {
@@ -226,49 +218,16 @@ const Verificar = () => {
             setActiveIndex(index);
         }
     };
-
-    const items = [
-        { label: 'Paso 1' },
-        { label: 'Paso 2' },
-        { label: 'Paso 3' },
-        { label: 'Paso 4' },
-    ];
-
-
-
-    const handleAnswerSelect = (question, answer) => {
-        setSelectedAnswers((prev) => ({
-            ...prev,
-            [question]: answer
-        }));
+    //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
+    // -------- Capturar imagen con cámara
+    const videoConstraints = {
+    facingMode: "user", // Usa la cámara frontal
     };
-
-
-    const [capturedPhoto, setCapturedPhoto] = useState(null);
-    const webcamRef = useRef(null);
-
-    const foto = () => {
-        const captura = webcamRef.current.getScreenshot();
-        setCapturedPhoto(captura);
-    }
-
-    const handdleVerify = () => {
-        const user = "Repetido";
-
-        console.log("Verificando perfil desde back...");
-        if (user === "Verificado") {
-            alert("Tu perfil ha sido verificado con éxito.");
-            navigate("../profileVerify");
-
-        } else if (user === "Repetido") {
-            navigate("../profileRepeat");
-        }
-        else {
-            alert("Tu perfil no ha podido ser verificado.");
-            return;
-        }
-        // Lógica para verificar el perfil
-    }
+    
+  const capturarImagen = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setCapturedPhoto(imageSrc);
+  };
 
     return (
         <div className="text-black flex justify-center items-center h-full">
@@ -465,32 +424,30 @@ const Verificar = () => {
                             <p>Ahora, centra tu cara para verificar que la INE sea suya</p>
                             <React.Fragment>
                                 <div className="w-full mt-2 items-center flex flex-col">
-                                    {/* Webcam component to capture image 
-                                  <Webcam
-                                    ref={webcamRef}
-                                    screenshotFormat="image/jpeg"
-                                    videoConstraints={{
-                                        facingMode: "user", // Ensures the front camera is used
-                                    }}
-                                    onUserMediaError={(error) => {
-                                        if (error.name === "NotAllowedError") {
-                                            alert("Verifica los permisos de su dispotivio.");
-                                        } else if (error.name === "NotFoundError") {
-                                            alert("No se pudo detectar la cámara. Asegúrate de que esté conectada y funcionando.");
-                                        } else {
-                                            alert("Error al accesar a la camara.");
-                                        }
-                                        console.error(error);
-                                    }}
-                                        
-                                  />*/}
-                                    <button onClick={foto} className="Capturar w-10 h-10 rounded-full" />
-                                    <p className="text-center">Capturar imagen</p>
-                                    {capturedPhoto ? (
-                                        <img src={capturedPhoto} alt="Captura" />
-                                    ) : (
-                                        <p className="text-center text-red-500">No se ha capturado ninguna imagen.</p>
+                                    <div className="rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
+                                        {!capturedPhoto ? (
+                                            <Webcam
+                                                ref={webcamRef}
+                                                audio={false}
+                                                screenshotFormat="image/jpeg"
+                                                videoConstraints={videoConstraints}
+                                                className="w-72 h-96 object-cover"
+                                            />
+                                        ) : (
+                                            <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={capturarImagen}
+                                        className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
+                                    />
+                                    <p className="text-center mt-2">Capturar imagen</p>
+
+                                    {!capturedPhoto && (
+                                        <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
                                     )}
+
                                 </div>
                             </React.Fragment>
                         </div>
