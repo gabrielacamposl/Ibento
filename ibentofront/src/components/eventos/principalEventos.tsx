@@ -8,7 +8,7 @@ import CircularDemo from './components/carousel2';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFetchEvents } from '../../hooks/usefetchEvents';
+import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
 import useGeolocation from '../../hooks/useGeolocation';
 import api from '../../api';
 import { Sidebar } from 'primereact/sidebar';
@@ -22,6 +22,7 @@ function Page() {
 
     //const {data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/everything/');
     const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('http://127.0.0.1:8000/eventos/most_liked/');
+    const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('http://127.0.0.1:8000/eventos/recommended_events', localStorage.getItem("access") ?? "");
 
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);
@@ -49,7 +50,7 @@ function Page() {
         }
     }, []);
 
-    if (popularLoading) {
+    if (popularLoading || recommendedLoading) {
         return (
             <div className="flex min-h-screen justify-center items-center">
                 <span className="text-black loading loading-ring loading-xl"></span>
@@ -57,7 +58,7 @@ function Page() {
         );
     }
 
-    if (popularError) {
+    if (popularError || recommendedError) {
         return (
             <div className="flex min-h-screen justify-center items-center text-red-600">
                 <p>Error al cargar eventos: {popularError}</p>
@@ -98,6 +99,7 @@ function Page() {
                 <CircularDemo />
                 {/* <Cards listEvents = {eventosRecomendados} name = {"Recomendados para ti"} /> */}
                 <Cards listEvents={popularEvents} name={"Populares"} />
+                <Cards listEvents={recommendedEvents} name={"Recomendados para ti"} />
                 <SearchMenu />
                 <div className='h-16'></div>
             </div>

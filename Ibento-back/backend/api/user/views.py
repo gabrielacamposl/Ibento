@@ -20,6 +20,9 @@ from math import radians, sin, cos, sqrt, atan2
 # Cloudinary
 import cloudinary.uploader
 
+#Recomendación de eventos
+from api.services.recommended_events import obtener_eventos_recomendados
+
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
@@ -875,6 +878,142 @@ class EventoViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
     
+#--------- RECOMENDACIÓN DE EVENTOS
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def recommended_events(self, request):
+
+        #Obtener el id del parametro de consulta
+        usuario = request.user
+        preferenciasUser = usuario.preferencias_evento
+
+        #Obtenemos todos los eventos
+        eventos_query = self.get_queryset()
+
+        eventos_data = []
+
+        for evento in eventos_query:
+            # Acceder a los campos 'title' y 'classification' de cada objeto Evento
+            titleEvento = evento.title
+            classiEvento = evento.classifications
+
+            # Agregar los datos del evento a la lista
+            eventos_data.append({
+                "title": titleEvento,
+                "classification": classiEvento
+            })
+
+
+        #Mandamos todos los eventos a la función de recomendación
+        eventos_recomendados = obtener_eventos_recomendados(preferenciasUser, eventos_data, eventos_query)
+
+        serializer = EventoSerializerLimitado(eventos_recomendados, many= True)
+        return Response(serializer.data)
+
+# ------- Obtener eventos por ID
+    @action(detail=False, methods=['get'])
+    def event_by_id(self, request):
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Filtrar el evento por ID
+        try:
+            event = self.get_queryset().get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serializar el evento
+        serializer = EventoSerializer(event)
+        return Response(serializer.data)
+
+        
+
+    # ------- Guardar evento en guardado -----
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def save(self, request):
+        usuario = request.user
+
+        # Obtener el id del parámetro de consulta
+        id_event = request.query_params.get('eventId')
+
+        #Obtener id del usuario
+        id_user = usuario._id
+
+        #Añadir guardado a evento
+        try:
+            evento = Evento.objects.get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        #Añadir evento a guardados del usuario
+        if usuario.save_events is None:
+            usuario.save_events = []
+
+        
+        if id_event not in usuario.save_events:
+            usuario.save_events.append(id_event)
+            evento.numSaves += 1
+
+            if evento.assistants is None:
+                evento.assistans = []
+
+            evento.assistants.append(id_user)
+            evento.save(update_fields=['assistants'])
+            evento.save(update_fields=['numSaves'])
+            usuario.save(update_fields=['save_events'])
+            return Response({"detail": "Evento guardado correctamente."}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"detail": "El evento ya está guardado."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+    #------- Eliminar evento de guardados
+    @action(detail=False, methods=['delete'])
+    @permission_classes([IsAuthenticated])
+    def delete_save(self, request):
+        usuario = request.user
+
+        #Obtenemos los id del usuario y del evento
+        id_event = request.query_params.get('eventId')
+        id_user = usuario._id
+
+        #Comprobamos si el evento existe
+        try:
+            evento = Evento.objects.get(_id = id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."}
+            )
+        
+        #Comprobamos si el evento esta guardado
+        if id_event in usuario.save_events:
+            usuario.save_events.remove(id_event)
+            evento.numSaves -= 1
+            evento.assistants.remove(id_user)
+            evento.save(update_fields=['numSaves', 'assistants'])
+            usuario.save(update_fields=['save_events'])
+            return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "El evento no esta guardado."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def like_event(request, pk):
@@ -942,80 +1081,7 @@ def obtener_evento_por_id(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-
-    @action(detail=False, methods=['get'])
-    def event_by_id(self, request):
-
-        # Obtener el id del parámetro de consulta
-        id_event = request.query_params.get('eventId')
-
-        # Validar que el parámetro de categoría esté presente
-        if not id_event:
-            return Response(
-                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Filtrar el evento por ID
-        try:
-            event = self.get_queryset().get(_id=id_event)
-        except Evento.DoesNotExist:
-            return Response(
-                {"detail": "Evento no encontrado."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Serializar el evento
-        serializer = EventoSerializer(event)
-        return Response(serializer.data)
-
-    # ------- Guardar evento en guardado -----
-    @action(detail=False, methods=['post'])
-    @permission_classes([IsAuthenticated])
-    def save(self, request):
-        usuario = request.user
-
-        # Obtener el id del parámetro de consulta
-        id_event = request.query_params.get('eventId')
-
-        #Obtener id del usuario
-        id_user = usuario._id
-
-        #Añadir guardado a evento
-        try:
-            evento = Evento.objects.get(_id=id_event)
-        except Evento.DoesNotExist:
-            return Response(
-                {"detail": "Evento no encontrado."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        
-
-        #Añadir evento a guardados del usuario
-        if usuario.save_events is None:
-            usuario.save_events = []
-
-        
-        if id_event not in usuario.save_events:
-            usuario.save_events.append(id_event)
-            evento.numSaves += 1
-
-            if evento.assistants is None:
-                evento.assistans = []
-
-            evento.assistants.append(id_user)
-            evento.save(update_fields=['assistants'])
-            evento.save(update_fields=['numSaves'])
-            usuario.save(update_fields=['save_events'])
-            return Response({"detail": "Evento guardado correctamente."}, status=status.HTTP_200_OK)
-
-        return Response(
-            {"detail": "El evento ya está guardado."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-        
+    
 #------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -1040,4 +1106,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         usuario = request.user
         serializer = UsuarioSerializerEdit(usuario)
         return Response(serializer.data)
+    
+    
+
+
     

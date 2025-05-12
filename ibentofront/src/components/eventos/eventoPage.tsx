@@ -9,6 +9,7 @@ import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './components/carousel';
 import { useFetchEvents } from "../../hooks/usefetchEvents";
+import { useFetchUserEvents } from "../../hooks/useFetchUser";
 
 import { useParams } from 'react-router-dom';
 
@@ -42,7 +43,7 @@ function Page() {
   }, []);
 
   const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/eventos/event_by_id?eventId=" + eventId);
-
+  const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
   if (loading) {
     return (
@@ -50,52 +51,53 @@ function Page() {
         <span className="text-black loading loading-ring loading-xl"></span>
       </div>
     );
-      
-interface LikeResponse {
-  status: number;
-}
-
-const Like = async (id_event: string): Promise<void> => {
-  if (!id_event) {
-    console.error("Error: Event ID is undefined or invalid.");
-    return;
   }
 
-  const token: string | null = localStorage.getItem("access");
-  if (!token) {
-    console.error("Error: User is not authenticated. Token is missing.");
-    return;
+  interface LikeResponse {
+    status: number;
   }
 
-  try {
-    console.log("Token:", token);
-    console.log("ID del evento:", id_event);
-    const response = await fetch(
-      `http://127.0.0.1:8000/eventos/${id_event}/like/`,{
-      method: 'POST',
-      headers: {
-          'Authorization': `Bearer ${token}` 
+  const Like = async (id_event: string): Promise<void> => {
+    if (!id_event) {
+      console.error("Error: Event ID is undefined or invalid.");
+      return;
+    }
+
+    const token: string | null = localStorage.getItem("access");
+    if (!token) {
+      console.error("Error: User is not authenticated. Token is missing.");
+      return;
+    }
+
+    try {
+      console.log("Token:", token);
+      console.log("ID del evento:", id_event);
+      const response = await fetch(
+        `http://127.0.0.1:8000/eventos/${id_event}/like/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        console.log("Evento liked successfully");
+        setIsLiked(true);
+      } else {
+        console.log("Error liking event:", response);
       }
-  });
-
-    if (response.status === 200) {
-      console.log("Evento liked successfully");
-      setIsLiked(true);
-    } else {
-      console.log("Error liking event:", response);
+    } catch (error) {
+      console.error("Error liking event:", error);
     }
-  } catch (error) {
-    console.error("Error liking event:", error);
-  }
-};
+  };
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    if (eventos.length > 0 && eventId) {
-      const foundEvent = eventos.find((ev) => ev._id === eventId);
-      setCurrentEvent(foundEvent || null);
-    }
-  }, [eventos, eventId]);
+  //   if (eventos.length > 0 && eventId) {
+  //     const foundEvent = eventos.find((ev) => ev._id === eventId);
+  //     setCurrentEvent(foundEvent || null);
+  //   }
+  // }, [eventos, eventId]);
 
   if (error) {
     return (
@@ -128,6 +130,19 @@ const Like = async (id_event: string): Promise<void> => {
     numSaves,
   } = eventData;
 
+
+  // useEffect(() => {
+  //   if (eventosUsuario && eventosUsuario.length > 0 && eventosUsuario[0]?.save_event) {
+  //     const guardados = eventosUsuario[0].save_event;
+  //     if (guardados.some((guardado: any) => guardado._id === _id)) {
+  //       setIsBookmarked(true);
+  //     }
+  //     else {
+  //       setIsBookmarked(false);
+  //     }
+  //   }
+
+  // }, [eventosUsuario, _id]);
 
 
   const toggleLike = () => {
@@ -259,11 +274,11 @@ const Like = async (id_event: string): Promise<void> => {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
             {/* Botones en la esquina inferior derecha */}
             <div className="absolute bottom-2 right-2 flex flex-col items-end space-y-4">
-              
-              
+
+
               {/* Like */}
               <div className="flex flex-col items-center">
-                <button onClick ={() =>{toggleLike(); Like(_id);} } className="focus:outline-none">
+                <button onClick={() => { toggleLike(); Like(_id); }} className="focus:outline-none">
                   {isLiked ? (
                     <HeartSolid className="h-8 w-8 text-red-500" />
                   ) : (

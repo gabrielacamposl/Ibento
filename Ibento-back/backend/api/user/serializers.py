@@ -299,7 +299,7 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
         fields = ['nombre', 'apellido', 'password', 
                   'preferencias_evento', 'save_events', 
                   'favourite_events', 'profile_pic', 
-                  'preferencias_generales', 'birthday', 
+                  'preferencias_generales', 'birthday',
                   'gender', 'description']
 
     def to_representation(self, instance):
@@ -321,3 +321,4 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
                     pass
                     
         return data
+
