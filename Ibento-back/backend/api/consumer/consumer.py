@@ -25,33 +25,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
-        user_id = data['user_id']
-
-        # Save message to database
-        await self.save_message(user_id, message)
-
-        # Send message to room group
+        print("Received data:", data)
+        
+        event = {
+            'type': 'chat_message',
+            'message': data
+            
+        }
+        # # Send message to room group
         await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'user_id': user_id
-            }
-        )
+            self.room_group_name,event)
+        
 
     async def chat_message(self, event):
-        message = event['message']
-        user_id = event['user_id']
+        data = event['message']
+        print(data)
+        response = {
+            'mensaje': data['mensaje'],
+            'remitente': data['remitente_id'],
+            'destinatario': data['receptor_id'],
+            'conversacion_id': data['conversacion'],
+            
+        }
 
         # Send message to WebSocket
+      
         await self.send(text_data=json.dumps({
-            'message': message,
-            'user_id': user_id
+           "message": response,
+          
         }))
 
-    @database_sync_to_async
-    def save_message(self, user_id, message):
-        # Save the message to the database using your ORM model
-        Conversacion.objects.create(user_id=user_id, mensaje=message)  # Adjust this line according to your model structure. 
+    # @database_sync_to_async
+    # def save_message(self, user_id, message):
+    #     # Save the message to the database using your ORM model
+    #     Conversacion.objects.create(user_id=user_id, mensaje=message)  # Adjust this line according to your model structure. 

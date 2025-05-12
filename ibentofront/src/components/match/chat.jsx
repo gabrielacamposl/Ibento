@@ -1,7 +1,5 @@
-import React, { use, useState,useEffect } from 'react';
+import React, { use, useState,useEffect,useRef } from 'react';
 import "../../assets/css/botones.css";
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 const Chat = () => {
@@ -11,7 +9,7 @@ const Chat = () => {
         { sender: 'Tú', text: '¡Hola! Estoy bien, ¿y tú?' ,image: "/jin3.jpeg"},
     ]);
     const [newMessage, setNewMessage] = useState('');
-    const [showDialogBlock, setShowDialogBlock] = useState(false);
+   
    
    
     const query = new URLSearchParams(window.location.search);
@@ -28,14 +26,7 @@ const Chat = () => {
     }
 
 
-    // Creamos un socket para el chat en tiempo real
-    // const socketURL = 'ws://localhost:8080/ws/chat/room_name/';
-    // if (socketURL) {
-    //     console.log('Conexión WebSocket establecida en:', socketURL);
-    // } else {
-    //     console.error('WebSocket URL no existe');}
-    //const Socket = new WebSocket(socketURL);
-    
+ 
     const [mensajes, setMensaje] = useState([]);
     const [receptor, setReceptor] = useState('');
     useEffect(() => async () => {
@@ -65,12 +56,58 @@ const Chat = () => {
     
     
 const idCarolina ="681e5ce72d5dcb8f92ac6f19"
+
+const socketRef = useRef(null);
+
+useEffect(() => {
+    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/mensajes/${roomName}/`);
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        console.log("Mensaje:", data.message.mensaje);
+        console.log("Receptor:", data.message.remitente);
+        console.log("Remitente:", data.message.destinatario);
+        console.log("Conversacion:", data.message.conversacion_id);
+        
+        
+        setMensaje((prevMessages) => [
+            ...prevMessages,
+            {   conversacion: roomName,
+                fecha_envio: "hoy",
+                mensaje:data.message.mensaje,
+                receptor:  data.message.destinatario,
+                remitente: data.message.remitente
+                
+            },
+            
+        ]);
+       
+    }
+    socket.onopen = () => {
+        console.log('✅ WebSocket conectado');
+    };
+
+    socket.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
+    };
+
+    socket.onclose = () => {
+        console.log('🔌 WebSocket cerrado');
+    };
+
+    socketRef.current = socket;
+
+    return () => {
+        socket.close();
+    };
+}, [roomName]);
+
+
     const handleSendMessage = async() => {
         if (newMessage.trim() !== '') {
-        //     setMessages([...messages, { sender: 'Tú', text: newMessage, image: "/isaac.jpeg" }]);
-        //     setNewMessage('');
-        console.log(roomName,idCarolina, newMessage);
         const token = localStorage.getItem('access');
+        
         try {
             const response = await axios.post("http://127.0.0.1:8000/api/mensajes/enviar/"    , {
                 conversacion: roomName,
@@ -81,9 +118,21 @@ const idCarolina ="681e5ce72d5dcb8f92ac6f19"
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log(response);
+           
             if (response.status === 201) {
-                console.log("Mensaje enviado:", response.data);
+               
+                 const socket = socketRef.current;
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        mensaje: newMessage,
+                        receptor_id: response.data.receptor,
+                        remitente_id: response.data.remitente,
+                        conversacion: roomName,
+                    }));
+                  
+                } else {
+                    console.warn("⚠️ WebSocket aún no está abierto");
+                }
                 setNewMessage('');
             } else {
                 console.error("Error al enviar el JE:", response);
@@ -105,8 +154,8 @@ const idCarolina ="681e5ce72d5dcb8f92ac6f19"
                         <div className="mb-2 flex justify-between font-bold text-2xl w-full">
                             <div className=" flex justify-between p-2 w-full">
                             <button onClick={handleBack}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
 
                             </button>
@@ -166,9 +215,9 @@ const idCarolina ="681e5ce72d5dcb8f92ac6f19"
                              {/*AQUÍ COMIENZA EL CHAT */}
                             <div className='p-3'>
                                 {mensajes.map((message, index) => (
-                                    <div>
+                                    <div key={index}>
                                     <p className={`flex ${message.remitente_id === 'null' ? 'justify-end mr-3' : 'justify-start ml-3'}`}>{message.remitente_id}</p>
-                                    <div key={index} className={`flex mb-2 ${message.remitente_id === 'null' ? 'justify-end' : 'justify-start'}`}>
+                                    <div  className={`flex mb-2 ${message.remitente_id === 'null' ? 'justify-end' : 'justify-start'}`}>
                                        
                                         {message.remitente_id !== 'null' && (
                                             

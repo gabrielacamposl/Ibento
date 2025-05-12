@@ -7,5 +7,5 @@ from channels.security.websocket import AllowedHostsOriginValidator
 
 
 wsPatterns = [
-    path('ws/chat/<str:room_name>/', ChatConsumer.as_asgi()),
+    path('ws/mensajes/<str:room_name>/', ChatConsumer.as_asgi()),
 ]
