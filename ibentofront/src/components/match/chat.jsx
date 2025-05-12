@@ -26,7 +26,6 @@ const Chat = () => {
     }
 
 
- 
     const [mensajes, setMensaje] = useState([]);
     const [receptor, setReceptor] = useState('');
     useEffect(() => async () => {
@@ -54,7 +53,24 @@ const Chat = () => {
         }
     },[]);
     
-    
+    const messagesEndRef = useRef(null);
+ const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+};
+
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  
+useEffect(() => {
+    scrollToBottom();
+}, [mensajes]);
+
 const idCarolina ="681e5ce72d5dcb8f92ac6f19"
 
 const socketRef = useRef(null);
@@ -145,21 +161,21 @@ useEffect(() => {
     };
 
     return (
-        <div className="text-black flex flex-col  items-center min-h-screen">
-            <div className="relative flex flex-col shadow-lg justify-between w-full max-w-lg flex-grow">
-                <div className="flex-grow overflow-y-auto shadow-t">
+        <div className="text-black   w-full ">
+            <div className="   justify-between w-full h-screen">
+                <div className="flex-grow  shadow-t">
                     <div className="w-full">
 
-                        <div className='bg-gray-200 '>
-                        <div className="mb-2 flex justify-between font-bold text-2xl w-full">
-                            <div className=" flex justify-between p-2 w-full">
-                            <button onClick={handleBack}>
+                        <div className='shadow p-3 '>
+                        <div className="  justify-between font-bold text-2xl w-full">
+                            <div className=" flex justify-between m-2 w-full">
+                            <button className="cursor-pointer" onClick={handleBack}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
 
                             </button>
-                            <button onClick={handdleInfo} className="">
+                            <button  className="cursor-pointer" onClick={handdleInfo} >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                                 </svg>
@@ -168,20 +184,25 @@ useEffect(() => {
                         </div>
 
 
-                        <div className="">
+                        <div className="mt-5 flex justify-between">
                             <div className="flex">
                                 <img src="/harry.jpeg" className="w-10 h-10 object-cover rounded-full mr-2" />
                                 <h1 className="text-xl font-semibold">{messages[0].sender}</h1>
                             </div>
+                            <div><button  className="cursor-pointer" onClick={handdleInfo} >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            </button></div>
                         </div>
                 </div>
 
           
-                        <div className="h-150 overflow-y-auto bg-white mt-3 w-full">
-                            <div className="mt-9 mb-8 flex  justify-center items-center">
-                                <div className="relative">
+                        <div className="max-h-[calc(100vh-14rem)]  h-screen overflow-y-auto  bg-white mt-3 w-full">
+                            <div className="mt-10 mb-8 flex justify-center ">
+                                <div className="relative ">
                                     <img src={messages[0].image} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={messages[0].sender} />
-                                    <div className="absolute bottom-1 right-0 w-full flex justify-center items-center">
+                                    <div className="absolute bottom-1 right-0 w-full flex justify-center ">
                                         <svg width="100" height="100">
                                             <defs>
                                                 <path id="curve1" d="M 10,25 Q 50,-10 100,20" />
@@ -194,7 +215,7 @@ useEffect(() => {
                                         </svg>
                                     </div>
                                 </div>
-                                <div className="relative ">
+                                <div className="relative min-w-[100px] ml-2">
                                     <img src={messages[1].image} className="sombraMatch2 w-20 h-20 object-cover rounded-full" alt={messages[1].sender} />
                                     <div className="absolute top-9 right-2 w-full flex justify-center items-center">
                                         <svg width="100" height="100">
@@ -213,7 +234,7 @@ useEffect(() => {
 
 
                              {/*AQUÍ COMIENZA EL CHAT */}
-                            <div className='p-3'>
+                            <div className=" flex-grow m-3 max-h-[calc(100vh-4rem)]"> 
                                 {mensajes.map((message, index) => (
                                     <div key={index}>
                                     <p className={`flex ${message.remitente_id === 'null' ? 'justify-end mr-3' : 'justify-start ml-3'}`}>{message.remitente_id}</p>
@@ -237,15 +258,17 @@ useEffect(() => {
                                         )}
                                         <p>{message.mensaje}</p>
                                     </div>
+                                    
                                     </div>
                                 ))}
+                                  <div ref={messagesEndRef} /> {/* <- esto es lo importante */}
                             </div>
                         </div>
                     </div>
                 </div>
 
 
-                <div className="w-full flex items-center p-3 border-t">
+                <div className="w-full flex items-center p-3 mt-5 shadow">
                     <input
                         type="text"
                         value={newMessage}

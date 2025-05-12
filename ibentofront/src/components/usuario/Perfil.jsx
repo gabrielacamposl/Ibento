@@ -83,33 +83,7 @@ const Perfil = () => {
     }
     const [index, setIndex] = React.useState(0);
     
-    const events = [
-        {
-            id: 1,
-            name: 'Love yourself BTS',
-            date: '2023-11-01',
-            description: 'Un concierto de KPOP para que Gaby se emocione.',
-            image: '/bts.jpeg',
-            ubication: 'Estadio Azteca'
-        },
-        
-        {
-            id: 2,
-            name: 'Love On Tour - Harry Styles',
-            date: '2023-12-01',
-            description: 'Harry Styles en su gira mundial Love On Tour, presentando su último álbum.',
-            image: '/love.jpeg',
-            ubication:'Palacio de los Deportes'
-        },
-        {
-            id: 3,
-            name: 'Torneo de League of Legends',
-            date: '2025-01-01',
-            description: 'Un torneo de LOL para que Gaby se emocione.',
-            image: '/lol.jpeg',
-            ubication:'Bellas Artes'
-        }
-    ];
+   
 
 
         const eventsSaved = [
@@ -160,19 +134,7 @@ const Perfil = () => {
             <div className="relative degradadoPerfil  flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
                 
                 <div className=" relative w-full h-60 ">
-                {/* Carrusel 
-                <div className="carousel rounded-box w-full h-60">
-                    {user.pictures.map((picture, index) => (
-                    <div className="carousel-item w-full" key={index}>
-                        <img
-                        src={picture}
-                        className="w-full object-cover h-80 rounded-lg"
-                        alt={`Foto ${index}`}
-                        />
-                    </div>
-                    ))}
-                </div>
-*/} 
+                
 
                 <div className="">
                     <Carousel value={user.pictures} numVisible={1} numScroll={5} responsiveOptions={responsiveOptions} className="custom-carousel rounded-lg w-full" circular
