@@ -56,18 +56,7 @@ function Page() {
       
 interface LikeResponse {
   status: number;
-}
-
-const Like = async (id_event: string): Promise<void> => {
-  if (!id_event) {
-    console.error("Error: Event ID is undefined or invalid.");
-    return;
-
-  }
-
-  interface LikeResponse {
-    status: number;
-  }
+} 
 
   const Like = async (id_event: string): Promise<void> => {
     if (!id_event) {
