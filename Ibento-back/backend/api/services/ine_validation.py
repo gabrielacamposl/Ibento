@@ -31,29 +31,42 @@ def url_to_base64(url):
     return base64.b64encode(image_response.content).decode('utf-8')
 
 def ocr_ine(front_b64, back_b64):
+    print("Iniciando OCR de INE...")
+    print(f"Enviando base64 - Front: {len(front_b64)} chars, Back: {len(back_b64)} chars")
+
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "x-api-key": API_KEY_KIBAN,
     }
     payload = {
-        "files":[
-        {"name": "front", "base64": front_b64},
-        {"name": "back", "base64": back_b64}
+        "files": [
+            {"name": "front", "base64": front_b64},
+            {"name": "back", "base64": back_b64}
         ]
     }
     r = requests.post("https://link.kiban.com/api/v2/ine/data_extraction/", json=payload, headers=headers)
+
+    print(f"Status code OCR: {r.status_code}")
+    print(f"Response OCR: {r.text}")
+
     if r.status_code != 200:
-        raise Exception(f"Error al extraer datos de la INE.")
-    
-    # Verificar la extracción de la curp
+        raise Exception("Error al extraer datos de la INE.")
     
     data = r.json().get("response", {})
-    return data.get("cic"), data.get("identificadorCiudadano")
-      #, data.get("curp")
+    cic = data.get("cic")
+    id_ciudadano = data.get("identificadorCiudadano")
+
+    print(f"Datos extraídos - CIC: {cic}, ID Ciudadano: {id_ciudadano}")
+    
+    return cic, id_ciudadano
+
 
 def validate_ine(cic, id_ciudadano):
-    headars = {
+    print("Iniciando validación de INE...")
+    print(f" Enviando - CIC: {cic}, ID Ciudadano: {id_ciudadano}")
+
+    headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "x-api-key": API_KEY_KIBAN,
@@ -61,14 +74,17 @@ def validate_ine(cic, id_ciudadano):
     payload = {
         "modelo": "e",
         "cic": cic,
-        "identificadorCiudadano": id_ciudadano
+        "idCiudadano": id_ciudadano
     }
-    r = requests.post("https://link.kiban.com/api/v2/ine/validate/", json=payload, headers=headars)
+    r = requests.post("https://link.kiban.com/api/v2/ine/validate/", json=payload, headers=headers)
+
+    print(f"Status code VALIDATE: {r.status_code}")
+    print(f"Response VALIDATE: {r.text}")
+
     if r.status_code != 200:
-        raise Exception(f"Error al validar la INE.")
+        raise Exception("Error al validar la INE.")
     
     status = r.json().get("response", {}).get("status", {})
-    if (status == "VALID"):
-        return True
-    else:
-        return False
+    print(f"Resultado validación: {status}")
+    
+    return status == "VALID"
