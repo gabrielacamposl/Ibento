@@ -68,7 +68,67 @@ users = [
 
 
 questions = [
-    {
+    {   #1   Optional
+        "question": "¿En qué momento del día sueles ser más activo?",
+        "options": [
+            "En las mañanas",
+            "En las tardes",
+            "Por las noches",
+            "Todo el día"
+        ]
+    },
+    {   #2   Optional #Multi
+        "question": "¿Qué medio de transporte sueles usar?",
+        "options": [
+            "Metro",
+            "Cablebus",
+            "Taxi",
+            "Metrobus",
+            "Camión",
+            "Combi",
+            "Suburbano",
+            "Uber",
+            "Bicicleta",
+            "Motocicleta",
+            "Tengo carro propio"
+        ]
+    },
+    {   #3   Optional
+        "question": "¿Qué tan activo eres en redes?",
+        "options": [
+            "Estoy al pendiente siempre",
+            "Normalmente estoy activo",
+            "En mis ratos libres",
+            "No estoy muy al pendiente",
+            "No las uso"
+        ]
+    },
+    {   #4  Multi
+        "question": "¿En qué zonas de CDMX te mueves más seguido?",
+        "options" : ['Centro (Cuauhtémoc, Doctores, Juárez, Roma, Condesa)',
+                     'Sur (Coyoacán, Tlalpan, Xochimilco)', 
+                     'Poniente (Santa Fe, Álvaro Obregón, San Ángel)',
+                     'Norte (GAM, Azcapotzalco, Lindavista)', 
+                     'Oriente (Iztapalapa, Iztacalco, Neza)', 
+                     'Me muevo por toda la ciudad', 
+                     'Vivo en el Estado de México pero voy seguido a CDMX']
+    },
+    {   #5  Optional
+        "question": "¿Qué días prefieres para asistir a eventos?",
+        "options": ['Entre semana (Lunes a Jueves)', 
+                    'Fines de semana (Viernes a Domingo)', 
+                    'Cualquier día', 
+                    'Depende del evento']
+    },
+    {   #6
+        "question": "¿Qué tan dispuesto estás a desplazarte para un evento?",
+        "options": ['Estoy dispuesto a ir a cualquier parte de la ciudad', 
+                    'Prefiero eventos cerca de mi zona', 
+                    'Depende de la hora y tipo de evento', 
+                    'Solo si voy acompañado'],
+
+    },
+    {   #7  Optional
         "question": "¿Fumas con frecuencia?",
         "options": [
             "Sí, fumo con frecuencia",
@@ -78,7 +138,7 @@ questions = [
             "Lo hago para socializar"
         ]
     },
-    {
+    {   #8  Optional
         "question": "¿Bebes alcohol con frecuencia?",
         "options": [
             "Sí, bebo con frecuencia",
@@ -87,16 +147,25 @@ questions = [
             "No me gusta beber",
         ]
     },
-    {
-        "question": "¿En qué momento del día sueles ser más activo?",
+    {   #9
+        "question": "¿Cómo te sientes respecto a planes espontáneos?",
         "options": [
-            "En las mañanas",
-            "En las tardes",
-            "Por las noches",
-            "Todo el día"
+            "Me encantan, siempre estoy listo/a",
+            "Los disfruto si son interesantes",
+            "Prefiero tener algo de tiempo para organizarme",
+            "No son lo mío",
         ]
     },
-    {
+    {   #10
+        "question": "¿Qué tipo de interacción esperas durante un evento?",
+        "options": [
+            "Muchas risas y diversión",
+            "Compartir intereses mutuos",
+            "Solo estar presente y disfrutar el momento",
+            "Conversaciones profundas y significativas"
+        ]
+    },
+    {   #11  Optional   #Multi
         "question": "¿Tienes mascotas?",
         "options": [
             "Perro(s)",
@@ -112,7 +181,7 @@ questions = [
             "Me gustan pero no tengo"
         ]
     },
-    {
+    {   #12 Multi
         "question": "¿Cuáles son tus intereses?",
         "options": [
             "Naturaleza",
@@ -207,42 +276,20 @@ questions = [
             "Roblox",
         ]
     },
-    {
-        "question": "¿Qué tan activo eres en redes?",
-        "options": [
-            "Estoy al pendiente siempre",
-            "Normalmente estoy activo",
-            "En mis ratos libres",
-            "No estoy muy al pendiente",
-            "No las uso"
-        ]
+    {   #13 Multi
+        "_id": "6817d200a05c79868a61b64c",
+        "question": "¿Qué tipo de eventos te interesan más en CDMX?",
+        "options": ['Conciertos y festivales',
+                    'Cultura y exposiciones', 
+                    'Ferias y bazares', 
+                    'Eventos gastronómicos', 
+                    'Eventos alternativos o underground', 
+                    'Eventos de anime, cómics o gaming', 
+                    'Eventos deportivos', 
+                    'Meetups tranquilos (café, parque, museo)']
     },
-    {
-        "question": "¿Qué medio de transporte sueles usar?",
-        "options": [
-            "Metro",
-            "Cablebus",
-            "Taxi",
-            "Metrobus",
-            "Camión",
-            "Combi",
-            "Suburbano",
-            "Uber",
-            "Bicicleta",
-            "Motocicleta",
-            "Tengo carro propio"
-        ]
-    },
-    {
-        "question": "¿Cómo te sientes respecto a planes espontáneos?",
-        "options": [
-            "Me encantan, siempre estoy listo/a",
-            "Los disfruto si son interesantes",
-            "Prefiero tener algo de tiempo para organizarme",
-            "No son lo mío",
-        ]
-    },
-    {
+
+    {   #14
         "question": "¿Qué valoras más en una compañía?",
         "options": [
             "Buen sentido del humor",
@@ -252,16 +299,15 @@ questions = [
             "Gusto por las mismas actividades"
         ]
     },
-    {
-        "question": "¿Qué tipo de interacción esperas durante un evento?",
-        "options": [
-            "Muchas risas y diversión",
-            "Compartir intereses mutuos",
-            "Solo estar presente y disfrutar el momento",
-            "Conversaciones profundas y significativas"
-        ]
+    {   #15
+        "question": "¿Qué tipo de acompañante te gustaría para un evento?",
+        "options": ['Alguien divertido para pasarla bien', 
+                    'Alguien con intereses similares', 
+                    'Alguien para conocer mejor con el tiempo', 
+                    'Alguien que ya conozca el tipo de evento', 
+                    'Estoy abierto a conocer cualquier tipo de persona']
     },
-    {
+    {   #16 Optional
         "question": "¿Cuál es tu personalidad?",
         "options": [
             "INTJ", "INTP", "ENTJ", "ENTP",
@@ -576,13 +622,23 @@ def compatibilidad_personalidad(respuesta_a, respuesta_b):
 
 def compatibilidad_total(respuestas_usuario1, respuestas_usuario2):
     total_compatibilidad = 0.0
+    preguntas_consideradas = 0
+
+    if respuestas_usuario1[0] is not None and respuestas_usuario2[0] is not None:
+        total_compatibilidad += compatibilidad_actividad(respuestas_usuario1[0], respuestas_usuario2[0])
+        preguntas_consideradas += 1
+
+    if respuestas_usuario1[1] is not None and respuestas_usuario2[1] is not None:
+        total_compatibilidad += compatibilidad_transporte(respuestas_usuario1[1], respuestas_usuario2[1])
+        preguntas_consideradas += 1
+    
     total_compatibilidad += compatibilidad_fumar(respuestas_usuario1[0], respuestas_usuario2[0])
     total_compatibilidad += compatibilidad_alcohol(respuestas_usuario1[1], respuestas_usuario2[1])
-    total_compatibilidad += compatibilidad_actividad(respuestas_usuario1[2], respuestas_usuario2[2])
+    
     total_compatibilidad += compatibilidad_mascotas(respuestas_usuario1[3], respuestas_usuario2[3])
     total_compatibilidad += compatibilidad_intereses(respuestas_usuario1[4], respuestas_usuario2[4])*1.8
     total_compatibilidad += compatibilidad_redes(respuestas_usuario1[5], respuestas_usuario2[5])
-    total_compatibilidad += compatibilidad_transporte(respuestas_usuario1[6], respuestas_usuario2[6])
+    
     total_compatibilidad += compatibilidad_planes(respuestas_usuario1[7], respuestas_usuario2[7])
     total_compatibilidad += compatibilidad_interaccion(respuestas_usuario1[8], respuestas_usuario2[8])
     total_compatibilidad += compatibilidad_personalidad(respuestas_usuario1[10], respuestas_usuario2[10])
