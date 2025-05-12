@@ -497,37 +497,49 @@ def obtener_matches(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ------ Eliminar match
-# @api_view(["DELETE"])
-# def eliminar_match(request, usuario_id, match_id):
-#     user = request.user
-#     # Buscar el match por su _id
-#     match = get_object_or_404(Matches, _id=match_id)
-    
-#     # Verificar si el usuario está involucrado en este match
-#     if match.usuario_a._id != usuario_id and match.usuario_b._id != usuario_id:
-#         return Response({"error": "Este usuario no está involucrado en el match."}, status=status.HTTP_400_BAD_REQUEST)
-    
-#     # Eliminar el match de la lista de matches de ambos usuarios
-#     usuario_a = match.usuario_a
-#     usuario_b = match.usuario_b
-    
-#     # Eliminar el match de los campos 'matches' de ambos usuarios
-#     if match._id in usuario_a.matches:
-#         usuario_a.matches.remove(match._id)
-#     if match._id in usuario_b.matches:
-#         usuario_b.matches.remove(match._id)
-    
-#     # Guardar los cambios en los usuarios
-#     usuario_a.save()
-#     usuario_b.save()
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def eliminar_match(request, match_id):
+    usuario = request.user
 
-#     # Eliminar la conversación asociada (si también deseas eliminarla)
-#     Conversacion.objects.filter(match=match).delete()
+    try:
+        match = Matches.objects.get(_id=match_id)
+    except Matches.DoesNotExist:
+        return Response({'error': 'Match no encontrado'}, status=404)
 
-#     # Eliminar el match de la base de datos
-#     match.delete()
+    if usuario not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para eliminar este match'}, status=403)
 
-#     return Response({"message": "Match eliminado con éxito."}, status=status.HTTP_200_OK)
+    usuario_a = match.usuario_a
+    usuario_b = match.usuario_b
+
+    # Eliminar conversación y contar mensajes eliminados
+    mensajes_eliminados = 0
+    conversaciones_eliminadas = 0
+    try:
+        conversacion = Conversacion.objects.get(match=match)
+        mensajes_eliminados = conversacion.mensajes.count()
+        conversacion.delete()  # Esto borra también los mensajes automáticamente
+        conversaciones_eliminadas = 1
+    except Conversacion.DoesNotExist:
+        pass
+
+    # Eliminar interacciones entre ambos usuarios y contar
+    interacciones_eliminadas, _ = Interaccion.objects.filter(
+        Q(usuario_origen=usuario_a, usuario_destino=usuario_b) |
+        Q(usuario_origen=usuario_b, usuario_destino=usuario_a)
+    ).delete()
+
+    # Eliminar el match
+    match.delete()
+
+    return Response({
+        'message': 'Match eliminado correctamente.',
+        'interacciones_eliminadas': interacciones_eliminadas,
+        'mensajes_eliminados': mensajes_eliminados,
+        'conversaciones_eliminadas': conversaciones_eliminadas
+    }, status=200)
+
 
 #--------------------------------------- OBTENER SUGERENCIAS DE MATCHES --------------------------------
 #--------- Obtener personas recomendadas
@@ -586,6 +598,7 @@ def enviar_mensaje(request):
 
     # Obtenemos los datos de la solicitud
     conversacion_id = request.data.get('conversacion')
+    remitente_id = request.data.get('remitente')
     receptor_id = request.data.get('receptor')
     mensaje = request.data.get('mensaje')
 
@@ -606,7 +619,7 @@ def enviar_mensaje(request):
     # Crear el mensaje
     mensaje_data = {
         'conversacion': conversacion_id,
-        'remitente': remitente._id,
+        'remitente': remitente_id,
         'receptor': receptor_id,
         'mensaje': mensaje,
     }
