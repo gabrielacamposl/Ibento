@@ -71,6 +71,8 @@ useEffect(() => {
             
         } catch (error) {
             console.error("Error al obtener favoritos:", error);
+        }finally {
+            setLoading(false);
         }
     };
     fetchFavoritos();
@@ -146,7 +148,7 @@ useEffect(() => {
             );
         };
 
-
+const [loading, setLoading] = useState(true);
  if (loading) {
     return (
       <div className="flex min-h-screen justify-center items-center">
@@ -180,7 +182,7 @@ useEffect(() => {
                                     to="../editarPerfil"
                                     className="fondoFavorito  w-10 h-10 sm:w-10 sm:h-10 md:w-12 md:h-12 absolute bottom-0 right-0 bg-purple-300 text-white p-2 rounded-full"
                                     >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="sm:size-9 md:size-8  size-8 ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="sm:size-7 md:size-8  size-6 ">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                     </svg>
 
