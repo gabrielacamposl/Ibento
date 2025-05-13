@@ -53,7 +53,7 @@ function Page() {
     );
 
   }
-      
+
 interface LikeResponse {
   status: number;
 } 

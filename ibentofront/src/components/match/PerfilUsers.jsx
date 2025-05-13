@@ -63,6 +63,44 @@ const verPerfil = () => {
     };
 
 
+    const handleBlockUser = async () => {
+        try {
+            const response = await fetch(`/api/users/${userId}/block`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to block user');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleReportUser = async () => {
+        try {
+            const response = await fetch(`/api/users/${userId}/report`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to report user');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const deleteMatch = async () => {
+        try {
+            const response = await fetch(`/api/matches/${matchId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete match');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
     return (
         <div className="text-black flex justify-center  min-h-screen ">
             <div className="relative flex flex-col items-center   p-5 shadow-t max-w-lg w-full">
@@ -118,13 +156,13 @@ const verPerfil = () => {
             </div>
 
 
-            <Dialog open={showDialog} onClose={setShowDialog} className="relative z-10">
+            <Dialog open={showDialog} onClose={setShowDialog} className="items-center  w-full relative z-10">
                 <DialogBackdrop
                     transition
                     className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                 />
                 <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
                         <DialogPanel
                             transition
                             className="relative transform overflow-hidden  rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
@@ -149,7 +187,7 @@ const verPerfil = () => {
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                 <button
                                     type="button"
-                                    onClick={handleCloseDialog}
+                                    onClick={()=> {handleCloseDialog(); handleBlockUser(user.id);}}
                                     className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                 >
                                     Eliminar
@@ -178,7 +216,7 @@ const verPerfil = () => {
                     className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                 />
                 <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
                         <DialogPanel
                             transition
                             className="relative transform overflow-hidden  rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
@@ -233,7 +271,7 @@ const verPerfil = () => {
                     className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                 />
                 <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
                         <DialogPanel
                             transition
                             className="relative transform overflow-hidden  rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"

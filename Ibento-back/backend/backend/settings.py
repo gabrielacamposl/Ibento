@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'corsheaders', # Peticiones desde React  
     'api',  
     'api.user',
+    'channels',
+    'daphne'
 ]
 
 # PUSH_NOTIFICATION_SETTINGS = {
@@ -92,9 +94,25 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = 'backend.asgi.application'
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+# Usando channel redis
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+# Channel layers in memory (solo para desarrollo local)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 DATABASES = {
     'default': {

@@ -1202,7 +1202,7 @@ def obtener_evento_por_id(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
+
 #------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
 
 class UsuarioViewSet(viewsets.ModelViewSet):
