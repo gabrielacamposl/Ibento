@@ -2,8 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import password_reset_request, password_reset_validate, password_reset_resend, password_reset_change
-from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_like, obtener_matches, eliminar_match
-from api.user.views import obtener_mensajes, listar_conversaciones, mis_conversaciones, enviar_mensaje
+from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_like, obtener_matches, eliminar_match, cambiar_modo_busqueda
+from api.user.views import obtener_mensajes, mis_conversaciones, enviar_mensaje
 from api.user.views import estado_validacion_view, ine_validation_view
 from api.user.views import (crear_usuario, 
                             EventoViewSet,
@@ -16,10 +16,7 @@ from api.user.views import (crear_usuario,
                             guardar_respuestas_perfil,
                             importar_ticketmaster,
                             like_event,
-                            obtener_evento_por_id,
                             obtener_eventos_favoritos
-                            
-                            
                             )
 
 
@@ -58,15 +55,16 @@ urlpatterns = [
 
     # Matches
     path('api/interaccion/', matches, name='dar_like_dislike'),
+    path('api/match/modo/', cambiar_modo_busqueda, name='cambiar_modo_busqueda'),
     path('api/matches/sugerencias/', sugerencia_usuarios, name='sugerencias_usuarios'),
     path('api/matches/', obtener_matches, name='obtener_matches'), 
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     # Likes recibidos
     path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
     # Conversaciones
-    path('api/conversaciones/', listar_conversaciones, name='listar_conversaciones'),
+
     path('api/mis-conversaciones/', mis_conversaciones, name='mis_conversaciones'),
-     path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
+    path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
   
     #Otras

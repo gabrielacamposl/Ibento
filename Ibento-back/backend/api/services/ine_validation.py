@@ -56,10 +56,12 @@ def ocr_ine(front_b64, back_b64):
     data = r.json().get("response", {})
     cic = data.get("cic")
     id_ciudadano = data.get("identificadorCiudadano")
+    metadata = data.get("metadata", {})
+    curp = metadata.get("curp")
 
     print(f"Datos extraídos - CIC: {cic}, ID Ciudadano: {id_ciudadano}")
     
-    return cic, id_ciudadano
+    return cic, id_ciudadano, curp
 
 
 def validate_ine(cic, id_ciudadano):
