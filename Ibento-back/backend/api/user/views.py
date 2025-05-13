@@ -997,22 +997,27 @@ class EventoViewSet(viewsets.ModelViewSet):
                 "title": titleEvento,
                 "classification": classiEvento
             })
+
         # Mandamos todos los eventos a la función de recomendación
         eventos_recomendados = obtener_eventos_recomendados(preferenciasUser, eventos_data, eventos_query)
+
         serializer = EventoSerializerLimitado(eventos_recomendados, many= True)
         return Response(serializer.data)
 
 # ------- Obtener eventos por ID
     @action(detail=False, methods=['get'])
     def event_by_id(self, request):
+
         # Obtener el id del parámetro de consulta
         id_event = request.query_params.get('eventId')
+
         # Validar que el parámetro de categoría esté presente
         if not id_event:
             return Response(
                 {"detail": "Se requiere el parámetro de consulta 'id_event'."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         # Filtrar el evento por ID
         try:
             event = self.get_queryset().get(_id=id_event)
@@ -1025,7 +1030,9 @@ class EventoViewSet(viewsets.ModelViewSet):
         serializer = EventoSerializer(event)
         return Response(serializer.data)
 
-# ------- Guardar evento en guardado -----
+
+    # ------- Guardar evento en guardado -----
+
     @action(detail=False, methods=['post'])
     @permission_classes([IsAuthenticated])
     def save(self, request):
@@ -1033,6 +1040,7 @@ class EventoViewSet(viewsets.ModelViewSet):
 
         # Obtener el id del parámetro de consulta
         id_event = request.query_params.get('eventId')
+
         #Obtener id del usuario
         id_user = usuario._id
         #Añadir guardado a evento
@@ -1066,7 +1074,7 @@ class EventoViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
         
-#------- Eliminar evento de guardados
+
     @action(detail=False, methods=['delete'])
     @permission_classes([IsAuthenticated])
     def delete_save(self, request):
@@ -1083,6 +1091,7 @@ class EventoViewSet(viewsets.ModelViewSet):
             return Response(
                 {"detail": "Evento no encontrado."}
             )
+
         #Comprobamos si el evento esta guardado
         if id_event in usuario.save_events:
             usuario.save_events.remove(id_event)
