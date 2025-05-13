@@ -59,10 +59,11 @@ urlpatterns = [
     path('api/matches/sugerencias/', sugerencia_usuarios, name='sugerencias_usuarios'),
     path('api/matches/', obtener_matches, name='obtener_matches'), 
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
+    
     # Likes recibidos
     path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
-    # Conversaciones
 
+    # Conversaciones
     path('api/mis-conversaciones/', mis_conversaciones, name='mis_conversaciones'),
     path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),

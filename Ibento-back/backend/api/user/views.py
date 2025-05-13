@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes, action, pars
 from rest_framework.parsers import MultiPartParser
 # Utils Django
 from django.utils import timezone
+from django.utils.timezone import now
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
@@ -176,7 +177,6 @@ def password_reset_validate(request):
 
 
 # ------ Reesetear contraseña
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_change(request):
@@ -202,7 +202,6 @@ def password_reset_change(request):
 
 
 # ----- Reeenviar token nuevemente
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_resend(request):
@@ -233,7 +232,6 @@ def password_reset_resend(request):
 
 
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
-
 # ------- Seleccionar intereses para el perfil
 # Mostrar Intereses
 
@@ -287,6 +285,8 @@ def guardar_respuestas_perfil(request):
     usuario.save()
 
     return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+
+#----- Devolver las respuestas como arreglo
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
@@ -527,7 +527,6 @@ def sugerencia_usuarios(request):
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 # ------- Crear Match
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def matches(request):
@@ -586,22 +585,33 @@ def personas_que_me_dieron_like(request):
         tipo_interaccion="like"
     ).select_related("usuario_origen")
 
-    usuarios = [
-        {
-            "id": interaccion.usuario_origen._id,
-            "nombre": interaccion.usuario_origen.nombre,
-            "email": interaccion.usuario_origen.email,
-            "foto_perfil": interaccion.usuario_origen.profile_pic.url if interaccion.usuario_origen.profile_pic else None,
-            "preferencias_generales": interaccion.usuario_origen.preferencias_generales,
-            "preferencias_eventos": interaccion.usuario_origen.preferencias_evento,
-        }
-        for interaccion in interacciones
-    ]
+    usuarios = []
+
+    for interaccion in interacciones:
+        u = interaccion.usuario_origen
+
+        # Calcular edad si hay birthday
+        edad = None
+        if u.birthday:
+            today = date.today()
+            edad = today.year - u.birthday.year - (
+                (today.month, today.day) < (u.birthday.month, u.birthday.day)
+            )
+
+        usuarios.append({
+            "_id": u._id,
+            "nombre": u.nombre,
+            "apellido": u.apellido,
+            "profile_pic": u.profile_pic[0] if u.profile_pic else None,
+            "preferencias_evento": u.preferencias_evento,
+            "preferencias_generales": u.preferencias_generales,
+            "edad": edad,
+            "descripcion": u.description
+        })
 
     return Response(usuarios, status=200)
 
 # ------- Ver Matches
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def obtener_matches(request):
@@ -657,9 +667,6 @@ def eliminar_match(request, match_id):
     }, status=200)
 
 
-
-
-
 # --------------------------------------  CONVERSACIONES ------------------------------------------------
 # -------- Ver conversiones
 @api_view(["GET"])
@@ -669,24 +676,48 @@ def mis_conversaciones(request):
 
     conversaciones = Conversacion.objects.filter(
         Q(usuario_a=usuario) | Q(usuario_b=usuario)
-    ).select_related("usuario_a", "usuario_b")
+    ).select_related("usuario_a", "usuario_b", "match")
 
     data = []
+
     for conv in conversaciones:
         otro_usuario = conv.usuario_b if conv.usuario_a == usuario else conv.usuario_a
-        data.append({
+
+        # Buscar último mensaje (si existe)
+        ultimo_mensaje = Mensaje.objects.filter(conversacion=conv).order_by("-fecha_envio").first()
+
+        data_conv = {
             "conversacion_id": conv._id,
-            #Se agregó el match_id para la vista de los matches
             "match_id": conv.match._id,
             "usuario": {
-                "id": otro_usuario._id,
+                "_id": otro_usuario._id,
                 "nombre": otro_usuario.nombre,
-                "email": otro_usuario.email,
-                "foto_perfil": otro_usuario.profile_pic.url if otro_usuario.profile_pic else None,
+                "apellido": otro_usuario.apellido,
+                "profile_pic": otro_usuario.profile_pic[0] if otro_usuario.profile_pic else None,
+                "preferencias_evento": otro_usuario.preferencias_evento,
+                "preferencias_generales": otro_usuario.preferencias_generales,
+                "edad": calcular_edad(otro_usuario.birthday)
             }
-        })
+        }
+
+        if ultimo_mensaje:
+            try:
+                # Intentamos acceder al remitente de forma segura
+                if ultimo_mensaje.remitente:
+                    data_conv["ultimo_mensaje"] = ultimo_mensaje.mensaje
+                    data_conv["remitente_nombre"] = ultimo_mensaje.remitente.nombre
+                else:
+                    data_conv["ultimo_mensaje"] = ultimo_mensaje.mensaje
+                    data_conv["remitente_nombre"] = "Remitente no disponible"
+            except Mensaje.remitente.RelatedObjectDoesNotExist:
+                data_conv["ultimo_mensaje"] = ultimo_mensaje.mensaje
+                data_conv["remitente_nombre"] = "Remitente no disponible"
+
+        data.append(data_conv)
 
     return Response(data)
+
+
 
 #--------- Enviar mensaje
 @api_view(['POST'])

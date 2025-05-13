@@ -163,10 +163,16 @@ class IntereccionSerializer(serializers.ModelSerializer):
         read_only_fields = ['usuario_origen', 'fecha_interaccion']
 
 # ------Generar Match
-class MatchSerializer (serializers.ModelSerializer):
+class MatchSerializer(serializers.ModelSerializer):
+    usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only=True)
+    usuario_a_apellido = serializers.CharField(source="usuario_a.apellido", read_only=True)
+    usuario_b_nombre = serializers.CharField(source="usuario_b.nombre", read_only=True)
+    usuario_b_apellido = serializers.CharField(source="usuario_b.apellido", read_only=True)
+    
     class Meta:
         model = Matches
-        fields = '__all__'
+        fields = ['_id', 'usuario_a', 'usuario_b', 'usuario_a_nombre', 'usuario_a_apellido', 'usuario_b_nombre', 'usuario_b_apellido']
+
 
 # --------- Conversaciones con matches
 class ConversacionSerializer (serializers.ModelSerializer):
