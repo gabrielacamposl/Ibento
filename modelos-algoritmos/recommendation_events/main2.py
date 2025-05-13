@@ -136,39 +136,6 @@ ticketmaster_elements = [
     "Urbano"
 ]
 
-# Usuarios y sus preferencias
-usuarios = {
-        "usuario1" : [
-        "Fútbol",
-        "Baloncesto",
-        "Tenis",
-        "Atletismo",
-        "Rock",
-        "Comedia",
-        "Acción/Aventura",
-    ],
-
-    "usuario2" : [
-        "Teatro Infantil",
-        "Música Infantil",
-        "Familia",
-        "Ferias y Festivales",
-        "Bellas Artes",
-        "Cine de Autor",
-        "Comida y Bebida",
-    ],
-
-    "usuario3" : [
-        "Jazz",
-        "Pop",
-        "Drama",
-        "Interés Especial/Pasatiempos",
-        "Salud/Bienestar",
-        "Rugby",
-        "Conferencia/Seminario",
-    ]
-}
-
 # Función para cargar eventos desde un archivo JSON
 def cargar_eventos_desde_json(ruta_archivo):
     with open(ruta_archivo, "r", encoding="utf-8") as archivo:
@@ -176,7 +143,7 @@ def cargar_eventos_desde_json(ruta_archivo):
 
 # Función para obtener las clasificaciones de un evento
 def obtener_clasificaciones(evento):
-    return evento.get("classification", [])
+    return evento.get("clasificaciones", [])
 
 # Función para convertir etiquetas a un vector binario
 def tags_a_vector(tags, lista_tags):
@@ -187,14 +154,14 @@ def crear_vectores_eventos(eventos, lista_tags):
     vectores_eventos = {}
     for evento in eventos:
         clasificaciones = obtener_clasificaciones(evento)
-        vector = tags_a_vector(clasificaciones[1], lista_tags)
-        vectores_eventos[evento["title"]] = vector
+        vector = tags_a_vector(clasificaciones, lista_tags)
+        vectores_eventos[evento["nombre"]] = vector
     return vectores_eventos
 
 # Función principal
 def main():
-    # Ruta del archivo JSON
-    ruta_archivo = "ticketmaster_events_max.json"
+    # JSON o lista de Python con todos los eventos
+    ruta_archivo = "ticketmaster_events.json"
 
     # Cargar eventos desde el archivo
     eventos = cargar_eventos_desde_json(ruta_archivo)
@@ -234,5 +201,5 @@ def main():
         print(f"{evento}: {similitud:.2f}")
 
 if __name__ == "__main__":
-    #print(len(ticketmaster_elements))
-    main()
+    print(len(ticketmaster_elements))
+    #main()
