@@ -63,6 +63,44 @@ const verPerfil = () => {
     };
 
 
+    const handleBlockUser = async () => {
+        try {
+            const response = await fetch(`/api/users/${userId}/block`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to block user');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleReportUser = async () => {
+        try {
+            const response = await fetch(`/api/users/${userId}/report`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to report user');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const deleteMatch = async () => {
+        try {
+            const response = await fetch(`/api/matches/${matchId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete match');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
     return (
         <div className="text-black flex justify-center  min-h-screen ">
             <div className="relative flex flex-col items-center   p-5 shadow-t max-w-lg w-full">
@@ -149,7 +187,7 @@ const verPerfil = () => {
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                 <button
                                     type="button"
-                                    onClick={handleCloseDialog}
+                                    onClick={()=> {handleCloseDialog(); handleBlockUser(user.id);}}
                                     className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                 >
                                     Eliminar

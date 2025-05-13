@@ -89,13 +89,13 @@ const Like = async (id_event: string): Promise<void> => {
   }
 };
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    if (eventos.length > 0 && eventId) {
-      const foundEvent = eventos.find((ev) => ev._id === eventId);
-      setCurrentEvent(foundEvent || null);
-    }
-  }, [eventos, eventId]);
+  //   if (eventos.length > 0 && eventId) {
+  //     const foundEvent = eventos.find((ev) => ev._id === eventId);
+  //     setCurrentEvent(foundEvent || null);
+  //   }
+  // }, [eventos, eventId]);
 
   if (error) {
     return (

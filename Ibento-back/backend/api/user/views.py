@@ -887,75 +887,6 @@ class EventoViewSet(viewsets.ModelViewSet):
             serializer = EventoSerializerLimitadoWithFecha(limited_events, many=True)
 
         return Response(serializer.data)
-    
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def like_event(request, pk):
-    try:
-        # Obtener el evento usando pk
-        event = Evento.objects.get(pk=pk)
-        user = request.user
-
-        # Verificar si el evento ya está en los favoritos del usuario
-        if event.pk in user.favourite_events:
-            return Response({"detail": "El evento ya está en tus favoritos."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Agregar el evento a los favoritos del usuario
-        user.favourite_events.append(event.pk)  # Store only the event ID
-        user.save(update_fields=['favourite_events'])
-
-        # Incrementar el contador de likes del evento
-        event.numLike = (event.numLike or 0) + 1
-        event.save(update_fields=['numLike'])
-
-        return Response({"detail": "Evento agregado a favoritos y like registrado."}, status=status.HTTP_200_OK)
-    except Evento.DoesNotExist:
-        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
-
-# ------- Obtener eventos favoritos
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def obtener_eventos_favoritos(request):
-    user = request.user
-    eventos_favoritos = Evento.objects.filter(pk__in=user.favourite_events)
-    serializer = EventoSerializer(eventos_favoritos, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-# ------- Eliminar evento de favoritos
-@api_view(["DELETE"])
-@permission_classes([IsAuthenticated])
-def eliminar_evento_favorito(request, evento_id):
-    user = request.user
-    try:
-        evento = Evento.objects.get(pk=evento_id)
-        if evento.pk in user.favourite_events:
-            user.favourite_events.remove(evento.pk)
-            user.save(update_fields=['favourite_events'])
-
-            # Reducir el contador de likes del evento
-            if evento.numLike and evento.numLike > 0:
-                evento.numLike -= 1
-                evento.save(update_fields=['numLike'])
-
-            return Response({"detail": "Evento eliminado de favoritos."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"detail": "El evento no está en tus favoritos."}, status=status.HTTP_400_BAD_REQUEST)
-    except Evento.DoesNotExist:
-        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-# ------- Obtener eventos por ID
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def obtener_evento_por_id(request, pk):
-    try:
-        evento = Evento.objects.get(pk=pk)
-        serializer = EventoSerializer(evento)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Evento.DoesNotExist:
-        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
 
     @action(detail=False, methods=['get'])
     def event_by_id(self, request):
@@ -1028,7 +959,78 @@ def obtener_evento_por_id(request, pk):
             {"detail": "El evento ya está guardado."},
             status=status.HTTP_400_BAD_REQUEST
         )
-        
+ 
+  
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def like_event(request, pk):
+    try:
+        # Obtener el evento usando pk
+        event = Evento.objects.get(pk=pk)
+        user = request.user
+
+        # Verificar si el evento ya está en los favoritos del usuario
+        if event.pk in user.favourite_events:
+            return Response({"detail": "El evento ya está en tus favoritos."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Agregar el evento a los favoritos del usuario
+        user.favourite_events.append(event.pk)  # Store only the event ID
+        user.save(update_fields=['favourite_events'])
+
+        # Incrementar el contador de likes del evento
+        event.numLike = (event.numLike or 0) + 1
+        event.save(update_fields=['numLike'])
+
+        return Response({"detail": "Evento agregado a favoritos y like registrado."}, status=status.HTTP_200_OK)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    
+
+# ------- Obtener eventos favoritos
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_eventos_favoritos(request):
+    user = request.user
+    eventos_favoritos = Evento.objects.filter(pk__in=user.favourite_events)
+    serializer = EventoSerializer(eventos_favoritos, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# ------- Eliminar evento de favoritos
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def eliminar_evento_favorito(request, evento_id):
+    user = request.user
+    try:
+        evento = Evento.objects.get(pk=evento_id)
+        if evento.pk in user.favourite_events:
+            user.favourite_events.remove(evento.pk)
+            user.save(update_fields=['favourite_events'])
+
+            # Reducir el contador de likes del evento
+            if evento.numLike and evento.numLike > 0:
+                evento.numLike -= 1
+                evento.save(update_fields=['numLike'])
+
+            return Response({"detail": "Evento eliminado de favoritos."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "El evento no está en tus favoritos."}, status=status.HTTP_400_BAD_REQUEST)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ------- Obtener eventos por ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_evento_por_id(request, pk):
+    try:
+        evento = Evento.objects.get(pk=pk)
+        serializer = EventoSerializer(evento)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
+       
 #------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
 
 class UsuarioViewSet(viewsets.ModelViewSet):
