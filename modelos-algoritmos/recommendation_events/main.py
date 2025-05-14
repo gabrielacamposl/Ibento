@@ -5,95 +5,168 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Lista de elementos de Ticketmaster
 ticketmaster_elements = [
-    "Music",
-    "Sports",
-    "Arts & Theatre",
-    "Family",
-    "Miscellaneous",
-    "Alternative",
+    #Diverso
+    "Casino/Juegos",
+    "Comedia",
+    "Comunidad/Cívico",
+    "Comunidad/Cultural",
+    "Ferias y Festivales",
+    "Familia",
+    "Comida y Bebida",
+    "Salud/Bienestar",
+    "Exposiciones de Pasatiempos/Intereses Especiales",
+    "Festividades",
+    "Shows de Hielo",
+    "Conferencia/Seminario",
+    "Multimedia",
+    "Psíquicos/Médiums/Hipnotistas",
+    "Interés Especial/Pasatiempos",
+    "No Definido",
+    #Deportes
+    "Acuáticos",
+    "Carreras Atléticas",
+    "Bádminton",
+    "Bandy",
+    "Béisbol",
+    "Baloncesto",
+    "Biatlón",
+    "Fisicoculturismo",
+    "Boxeo",
+    "Cricket",
+    "Curling",
+    "Ciclismo",
+    "Ecuestre",
+    "eSports",
+    "Extremo",
+    "Hockey sobre Césped",
+    "Fitness",
+    "Floorball",
+    "Fútbol Americano",
+    "Golf",
+    "Gimnasia",
+    "Balonmano",
+    "Hockey",
+    "Patinaje sobre Hielo",
+    "Fútbol Sala",
+    "Lacrosse",
+    "Artes Marciales",
+    "Diverso",
+    "Motores/Carreras",
+    "Netball",
+    "Rodeo",
+    "Roller Derby",
+    "Roller Hockey",
+    "Rugby",
+    "Salto de Esquí",
+    "Esquí",
+    "Fútbol",
+    "Softbol",
+    "Squash",
+    "Surf",
+    "Natación",
+    "Tenis de Mesa",
+    "Tenis",
+    "Toros",
+    "Atletismo",
+    "Voleibol",
+    "Waterpolo",
+    "Lucha Libre",
+    "Ringuette",
+    "Pádel",
+    #Música
+    "Alternativa",
+    "Baladas/Romántica",
     "Blues",
-    "Classical",
+    "Canción Francesa",
+    "Música Infantil",
+    "Clásica",
     "Country",
-    "Electronic",
+    "Dance/Electrónica",
     "Folk",
     "Hip-Hop/Rap",
+    "Festiva",
     "Jazz",
-    "Latin",
+    "Latina",
+    "Medieval/Renacimiento",
+    "Metal",
+    "New Age",
+    "Otro",
     "Pop",
     "R&B",
+    "Reggae",
+    "Religiosa",
     "Rock",
-    "World",
-    "Adventure Sports",
-    "Baseball",
-    "Basketball",
-    "Boxing",
-    "Cricket",
-    "Football",
-    "American Football",
-    "Golf",
-    "Hockey",
-    "Lacrosse",
-    "Martial Arts",
-    "Motor Sports",
-    "Olympics",
-    "Horse Racing",
-    "Rodeo",
-    "Tennis",
-    "Volleyball",
-    "Ballet",
-    "Musicals",
-    "Opera",
-    "Performance Art",
-    "Theatre",
-    "Children's",
-    "Disney On Ice",
-    "Monster Jam",
-    "Sesame Street Live",
-    "Circus",
-    "Comedy",
-    "Fairs",
-    "Festivals",
-    "Movies",
-    "Museums",
-    "Parks",
-    "Spectacular Shows",
-    "Indie Rock",
-    "Alternative Metal",
-    "Acoustic Blues",
-    "Blues Rock",
-    "Chamber Music",
-    "Choral",
-    "Alternative Country",
-    "Country Pop",
-    "House",
-    "Techno",
-    "Alternative Folk",
-    "Celtic",
-    "Conscious",
-    "East Coast",
-    "Avant-Garde Jazz",
-    "Bebop",
-    "Bachata",
-    "Banda",
-    "Alternative Pop",
-    "Dance Pop",
-    "Alternative R&B",
-    "Adult Contemporary",
-    "Rock And Roll",
-    "Alternative Rock",
-    "Afro-Beat",
-    "Arabic",
+    "No Definido",
+    "Mundial",
+    #Artes y Teatro
+    "Teatro Infantil",
+    "Circo y Actos Especiales",
+    "Clásico",
+    "Comedia",
+    "Cultural",
+    "Danza",
+    "Espectáculo",
+    "Moda",
+    "Bellas Artes",
+    "Magia e Ilusión",
+    "Diverso",
+    "Teatro diverso",
+    "Multimedia",
+    "Música",
+    "Ópera",
+    "Arte Performático",
+    "Títeres",
+    "Espectacular",
+    "Teatro",
+    "Variedades",
+    "No Definido",
+    #Cine
+    "Acción/Aventura",
+    "Animación",
+    "Cine de Autor",
+    "Comedia",
+    "Documental",
+    "Drama",
+    "Familiar",
+    "Extranjero",
+    "Terror",
+    "Diverso",
+    "Música",
+    "Ciencia Ficción",
+    "Urbano"
 ]
 
 # Usuarios y sus preferencias
 usuarios = {
-    "usuario1": ["Music", "Folk", "Football", "Baseball", "Circus"],
-    "usuario2": ["Arts & Theatre", "Comedy", "Boxing", "Jazz"],
-    "usuario3": ["Music", "Rock", "Alternative Rock", "Festivals"],
-    "usuario4": ["Sports", "Football", "Tennis", "Basketball"],
-    "usuario5": ["Arts & Theatre", "Musicals", "Theatre", "Comedy"],
-    "usuario6": ["Family", "Children's", "Disney On Ice"],
-    "usuario7": ["Music", "Electronic", "House", "Pop", "Dance Pop"],
+        "usuario1" : [
+        "Fútbol",
+        "Baloncesto",
+        "Tenis",
+        "Atletismo",
+        "Rock",
+        "Comedia",
+        "Acción/Aventura",
+    ],
+
+    "usuario2" : [
+        "Teatro Infantil",
+        "Música Infantil",
+        "Familia",
+        "Ferias y Festivales",
+        "Bellas Artes",
+        "Cine de Autor",
+        "Comida y Bebida",
+    ],
+
+    "usuario3" : [
+        "Jazz",
+        "Pop",
+        "Drama",
+        "Interés Especial/Pasatiempos",
+        "Salud/Bienestar",
+        "Rugby",
+        "Conferencia/Seminario",
+    ]
 }
 
 # Función para cargar eventos desde un archivo JSON
@@ -103,7 +176,7 @@ def cargar_eventos_desde_json(ruta_archivo):
 
 # Función para obtener las clasificaciones de un evento
 def obtener_clasificaciones(evento):
-    return evento.get("clasificaciones", [])
+    return evento.get("classification", [])
 
 # Función para convertir etiquetas a un vector binario
 def tags_a_vector(tags, lista_tags):
@@ -114,25 +187,20 @@ def crear_vectores_eventos(eventos, lista_tags):
     vectores_eventos = {}
     for evento in eventos:
         clasificaciones = obtener_clasificaciones(evento)
-        vector = tags_a_vector(clasificaciones, lista_tags)
-        vectores_eventos[evento["nombre"]] = vector
+        vector = tags_a_vector(clasificaciones[1], lista_tags)
+        vectores_eventos[evento["title"]] = vector
     return vectores_eventos
 
 # Función principal
 def main():
     # Ruta del archivo JSON
-    ruta_archivo = "ticketmaster_events.json"
+    ruta_archivo = "ticketmaster_events_max.json"
 
     # Cargar eventos desde el archivo
     eventos = cargar_eventos_desde_json(ruta_archivo)
 
     # Crear vectores para los eventos
     vectores_eventos = crear_vectores_eventos(eventos, ticketmaster_elements)
-
-    # # Imprimir los vectores de los eventos
-    # print("Vectores de eventos:")
-    # pprint(vectores_eventos, width=50, indent=2, depth=3, compact=False)
-    # print("\n")
 
     vector_usuario1 = tags_a_vector(usuarios["usuario1"], ticketmaster_elements)
 
@@ -166,4 +234,5 @@ def main():
         print(f"{evento}: {similitud:.2f}")
 
 if __name__ == "__main__":
+    #print(len(ticketmaster_elements))
     main()

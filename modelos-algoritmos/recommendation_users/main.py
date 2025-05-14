@@ -68,7 +68,67 @@ users = [
 
 
 questions = [
-    {
+    {   #1   Optional
+        "question": "¿En qué momento del día sueles ser más activo?",
+        "options": [
+            "En las mañanas",
+            "En las tardes",
+            "Por las noches",
+            "Todo el día"
+        ]
+    },
+    {   #2   Optional #Multi
+        "question": "¿Qué medio de transporte sueles usar?",
+        "options": [
+            "Metro",
+            "Cablebus",
+            "Taxi",
+            "Metrobus",
+            "Camión",
+            "Combi",
+            "Suburbano",
+            "Uber",
+            "Bicicleta",
+            "Motocicleta",
+            "Tengo carro propio"
+        ]
+    },
+    {   #3   Optional
+        "question": "¿Qué tan activo eres en redes?",
+        "options": [
+            "Estoy al pendiente siempre",
+            "Normalmente estoy activo",
+            "En mis ratos libres",
+            "No estoy muy al pendiente",
+            "No las uso"
+        ]
+    },
+    {   #4  Multi
+        "question": "¿En qué zonas de CDMX te mueves más seguido?",
+        "options" : ['Centro (Cuauhtémoc, Doctores, Juárez, Roma, Condesa)',
+                     'Sur (Coyoacán, Tlalpan, Xochimilco)', 
+                     'Poniente (Santa Fe, Álvaro Obregón, San Ángel)',
+                     'Norte (GAM, Azcapotzalco, Lindavista)', 
+                     'Oriente (Iztapalapa, Iztacalco, Neza)', 
+                     'Me muevo por toda la ciudad', 
+                     'Vivo en el Estado de México pero voy seguido a CDMX']
+    },
+    {   #5
+        "question": "¿Qué días prefieres para asistir a eventos?",
+        "options": ['Entre semana (Lunes a Jueves)', 
+                    'Fines de semana (Viernes a Domingo)', 
+                    'Cualquier día', 
+                    'Depende del evento']
+    },
+    {   #6
+        "question": "¿Qué tan dispuesto estás a desplazarte para un evento?",
+        "options": ['Estoy dispuesto a ir a cualquier parte de la ciudad', 
+                    'Prefiero eventos cerca de mi zona', 
+                    'Depende de la hora y tipo de evento', 
+                    'Solo si voy acompañado'],
+
+    },
+    {   #7  Optional
         "question": "¿Fumas con frecuencia?",
         "options": [
             "Sí, fumo con frecuencia",
@@ -78,7 +138,7 @@ questions = [
             "Lo hago para socializar"
         ]
     },
-    {
+    {   #8  Optional
         "question": "¿Bebes alcohol con frecuencia?",
         "options": [
             "Sí, bebo con frecuencia",
@@ -87,16 +147,25 @@ questions = [
             "No me gusta beber",
         ]
     },
-    {
-        "question": "¿En qué momento del día sueles ser más activo?",
+    {   #9
+        "question": "¿Cómo te sientes respecto a planes espontáneos?",
         "options": [
-            "En las mañanas",
-            "En las tardes",
-            "Por las noches",
-            "Todo el día"
+            "Me encantan, siempre estoy listo/a",
+            "Los disfruto si son interesantes",
+            "Prefiero tener algo de tiempo para organizarme",
+            "No son lo mío",
         ]
     },
-    {
+    {   #10
+        "question": "¿Qué tipo de interacción esperas durante un evento?",
+        "options": [
+            "Muchas risas y diversión",
+            "Compartir intereses mutuos",
+            "Solo estar presente y disfrutar el momento",
+            "Conversaciones profundas y significativas"
+        ]
+    },
+    {   #11  Optional   #Multi
         "question": "¿Tienes mascotas?",
         "options": [
             "Perro(s)",
@@ -112,7 +181,7 @@ questions = [
             "Me gustan pero no tengo"
         ]
     },
-    {
+    {   #12 Multi
         "question": "¿Cuáles son tus intereses?",
         "options": [
             "Naturaleza",
@@ -207,42 +276,19 @@ questions = [
             "Roblox",
         ]
     },
-    {
-        "question": "¿Qué tan activo eres en redes?",
-        "options": [
-            "Estoy al pendiente siempre",
-            "Normalmente estoy activo",
-            "En mis ratos libres",
-            "No estoy muy al pendiente",
-            "No las uso"
-        ]
+    {   #13 Multi
+        "_id": "6817d200a05c79868a61b64c",
+        "question": "¿Qué tipo de eventos te interesan más en CDMX?",
+        "options": ['Conciertos y festivales',
+                    'Cultura y exposiciones', 
+                    'Ferias y bazares', 
+                    'Eventos gastronómicos', 
+                    'Eventos alternativos o underground', 
+                    'Eventos de anime, cómics o gaming', 
+                    'Eventos deportivos', 
+                    'Meetups tranquilos (café, parque, museo)']
     },
-    {
-        "question": "¿Qué medio de transporte sueles usar?",
-        "options": [
-            "Metro",
-            "Cablebus",
-            "Taxi",
-            "Metrobus",
-            "Camión",
-            "Combi",
-            "Suburbano",
-            "Uber",
-            "Bicicleta",
-            "Motocicleta",
-            "Tengo carro propio"
-        ]
-    },
-    {
-        "question": "¿Cómo te sientes respecto a planes espontáneos?",
-        "options": [
-            "Me encantan, siempre estoy listo/a",
-            "Los disfruto si son interesantes",
-            "Prefiero tener algo de tiempo para organizarme",
-            "No son lo mío",
-        ]
-    },
-    {
+    {   #14
         "question": "¿Qué valoras más en una compañía?",
         "options": [
             "Buen sentido del humor",
@@ -252,16 +298,15 @@ questions = [
             "Gusto por las mismas actividades"
         ]
     },
-    {
-        "question": "¿Qué tipo de interacción esperas durante un evento?",
-        "options": [
-            "Muchas risas y diversión",
-            "Compartir intereses mutuos",
-            "Solo estar presente y disfrutar el momento",
-            "Conversaciones profundas y significativas"
-        ]
+    {   #15
+        "question": "¿Qué tipo de acompañante te gustaría para un evento?",
+        "options": ['Alguien divertido para pasarla bien', 
+                    'Alguien con intereses similares', 
+                    'Alguien para conocer mejor con el tiempo', 
+                    'Alguien que ya conozca el tipo de evento', 
+                    'Estoy abierto a conocer cualquier tipo de persona']
     },
-    {
+    {   #16 Optional
         "question": "¿Cuál es tu personalidad?",
         "options": [
             "INTJ", "INTP", "ENTJ", "ENTP",
@@ -349,69 +394,9 @@ types = list(compatibility_matrix_personality.keys())
 def tags_a_vector(tags, lista_tags):
     return np.array([1 if tag in tags else 0 for tag in lista_tags])
 
-def compatibilidad_fumar(respuesta1, respuesta2):
-    compatibilidad = {
-        ("Sí, fumo con frecuencia", "Sí, fumo con frecuencia"): 1.0,
-        ("Sí, fumo con frecuencia", "Lo hago para socializar"): 0.7,
-        ("Sí, fumo con frecuencia", "Solamente en reuniones"): 0.5,
-        ("Sí, fumo con frecuencia", "Trato de dejarlo"): -0.2,
-        ("Sí, fumo con frecuencia", "No me gusta fumar"): -0.5,
-        
-        ("Solamente en reuniones", "Solamente en reuniones"): 1.0,
-        ("Solamente en reuniones", "Lo hago para socializar"): 0.8,
-        ("Solamente en reuniones", "Trato de dejarlo"): 0.2,
-        ("Solamente en reuniones", "No me gusta fumar"): -0.1,
-        
-        ("No me gusta fumar", "No me gusta fumar"): 1.0,
-        ("No me gusta fumar", "Lo hago para socializar"): 0.1,
-        ("No me gusta fumar", "Trato de dejarlo"): 0.5,
-        
-        ("Trato de dejarlo", "Trato de dejarlo"): 1.0,
-        ("Trato de dejarlo", "Lo hago para socializar"): 0.2,
-        
-        ("Lo hago para socializar", "Lo hago para socializar"): 1.0
-    }
-    
-    # Verificar ambas combinaciones posibles (orden no importa)
-    if (respuesta1, respuesta2) in compatibilidad:
-        return compatibilidad[(respuesta1, respuesta2)]
-    elif (respuesta2, respuesta1) in compatibilidad:
-        return compatibilidad[(respuesta2, respuesta1)]
-    else:
-        return 0.0  # Valor por defecto si no hay coincidencia
 
-def compatibilidad_alcohol(respuesta1, respuesta2):
-    opciones_alcohol = [
-        "Sí, bebo con frecuencia",
-        "Lo hago para socializar o en reuniones",
-        "Rara vez bebo alcohol",
-        "No me gusta beber"
-    ]
-    
-    compatibilidad = {
-        (opciones_alcohol[0], opciones_alcohol[0]): 1.0,
-        (opciones_alcohol[0], opciones_alcohol[1]): 0.7,
-        (opciones_alcohol[0], opciones_alcohol[2]): 0.4,
-        (opciones_alcohol[0], opciones_alcohol[3]): -0.5,
 
-        (opciones_alcohol[1], opciones_alcohol[1]): 1.0,
-        (opciones_alcohol[1], opciones_alcohol[2]): 0.5,
-        (opciones_alcohol[1], opciones_alcohol[3]): -0.2,
-
-        (opciones_alcohol[2], opciones_alcohol[2]): 1.0,
-        (opciones_alcohol[2], opciones_alcohol[3]): 0.3,
-
-        (opciones_alcohol[3], opciones_alcohol[3]): 1.0
-    }
-    
-    # Verificar ambas combinaciones posibles
-    if (respuesta1, respuesta2) in compatibilidad:
-        return compatibilidad[(respuesta1, respuesta2)]
-    elif (respuesta2, respuesta1) in compatibilidad:
-        return compatibilidad[(respuesta2, respuesta1)]
-    else:
-        return 0.0  # Valor por defecto si no hay coincidencia
-
+#1 Optional
 def compatibilidad_actividad(respuesta_a, respuesta_b):
     
     coincidencias = set(respuesta_a) & set(respuesta_b)
@@ -425,34 +410,37 @@ def compatibilidad_actividad(respuesta_a, respuesta_b):
     else:
         return 0.5
 
-def compatibilidad_mascotas(respuesta_a, respuesta_b):
-    # Definir la lógica de compatibilidad para mascotas
+#2 Optional     Multi
+def compatibilidad_transporte(respuesta_a, respuesta_b):
+
+    if not isinstance[respuesta_a, list]:
+        respuesta_a = [respuesta_a]
+
+    if not isinstance[respuesta_b, list]:
+        respuesta_b = [respuesta_b]
+
+    # Definir la lógica de compatibilidad para transporte
     if respuesta_a == respuesta_b:
         return 1.0
-    if (respuesta_a or respuesta_b ) in  ["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"]:
-        if (respuesta_a or respuesta_b) not in ["Soy alérgico", "No me gustan"]:
-            return 0.8
-        else:
-            return -0.2
-    if (respuesta_a or respuesta_b) == "Soy alérgico":
-        if (respuesta_a or respuesta_b) in ["No me gustan", "Me gustan pero no tengo"]:
-            return 0.5
-        if (respuesta_a or respuesta_b) == "No tengo mascotas pero quisiera una":
-            return -0.3
-        return -0.5
-    return 0.5
+    
+    if "Tengo carro propio" in (respuesta_a or respuesta_b):
+        return 0.8
 
-def compatibilidad_intereses(respuesta_a, respuesta_b):
+    return 0.4
 
-    intereses = questions[4]["options"]
+            # "Metro",
+            # "Cablebus",
+            # "Taxi",
+            # "Metrobus",
+            # "Camión",
+            # "Combi",
+            # "Suburbano",
+            # "Uber",
+            # "Bicicleta",
+            # "Motocicleta",
+            # "Tengo carro propio"
 
-    vector_usuario1 = tags_a_vector(respuesta_a, intereses)
-    vector_usuario2 = tags_a_vector(respuesta_b, intereses)
-
-    # Calcular la similitud coseno entre los dos usuarios
-    similitud = cosine_similarity([vector_usuario1], [vector_usuario2])[0][0]
-    return similitud
-
+#3  Optional
 def compatibilidad_redes(respuesta_a, respuesta_b):
 
     # Definir la lógica de compatibilidad para redes sociales
@@ -495,27 +483,134 @@ def compatibilidad_redes(respuesta_a, respuesta_b):
             # "No estoy muy al pendiente",
             # "No las uso"
 
-def compatibilidad_transporte(respuesta_a, respuesta_b):
+#4 Multi
+def compatibilidad_zonas(respuesta_a, respuesta_b):
     
-    # Definir la lógica de compatibilidad para transporte
+    if not isinstance[respuesta_a, list]:
+        respuesta_a = [respuesta_a]
+
+    if not isinstance[respuesta_b, list]:
+        respuesta_b = [respuesta_b]
+
+    resp = "Me muevo por toda la ciudad"
+    resp2 = "Vivo en el Estado de México pero voy seguido a CDMX"
+
     if respuesta_a == respuesta_b:
         return 1.0
-    if (respuesta_a or respuesta_b) == "Tengo carro propio":
+
+    if resp in (respuesta_a or respuesta_b):
+        return 0.7
+    
+    if resp2 in (respuesta_a or respuesta_b):
+        return 0.5
+    
+    elementos_comunes = respuesta_a & respuesta_b
+
+    total_elementos = len(respuesta_a) + len(respuesta_b)
+
+    proporcion = len(elementos_comunes)*2/total_elementos
+
+    return proporcion
+    
+    # 'Centro (Cuauhtémoc, Doctores, Juárez, Roma, Condesa)',
+    # 'Sur (Coyoacán, Tlalpan, Xochimilco)', 
+    # 'Poniente (Santa Fe, Álvaro Obregón, San Ángel)',
+    # 'Norte (GAM, Azcapotzalco, Lindavista)', 
+    # 'Oriente (Iztapalapa, Iztacalco, Neza)', 
+    # 'Me muevo por toda la ciudad', 
+    # 'Vivo en el Estado de México pero voy seguido a CDMX'
+
+#5
+def compatibilidad_dias(respuesta_a, respuesta_b):
+    
+    if respuesta_a == respuesta_b:
+        return 1.0
+    
+    if (respuesta_a or respuesta_b) == "Cualquier día":
         return 0.8
+    
+    if (respuesta_a or respuesta_b) == "Depende del evento":
+        return 0.4
+    
+    return 0.2
+
+#6
+def compatibilidad_desplazarte(respuesta_a, respuesta_b):
+    
+    if respuesta_a == respuesta_b:
+        return 1.0
+    
+    if (respuesta_a or respuesta_b) == "Estoy dispuesto a ir a cualquier parte de la ciudad":
+        return 0.8
+
     return 0.4
 
-            # "Metro",
-            # "Cablebus",
-            # "Taxi",
-            # "Metrobus",
-            # "Camión",
-            # "Combi",
-            # "Suburbano",
-            # "Uber",
-            # "Bicicleta",
-            # "Motocicleta",
-            # "Tengo carro propio"
+#7  Optional
+def compatibilidad_fumar(respuesta1, respuesta2):
+    compatibilidad = {
+        ("Sí, fumo con frecuencia", "Sí, fumo con frecuencia"): 1.0,
+        ("Sí, fumo con frecuencia", "Lo hago para socializar"): 0.7,
+        ("Sí, fumo con frecuencia", "Solamente en reuniones"): 0.5,
+        ("Sí, fumo con frecuencia", "Trato de dejarlo"): -0.2,
+        ("Sí, fumo con frecuencia", "No me gusta fumar"): -0.5,
+        
+        ("Solamente en reuniones", "Solamente en reuniones"): 1.0,
+        ("Solamente en reuniones", "Lo hago para socializar"): 0.8,
+        ("Solamente en reuniones", "Trato de dejarlo"): 0.2,
+        ("Solamente en reuniones", "No me gusta fumar"): -0.1,
+        
+        ("No me gusta fumar", "No me gusta fumar"): 1.0,
+        ("No me gusta fumar", "Lo hago para socializar"): 0.1,
+        ("No me gusta fumar", "Trato de dejarlo"): 0.5,
+        
+        ("Trato de dejarlo", "Trato de dejarlo"): 1.0,
+        ("Trato de dejarlo", "Lo hago para socializar"): 0.2,
+        
+        ("Lo hago para socializar", "Lo hago para socializar"): 1.0
+    }
+    
+    # Verificar ambas combinaciones posibles (orden no importa)
+    if (respuesta1, respuesta2) in compatibilidad:
+        return compatibilidad[(respuesta1, respuesta2)]
+    elif (respuesta2, respuesta1) in compatibilidad:
+        return compatibilidad[(respuesta2, respuesta1)]
+    else:
+        return 0.0  # Valor por defecto si no hay coincidencia
 
+#8  Optional
+def compatibilidad_alcohol(respuesta1, respuesta2):
+    opciones_alcohol = [
+        "Sí, bebo con frecuencia",
+        "Lo hago para socializar o en reuniones",
+        "Rara vez bebo alcohol",
+        "No me gusta beber"
+    ]
+    
+    compatibilidad = {
+        (opciones_alcohol[0], opciones_alcohol[0]): 1.0,
+        (opciones_alcohol[0], opciones_alcohol[1]): 0.7,
+        (opciones_alcohol[0], opciones_alcohol[2]): 0.4,
+        (opciones_alcohol[0], opciones_alcohol[3]): -0.5,
+
+        (opciones_alcohol[1], opciones_alcohol[1]): 1.0,
+        (opciones_alcohol[1], opciones_alcohol[2]): 0.5,
+        (opciones_alcohol[1], opciones_alcohol[3]): -0.2,
+
+        (opciones_alcohol[2], opciones_alcohol[2]): 1.0,
+        (opciones_alcohol[2], opciones_alcohol[3]): 0.3,
+
+        (opciones_alcohol[3], opciones_alcohol[3]): 1.0
+    }
+    
+    # Verificar ambas combinaciones posibles
+    if (respuesta1, respuesta2) in compatibilidad:
+        return compatibilidad[(respuesta1, respuesta2)]
+    elif (respuesta2, respuesta1) in compatibilidad:
+        return compatibilidad[(respuesta2, respuesta1)]
+    else:
+        return 0.0  # Valor por defecto si no hay coincidencia
+
+#9
 def compatibilidad_planes(respuesta_a, respuesta_b):
     if respuesta_a == respuesta_b:
         return 1.0
@@ -554,6 +649,7 @@ def compatibilidad_planes(respuesta_a, respuesta_b):
             # "Capacidad para adaptarse",
             # "Gusto por las mismas actividades"
 
+#10
 def compatibilidad_interaccion(respuesta_a, respuesta_b):
     
     # Definir la lógica de compatibilidad para interacción
@@ -566,6 +662,83 @@ def compatibilidad_interaccion(respuesta_a, respuesta_b):
             # "Solo estar presente y disfrutar el momento",
             # "Conversaciones profundas y significativas"
 
+#11 Optional    Multi
+def compatibilidad_mascotas(respuesta_a, respuesta_b):
+
+    if not isinstance[respuesta_a, list]:
+        respuesta_a = [respuesta_a]
+
+    if not isinstance[respuesta_b, list]:
+        respuesta_b = [respuesta_b]
+
+    # Definir la lógica de compatibilidad para mascotas
+    if respuesta_a == respuesta_b:
+        return 1.0
+    
+    if len(respuesta_a & respuesta_b & ["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"]) > 0:
+        if len(respuesta_a & respuesta_b & ["Soy alérgico", "No me gustan"]) == 0:
+            return 0.8
+        else:
+            return -0.2
+
+    if "Soy alérgico" in (respuesta_a or respuesta_b):
+        if len(respuesta_a & respuesta_b & ["No me gustan", "Me gustan pero no tengo"]) > 0:
+            return 0.5
+        if "No tengo mascotas pero quisiera una" in (respuesta_a or respuesta_b):
+            return -0.3
+        return -0.5
+
+    return 0.5
+
+#12 Multi
+def compatibilidad_intereses(respuesta_a, respuesta_b):
+
+    if not isinstance[respuesta_a, list]:
+        respuesta_a = [respuesta_a]
+
+    if not isinstance[respuesta_b, list]:
+        respuesta_b = [respuesta_b]
+
+    intereses = questions[11]["options"]
+
+    vector_usuario1 = tags_a_vector(respuesta_a, intereses)
+    vector_usuario2 = tags_a_vector(respuesta_b, intereses)
+
+    # Calcular la similitud coseno entre los dos usuarios
+    similitud = cosine_similarity([vector_usuario1], [vector_usuario2])[0][0]
+    return similitud
+
+#13 Multi
+def compatibilidad_tipoEventos(respuesta_a, respuesta_b):
+    if not isinstance[respuesta_a, list]:
+        respuesta_a = [respuesta_a]
+
+    if not isinstance[respuesta_b, list]:
+        respuesta_b = [respuesta_b]
+    
+    tipoEventos = questions[12]["options"]
+
+    vector_usuario1 = tags_a_vector(respuesta_a, tipoEventos)
+    vector_usuario2 = tags_a_vector(respuesta_b, tipoEventos)
+
+    # Calcular la similitud coseno entre los dos usuarios
+    similitud = cosine_similarity([vector_usuario1], [vector_usuario2])[0][0]
+    return similitud
+
+#14
+def compatibilidad_valores(respuesta_a, respuesta_b):
+    
+    if respuesta_a == respuesta_b:
+        return 1.0
+    return 0.5
+
+#15
+def compatibilidad_tipoAcompañante(respuesta_a, respuesta_b):
+    if respuesta_a == respuesta_b:
+        return 1.0
+    return 0.6
+
+#16 Optional
 def compatibilidad_personalidad(respuesta_a, respuesta_b):
     type1, type2 = respuesta_a.upper(), respuesta_b.upper()
     if type1 not in compatibility_matrix_personality or type2 not in compatibility_matrix_personality:
@@ -574,27 +747,31 @@ def compatibilidad_personalidad(respuesta_a, respuesta_b):
     print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
     return compatibility_matrix_personality[type1][index]
 
+
 def compatibilidad_total(respuestas_usuario1, respuestas_usuario2):
     total_compatibilidad = 0.0
+    preguntas_consideradas = 0
+
+    if respuestas_usuario1[0] is not None and respuestas_usuario2[0] is not None:
+        total_compatibilidad += compatibilidad_actividad(respuestas_usuario1[0], respuestas_usuario2[0])
+        preguntas_consideradas += 1
+
+    if respuestas_usuario1[1] is not None and respuestas_usuario2[1] is not None:
+        total_compatibilidad += compatibilidad_transporte(respuestas_usuario1[1], respuestas_usuario2[1])
+        preguntas_consideradas += 1
+    
     total_compatibilidad += compatibilidad_fumar(respuestas_usuario1[0], respuestas_usuario2[0])
     total_compatibilidad += compatibilidad_alcohol(respuestas_usuario1[1], respuestas_usuario2[1])
-    total_compatibilidad += compatibilidad_actividad(respuestas_usuario1[2], respuestas_usuario2[2])
+    
     total_compatibilidad += compatibilidad_mascotas(respuestas_usuario1[3], respuestas_usuario2[3])
     total_compatibilidad += compatibilidad_intereses(respuestas_usuario1[4], respuestas_usuario2[4])*1.8
     total_compatibilidad += compatibilidad_redes(respuestas_usuario1[5], respuestas_usuario2[5])
-    total_compatibilidad += compatibilidad_transporte(respuestas_usuario1[6], respuestas_usuario2[6])
+    
     total_compatibilidad += compatibilidad_planes(respuestas_usuario1[7], respuestas_usuario2[7])
     total_compatibilidad += compatibilidad_interaccion(respuestas_usuario1[8], respuestas_usuario2[8])
     total_compatibilidad += compatibilidad_personalidad(respuestas_usuario1[10], respuestas_usuario2[10])
 
     return total_compatibilidad/10.0 
-
-#Asignar valores a cada pregunta
-#Actualizar los valores de intereses
-#Filtrar busqueda por usuario
-#Generar usuarios de prueba
-#Obtener el vector de cada usuario
-#Obtener similitudes
 
 def main():
 
