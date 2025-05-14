@@ -100,7 +100,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': os.getenv('DB_NAME'),
-        'ENHOST': os.getenv('DB_HOST'),
+        'CLIENT': {
+            'host':  os.getenv("MONGO_HOST"),
+        },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
     }
