@@ -3,70 +3,6 @@ import numpy as np
 from pprint import pprint
 from sklearn.metrics.pairwise import cosine_similarity
 
-
-users = [
-    ["No me gusta fumar", "Rara vez bebo alcohol", ["En las mañanas"], "No tengo mascotas pero quisiera una", 
-     ["Naturaleza", "Leer", "Meditación", "Café", "Documentales"], "En mis ratos libres", ["Metro", "Bicicleta"], 
-     "Prefiero tener algo de tiempo para organizarme", "Confianza y apoyo", 
-     "Conversaciones profundas y significativas", "INFJ"],
-
-    ["Sí, fumo con frecuencia", "Sí, bebo con frecuencia", ["Por las noches"], "Perro(s)", 
-     ["Vida nocturna", "Fiestas", "Cócteles sin alcohol", "Comida callejera", "Reguetón", "Leer"], "Estoy al pendiente siempre", 
-     ["Uber", "Tengo carro propio"], "Me encantan, siempre estoy listo/a", "Buen sentido del humor", 
-     "Muchas risas y diversión", "ESFP"],
-
-    ["Solamente en reuniones", "Lo hago para socializar o en reuniones", ["En las tardes"], "Gato(s)", 
-     ["Maratonear series", "Netflix", "Comedias", "K-dramas", "Anime"], "Normalmente estoy activo", 
-     ["Metro", "Metrobus"], "Los disfruto si son interesantes", "Gusto por las mismas actividades", 
-     "Compartir intereses mutuos", "INFP"],
-
-    ["Trato de dejarlo", "No me gusta beber", ["Todo el día"], "No me gustan", 
-     ["Deportes", "Fútbol", "NBA", "Gastronomía", "Cocinar"], "No estoy muy al pendiente", 
-     ["Bicicleta", "Motocicleta"], "No son lo mío", "Amabilidad y cortesía", 
-     "Solo estar presente y disfrutar el momento", "ISTJ"],
-
-    ["Lo hago para socializar", "Rara vez bebo alcohol", ["En las mañanas", "En las tardes"], "Gato(s)", 
-     ["Arte", "Pintar", "Exposiciones", "Galerías de arte", "Fotografía"], "No las uso", 
-     ["Cablebus", "Taxi"], "Prefiero tener algo de tiempo para organizarme", "Capacidad para adaptarse", 
-     "Conversaciones profundas y significativas", "ENFJ"],
-
-    ["No me gusta fumar", "No me gusta beber", ["Por las noches"], "Soy alérgico", 
-     ["Videojuegos", "E-Sports", "League of Legends", "Roblox", "Juegos de mesa"], "En mis ratos libres", 
-     ["Tengo carro propio"], "No son lo mío", "Gusto por las mismas actividades", 
-     "Compartir intereses mutuos", "INTP"],
-
-    ["Sí, fumo con frecuencia", "Sí, bebo con frecuencia", ["Todo el día"], "Perro(s)", 
-     ["Automovilismo", "F1", "Deportes de motor", "Coches", "Hotwheels"], "Estoy al pendiente siempre", 
-     ["Motocicleta", "Tengo carro propio"], "Me encantan, siempre estoy listo/a", "Buen sentido del humor", 
-     "Muchas risas y diversión", "ESTP"],
-
-    ["No me gusta fumar", "Lo hago para socializar o en reuniones", ["En las tardes"], "No tengo mascotas pero quisiera una", 
-     ["K-Pop", "BTS", "Pop", "Conciertos", "Bailar"], "Normalmente estoy activo", 
-     ["Metro", "Uber"], "Los disfruto si son interesantes", "Amabilidad y cortesía", 
-     "Solo estar presente y disfrutar el momento", "ISFP"],
-
-    ["Solamente en reuniones", "Rara vez bebo alcohol", ["En las mañanas"], "Aves", 
-     ["Senderismo", "Acampar", "Aire libre", "Viajar", "Tours a pie"], "No estoy muy al pendiente", 
-     ["Camión", "Combi"], "Prefiero tener algo de tiempo para organizarme", "Confianza y apoyo", 
-     "Conversaciones profundas y significativas", "ISTP"],
-
-    ["Trato de dejarlo", "Lo hago para socializar o en reuniones", ["Por las noches"], "Me gustan pero no tengo", 
-     ["Cerveza artesanal", "Comida coreana", "Ramen", "Sushi", "Asado de cerdo"], "Normalmente estoy activo", 
-     ["Suburbano", "Taxi"], "Los disfruto si son interesantes", "Capacidad para adaptarse", 
-     "Compartir intereses mutuos", "ENTP"],
-
-    ["No me gusta fumar", "No me gusta beber", ["En las mañanas"], "Hamster", 
-     ["Literatura", "Poesía", "Intercambio de idiomas", "Leer", "Manga"], "No las uso", 
-     ["Bicicleta"], "No son lo mío", "Amabilidad y cortesía", 
-     "Solo estar presente y disfrutar el momento", "INTJ"],
-
-    ["Lo hago para socializar", "Sí, bebo con frecuencia", ["En las tardes", "Por las noches"], "Conejo", 
-     ["Moda vintage", "Cosplay", "Tatuajes", "Influencer", "TikTok", "YouTube"], "Estoy al pendiente siempre", 
-     ["Uber", "Metrobus"], "Me encantan, siempre estoy listo/a", "Buen sentido del humor", 
-     "Muchas risas y diversión", "ENFP"]
-]
-
-
 questions = [
     {   #1   Optional
         "question": "¿En qué momento del día sueles ser más activo?",
@@ -748,46 +684,143 @@ def compatibilidad_personalidad(respuesta_a, respuesta_b):
     return compatibility_matrix_personality[type1][index]
 
 
-def compatibilidad_total(respuestas_usuario1, respuestas_usuario2):
+def compatibilidad_total(lista_preguntas ,respuestas_usuario1, respuestas_usuario2):
     total_compatibilidad = 0.0
     preguntas_consideradas = 0
 
-    if respuestas_usuario1[0] is not None and respuestas_usuario2[0] is not None:
-        total_compatibilidad += compatibilidad_actividad(respuestas_usuario1[0], respuestas_usuario2[0])
+    if questions[0]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[0]["question"]]
+        respuesta_B = respuestas_usuario2[questions[0]["question"]]
+
+        total_compatibilidad += compatibilidad_actividad(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
 
-    if respuestas_usuario1[1] is not None and respuestas_usuario2[1] is not None:
-        total_compatibilidad += compatibilidad_transporte(respuestas_usuario1[1], respuestas_usuario2[1])
+    if questions[1]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[1]["question"]]
+        respuesta_B = respuestas_usuario2[questions[1]["question"]]
+
+        total_compatibilidad += compatibilidad_transporte(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    total_compatibilidad += compatibilidad_fumar(respuestas_usuario1[0], respuestas_usuario2[0])
-    total_compatibilidad += compatibilidad_alcohol(respuestas_usuario1[1], respuestas_usuario2[1])
+    if questions[2]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[2]["question"]]
+        respuesta_B = respuestas_usuario2[questions[2]["question"]]
+
+        total_compatibilidad += compatibilidad_redes(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
     
-    total_compatibilidad += compatibilidad_mascotas(respuestas_usuario1[3], respuestas_usuario2[3])
-    total_compatibilidad += compatibilidad_intereses(respuestas_usuario1[4], respuestas_usuario2[4])*1.8
-    total_compatibilidad += compatibilidad_redes(respuestas_usuario1[5], respuestas_usuario2[5])
+    if questions[3]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[3]["question"]]
+        respuesta_B = respuestas_usuario2[questions[3]["question"]]
+
+        total_compatibilidad += compatibilidad_zonas(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
     
-    total_compatibilidad += compatibilidad_planes(respuestas_usuario1[7], respuestas_usuario2[7])
-    total_compatibilidad += compatibilidad_interaccion(respuestas_usuario1[8], respuestas_usuario2[8])
-    total_compatibilidad += compatibilidad_personalidad(respuestas_usuario1[10], respuestas_usuario2[10])
+    if questions[4]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[4]["question"]]
+        respuesta_B = respuestas_usuario2[questions[4]["question"]]
 
-    return total_compatibilidad/10.0 
-
-def main():
-
-    #Ejemplo
-    usuario1 = users[0]
-
-    x = 1
-    for usuario in users:
-        compatibilidad = compatibilidad_total(usuario1, usuario)
-        print(f"La compatibilidad entre el usuario 1 y el usuario {x} es: {compatibilidad}")
-        x += 1
+        total_compatibilidad += compatibilidad_dias(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
     
+    if questions[5]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[5]["question"]]
+        respuesta_B = respuestas_usuario2[questions[5]["question"]]
 
-    pass
-
-if __name__ == "__main__":
-    main()
+        total_compatibilidad += compatibilidad_desplazarte(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
     
+    if questions[6]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[6]["question"]]
+        respuesta_B = respuestas_usuario2[questions[6]["question"]]
+
+        total_compatibilidad += compatibilidad_fumar(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[7]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[7]["question"]]
+        respuesta_B = respuestas_usuario2[questions[7]["question"]]
+
+        total_compatibilidad += compatibilidad_alcohol(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[8]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[8]["question"]]
+        respuesta_B = respuestas_usuario2[questions[8]["question"]]
+
+        total_compatibilidad += compatibilidad_planes(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[9]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[9]["question"]]
+        respuesta_B = respuestas_usuario2[questions[9]["question"]]
+
+        total_compatibilidad += compatibilidad_interaccion(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[10]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[10]["question"]]
+        respuesta_B = respuestas_usuario2[questions[10]["question"]]
+
+        total_compatibilidad += compatibilidad_mascotas(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[11]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[11]["question"]]
+        respuesta_B = respuestas_usuario2[questions[11]["question"]]
+
+        total_compatibilidad += compatibilidad_intereses(respuesta_A, respuesta_B)*2.0
+        preguntas_consideradas += 1
+    
+    if questions[12]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[12]["question"]]
+        respuesta_B = respuestas_usuario2[questions[12]["question"]]
+
+        total_compatibilidad += compatibilidad_tipoEventos(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[13]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[13]["question"]]
+        respuesta_B = respuestas_usuario2[questions[13]["question"]]
+
+        total_compatibilidad += compatibilidad_valores(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[14]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[14]["question"]]
+        respuesta_B = respuestas_usuario2[questions[14]["question"]]
+
+        total_compatibilidad += compatibilidad_tipoAcompañante(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+    
+    if questions[15]["question"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[15]["question"]]
+        respuesta_B = respuestas_usuario2[questions[15]["question"]]
+
+        total_compatibilidad += compatibilidad_personalidad(respuesta_A, respuesta_B)
+        preguntas_consideradas += 1
+
+    return total_compatibilidad/preguntas_consideradas
+
+def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
+
+    usuario1 = {}
+    usuario2 = {}
+
+    lista_preguntas = []
+    lista_preguntas2 = []
+
+    for respuesta, respuesta2 in preferencias_usuario, preferencias_candidato:
+        usuario1[respuesta[1]] = respuesta[2]
+        usuario2[respuesta2[1]] = respuesta2[2]
+        lista_preguntas.append(respuesta[1])
+        lista_preguntas2.append(respuesta2[1])
+    
+    lista_preguntas_final = lista_preguntas & lista_preguntas2
+
+    compatibilidad = compatibilidad_total(lista_preguntas_final, usuario1, usuario2)
+
+    return compatibilidad
+
+
     
