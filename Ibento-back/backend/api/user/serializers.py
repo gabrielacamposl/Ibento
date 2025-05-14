@@ -9,7 +9,6 @@ from api.models import (Usuario,
                         TokenBlackList,
                         CategoriasPerfil,
                         Matches, 
-                        ConfiguracionEventoMatch,
                         Interaccion,
                         Conversacion, 
                         Mensaje, 
@@ -133,8 +132,8 @@ class ValidacionRostro(serializers.ModelSerializer):
 class SugerenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales']
-        read_only_fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales']
+        fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales', 'modo_busqueda_match','birthday','gender','description','save_events']
+        read_only_fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales','modo_busqueda_match','birthday','gender','description', 'save_events']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -154,7 +153,13 @@ class SugerenciaSerializer(serializers.ModelSerializer):
                     pass
 
         return data
-    
+# ------ Buscar match para un evento en específico
+class EventoMatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = ['_id', 'title', 'place', 'buscar_match']
+        read_only_fields = ['_id', 'title', 'place', 'buscar_match']
+
 # ------ Interacción con matches
 class IntereccionSerializer(serializers.ModelSerializer):
     class Meta:

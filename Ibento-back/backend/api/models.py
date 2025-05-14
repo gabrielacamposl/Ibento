@@ -170,15 +170,11 @@ class Evento(models.Model):
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
     assistants = models.JSONField(default=list, null=True, blank=True)
+    buscar_match = models.BooleanField(default=False)  # Campo para saber si se quiere buscar acompañante para el evento
+
 
     def __str__(self):
         return self.title
-
-# -------- Buscar match para un evento en específico
-class ConfiguracionEventoMatch(models.Model):
-    usuario_id = models.CharField(max_length=100)
-    evento_id = models.CharField(max_length=100)
-    buscar_match = models.BooleanField(default=False)
 
 # ------------------------------------------- FUNCIONES PARA ADMIN -------------------------------------------    
     
@@ -212,4 +208,3 @@ class Subcategoria(models.Model):
     def __str__(self):
         return self.nombre_subcategoria
     
-
