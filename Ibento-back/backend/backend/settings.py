@@ -99,10 +99,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'Ibento',
-        'CLIENT': {
-            'host':  os.getenv("MONGO_HOST"),
-        }
+        'NAME': os.getenv('DB_NAME'),
+        'ENHOST': os.getenv('DB_HOST'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
     }
 }
 
