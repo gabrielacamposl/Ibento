@@ -48,7 +48,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
-                          ConfiguracionEventoMatch,
+                          EventoMatchSerializer,
+                          SugerenciaSerializer,
                           IntereccionSerializer,
                           # Serializer para los chats de los matches
                           MensajesSerializer,
@@ -76,8 +77,7 @@ def calcular_edad(birthday):
     if not birthday:
         return None
     today = date.today()
-    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
-
+    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))     
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 
@@ -414,7 +414,6 @@ def ine_validation_view(request):
 
 # ----------- Comparación de Rostros 
 
-
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
 
 @api_view(['GET'])
@@ -442,87 +441,54 @@ def cambiar_modo_busqueda(request):
     usuario.save()
     return Response({"mensaje": f"Modo de búsqueda cambiado a {modo}"})
 
-#--------- Obtener personas recomendadas
+# ------- Obtener sugerencias para match
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sugerencia_usuarios(request):
     usuario = request.user
-    preferencias_usuario = usuario.preferencias_generales or {}
-    sugerencias = []
 
-    def calcular_edad(birthday):
-        from datetime import date
-        today = date.today()
-        if birthday:
-            return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
-        return None
-
-    if usuario.modo_busqueda_match == "global":
-        candidatos = Usuario.objects.filter(
-            is_ine_validated=True,
-            is_validated_camera=True
-        ).exclude(id=usuario.id)
-
-        for candidato in candidatos:
-            if candidato.preferencias_generales:
-                score = calcular_compatibilidad(preferencias_usuario, candidato.preferencias_generales)
-                if score >= 3:
-                    sugerencias.append({
-                        "_id": str(candidato._id),
-                        "nombre": candidato.nombre,
-                        "apellido": candidato.apellido,
-                        "profile_pic": candidato.profile_pic[0] if candidato.profile_pic else None,
-                        "preferencias_evento": candidato.preferencias_evento,
-                        "preferencias_generales": candidato.preferencias_generales,
-                        "edad": calcular_edad(candidato.birthday),
-                        "descripcion": candidato.description,
-                        "compatibilidad": score
-                    })
-
-    elif usuario.modo_busqueda_match == "evento":
-        configuraciones = ConfiguracionEventoMatch.objects.filter(usuario_id=str(usuario.id), buscar_match=True)
-        eventos_ids = [cfg.evento_id for cfg in configuraciones]
-        participantes_ids = set()
-
-        for eid in eventos_ids:
-            try:
-                evento = Evento.objects.get(id=eid)
-                for pid in evento.participantes or []:
-                    if pid != str(usuario.id):
-                        participantes_ids.add(pid)
-            except Evento.DoesNotExist:
-                continue
-
-        for pid in participantes_ids:
-            try:
-                candidato = Usuario.objects.get(
-                    id=pid,
-                    is_ine_validated=True,
-                    is_validated_camera=True
-                )
-                if candidato.preferencias_generales:
-                    score = calcular_compatibilidad(preferencias_usuario, candidato.preferencias_generales)
-                    if score >= 3:
-                        sugerencias.append({
-                            "_id": str(candidato._id),
-                            "nombre": candidato.nombre,
-                            "apellido": candidato.apellido,
-                            "profile_pic": candidato.profile_pic[0] if candidato.profile_pic else None,
-                            "preferencias_evento": candidato.preferencias_evento,
-                            "preferencias_generales": candidato.preferencias_generales,
-                            "edad": calcular_edad(candidato.birthday),
-                            "descripcion": candidato.description,
-                            "compatibilidad": score
-                        })
-            except Usuario.DoesNotExist:
-                continue
-
+    # Obtener el parámetro 'save_events' de la URL (puede ser un solo valor o una lista separada por comas)
+    save_events_param = request.query_params.get('save_events', '')
+    
+    # Si hay un valor, asegurarnos de que es una lista
+    if save_events_param:
+        # Si solo hay un valor, lo convertimos en una lista
+        evento_ids = save_events_param.split(',')  # Esto manejará tanto una lista de IDs como un único ID
     else:
-        return Response({"error": "Modo de búsqueda no válido"}, status=400)
+        evento_ids = []
 
-    sugerencias_ordenadas = sorted(sugerencias, key=lambda x: x["compatibilidad"], reverse=True)
-    return Response({"modo": usuario.modo_busqueda_match, "sugerencias": sugerencias_ordenadas})
+    # Asegurarnos de que 'evento_ids' es una lista de cadenas válidas
+    if isinstance(evento_ids, list) and all(isinstance(evento, str) for evento in evento_ids):
+        # Buscar eventos guardados por el usuario basados en los IDs proporcionados
+        eventos_guardados = [
+            evento for evento in Evento.objects.filter(_id__in=evento_ids)
+            if getattr(evento, 'buscar_match', False) is True
+        ]
+    else:
+        eventos_guardados = []
 
+    sugerencias = []
+    if usuario.modo_busqueda_match == 'evento' and eventos_guardados:
+        # Si el modo de búsqueda es por evento, buscar otros usuarios que tengan los mismos eventos guardados
+        for evento in eventos_guardados:
+            usuarios_en_evento = Usuario.objects.filter(save_events__in=[evento._id], modo_busqueda_match='evento')
+            for u in usuarios_en_evento:
+                if u._id != usuario._id:  # No sugerir al propio usuario
+                    sugerencias.append(u)
+
+    # Si el modo de búsqueda es global, sugerir usuarios como antes
+    if usuario.modo_busqueda_match == 'global':
+        sugerencias = Usuario.objects.all()
+        sugerencias = [u for u in sugerencias if u._id != usuario._id]
+
+    # Serializar los usuarios sugeridos con el SugerenciaSerializer
+    serializer = SugerenciaSerializer(sugerencias, many=True)
+
+    # Añadir la edad a cada sugerencia
+    for i, user_data in enumerate(serializer.data):
+        user_data['edad'] = calcular_edad(sugerencias[i].birthday)
+
+    return Response({"sugerencias": serializer.data})
 
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
@@ -1105,6 +1071,31 @@ class EventoViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
         
+    # Activar y desactivar búsqueda de match en un evento
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def toggle_buscar_match(self, request):
+        usuario = request.user
+        id_event = request.query_params.get('eventId')
+        estado = request.query_params.get('estado')  # Valor boleano "true" o "false"
+        
+        if not id_event or estado not in ['true', 'false']:
+            return Response({"detail": "Parámetros inválidos."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            evento = Evento.objects.get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Validar que el evento esté en los eventos guardados del usuario
+        if id_event not in usuario.save_events:
+           return Response({"detail": "Este evento no está guardado por el usuario."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Convertir estado a booleano y actualizar el campo
+        evento.buscar_match = True if estado == 'true' else False
+        evento.save(update_fields=['buscar_match'])
+        estado_str = "activado" if evento.buscar_match else "desactivado"
+        return Response({"detail": f"Buscar match {estado_str} para el evento."}, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['delete'])
     @permission_classes([IsAuthenticated])
@@ -1114,7 +1105,7 @@ class EventoViewSet(viewsets.ModelViewSet):
         #Obtenemos los id del usuario y del evento
         id_event = request.query_params.get('eventId')
         id_user = usuario._id
-
+        
         #Comprobamos si el evento existe
         try:
             evento = Evento.objects.get(_id = id_event)
