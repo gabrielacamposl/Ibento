@@ -1,0 +1,183 @@
+.btn-custom {
+    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+    color: white;
+  
+  }
+
+  .btn-custom2 {
+    border: 3px solid #bc51f6;
+    color: black;
+    border-radius: 20px;
+  
+  }
+  
+  .btn-custom:hover {
+    background-color: #c237de; 
+   
+  }
+.interes {
+    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+    color: white;
+  
+  }
+
+.degradadoPerfil{
+  background: linear-gradient(to bottom,  #f5abff, #F3D1FF, #FFFFFF,#FFFFFF,#FFFFFF,#FFFFFF); /* Gradient */
+}
+
+.miPerfil{
+  color: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+}
+
+.Transparencia{
+  background: rgba(0, 0, 0, 0.5); /* Black transparent */
+  color: white;
+}
+
+.Transparencia2{
+  background: rgba(0, 0, 0, 0.3); /* Black transparent */
+  color: white;
+}
+
+.botonTransparente{
+  background: rgba(255, 255, 255, 0.2); /* Black transparent */
+  color: white;
+  border: .5px solid white;
+}
+.Morado{
+  background: #bc51f6; /* Gradient */
+  color: white;
+}
+
+.divBorder{
+  border: 2px dashed #bc51f6;
+  color: #ffffff;
+  
+}
+.texto{
+  color: #bc51f6;
+}
+
+.btn-off{
+  border: 2px solid #bc51f6;
+  color: black;
+}
+
+.botonAsistir{
+  background: white;
+  color:black;
+
+}
+
+/* JUAS JUAS ESTILOS DE verPerfil*/
+.btnAzul{
+  background: #A4CCF8; /* Gradient */
+  color: white;
+}
+
+.btnRosa{
+  background: #E3A4F8; /* Gradient */
+  color: white;
+}
+
+
+.btnVerde{
+  background: #87d480; /* Gradient */
+  color: white;
+}
+
+.btnTransparente {
+  background: rgba(89, 89, 89, 0.5); /* Gray transparent */
+  color: rgb(255, 255, 255);
+  border: node;
+}
+
+.btnRed{
+  color:red;
+}
+
+/*Estilos de favoritos*/
+.Caja{
+  background-color: #F5F6F8;
+}
+
+.fondoFavorito{
+  background-color: #B87BE2;
+}
+
+.colorRosa{
+ color: #843db3;
+}
+
+
+/*Estilos de Guardados*/
+.botonMatch{
+  
+  background-color: #BA6FEC;
+  color: white;
+}
+
+.cancelarMatch{
+  background-color: #C689EE;
+  color: black;
+}
+
+
+.BuscarMatch{
+
+  color: #BA6FEC;
+  text-decoration: solid;
+  border-bottom: 2px solid #C689EE;
+}
+
+.Capturar{
+
+  background-color: none;
+  border: 3px solid #C689EE;
+}
+
+
+.rojo{
+  color:rgb(216, 0, 0)
+}
+
+.morado{
+  color:#a333ff
+}
+
+.TransparenciaFoto{
+  background-color: rgba(123, 56, 255, 0.5); /* Black transparent */
+  color: white;
+  background-blend-mode: color; /* Blend mode to apply color */
+}
+
+.barraPorciento{
+  background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); 
+}
+
+.btn-inactive{
+  background-color: none;
+  border: 1.5px solid #9433D5;
+  color: #000000;
+}
+
+.btn-active{
+  background: #df7fff; 
+  color: #ffffff;
+  border:1.5px solid #bc51f6;
+}
+
+
+.botonLink{
+  color: #2878fa;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; /* Adjust as needed */
+  height: calc(100% - 4rem); /* Subtract the height of the BottomNav (4rem) */
+  padding: auto;
+  overflow-y: auto; /* Add scrolling if content overflows */
+}
