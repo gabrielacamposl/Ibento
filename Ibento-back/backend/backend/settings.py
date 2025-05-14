@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'corsheaders', # Peticiones desde React  
     'api',  
     'api.user',
-    'channels',
-    'daphne'
+    'channels',  # Para el uso de websockets
+    'daphne',  # Para el uso de websockets
+    
 ]
 
 # PUSH_NOTIFICATION_SETTINGS = {
@@ -120,6 +121,9 @@ DATABASES = {
         'NAME': 'Ibento',
         'CLIENT': {
             'host':  os.getenv("MONGO_HOST"),
+            #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
+            'ssl': True,
+            'tlsAllowInvalidCertificates': True,
         }
     }
 }
