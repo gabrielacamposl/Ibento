@@ -20,3 +20,8 @@ sqlparse==0.2.4
 typing_extensions==4.12.2
 tzdata==2025.1
 urllib3==2.3.0
+gunicorn==23.0.0
+requests==2.32.3
+scikit-learn==1.6.1
+pillow==11.2.1
+numpy==2.2.5
