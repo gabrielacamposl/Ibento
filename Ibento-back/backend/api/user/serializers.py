@@ -2,7 +2,6 @@ from rest_framework import serializers
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
-from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from api.services import ine_validation
 import cloudinary.uploader
@@ -21,7 +20,6 @@ from api.models import (Usuario,
 # ------------------------------------------- CREACIÓN DE USUARIO -------------------------------------------
 
 # -------- Creación del usuario
-
 class UsuarioSerializer(serializers.ModelSerializer):
     preferencias_evento = serializers.ListField(
         child=serializers.CharField(max_length=100),
@@ -67,8 +65,7 @@ class LoginSerializer(serializers.Serializer):
             "nombre": usuario.nombre,
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-        }
-    
+        }    
 #------- Logout / Cierre de Sesión
 class Logout(serializers.Serializer):
     refresh = serializers.CharField()
@@ -83,14 +80,11 @@ class Logout(serializers.Serializer):
         # Guarda el token en la blacklist
         TokenBlackList.objects.create(token=refresh_token)
         return {}
-    
-
 
 #-------------------------------------------   REESTABLECER CONTRASEÑA ------------------------------------------------------------
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
 
 class PasswordResetCodeValidationSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -103,7 +97,6 @@ class PasswordResetChangeSerializer(serializers.Serializer):
 # -------------------------------------------  CREACIÓN DE PERFIL PARA BUSQUEDA DE ACOMPAÑANTES ------------------------------------
 
 #---------- Subir imágenes de perfil para la busqueda de acompañantes
-
 class UploadProfilePicture(serializers.Serializer):
     pictures = serializers.ListField(
         child=serializers.ImageField(),
@@ -129,14 +122,44 @@ class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
     respuesta = serializers.JSONField()
 
-
-
 #---------- Comparación de rostros segundo filtro
-
 class ValidacionRostro(serializers.ModelSerializer):
     foto_camara = serializers.ImageField(required=True)
 
 # ----------------------------------------------- MATCHES ------------------------------------------------
+
+# ------ Sugerencias de usuarios
+class SugerenciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales', 'modo_busqueda_match','birthday','gender','description','save_events']
+        read_only_fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales','modo_busqueda_match','birthday','gender','description', 'save_events']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Lista de campos que deberían ser arrays
+        json_fields = ['profile_pic']
+
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+
+        return data
+# ------ Buscar match para un evento en específico
+class EventoMatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = ['_id', 'title', 'place', 'buscar_match']
+        read_only_fields = ['_id', 'title', 'place', 'buscar_match']
+
 # ------ Interacción con matches
 class IntereccionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -145,10 +168,16 @@ class IntereccionSerializer(serializers.ModelSerializer):
         read_only_fields = ['usuario_origen', 'fecha_interaccion']
 
 # ------Generar Match
-class MatchSerializer (serializers.ModelSerializer):
+class MatchSerializer(serializers.ModelSerializer):
+    usuario_a_nombre = serializers.CharField(source="usuario_a.nombre", read_only=True)
+    usuario_a_apellido = serializers.CharField(source="usuario_a.apellido", read_only=True)
+    usuario_b_nombre = serializers.CharField(source="usuario_b.nombre", read_only=True)
+    usuario_b_apellido = serializers.CharField(source="usuario_b.apellido", read_only=True)
+    
     class Meta:
         model = Matches
-        fields = '__all__'
+        fields = ['_id', 'usuario_a', 'usuario_b', 'usuario_a_nombre', 'usuario_a_apellido', 'usuario_b_nombre', 'usuario_b_apellido']
+
 
 # --------- Conversaciones con matches
 class ConversacionSerializer (serializers.ModelSerializer):
