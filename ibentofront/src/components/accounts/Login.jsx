@@ -17,10 +17,11 @@ import { buttonStyle, inputStyles } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
-import { email_regex, password_regex } from "../../utils/regex";
+
 
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -249,7 +250,7 @@ const Login = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <label className="block text-sm font-medium text-gray-700">
-                      Correo electrónico<span className="text-red-500">*</span>
+                      Contraseña<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <InputText
@@ -280,14 +281,11 @@ const Login = () => {
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </Grid>
-
-
                   <FormControlLabel
                     control={<Checkbox value="remember" color="primary" />}
                     label="Recordar cuenta"
                     sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                   />
-
                   <Button className={buttonStyle} type="submit"
                     fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
                     onClick={handleLogin}>
