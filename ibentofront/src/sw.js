@@ -3,7 +3,7 @@ self.addEventListener('push', function (event) {
       const data = event.data.json()
       const options = {
         body: data.body,
-        icon: data.icon || '/ibento_logo.png',
+        icon: data.icon || '/ibentoLogo.png',
         badge: '/bts.jpeg',
         vibrate: [100, 50, 100],
         data: {
