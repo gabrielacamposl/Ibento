@@ -2,7 +2,7 @@ import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
-import api from '../../axiosConfig';
+import api from '../../api';
 import {
   FormControlLabel,
   Checkbox,
@@ -280,14 +280,11 @@ const Login = () => {
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </Grid>
-
-
                   <FormControlLabel
                     control={<Checkbox value="remember" color="primary" />}
                     label="Recordar cuenta"
                     sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                   />
-
                   <Button className={buttonStyle} type="submit"
                     fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
                     onClick={handleLogin}>
