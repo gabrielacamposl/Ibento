@@ -17,7 +17,7 @@ import { buttonStyle, inputStyles } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
-import { email_regex, password_regex } from "../../utils/regex";
+
 
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
