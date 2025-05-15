@@ -69,7 +69,7 @@ urlpatterns = [
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
   
     #Otras
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
     path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
 
 

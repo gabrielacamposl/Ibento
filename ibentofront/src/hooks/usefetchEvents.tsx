@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+import api from '../api';
+
 interface Event {
     _id: string;
     title: string;
@@ -26,7 +28,7 @@ const useFetchEvents = (url: string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url);
+                const response = await api.get<Event[]>(url);
                 setData(response.data);
             } catch (err) {
                 setError('Error al cargar los datos.');
@@ -50,7 +52,7 @@ const useFetchEvent = (url: string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url);
+                const response = await api.get<Event[]>(url);
                 setData(response.data);
             } catch (err) {
                 setError('Error al cargar los datos.');
@@ -111,7 +113,7 @@ const useFetchRecommendedEvents = (url: string, token:string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url, 
+                const response = await api.get<Event[]>(url, 
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
