@@ -249,7 +249,7 @@ const Login = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <label className="block text-sm font-medium text-gray-700">
-                      Correo electrónico<span className="text-red-500">*</span>
+                      Contraseña<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <InputText

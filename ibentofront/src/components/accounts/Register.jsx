@@ -60,12 +60,6 @@ export default function Register() {
   const fetchCategorias = async () => {
     try {
       const res = await axios.get('eventos/categorias/');
-      console.log("Respuesta de la API:", res.data);
-
-      if (!Array.isArray(res.data)){
-        throw new Error("Esto no es un array.")
-      }
-      console.log ("Respuesta del API", res.data);
       const categoriasFormateadas = res.data.map(cat => ({
         id: cat._id,
         nombre: cat.nombre,
