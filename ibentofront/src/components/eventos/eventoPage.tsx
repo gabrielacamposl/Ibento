@@ -42,7 +42,10 @@ function Page() {
     window.scrollTo(0, 0);
   }, []);
 
-  const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/eventos/event_by_id?eventId=" + eventId);
+
+
+  const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" + eventId);
+
   const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
   if (loading) {
