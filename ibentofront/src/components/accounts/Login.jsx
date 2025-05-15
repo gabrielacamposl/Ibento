@@ -3,7 +3,6 @@ import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../axiosConfig';
-import axios from "axios";
 import {
   FormControlLabel,
   Checkbox,
