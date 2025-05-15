@@ -117,7 +117,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.1.70:5173",
     "https://ibento.vercel.app", 
     "https://ibento.onrender.com",
-    "https://ibento-sigma.vercel.app",
+    "https://ibento-hazel.vercel.app",
 ]
 
 
