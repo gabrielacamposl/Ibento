@@ -22,6 +22,7 @@ import ibentoLogo from "/images/ibentoLogo.png";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

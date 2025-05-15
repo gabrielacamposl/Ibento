@@ -20,6 +20,7 @@ import api from "../../api";
 import ibentoLogo from "/images/ibentoLogo.png";
 
 import { name_regex, email_regex, password_regex } from "../../utils/regex";
+import apiaxios from "../../axiosConfig";
 
 
 
@@ -59,7 +60,7 @@ export default function Register() {
   // Función para obtener categorías de eventos
   const fetchCategorias = async () => {
     try {
-      const res = await axios.get('eventos/categorias/');
+      const res = await apiaxios.get('eventos/categorias/');
       const categoriasFormateadas = res.data.map(cat => ({
         id: cat._id,
         nombre: cat.nombre,
