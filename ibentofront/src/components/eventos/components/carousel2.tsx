@@ -9,7 +9,7 @@ import { useFetchEvents } from '../../../hooks/usefetchEvents';
 
 export default function CircularDemo() {
 
-    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
+    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('http://127.0.0.1:8000/eventos/most_liked/');
     
     const responsiveOptions = [
         {
