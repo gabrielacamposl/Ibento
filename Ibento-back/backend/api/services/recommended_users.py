@@ -330,8 +330,6 @@ types = list(compatibility_matrix_personality.keys())
 def tags_a_vector(tags, lista_tags):
     return np.array([1 if tag in tags else 0 for tag in lista_tags])
 
-
-
 #1 Optional
 def compatibilidad_actividad(respuesta_a, respuesta_b):
     

@@ -44,6 +44,8 @@ function Page() {
     window.scrollTo(0, 0);
   }, []);
 
+  //Holi, no sirvo como commit
+
   const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" + eventId);
   const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
