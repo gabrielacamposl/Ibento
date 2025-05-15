@@ -103,6 +103,36 @@ const useFetchNearestEvents = (url: string) => {
 
 }
 
+const useFetchRecommendedEvents = (url: string, token:string) => {
+    const [data, setData] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get<Event[]>(url, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+            );
+                setData(response.data);
+            } catch (err) {
+                setError('Error al cargar los datos.');
+                console.error('Error fetching data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [url]);
+
+    return { data, loading, error };
+};
+
 const saveEvent = (eventId: string) => {
 
     const fetchData = async () => {
@@ -118,4 +148,4 @@ const saveEvent = (eventId: string) => {
     }
 }
 
-export { useFetchEvents, useFetchNearestEvents, useFetchEvent};
+export { useFetchEvents, useFetchNearestEvents, useFetchEvent, useFetchRecommendedEvents};

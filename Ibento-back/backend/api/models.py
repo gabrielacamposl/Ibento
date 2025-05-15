@@ -24,8 +24,6 @@ class UsuarioManager(BaseUserManager):
     
 
 # ----------------------------------------------- USER ---------------------------------------------------------
-
-
 class Usuario(AbstractBaseUser, PermissionsMixin):
     _id = models.CharField(primary_key=True, default=generate_objectid, max_length=100, editable=False)
     nombre = models.CharField(max_length=100)
@@ -43,6 +41,13 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     # Preferenicas de eventos
     save_events = models.JSONField(default=list, blank=True, null=True)
     favourite_events = models.JSONField(default=list, blank=True, null=True)
+
+    # Matches
+    modo_busqueda_match = models.CharField(
+        max_length=20,
+        choices=[("global", "Global"), ("evento", "Por evento")],
+        default="global"
+    )
 
     # Campos para la creación del perfil de acompañantes
     profile_pic = models.JSONField(default=list, null=True, blank=True)
@@ -67,7 +72,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 # ------------------ Tokens para Login 
-
 class TokenBlackList(models.Model):
     token = models.CharField(max_length=500, unique=True)
     fecha = models.DateTimeField(auto_now_add=True)
@@ -93,9 +97,9 @@ class Interaccion(models.Model):
         
     def __str__(self):
         return f"{self.usuario_origen.email} → {self.usuario_objetivo.email}: {self.tipo_interaccion}"
+    
 
 # --------- Matches de acompañantes
-
 class Matches (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default= generate_objectid)
     usuario_a = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="usuario_a", to_field= "_id")
@@ -166,10 +170,12 @@ class Evento(models.Model):
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
     assistants = models.JSONField(default=list, null=True, blank=True)
+    buscar_match = models.BooleanField(default=False)  # Campo para saber si se quiere buscar acompañante para el evento
+
 
     def __str__(self):
         return self.title
-    
+
 # ------------------------------------------- FUNCIONES PARA ADMIN -------------------------------------------    
     
     # Clases para las Preguntas de preferencias personales para crear el perfil de "Busqueda de Acompañantes"
@@ -202,4 +208,3 @@ class Subcategoria(models.Model):
     def __str__(self):
         return self.nombre_subcategoria
     
-

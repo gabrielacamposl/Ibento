@@ -11,6 +11,7 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState('');
    
    
+    const myId = JSON.parse(localStorage.getItem('user'))?.id;
    
     const query = new URLSearchParams(window.location.search);
     const roomName = query.get('room');
@@ -25,6 +26,8 @@ const Chat = () => {
         navigate("../match");
     }
 
+  
+    
 
     const [mensajes, setMensaje] = useState([]);
     const [receptor, setReceptor] = useState('');
@@ -237,26 +240,28 @@ useEffect(() => {
                             <div className=" flex-grow m-3 max-h-[calc(100vh-4rem)]"> 
                                 {mensajes.map((message, index) => (
                                     <div key={index}>
-                                    <p className={`flex ${message.remitente_id === 'null' ? 'justify-end mr-3' : 'justify-start ml-3'}`}>{message.remitente_id}</p>
-                                    <div  className={`flex mb-2 ${message.remitente_id === 'null' ? 'justify-end' : 'justify-start'}`}>
-                                       
+                                  
+                                    <div  className={`flex mb-2 ${message.remitente_id === myId ? 'justify-end' : 'justify-start'}`}>
+                                       {/*IMAGEN */}
                                         {message.remitente_id !== 'null' && (
                                             
                                             <img src={message.image} className="w-8 h-8 object-cover rounded-full mr-2" />
                                         )}
-                                       <span
-                                       
+
+                                        <p>{message.receptor}</p>
+                                        {/*MENSAJE */}
+                                        <span
                                             className={`p-2 rounded ${
-                                                message.remitente_id =='null' ? 'bg-blue-400 text-white text-right' : 'bg-gray-200'
+                                                message.receptor === myId ? 'bg-blue-400 text-white text-right' : 'bg-gray-200'
                                             }`}
-                                            
-                                            >  {message.text}
-                                            </span>
-                                            
+                                        >
+                                            {message.mensaje}
+                                        </span>
+                                        {/*IMAGEN */}
                                         {message.remitente_id === 'null' && (
                                             <img src={message.image} className=" w-8 h-8 object-cover rounded-full ml-2" />
                                         )}
-                                        <p>{message.mensaje}</p>
+                                      
                                     </div>
                                     
                                     </div>
