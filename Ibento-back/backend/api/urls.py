@@ -36,19 +36,19 @@ urlpatterns = [
     path("api/logout/", logout_usuario, name="logout"),
 
     # Cambiar contraseña
-    path('password-reset/request/', password_reset_request, name='password_reset_request'),
-    path('password-reset/change/', password_reset_change, name='password_reset_change'),
-    path('password-reset/validate/', password_reset_validate, name='password_reset_validate'),
-    path('password-reset/resend/', password_reset_resend, name='password_reset_resend'),
+    path('api/password-reset/request/', password_reset_request, name='password_reset_request'),
+    path('api/password-reset/change/', password_reset_change, name='password_reset_change'),
+    path('api/password-reset/validate/', password_reset_validate, name='password_reset_validate'),
+    path('api/password-reset/resend/', password_reset_resend, name='password_reset_resend'),
     
     
     # Creación de perfil para acompañantes
     # ---- Subir imágenes de perfil
-     path('perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
+     path('api/perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
     # ---- Está validado
-    path('estado-validacion/', estado_validacion_view, name='estado-validacion'),
+    path('api/estado-validacion/', estado_validacion_view, name='estado-validacion'),
     # ---- Obtener intereses
-    path('categorias-perfil/', get_categorias_perfil, name='categorias-perfil'),
+    path('api/categorias-perfil/', get_categorias_perfil, name='categorias-perfil'),
     path('api/guardar-respuestas/', guardar_respuestas_perfil, name='guardar-respuestas'),
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
@@ -70,11 +70,11 @@ urlpatterns = [
   
     #Otras
     path('', include(router.urls)),
-    path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
+    path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
 
 
     #Acciones User
-    path('eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
-    path('eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
+    path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
+    path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
 
 ]
