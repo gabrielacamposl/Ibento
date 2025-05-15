@@ -18,7 +18,9 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ibento.onrender.com',
+                 'localhost',
+                 '127.0.0.1']
 
 
 # Application definition
@@ -75,7 +77,7 @@ MIDDLEWARE = [
     
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'backend.backend.urls'
 
 TEMPLATES = [
     {
@@ -93,27 +95,31 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
 
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'Ibento',
+        'NAME': os.getenv('DB_NAME'),
         'CLIENT': {
             'host':  os.getenv("MONGO_HOST"),
-        }
+        },
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
     }
 }
 
-# CORS (permite conexión con el frontend)
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",  
-#     "http://127.0.0.1:5173",
-#     "http://192.168.1.70:5173"
-# ]
+#CORS (permite conexión con el frontend)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
+    "http://192.168.1.70:5173",
+    "https://ibento.vercel.app", 
+    "https://ibento.onrender.com",
+    "https://ibento-sigma.vercel.app",
+]
 
-CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 

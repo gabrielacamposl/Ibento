@@ -14,7 +14,8 @@ import { Button } from "primereact/button";
 import { buttonStyle } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import axios from "../../axiosConfig";
+import api from "../../api";
 
 import ibentoLogo from "/images/ibentoLogo.png";
 
@@ -58,7 +59,13 @@ export default function Register() {
   // Función para obtener categorías de eventos
   const fetchCategorias = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/adminuser/eventos/categorias/');
+      const res = await axios.get('eventos/categorias/');
+      console.log("Respuesta de la API:", res.data);
+
+      if (!Array.isArray(res.data)){
+        throw new Error("Esto no es un array.")
+      }
+      console.log ("Respuesta del API", res.data);
       const categoriasFormateadas = res.data.map(cat => ({
         id: cat._id,
         nombre: cat.nombre,
@@ -114,7 +121,7 @@ export default function Register() {
     };
 
     try {
-      const res = await axios.post('http://localhost:8000/api/crear-cuenta/', data);
+      const res = await api.post('crear-cuenta/', data);
 
       if (res.data.mensaje) {
         setMessage("Tu cuenta se ha creado correctamente, revisa tu correo para activar tu cuenta. " + res.data.mensaje);

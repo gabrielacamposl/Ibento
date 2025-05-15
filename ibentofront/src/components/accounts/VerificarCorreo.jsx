@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../../api";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
@@ -13,8 +12,6 @@ import { motion } from "framer-motion";
 export default function VerificarCorreo() {
 
   const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
-
-
 
 
   return (
