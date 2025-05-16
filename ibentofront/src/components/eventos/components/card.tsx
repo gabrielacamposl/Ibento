@@ -55,13 +55,13 @@ export default function CardWrapper(
       }, [lat, lon]);
     
 
-    const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('eventos/upcoming_events/');
+    const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('http://127.0.0.1:8000/eventos/upcoming_events/');
     
-    const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('eventos/by_category?category=Música');
+    const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Música');
   
     const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchNearestEvents(liga || '');
 
-    const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('eventos/by_category?category=Deportes');
+    const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=Deportes');
 
     
 
