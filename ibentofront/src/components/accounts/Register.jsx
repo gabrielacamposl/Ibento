@@ -23,8 +23,6 @@ import { name_regex, email_regex, password_regex } from "../../utils/regex";
 import apiaxios from "../../axiosConfig";
 
 
-
-
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({

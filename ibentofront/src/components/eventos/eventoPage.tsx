@@ -236,6 +236,7 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", eventId);
+
       const response = await api.post(
         `eventos/save/?eventId=${eventId}`, {
         headers: {
