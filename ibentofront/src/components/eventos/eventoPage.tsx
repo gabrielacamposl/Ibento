@@ -11,6 +11,8 @@ import Carousel from './components/carousel';
 import { useFetchEvents } from "../../hooks/usefetchEvents";
 import { useFetchUserEvents } from "../../hooks/useFetchUser";
 
+import api from "../../api"
+
 import { useParams } from 'react-router-dom';
 
 interface ListEvent {
