@@ -11,6 +11,8 @@ import Carousel from './components/carousel';
 import { useFetchEvents } from "../../hooks/usefetchEvents";
 import { useFetchUserEvents } from "../../hooks/useFetchUser";
 
+import api from "../../api"
+
 import { useParams } from 'react-router-dom';
 
 interface ListEvent {
@@ -234,9 +236,9 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", eventId);
-      const response = await fetch(
-        `https://ibento.onrender.com/api/eventos/save/?eventId=${eventId}`, {
-        method: 'POST',
+
+      const response = await api.post(
+        `eventos/save/?eventId=${eventId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
