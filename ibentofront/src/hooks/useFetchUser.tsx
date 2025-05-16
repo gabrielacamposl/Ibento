@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import api from '../api'
 
 interface Event {
     save_event: []
@@ -12,12 +13,12 @@ const useFetchUserEvents = (token:string) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const url = 'https://ibento.onrender.com/api/usuarios/events/'
+    const url = 'usuarios/events/'
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<any[]>
+                const response = await api.get<any[]>
                 (url,
                     {
                         headers: {

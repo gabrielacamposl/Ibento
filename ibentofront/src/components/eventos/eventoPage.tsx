@@ -46,7 +46,7 @@ function Page() {
 
 
 
-  const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" + eventId);
+  const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" +  eventId);
 
   const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
@@ -78,9 +78,8 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", id_event);
-      const response = await fetch(
-        `http://127.0.0.1:8000/eventos/${id_event}/like/`, {
-        method: 'POST',
+      const response = await api.post(
+        `eventos/${id_event}/like/`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
