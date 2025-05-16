@@ -75,7 +75,7 @@ const useFetchNearestEvents = (url: string) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (url === 'http://127.0.0.1:8000/eventos/nearest/?lat=undefined&lon=undefined') {
+        if (url === 'https://ibento.onrender.com/api/eventos/nearest/?lat=undefined&lon=undefined') {
             setData([]);
             setLoading(false);
             return;
