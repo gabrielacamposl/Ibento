@@ -235,7 +235,7 @@ interface LikeResponse {
       console.log("Token:", token);
       console.log("ID del evento:", eventId);
       const response = await fetch(
-        `http://127.0.0.1:8000/eventos/save/?eventId=${eventId}`, {
+        `https://ibento.onrender.com/api/eventos/save/?eventId=${eventId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

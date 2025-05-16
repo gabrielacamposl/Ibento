@@ -28,28 +28,44 @@ export default defineConfig({
           { src: '/icons/ibento192x192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icons/ibento256x256.png', sizes: '256x256', type: 'image/png' },
           { src: '/icons/ibento384x384.png', sizes: '384x384', type: 'image/png' },
-          { src: '/icons/ibento512x512.png', sizes: '512x512', type: 'image/png' }
+         // { src: '/icons/ibento512x512.png', sizes: '512x512', type: 'image/png' }
         ],
         "screenshots": [
           {
             "src": "/images/screenshot1.jpeg",
             "sizes": "403x789",
             "type": "image/png",
+            "form_factor": "narrow"
           },
           {
             "src": "/images/screenshot2.jpeg",
             "sizes": "394x790",
-            "type": "image/png"
+            "type": "image/png",
+            "form_factor": "narrow"
           },
            {
             "src": "/images/screenshot3.jpeg",
             "sizes": "405x787",
             "type": "image/png",
+            "form_factor": "narrow"
           },
           {
             "src": "/images/screenshot4.jpeg",
             "sizes": "394x795",
-            "type": "image/png"
+            "type": "image/png",
+            "form_factor": "narrow"
+          },
+          {
+            "src": "/images/screenshot5.jpeg",
+            "sizes": "394x795",
+            "type": "image/png",
+            "form_factor": "wide"
+          },
+          {
+            "src": "/images/screenshot6.jpeg",
+            "sizes": "394x795",
+            "type": "image/png",
+            "form_factor": "wide"
           }
         ]
 
