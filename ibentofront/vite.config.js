@@ -35,37 +35,33 @@ export default defineConfig({
             "src": "/images/screenshot1.jpeg",
             "sizes": "403x789",
             "type": "image/png",
-            "form_factor": "narrow"
           },
           {
             "src": "/images/screenshot2.jpeg",
             "sizes": "394x790",
             "type": "image/png",
-            "form_factor": "narrow"
           },
            {
             "src": "/images/screenshot3.jpeg",
             "sizes": "405x787",
             "type": "image/png",
-            "form_factor": "narrow"
           },
           {
             "src": "/images/screenshot4.jpeg",
             "sizes": "394x795",
             "type": "image/png",
-            "form_factor": "narrow"
           },
           {
             "src": "/images/screenshot5.jpeg",
-            "sizes": "394x795",
+            "sizes": "686x904",
             "type": "image/png",
             "form_factor": "wide"
           },
           {
             "src": "/images/screenshot6.jpeg",
-            "sizes": "394x795",
+            "sizes": "678x907",
             "type": "image/png",
-            "form_factor": "wide"
+           
           }
         ]
 
