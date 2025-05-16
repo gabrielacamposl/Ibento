@@ -62,7 +62,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_validated_camera = models.BooleanField(default=False) # Verificación del perfil con la cámara
     
     # Token para Firebase Cloud Messaging
-    token_fcm = models.CharField(max_length=255, null=True, blank=True)
+    tokens_fcm = models.JSONField(default=list, blank=True, null=True) 
 
     objects = UsuarioManager()
     REQUIRED_FIELDS = ['nombre', 'apellido']
