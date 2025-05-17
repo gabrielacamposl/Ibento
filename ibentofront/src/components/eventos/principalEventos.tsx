@@ -21,8 +21,8 @@ function Page() {
     const navigate = useNavigate();
 
     //const {data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/everything/');
-    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
-    const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('eventos/recommended_events', localStorage.getItem("access") ?? "");
+    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('http://127.0.0.1:8000/eventos/most_liked/');
+    const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('http://127.0.0.1:8000/eventos/recommended_events', localStorage.getItem("access") ?? "");
 
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);

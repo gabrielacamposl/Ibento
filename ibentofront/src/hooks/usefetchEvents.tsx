@@ -69,7 +69,7 @@ const useFetchEvent = (url: string) => {
 
 const useFetchNearestEvents = (url: string) => {
 
-    url = 'eventos/nearest/?lat=undefined&lon=undefined'
+    url = 'http://127.0.0.1:8000/eventos/nearest/?lat=undefined&lon=undefined'
 
     const [data, setData] = useState<Event[]>([]);;
     const [loading, setLoading] = useState(false);
@@ -86,7 +86,7 @@ const useFetchNearestEvents = (url: string) => {
             setLoading(true);
             setError(null);
             try{
-                const response = await api.get(url);
+                const response = await axios.get(url);
                 if(response.status != 200){
                     throw new Error(`HTTP error. Status: ${response.status}`)
                 }
@@ -114,7 +114,7 @@ const useFetchRecommendedEvents = (url: string, token:string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await api.get<Event[]>(url, 
+                const response = await axios.get<Event[]>(url, 
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -140,7 +140,7 @@ const saveEvent = (eventId: string) => {
 
     const fetchData = async () => {
         try{
-            const response = await api.get("");
+            const response = await axios.get("");
             if(response.status != 200){
                 throw new Error(`HTTP error. Status: ${response.status}`)
             }

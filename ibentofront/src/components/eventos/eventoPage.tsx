@@ -10,8 +10,7 @@ import EventMap from './EventMap';
 import Carousel from './components/carousel';
 import { useFetchEvents } from "../../hooks/usefetchEvents";
 import { useFetchUserEvents } from "../../hooks/useFetchUser";
-
-import api from "../../api"
+import axios from 'axios';
 
 import { useParams } from 'react-router-dom';
 
@@ -48,7 +47,7 @@ function Page() {
 
 
 
-  const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" +  eventId);
+  const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/api/eventos/event_by_id?eventId=" +  eventId);
 
   const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
@@ -80,7 +79,7 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", id_event);
-      const response = await api.post(
+      const response = await axios.post(
         `eventos/${id_event}/like/`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -238,8 +237,8 @@ interface LikeResponse {
       console.log("Token:", token);
       console.log("ID del evento:", eventId);
 
-      const response = await api.post(
-        `eventos/save/?eventId=${eventId}`, {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/eventos/save/?eventId=${eventId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
