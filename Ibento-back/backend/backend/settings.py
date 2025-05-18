@@ -98,7 +98,7 @@ TEMPLATES = [
         },
     },
 ]
-ASGI_APPLICATION = 'backend.asgi.application'
+ASGI_APPLICATION = 'backend.backend.asgi.application'
 
 WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
