@@ -13,6 +13,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(reg => console.log('[SW] Registrado', reg))
       .catch(err => console.error('[SW] Error al registrar', err))
-  })
+  });
 }
 
