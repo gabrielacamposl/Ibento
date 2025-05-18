@@ -17,7 +17,9 @@ from api.user.views import (crear_usuario,
                             importar_ticketmaster,
                             like_event,
                             obtener_eventos_favoritos,
-                            obtener_match
+                            obtener_match,
+                            obtener_usuarios_conversacion,
+                            es_favorito,
                             )
 
 
@@ -68,7 +70,7 @@ urlpatterns = [
     path('api/mis-conversaciones/', mis_conversaciones, name='mis_conversaciones'),
     path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
-  
+    path('api/usuarios/<str:conversacion_id>/conversacion/', obtener_usuarios_conversacion, name='obtener_usuarios_conversacion'),
     #Otras
     path('', include(router.urls)),
     path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
@@ -76,6 +78,8 @@ urlpatterns = [
 
     #Acciones User
     path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
-    path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
+    path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
+    path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
+    
 
 ]

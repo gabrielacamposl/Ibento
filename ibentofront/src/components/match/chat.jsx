@@ -11,16 +11,16 @@ const Chat = () => {
     ]);
     const [newMessage, setNewMessage] = useState('');
    
-   
+    
     const myId = JSON.parse(localStorage.getItem('user'))?.id;
-   
+
     const query = new URLSearchParams(window.location.search);
     const roomName = query.get('room');
    
    
   
     const handdleInfo = () => {
-        navigate("../verPerfil");
+        navigate("../verPerfil?id=" + receptor._id);
     };
 
     const handleBack = () => {
@@ -31,7 +31,42 @@ const Chat = () => {
     
 
     const [mensajes, setMensaje] = useState([]);
-    const [receptor, setReceptor] = useState('');
+    const [receptor, setReceptor] = useState([]);
+    const [Me, setMe] = useState([]);
+
+
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchUsersChat = async () => {
+            try {
+                const response = await api.get(`usuarios/${roomName}/conversacion/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    console.log("Usuarios",response.data);
+                    //El usuario 2 será el usuario que no es el mío
+                    if(response.data[0]._id != myId){
+                        setReceptor(response.data[0]);
+                        setMe(response.data[1]);
+                    }
+                    else{
+                        setReceptor(response.data[1]);
+                        setMe(response.data[0]);
+                    }
+                 
+                } else {
+                    console.error("No hay conversación iniciada", response.statusText);
+                }
+            } catch (error) {
+                console.error("Error al obtener los mensajes:", error);
+            }
+        };
+        fetchUsersChat();
+    }, [roomName]);
+
     useEffect(() => async () => {
         const token = localStorage.getItem('access');
       
@@ -131,7 +166,7 @@ useEffect(() => {
         try {
             const response = await api.post("mensajes/enviar/"    , {
                 conversacion: roomName,
-                receptor: idCarolina,
+                receptor: receptor._id,
                 mensaje: newMessage,
             }, {
                 headers: {
@@ -190,8 +225,8 @@ useEffect(() => {
 
                         <div className="mt-5 flex justify-between">
                             <div className="flex">
-                                <img src="/harry.jpeg" className="w-10 h-10 object-cover rounded-full mr-2" />
-                                <h1 className="text-xl font-semibold">{messages[0].sender}</h1>
+                                <img src={receptor.profile_pic} className="w-10 h-10 object-cover rounded-full mr-2" />
+                                <h1 className="text-xl font-semibold">{receptor.nombre} {receptor.apellido}</h1>
                             </div>
                             <div><button  className="cursor-pointer" onClick={handdleInfo} >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
@@ -205,7 +240,7 @@ useEffect(() => {
                         <div className="max-h-[calc(100vh-14rem)]  h-screen overflow-y-auto  bg-white mt-3 w-full">
                             <div className="mt-10 mb-8 flex justify-center ">
                                 <div className="relative ">
-                                    <img src={messages[0].image} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={messages[0].sender} />
+                                    <img src={receptor.profile_pic} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={receptor.nombre} />
                                     <div className="absolute bottom-1 right-0 w-full flex justify-center ">
                                         <svg width="100" height="100">
                                             <defs>
@@ -220,7 +255,7 @@ useEffect(() => {
                                     </div>
                                 </div>
                                 <div className="relative min-w-[100px] ml-2">
-                                    <img src={messages[1].image} className="sombraMatch2 w-20 h-20 object-cover rounded-full" alt={messages[1].sender} />
+                                    <img src={Me.profile_pic} className="sombraMatch2 w-20 h-20 object-cover rounded-full" alt={messages[1].sender} />
                                     <div className="absolute top-9 right-2 w-full flex justify-center items-center">
                                         <svg width="100" height="100">
                                             <defs>
@@ -242,18 +277,18 @@ useEffect(() => {
                                 {mensajes.map((message, index) => (
                                     <div key={index}>
                                   
-                                    <div  className={`flex mb-2 ${message.remitente_id === myId ? 'justify-end' : 'justify-start'}`}>
+                                    <div  className={`flex mb-2 ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
                                        {/*IMAGEN */}
                                         {message.remitente_id !== 'null' && (
                                             
                                             <img src={message.image} className="w-8 h-8 object-cover rounded-full mr-2" />
                                         )}
 
-                                        <p>{message.receptor}</p>
+                                      
                                         {/*MENSAJE */}
                                         <span
-                                            className={`p-2 rounded ${
-                                                message.receptor === myId ? 'bg-blue-400 text-white text-right' : 'bg-gray-200'
+                                            className={`p-2 rounded  p-2 rounded max-w-xs break-words ${
+                                                message.receptor === myId ?  'bg-gray-200' : 'bg-blue-400 text-white text-right'
                                             }`}
                                         >
                                             {message.mensaje}

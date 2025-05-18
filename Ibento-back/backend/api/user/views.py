@@ -770,6 +770,39 @@ def obtener_mensajes (request, conversacion_id):
     return Response(serializer.data)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuarios_conversacion(request, conversacion_id):
+    try:
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+    except Conversacion.DoesNotExist:
+        return Response({"error": "Conversación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({"error": "No tienes permiso para ver esta conversación."}, status=status.HTTP_403_FORBIDDEN)
+    usuarios= []
+    usuario_a = conversacion.usuario_a
+    usuario_b = conversacion.usuario_b
+
+    usuarios.append({
+            "_id": usuario_a._id,
+            "nombre": usuario_a.nombre,
+            "apellido": usuario_a.apellido,
+            "profile_pic": usuario_a.profile_pic[0] if usuario_a.profile_pic else None,
+            
+        })
+    usuarios.append({
+            "_id": usuario_b._id,
+            "nombre": usuario_b.nombre,
+            "apellido": usuario_b.apellido,
+            "profile_pic": usuario_b.profile_pic[0] if usuario_b.profile_pic else None,
+            
+        })
+
+
+
+    return Response(usuarios, status=status.HTTP_200_OK)
+
 # --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------
 # --------- Crear evento
 @api_view(['POST'])
@@ -1225,6 +1258,31 @@ def obtener_evento_por_id(request, pk):
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
+# ------- ¿Es favorito?
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def es_favorito(request, pk):
+    user = request.user
+    try:
+        evento = Evento.objects.get(pk=pk)
+        if evento.pk in user.favourite_events:
+            return Response({"es_favorito": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"es_favorito": False}, status=status.HTTP_200_OK)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ------- Obtener usuarios por ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuario_por_id(request, pk):
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        serializer = UsuarioSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Usuario.DoesNotExist:
+        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
 #------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -1249,3 +1307,5 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         usuario = request.user
         serializer = UsuarioSerializerEdit(usuario)
         return Response(serializer.data)
+
+
