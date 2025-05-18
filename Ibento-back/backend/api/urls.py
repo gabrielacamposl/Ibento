@@ -85,7 +85,7 @@ urlpatterns = [
     #Acciones User
     path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
 
-    path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
+    path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
 
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
