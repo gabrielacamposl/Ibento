@@ -38,7 +38,6 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
     path('api/login/', login_usuario, name='login'),
-    path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
 
@@ -78,7 +77,6 @@ urlpatterns = [
     path('api/usuarios/<str:conversacion_id>/conversacion/', obtener_usuarios_conversacion, name='obtener_usuarios_conversacion'),
     path('api/usuarios/<str:pk>/info/', obtener_usuario_info, name='obtener_usuario_info'),
     #Otras
-    path('', include(router.urls)),
     path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
 
 
