@@ -3,15 +3,11 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../../axiosConfig';
 const matches = () => {
     const navigate = useNavigate();
     const [verificar, setVerificar] = useState(true);
-    const [user, setUser] = useState({
-        
-        pictures: ["/minovio.jpeg", "/juas.webp"],
-        likes: 20,
-        
-    });
+   
     
         // useEffect(() => {
         //     const token = localStorage.getItem("access");
@@ -21,74 +17,13 @@ const matches = () => {
         //     }
         // }, []);
    
-    
-    const users = [
-        {
-            name: 'Lee Know',
-            age: 26,
-            pictures: ["/lee2.jpeg", "/lee.jpeg"],
-            asistir: ['EDC', 'FlowFest'],
-            eventosComun: ['Fiesta de disfraces', 'Karaoke'],
-            ultimoMensaje:'Hola,¿Cómo estás?',
-            idChat: 1,
-        },
-        {
-            name: 'Felix',
-            age: 22,
-            pictures: ["/lee.jpeg", "/felix2.jpeg"],
-            asistir: ['Lollapalooza', 'Tomorrowland'],
-            eventosComun: ['Concierto de rock', 'Festival de cine'],
-            ultimoMensaje:'',
-            idChat: 2,
-        },
-        {
-            name: 'Hyunjin',
-            age: 23,
-            pictures: ["/jin.jpeg", "/hyunjin2.jpeg"],
-            asistir: ['Ultra Music Festival', 'Coachella'],
-            eventosComun: ['Exposición de arte', 'Torneo de videojuegos'],
-            ultimoMensaje:'Te amoooo <3',
-            idChat: 3,
-        },
-        {
-            name: 'Harry',
-            age: 28,
-            pictures: ["/harry.jpeg", "/jisoo2.jpeg"],
-            asistir: ['SXSW', 'Burning Man'],
-            eventosComun: ['Concierto de pop', 'Festival de comida'],
-            ultimoMensaje:'Te invito a mi concierto',
-            idChat: 4,
-        },
-        {
-            name: 'Chinos',
-            age: 27,
-            pictures: ["/bts.jpeg", "/jennie2.jpeg"],
-            asistir: ['Glastonbury', 'Reading Festival'],
-            eventosComun: ['Desfile de moda', 'Fiesta en la playa'],
-            ultimoMensaje:'',
-            idChat: 5,
-        },
-        {
-            name: 'Jung',
-            age: 26,
-            pictures: ["/jung.webp", "/lisa2.jpeg"],
-            asistir: ['Primavera Sound', 'Rock in Rio'],
-            eventosComun: ['Concierto de hip-hop', 'Competencia de baile'],
-            ultimoMensaje:'',
-            idChat: 6,
-        }
-    ];
-
+  
    
     const handdleFuture = () => {
         navigate("../verMatches");
         }
 
-    const handdleChat = () => {
-        setTimeout(() => navigate("../chat"), 0);
-    }
-
-       
+   
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
     } 
@@ -105,7 +40,7 @@ const matches = () => {
         const token = localStorage.getItem('access');
         const fetchUserData = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/likes-recibidos/", {
+                const response = await api.get("likes-recibidos/", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -130,7 +65,7 @@ const matches = () => {
     useEffect(() => async () => {
         const token = localStorage.getItem('access');
         try {
-            const response = await axios.get("http://127.0.0.1:8000/api/mis-conversaciones/", {
+            const response = await api.get("mis-conversaciones/", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,

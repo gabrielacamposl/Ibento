@@ -3,7 +3,7 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-
+import api from '../../axiosConfig';
 const verPerfil = () => {
     const user = {
         name: 'Harry Styles',
@@ -65,7 +65,7 @@ const verPerfil = () => {
 
     const handleBlockUser = async () => {
         try {
-            const response = await fetch(`/api/users/${userId}/block`, {
+            const response = await api.post(`/api/users/${userId}/block`, {
                 method: 'POST',
             });
             if (!response.ok) {
@@ -78,7 +78,7 @@ const verPerfil = () => {
 
     const handleReportUser = async () => {
         try {
-            const response = await fetch(`/api/users/${userId}/report`, {
+            const response = await api.post(`/api/users/${userId}/report`, {
                 method: 'POST',
             });
             if (!response.ok) {
@@ -91,7 +91,7 @@ const verPerfil = () => {
 
     const deleteMatch = async () => {
         try {
-            const response = await fetch(`/api/matches/${matchId}`, {
+            const response = await api.post(`/api/matches/${matchId}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {

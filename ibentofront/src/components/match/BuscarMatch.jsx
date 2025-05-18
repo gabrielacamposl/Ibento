@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import "../../assets/css/botones.css";
 import "../../assets/css/sombras.css";
 import { useNavigate } from "react-router-dom";
+import api from '../../axiosConfig';
 import axios from 'axios';
 
 const buscarMatchx = () => {
@@ -17,7 +18,7 @@ const buscarMatchx = () => {
         try {
             const token = localStorage.getItem('access');
            
-            const response = await axios.post('http://127.0.0.1:8000/api/interaccion/', {
+            const response = await api.post('interaccion/', {
                 "usuario_destino": user_id,
                 "tipo_interaccion": "dislike"}, {
                 headers: {
@@ -40,7 +41,7 @@ const buscarMatchx = () => {
         try {
             const token = localStorage.getItem('access');
            
-            const response = await axios.post('http://127.0.0.1:8000/api/interaccion/', {
+            const response = await api.post('interaccion/', {
                 "usuario_destino": user_id,
                 "tipo_interaccion": "like"}, {
                 headers: {
@@ -76,7 +77,7 @@ const buscarMatchx = () => {
         async function fetchData() {
             const token = localStorage.getItem('access');
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/matches/sugerencias/', {
+                const response = await api.get('matches/sugerencias/', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }

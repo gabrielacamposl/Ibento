@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
-
+import api from '../../axiosConfig';
 const Favoritos = ({ events }) => {
     const [favoritosCheck, setFavoritosCheck] = useState(true);
 
@@ -20,7 +20,7 @@ const Favoritos = ({ events }) => {
 
         const token = localStorage.getItem("access");
         try {
-            const response = await fetch(`http://127.0.0.1:8000/favoritos/${eventId}/eliminar/`, {
+            const response = await api.post(`favoritos/${eventId}/eliminar/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}` 

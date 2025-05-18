@@ -8,6 +8,7 @@ import Favoritos from './Favoritos'; // Asegúrate de que la ruta sea correcta
 import Guardados from './Guardados'; // Asegúrate de que la ruta sea correcta
 import SideBar from '../usuario/sidebar'; // Asegúrate de que la ruta sea correcta
 import axios from 'axios';
+import api from '../../axiosConfig';
 const Perfil = () => {
 
     
@@ -31,7 +32,7 @@ useEffect(() => {
     const Perfil = async () => {
         try {
             const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
-            const response = await axios.get('http://127.0.0.1:8000/usuarios/info_to_edit/', {
+            const response = await api.get('usuarios/info_to_edit/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -55,7 +56,7 @@ useEffect(() => {
     const fetchFavoritos = async () => {
         try {
             const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
-            const response = await axios.get('http://127.0.0.1:8000/perfil/favoritos/', {
+            const response = await api.get('perfil/favoritos/', {
                 
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -2,6 +2,7 @@ import React, { use, useState,useEffect,useRef } from 'react';
 import "../../assets/css/botones.css";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import api from '../../axiosConfig';
 const Chat = () => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([
@@ -35,7 +36,7 @@ const Chat = () => {
         const token = localStorage.getItem('access');
       
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/mensajes/${roomName}/`, {
+            const response = await api.get(`mensajes/${roomName}/`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -128,7 +129,7 @@ useEffect(() => {
         const token = localStorage.getItem('access');
         
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/mensajes/enviar/"    , {
+            const response = await api.post("mensajes/enviar/"    , {
                 conversacion: roomName,
                 receptor: idCarolina,
                 mensaje: newMessage,

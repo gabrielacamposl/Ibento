@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
+import api from '../../axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import { buttonStyle, inputStyles,verifyStyle } from "../../styles/styles";
 import { ReplyAll } from 'lucide-react';
