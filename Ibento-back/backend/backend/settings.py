@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
   #  'push_notifications', # fcm 
     'corsheaders', # Peticiones desde React  
-    'api',  
+    'backend.api',  
     'api.user',
     'channels',  # Para el uso de websockets
     'daphne',  # Para el uso de websockets
