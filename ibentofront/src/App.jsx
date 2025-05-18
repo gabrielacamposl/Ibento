@@ -1,8 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { getToken } from "firebase/messaging";
+import { messaging } from "./firebase"; 
+import 'primereact/resources/primereact.min.css';
+import InstallPrompt from './components/pwa/InstallPrompt';
 
-import 'primereact/resources/primereact.min.css'; //core css
-
-
+// -------------------------- RUTAS -----------------------------------------
+// Auth & Register
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
 import Login from "./components/accounts/Login";
@@ -13,7 +17,7 @@ import VerificarCorreo from "./components/accounts/VerificarCorreo";
 import RecuperarContrasena from "./components/accounts/resetPassword/recuperarContrasena";
 import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
 import NuevaContrasena from "./components/accounts/resetPassword/nuevaContrasena";  
-
+// Match
 import Perfil from "./components/usuario/Perfil";
 import SideBar from "./components/usuario/sidebar";
 import EditarPerfil from "./components/usuario/EditarPerfil";
@@ -30,9 +34,7 @@ import Matches from "./components/match/itsMatch";
 import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
-
-
-
+// Eventos
 import EventoPage from "./components/eventos/eventoPage";  
 import PrincipalEventos from "./components/eventos/principalEventos";
 import MainLayout from "./layouts/MainLayout";
@@ -40,9 +42,36 @@ import Busqueda  from "./components/eventos/busqueda";
 import BusquedaCategoria from "./components/eventos/searchCategories";
 
 
+const VAPID_P = import.meta.env.VAPID_PUBLICA;
+
 
 export default function App() {
+
+   useEffect(() => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          getToken(messaging, {
+            vapidKey: VAPID_P
+          })
+            .then(currentToken => {
+              if (currentToken) {
+                console.log('[FCM Token]', currentToken);
+                // Aquí puedes enviar el token a tu backend con fetch()
+              } else {
+                console.warn('No se obtuvo token FCM');
+              }
+            })
+            .catch(err => {
+              console.error('Error al obtener token FCM', err);
+            });
+        }
+      });
+    }
+  }, []);
+
   return (
+    <>
     <Router>
     <Routes>
       {/* Auth & Register*/}
@@ -53,7 +82,6 @@ export default function App() {
 
       <Route path="/logout" element={<Logout/>}/>
       
-
         {/* Matches*/}
         
         <Route path="/ibento" element={<MainLayout />}>
@@ -63,8 +91,7 @@ export default function App() {
           <Route path="eventos/:eventId" element={<EventoPage />} />
           <Route path="busqueda" element={<Busqueda />} />
           <Route path ="busqueda/:query" element = {<BusquedaCategoria/>} />
-          
-
+        
           <Route path="perfil" element={<Perfil />} />
           <Route path="editarPerfil" element={<EditarPerfil />} />
           <Route path="editarIntereses" element={<EditarIntereses />} />
@@ -85,11 +112,12 @@ export default function App() {
           <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />
           <Route path="recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
 
-
           <Route path="verificar" element={<VerificarPerfil />} />
 
         </Route>
       </Routes>
     </Router>
+    <InstallPrompt />
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import api from '../api'
 
 interface Event {
     _id: string;
@@ -50,7 +51,7 @@ const useFetchEvent = (url: string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url);
+                const response = await api.get<Event[]>(url);
                 setData(response.data);
             } catch (err) {
                 setError('Error al cargar los datos.');
@@ -68,12 +69,14 @@ const useFetchEvent = (url: string) => {
 
 const useFetchNearestEvents = (url: string) => {
 
+    url = 'eventos/nearest/?lat=undefined&lon=undefined'
+
     const [data, setData] = useState<Event[]>([]);;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (url === 'http://127.0.0.1:8000/eventos/nearest/?lat=undefined&lon=undefined') {
+        if (url === url || url == '') {
             setData([]);
             setLoading(false);
             return;
@@ -83,7 +86,7 @@ const useFetchNearestEvents = (url: string) => {
             setLoading(true);
             setError(null);
             try{
-                const response = await axios.get(url);
+                const response = await api.get(url);
                 if(response.status != 200){
                     throw new Error(`HTTP error. Status: ${response.status}`)
                 }
@@ -111,7 +114,7 @@ const useFetchRecommendedEvents = (url: string, token:string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url, 
+                const response = await api.get<Event[]>(url, 
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -137,7 +140,7 @@ const saveEvent = (eventId: string) => {
 
     const fetchData = async () => {
         try{
-            const response = await axios.get("");
+            const response = await api.get("");
             if(response.status != 200){
                 throw new Error(`HTTP error. Status: ${response.status}`)
             }

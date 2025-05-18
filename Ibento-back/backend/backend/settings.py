@@ -18,7 +18,10 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ibento.onrender.com',
+                 'localhost',
+                 'ibento.com.mx',
+                 '127.0.0.1']
 
 
 # Application definition
@@ -78,7 +81,7 @@ MIDDLEWARE = [
     
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'backend.backend.urls'
 
 TEMPLATES = [
     {
@@ -97,7 +100,7 @@ TEMPLATES = [
 ]
 ASGI_APPLICATION = 'backend.asgi.application'
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
 # Usando channel redis
 # CHANNEL_LAYERS = {
@@ -118,24 +121,31 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'Ibento',
+        'NAME': os.getenv('DB_NAME'),
         'CLIENT': {
             'host':  os.getenv("MONGO_HOST"),
-            #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
-            'ssl': True,
-            'tlsAllowInvalidCertificates': True,
+        },
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
+        'ssl': True,
+        'tlsAllowInvalidCertificates': True,
         }
     }
 }
 
-# CORS (permite conexión con el frontend)
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",  
-#     "http://127.0.0.1:5173",
-#     "http://192.168.1.70:5173"
-# ]
+#CORS (permite conexión con el frontend)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
+    "http://192.168.1.70:5173",
+    "https://ibento.vercel.app", 
+    "https://ibento.onrender.com",
+    "https://ibento-hazel.vercel.app",
+    "https://ibento.com.mx",
 
-CORS_ALLOW_ALL_ORIGINS = True
+]
+
 
 CORS_ALLOW_CREDENTIALS = True
 

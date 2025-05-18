@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api";
 import Container from "@mui/material/Container";
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
@@ -25,7 +25,7 @@ export default function Confirm() {
       if (isConfirmed) {return};
       try {
         // Hacemos la llamada al backend para confirmar el token
-        const response = await axios.get(`http://127.0.0.1:8000/api/confirmar/${token}/`);
+        const response = await api.get(`confirmar/${token}/`);
       
         if (response.status === 200) {
           console.log("ENTRE PRIMERO EN EXITO");

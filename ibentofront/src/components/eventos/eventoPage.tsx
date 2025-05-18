@@ -11,7 +11,11 @@ import Carousel from './components/carousel';
 import { useFetchEvents } from "../../hooks/usefetchEvents";
 import { useFetchUserEvents } from "../../hooks/useFetchUser";
 
+import api from "../../api"
+
 import { useParams } from 'react-router-dom';
+
+//Easter Egg: Porfavorya
 
 interface ListEvent {
   _id: string;
@@ -42,7 +46,10 @@ function Page() {
     window.scrollTo(0, 0);
   }, []);
 
-  const { data: evento, loading, error } = useFetchEvents("http://127.0.0.1:8000/eventos/event_by_id?eventId=" + eventId);
+
+
+  const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" +  eventId);
+
   const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
   if (loading) {
@@ -73,9 +80,8 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", id_event);
-      const response = await fetch(
-        `http://127.0.0.1:8000/eventos/${id_event}/like/`, {
-        method: 'POST',
+      const response = await api.post(
+        `eventos/${id_event}/like/`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -231,9 +237,9 @@ interface LikeResponse {
     try {
       console.log("Token:", token);
       console.log("ID del evento:", eventId);
-      const response = await fetch(
-        `http://127.0.0.1:8000/eventos/save/?eventId=${eventId}`, {
-        method: 'POST',
+
+      const response = await api.post(
+        `eventos/save/?eventId=${eventId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
