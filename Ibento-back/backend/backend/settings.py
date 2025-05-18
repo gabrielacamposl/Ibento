@@ -132,7 +132,7 @@ DATABASES = {
         'tlsAllowInvalidCertificates': True,
         }
     }
-}
+
 
 #CORS (permite conexión con el frontend)
 CORS_ALLOWED_ORIGINS = [
