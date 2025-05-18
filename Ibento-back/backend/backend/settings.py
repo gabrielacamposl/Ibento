@@ -127,9 +127,6 @@ DATABASES = {
         },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
-        'ssl': True,
-        'tlsAllowInvalidCertificates': True,
         }
     }
 
