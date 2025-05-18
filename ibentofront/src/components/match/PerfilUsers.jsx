@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import api from '../../axiosConfig';
+import { useNavigate } from 'react-router-dom';
 import {buttonStyle, buttonStyleSecondary} from '../../styles/styles';
 const verPerfil = () => {
-
+    const nativate = useNavigate();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const handleNext = () => {
@@ -53,12 +54,42 @@ const verPerfil = () => {
     };
 
 
+    const [menssageBlock, setMessageBlock] = useState(false);
+
 //CONSULTAS DEL BACKEND CON EL USUARIO EN CUESTION
     const [currentUser, setCurrentUser] = useState([]);
+    const [matchID, setMatchID] = useState([]);
     const queryID = new URLSearchParams( window.location.search );
     const userId = queryID.get('id');
+    const Id_Match = queryID.get('match');
    
+    //Obtener el id del match para realizar acciones como bloquear, eliminar match y reportar
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('access');
+            try {
+                const response = await api.get(`matches/${Id_Match}/obtener/`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (response.status === 200) {
+                    setMatchID(response.data);
+                    console.log(response.data);
+                } else {
+                    console.error('Error fetching user data:', response.status);
+                }
+            }
+            catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+        fetchUserData();
+    }, []);
 
+    //Obtenemos la informacion del usuario
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem('access');
@@ -83,6 +114,8 @@ const verPerfil = () => {
         fetchUserData();
     }, []);
 
+    //Funciones para eliminar el match, bloquear y reportar al usuario
+    //BLOQUEAR USUARIO
     const handleBlockUser = async () => {
         try {
             const response = await api.post(`matches/${userId}/bloquear`, {
@@ -95,7 +128,7 @@ const verPerfil = () => {
             console.error(error);
         }
     }
-
+    //REPORTAR USUARIO
     const handleReportUser = async () => {
         try {
             const response = await api.post(`users/${userId}/report`, {
@@ -108,14 +141,24 @@ const verPerfil = () => {
             console.error(error);
         }
     }
-
+    //ELIMINAR MATCH
     const deleteMatch = async () => {
+        const token = localStorage.getItem('access');
         try {
-            const response = await api.delete(`api/matches/${Id_Match}/eliminar/`, {
+            const response = await api.delete(`matches/${matchID}/eliminar/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             if (response.status === 200) {
                 console.log('Match eliminado');
+
+                setTimeout(() => {
+                    nativate("../match");
+                }, 3000);
+
                 console.log(response.data);
+
             }
         } catch (error) {
             console.error(error);
@@ -214,10 +257,10 @@ const verPerfil = () => {
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                 <button
                                     type="button"
-                                    onClick={()=> {handleCloseDialog();}}
+                                    onClick={()=> {handleCloseDialog(); deleteMatch(); }}
                                     className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                 >
-                                    Eliminar
+                                    Eliminar Match
                                 </button>
                                 <button
                                     type="button"
@@ -233,10 +276,6 @@ const verPerfil = () => {
                 </div>
             </Dialog>
 
-
-
-
-            
             <Dialog open={showDialogBlock} onClose={setShowDialogBlock} className="relative z-10">
                 <DialogBackdrop
                     transition
@@ -287,11 +326,6 @@ const verPerfil = () => {
                 </div>
             </Dialog>
 
-
-
-
-
-
             <Dialog open={showDialogDetails} onClose={setShowDialogDetail} className="relative z-10">
                 <DialogBackdrop
                     transition
@@ -321,6 +355,36 @@ const verPerfil = () => {
                                     Reportar
                                 </button>
 
+                                
+                            </div>
+                        </DialogPanel>
+                    </div>
+                </div>
+            </Dialog>
+
+
+
+            {/*Mensaje de confirmación de eliminación de cuenta */}
+
+              <Dialog open={showDialogDetails} onClose={setMessageBlock} className="relative z-10">
+                <DialogBackdrop
+                    transition
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                />
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                        <DialogTitle as="h3" className="text-base font-semibold text-center text-gray-900">
+                                            Eliminar Match
+                                        </DialogTitle>
+                        <DialogPanel
+                            transition
+                            className="relative transform overflow-hidden  rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                        >
+                            
+                            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-auto items-center justify-center">
+                                <p></p>
+                                <p></p>
+                                <p></p>
                                 
                             </div>
                         </DialogPanel>

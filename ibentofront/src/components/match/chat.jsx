@@ -17,10 +17,11 @@ const Chat = () => {
     const query = new URLSearchParams(window.location.search);
     const roomName = query.get('room');
    
+    
    
   
     const handdleInfo = () => {
-        navigate("../verPerfil?id=" + receptor._id);
+        navigate("../verPerfil?id=" + receptor._id+"&match="+roomName);
     };
 
     const handleBack = () => {
@@ -277,9 +278,9 @@ useEffect(() => {
                                 {mensajes.map((message, index) => (
                                     <div key={index}>
                                   
-                                    <div  className={`flex mb-2 ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
+                                    <div  className={`flex mb-4 ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
                                        {/*IMAGEN */}
-                                        {message.remitente_id !== 'null' && (
+                                        {message.receptor == myId && (
                                             
                                             <img src={message.image} className="w-8 h-8 object-cover rounded-full mr-2" />
                                         )}
@@ -287,14 +288,14 @@ useEffect(() => {
                                       
                                         {/*MENSAJE */}
                                         <span
-                                            className={`p-2 rounded  p-2 rounded max-w-xs break-words ${
-                                                message.receptor === myId ?  'bg-gray-200' : 'bg-blue-400 text-white text-right'
+                                            className={`p- rounded  p-2 rounded max-w-xs break-words ${
+                                                message.receptor == myId ?  'bg-gray-200' : 'bg-blue-400 text-white text-justify'
                                             }`}
                                         >
                                             {message.mensaje}
                                         </span>
                                         {/*IMAGEN */}
-                                        {message.remitente_id === 'null' && (
+                                        {message.receptor != myId && (
                                             <img src={message.image} className=" w-8 h-8 object-cover rounded-full ml-2" />
                                         )}
                                       

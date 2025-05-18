@@ -22,6 +22,7 @@ from api.user.views import (crear_usuario,
                             es_favorito,
                             obtener_usuario_info,
                             bloquear_usuario,
+                            obtener_match_id,
                            
                             )
 
@@ -67,7 +68,7 @@ urlpatterns = [
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
     path('api/matches/<str:match_id>/bloquear/', bloquear_usuario, name='bloquear_usuario'),
-    # Likes recibidos
+    path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
     path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
 
     # Conversaciones

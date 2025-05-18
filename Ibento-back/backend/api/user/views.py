@@ -803,6 +803,23 @@ def obtener_usuarios_conversacion(request, conversacion_id):
 
     return Response(usuarios, status=status.HTTP_200_OK)
 
+# ------- Obtener Match ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_match_id(request, match_id):
+    try:
+        match = Conversacion.objects.get(_id=match_id)
+    except Conversacion.DoesNotExist:
+        return Response({'error': 'Conversación no encontrada'}, status=404)
+
+    if request.user not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para ver este match'}, status=403)
+
+    return Response(match.match_id, status=200)
+
+
+
+
 # --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------
 # --------- Crear evento
 @api_view(['POST'])
