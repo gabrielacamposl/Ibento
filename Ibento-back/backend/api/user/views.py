@@ -1275,15 +1275,45 @@ def es_favorito(request, pk):
 # ------- Obtener usuarios por ID
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def obtener_usuario_por_id(request, pk):
+def obtener_usuario_info(request, pk):
+    data = []
     try:
         usuario = Usuario.objects.get(pk=pk)
-        serializer = UsuarioSerializer(usuario)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data.append({
+            "_id": usuario._id,
+            "nombre": usuario.nombre,
+            "apellido": usuario.apellido,
+            "profile_pic": usuario.profile_pic if usuario.profile_pic else None,
+            "preferencias_evento": usuario.preferencias_evento,
+            "preferencias_generales": usuario.preferencias_generales,
+            "edad": calcular_edad(usuario.birthday),
+            "descripcion": usuario.description,
+        })
+        return Response(data, status=status.HTTP_200_OK)
     except Usuario.DoesNotExist:
         return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
+# ---------- Bloquear usuario
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bloquear_usuario(request, pk):
+    user = request.user
+    try:
+        usuario_a_bloquear = Usuario.objects.get(pk=pk)
+        if usuario_a_bloquear.pk in user.blocked:
+            return Response({"detail": "El usuario ya está bloqueado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Agregar el usuario a la lista de bloqueados
+        user.blocked.append(usuario_a_bloquear.pk)
+        user.save(update_fields=['blocked'])
+        # Eliminar al usuario bloqueado del campo matches si existe
+        if usuario_a_bloquear._id in user.matches:
+            user.matches.remove(usuario_a_bloquear._id)
+            user.save(update_fields=['matches'])
+        # Eliminar match si existe
+        return Response({"detail": "Usuario bloqueado correctamente."}, status=status.HTTP_200_OK)
+    except Usuario.DoesNotExist:
+        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()

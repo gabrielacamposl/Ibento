@@ -20,6 +20,9 @@ from api.user.views import (crear_usuario,
                             obtener_match,
                             obtener_usuarios_conversacion,
                             es_favorito,
+                            obtener_usuario_info,
+                            bloquear_usuario,
+                           
                             )
 
 
@@ -63,6 +66,7 @@ urlpatterns = [
     path('api/matches/', obtener_matches, name='obtener_matches'), 
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
+    path('api/matches/<str:match_id>/bloquear/', bloquear_usuario, name='bloquear_usuario'),
     # Likes recibidos
     path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
 
@@ -71,6 +75,7 @@ urlpatterns = [
     path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
     path('api/usuarios/<str:conversacion_id>/conversacion/', obtener_usuarios_conversacion, name='obtener_usuarios_conversacion'),
+    path('api/usuarios/<str:pk>/info/', obtener_usuario_info, name='obtener_usuario_info'),
     #Otras
     path('', include(router.urls)),
     path('importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
@@ -80,6 +85,5 @@ urlpatterns = [
     path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
-    
-
+  
 ]

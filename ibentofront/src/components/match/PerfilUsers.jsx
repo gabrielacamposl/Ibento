@@ -1,28 +1,20 @@
-import React, { useState } from 'react';
+import React, { use, useState,useEffect } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import api from '../../axiosConfig';
+import {buttonStyle, buttonStyleSecondary} from '../../styles/styles';
 const verPerfil = () => {
-    const user = {
-        name: 'Harry Styles',
-        age: 31,
-        bio: 'Soy un cantante, compositor y actor británico. Me encanta la música y la moda, y disfruto de los desafíos creativos. La moda también es una gran parte de quién soy. Para mí, la ropa es una forma de expresión, de libertad. No hay reglas, solo cómo te sientes en ella. Amo los trajes llamativos, las perlas, los colores y todo lo que me haga sentir auténtico.',
-        pictures: ["/minovio.jpeg", "/juas.webp", "/harry.jpeg"],
-        interests: ['Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
-        eventosComun: ['Fiesta de disfraces', 'Karaoke', 'Cine al aire libre', 'Picnic'],
-        personalidad: ['ISFJ']
-    };
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const handleNext = () => {
-        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % user.pictures.length);
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % currentUser.profile_pic.length);
     };
 
     const handlePrev = () => {
-        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.pictures.length) % user.pictures.length);
+        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + currentUser.profile_pic.length) % Array.isArray(currentUser.profile_pic).length);
     };
 
     const [showDialog, setShowDialog] = useState(false);
@@ -36,8 +28,6 @@ const verPerfil = () => {
     const handleCloseDialog = () => {
         setShowDialog(false);
     };
-
-
 
     const handleCancelBlock = () => {
         setShowDialogBlock(true);
@@ -63,13 +53,43 @@ const verPerfil = () => {
     };
 
 
+//CONSULTAS DEL BACKEND CON EL USUARIO EN CUESTION
+    const [currentUser, setCurrentUser] = useState([]);
+    const queryID = new URLSearchParams( window.location.search );
+    const userId = queryID.get('id');
+   
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('access');
+            try {
+                const response = await api.get(`usuarios/${userId}/info/`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (response.status === 200) {
+                    setCurrentUser(response.data[0]);
+                    console.log(response.data);
+                } else {
+                    console.error('Error fetching user data:', response.status);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+        fetchUserData();
+    }, []);
+
     const handleBlockUser = async () => {
         try {
-            const response = await api.post(`/api/users/${userId}/block`, {
+            const response = await api.post(`matches/${userId}/bloquear`, {
                 method: 'POST',
             });
-            if (!response.ok) {
-                throw new Error('Failed to block user');
+            if(response.status === 200){
+                console.log('Usuario bloqueado');
             }
         } catch (error) {
             console.error(error);
@@ -78,7 +98,7 @@ const verPerfil = () => {
 
     const handleReportUser = async () => {
         try {
-            const response = await api.post(`/api/users/${userId}/report`, {
+            const response = await api.post(`users/${userId}/report`, {
                 method: 'POST',
             });
             if (!response.ok) {
@@ -91,21 +111,22 @@ const verPerfil = () => {
 
     const deleteMatch = async () => {
         try {
-            const response = await api.post(`/api/matches/${matchId}`, {
-                method: 'DELETE',
+            const response = await api.delete(`api/matches/${Id_Match}/eliminar/`, {
             });
-            if (!response.ok) {
-                throw new Error('Failed to delete match');
+            if (response.status === 200) {
+                console.log('Match eliminado');
+                console.log(response.data);
             }
         } catch (error) {
             console.error(error);
         }
     }
+
     return (
         <div className="text-black flex justify-center  min-h-screen ">
-            <div className="relative flex flex-col items-center   p-5 shadow-t max-w-lg w-full">
+            <div className="relative flex flex-col items-center    shadow-t max-w-lg w-full">
                 <div className="relative h-100 w-full">
-                    <img src={user.pictures[currentImageIndex]} className="w-full h-full object-cover" alt={user.name} />
+                    <img src={Array.isArray(currentUser.profile_pic) ? currentUser.profile_pic[currentImageIndex] : '/profile_empty.webp'} className="w-full h-full object-cover" alt={currentUser.nombre || ''} />
                     
 
                     <button onClick={handleCancelDetails} className="absolute right-0 top-0 transform  text-white p-2 rounded-full">
@@ -126,29 +147,35 @@ const verPerfil = () => {
                         </svg>
                     </button>
                 </div>
-                <h1 className="mt-2 mb-3 text-2xl font-semibold ">{user.name}, {user.age}</h1>
-                <div className="bg-white shadow-xl p-2 w-full">
+                <h1 className="mt-2 mb-3 text-2xl font-semibold ">{currentUser.nombre} {currentUser.apellido}, {currentUser.edad}</h1>
+                <div className="bg-white  p-2 w-full">
                     <h2 className="text-lg font-semibold">Sobre mí</h2>
-                    <p className='text-justify'>{user.bio}</p>
+                    <p className='text-justify'>{currentUser.descripcion}</p>
 
+                {/*
                     <h2 className="text-lg mt-3 font-semibold">Eventos en común</h2>
                     <div className="mt-2 flex flex-wrap">
                         {user.eventosComun.map((comun, index) => (
                             <h1 key={index} className="btnAzul rounded-lg text-center mb-1 px-3 ml-3 mt-2 sm:w-auto negritas">{comun}</h1>
                         ))}
                     </div>
-
+                */}
                     <h2 className="text-lg mt-3 font-semibold">Intereses</h2>
                     <div className="mt-2 flex flex-wrap">
-                        {user.interests.map((interest, index) => (
+                        {Array.isArray(currentUser.preferencias_evento) && currentUser.preferencias_evento.map((interest, index) => (
                             <h1 key={index} className="btnRosa rounded-lg text-center mb-1 px-3 ml-3 mt-2 sm:w-auto negritas">{interest}</h1>
                         ))}
                     </div>
+                   
                     
                     <h2 className="text-lg mt-3 font-semibold">Personalidad </h2>
-                    <h1 className="btnVerde rounded-lg text-center mb-1 px-3 ml-3 mt-2 w-auto w-fit flex-w negritas">{user.personalidad}</h1>
-                    <div className="mt-1 flex justify-center">
-                        <button onClick={handleCancelMatch} className='btn-custom font-bold rounded-lg text-center mb-1 px-3 ml-3 mt-2 w-auto w-fit flex-w negritas'>
+                    <h1 className="btnVerde rounded-lg text-center mb-1 px-3 ml-3 mt-2 w-auto w-fit flex-w negritas">
+                        {Array.isArray(currentUser.preferencias_generales) && currentUser.preferencias_generales.length > 12
+                            ? currentUser.preferencias_generales[13].respuesta
+                            : ''}
+                    </h1>
+                    <div className="mt-5 flex justify-between">
+                        <button onClick={handleCancelMatch} className={buttonStyle}>
                             Eliminar Match
                         </button>
                     </div>
@@ -178,7 +205,7 @@ const verPerfil = () => {
                                         </DialogTitle>
                                         <div className="mt-2">
                                             <p className="text-sm text-gray-500">
-                                            ¿Está seguro de eliminar su match con {user.name}?
+                                            ¿Está seguro de eliminar su match con {currentUser.nombre}?
                                             </p>
                                         </div>
                                     </div>
@@ -187,7 +214,7 @@ const verPerfil = () => {
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                 <button
                                     type="button"
-                                    onClick={()=> {handleCloseDialog(); handleBlockUser(user.id);}}
+                                    onClick={()=> {handleCloseDialog();}}
                                     className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                 >
                                     Eliminar
@@ -232,7 +259,7 @@ const verPerfil = () => {
                                         </DialogTitle>
                                         <div className="mt-2">
                                             <p className="text-sm text-gray-500">
-                                            ¿Está seguro de bloquear al usuario {user.name}?
+                                            ¿Está seguro de bloquear al usuario {currentUser.nombre}?
                                             </p>
                                         </div>
                                     </div>
@@ -241,7 +268,7 @@ const verPerfil = () => {
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                 <button
                                     type="button"
-                                    onClick={() => { handleCloseBlock(); handleCloseDetails(); }}
+                                    onClick={() => { handleBlockUser(currentUser._id); handleCloseBlock(); handleCloseDetails(); }}
                                     className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                 >
                                     Bloquear
