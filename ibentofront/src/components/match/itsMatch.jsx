@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { use, useState,useEffect } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import api from '../../axiosConfig';
+import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { useContext } from 'react';
 const itsMatch = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({
@@ -28,6 +34,8 @@ const itsMatch = () => {
             eventosComun: ['Concierto de rock', 'Festival de cine'],
         }
     ];
+const [usersMatch, setUsersMatch] = useState([]);
+
 
 const handdleContinuar = () => {
     navigate("../matches");
@@ -37,7 +45,36 @@ const handdleChat = () => {
 }
 
 
-   
+
+useEffect(() => {
+    const  fetchData = async() => {
+    const token = localStorage.getItem('access');
+    const queryParams = new URLSearchParams(window.location.search);
+    const matchId = queryParams.get('id');
+    
+    try {
+        const response = await api.get(`api/matches/${matchId}/`, {
+           
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+     
+        setUsersMatch(response.data);
+     
+       
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+fetchData();
+}  
+, []);
+
+
+
+
 
     return (
         <div className="text-black flashOnce flex justify-center items-center min-h-screen ">
@@ -55,7 +92,7 @@ const handdleChat = () => {
                     <React.Fragment>
                         <div className="animateDiv flex justify-center items-center ">
                             <div className="relative ">
-                                <img src={users[0].pictures[0]} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={users[0].name} />
+                                <img src={usersMatch?.match?.imagen_usuario_a?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_a_nombre || 'Default Name'} />
                                 <div className="absolute bottom-12 right-10 w-full flex justify-center items-center mb-10">
                                     <svg width="280" height="150">
                                         <defs>
@@ -71,7 +108,7 @@ const handdleChat = () => {
                             </div>
 
                             <div className="relative">
-                                <img src={users[1].pictures[0]} className="sombraMatch2 w-50 h-50 object-cover rounded-full" alt={users[1].name} />
+                            <img src={usersMatch?.match?.imagen_usuario_b?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_b_nombre || 'Default Name'} />
                                 <div className="absolute top-13 right-1 w-full flex justify-center items-center">
                                     <svg width="300" height="300">
                                         <defs>
@@ -88,8 +125,8 @@ const handdleChat = () => {
                         </div>
                         
                     </React.Fragment>
-                    <div className="mt-30 w-full">
-                        <button onClick={handdleChat} className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
+                    <div className="mt-40 w-full">
+                        <button onClick={() => navigate(`../chat/?room=${usersMatch?.conversacion_id}`)} className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
                         <button onClick={handdleContinuar} className='btn-custom2 rounded h-10 w-full font-bold text-lg'>Continuar</button>
                     </div>
                 </div>

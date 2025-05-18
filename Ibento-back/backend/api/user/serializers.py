@@ -173,10 +173,43 @@ class MatchSerializer(serializers.ModelSerializer):
     usuario_a_apellido = serializers.CharField(source="usuario_a.apellido", read_only=True)
     usuario_b_nombre = serializers.CharField(source="usuario_b.nombre", read_only=True)
     usuario_b_apellido = serializers.CharField(source="usuario_b.apellido", read_only=True)
+
+    imagen_usuario_a = serializers.SerializerMethodField()
+    imagen_usuario_b = serializers.SerializerMethodField()
+
+    def get_imagen_usuario_a(self, obj):
+        val = obj.usuario_a.profile_pic
+        if not val:
+            return []
+        if isinstance(val, list):
+            return val
+        if isinstance(val, str) and val.startswith('['):
+            try:
+                return json.loads(val)
+            except Exception:
+                return []
+        return [val]
+
+    def get_imagen_usuario_b(self, obj):
+        val = obj.usuario_b.profile_pic
+        if not val:
+            return []
+        if isinstance(val, list):
+            return val
+        if isinstance(val, str) and val.startswith('['):
+            try:
+                return json.loads(val)
+            except Exception:
+                return []
+        return [val]
+
+
     
     class Meta:
         model = Matches
-        fields = ['_id', 'usuario_a', 'usuario_b', 'usuario_a_nombre', 'usuario_a_apellido', 'usuario_b_nombre', 'usuario_b_apellido']
+        fields = ['_id', 'usuario_a', 'usuario_b',
+          'usuario_a_nombre', 'usuario_a_apellido', 'imagen_usuario_a',
+          'usuario_b_nombre', 'usuario_b_apellido', 'imagen_usuario_b']
 
 
 # --------- Conversaciones con matches

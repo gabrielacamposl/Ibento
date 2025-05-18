@@ -181,3 +181,15 @@
   padding: auto;
   overflow-y: auto; /* Add scrolling if content overflows */
 }
+
+
+
+.mensajesBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; /* Adjust as needed */
+  height: calc(100% - 4rem); /* Subtract the height of the BottomNav (4rem) */
+  padding: auto;
+  overflow-y: auto; /* Add scrolling if content overflows */
+}

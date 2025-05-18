@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'corsheaders', # Peticiones desde React  
     'api',  
     'api.user',
+    'channels',  # Para el uso de websockets
+    'daphne',  # Para el uso de websockets
+    
 ]
 
 # PUSH_NOTIFICATION_SETTINGS = {
@@ -95,9 +98,25 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = 'backend.asgi.application'
 
 WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
+# Usando channel redis
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+# Channel layers in memory (solo para desarrollo local)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 DATABASES = {
     'default': {
@@ -108,6 +127,10 @@ DATABASES = {
         },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
+        #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
+        'ssl': True,
+        'tlsAllowInvalidCertificates': True,
+        }
     }
 }
 

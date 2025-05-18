@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import api from '../../axiosConfig';
 const verMatch = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({
