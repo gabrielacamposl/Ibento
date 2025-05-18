@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.hashers import check_password
 from api.services import ine_validation
 import cloudinary.uploader
-from api.models import (Usuario, 
+from backend.api.models import (Usuario, 
                         TokenBlackList,
                         CategoriasPerfil,
                         Matches, 

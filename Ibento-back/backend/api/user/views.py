@@ -29,7 +29,7 @@ from backend.api.utils import enviar_email_confirmacion, enviar_codigo_recuperac
 #Servicio de ticketmaster
 from backend.api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio de INES
-from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
+from backend.api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
 from backend.api.models import Usuario, Evento, TokenBlackList
 from backend.api.models import Interaccion, Matches,Conversacion, Mensaje
