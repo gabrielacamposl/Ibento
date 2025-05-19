@@ -10,7 +10,9 @@ ibento-front/node_modules/
 
 #Claves Firebase
 Ibento-backend/backend/ibento-8e4fc.json
-Ibento-backend/backend/backend/secret/
+# Firebase credentials
+backend/secrets/
+ibento-back/backend/backend/secrets/
 
 #Archivos de entorno
 *.env

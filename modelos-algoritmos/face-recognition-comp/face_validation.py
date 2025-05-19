@@ -29,22 +29,6 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('c'):
         break
 
-#Desde el teléfono
-
-
-# url = "http://192.168.1.110/4747/video"
-# cap = cv2.VideoCapture(url)
-
-# while True:
-#     ret, frame = cap.read()
-#     if not ret:
-#         print("No se pudo obtener el frame.")
-#         break
-
-#     cv2.imshow("Cámara del Celular", frame)
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         break
-
 cap.release()
 cv2.destroyAllWindows()
 

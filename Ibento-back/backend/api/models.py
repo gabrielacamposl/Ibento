@@ -48,6 +48,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         choices=[("global", "Global"), ("evento", "Por evento")],
         default="global"
     )
+    eventos_buscar_match = models.JSONField(default=list, blank=True, null=True)
 
     # Campos para la creación del perfil de acompañantes
     profile_pic = models.JSONField(default=list, null=True, blank=True)
@@ -170,7 +171,6 @@ class Evento(models.Model):
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
     assistants = models.JSONField(default=list, null=True, blank=True)
-    buscar_match = models.BooleanField(default=False)  # Campo para saber si se quiere buscar acompañante para el evento
 
 
     def __str__(self):
