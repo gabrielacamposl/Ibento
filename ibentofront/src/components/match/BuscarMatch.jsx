@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import "../../assets/css/botones.css";
 import "../../assets/css/sombras.css";
 import { useNavigate } from "react-router-dom";
-import api from '../../axiosConfig';
+import api from '../../api';
 import axios from 'axios';
 
 const buscarMatchx = () => {

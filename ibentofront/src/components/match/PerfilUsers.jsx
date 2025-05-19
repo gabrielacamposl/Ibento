@@ -3,7 +3,7 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import api from '../../axiosConfig';
+import api from '../../api';
 import { useNavigate } from 'react-router-dom';
 import {buttonStyle, buttonStyleSecondary} from '../../styles/styles';
 const verPerfil = () => {
@@ -15,7 +15,7 @@ const verPerfil = () => {
     };
 
     const handlePrev = () => {
-        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + currentUser.profile_pic.length) % Array.isArray(currentUser.profile_pic).length);
+        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + currentUser.profile_pic.length) % currentUser.profile_pic.length);
     };
 
     const [showDialog, setShowDialog] = useState(false);
@@ -54,7 +54,7 @@ const verPerfil = () => {
     };
 
 
-    const [menssageBlock, setMessageBlock] = useState(false);
+    const [messageBlock, setMessageBlock] = useState(false);
 
 //CONSULTAS DEL BACKEND CON EL USUARIO EN CUESTION
     const [currentUser, setCurrentUser] = useState([]);
@@ -142,8 +142,10 @@ const verPerfil = () => {
         }
     }
     //ELIMINAR MATCH
+    const [InfoDelete, setInfoDelete] = useState([]);
     const deleteMatch = async () => {
         const token = localStorage.getItem('access');
+        setMessageBlock(true);
         try {
             const response = await api.delete(`matches/${matchID}/eliminar/`, {
                 headers: {
@@ -151,18 +153,27 @@ const verPerfil = () => {
                 },
             });
             if (response.status === 200) {
+                setInfoDelete(response.data);
                 console.log('Match eliminado');
-
                 setTimeout(() => {
                     nativate("../match");
                 }, 3000);
 
-                console.log(response.data);
+              
 
             }
         } catch (error) {
             console.error(error);
         }
+       
+    };
+
+    if (!currentUser || Object.keys(currentUser).length === 0) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <span className="text-gray-500">Cargando...</span>
+            </div>
+        );
     }
 
     return (
@@ -366,30 +377,42 @@ const verPerfil = () => {
 
             {/*Mensaje de confirmación de eliminación de cuenta */}
 
-              <Dialog open={showDialogDetails} onClose={setMessageBlock} className="relative z-10">
+            <Dialog open={messageBlock} onClose={() => setMessageBlock(false)} className="relative z-10">
                 <DialogBackdrop
                     transition
                     className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                 />
-                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-                        <DialogTitle as="h3" className="text-base font-semibold text-center text-gray-900">
-                                            Eliminar Match
-                                        </DialogTitle>
-                        <DialogPanel
-                            transition
-                            className="relative transform overflow-hidden  rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
-                        >
-                            
-                            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-auto items-center justify-center">
-                                <p></p>
-                                <p></p>
-                                <p></p>
-                                
-                            </div>
-                        </DialogPanel>
-                    </div>
+            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+            <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
+                <Dialog.Panel className="w-full max-w-md rounded bg-white p-6 shadow-xl">
+                <DialogTitle as="h3" className="text-base font-semibold text-center text-gray-900">
+                                                        {InfoDelete.message}
+                                                    </DialogTitle>
+                <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-600">Conversaciones eliminadas: {InfoDelete.conversaciones_eliminadas}</p>
+                    <p className="text-sm text-gray-600">Interacciones eliminadas: {InfoDelete.interacciones_eliminadas}</p>
+                    <p className="text-sm text-gray-600">Mensajes eliminadas: {InfoDelete.mensajes_eliminados}</p>
+          
                 </div>
+                <div className="mt-6 flex justify-center gap-4">
+                    <button
+                    onClick={() => setMessageBlock(false)}
+                    className="rounded bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+                    >
+                    Cancelar
+                    </button>
+                    <button
+                    onClick={() => {
+                        // Lógica de eliminación
+                        setMessageBlock(false);
+                    }}
+                    className="rounded bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
+                    >
+                    Eliminar
+                    </button>
+                </div>
+                </Dialog.Panel>
+            </div>
             </Dialog>
 
 
