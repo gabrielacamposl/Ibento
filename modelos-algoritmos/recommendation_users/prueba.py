@@ -440,7 +440,7 @@ def compatibilidad_zonas(respuesta_a, respuesta_b):
     if resp2 in (respuesta_a or respuesta_b):
         return 0.5
     
-    elementos_comunes = set(respuesta_a) & set(respuesta_b)
+    elementos_comunes = respuesta_a & respuesta_b
 
     total_elementos = len(respuesta_a) + len(respuesta_b)
 
@@ -801,9 +801,6 @@ def compatibilidad_total(lista_preguntas ,respuestas_usuario1, respuestas_usuari
         total_compatibilidad += compatibilidad_personalidad(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
 
-    if preguntas_consideradas == 0:
-        return 0.0
-    
     return total_compatibilidad/preguntas_consideradas
 
 def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
@@ -813,9 +810,9 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
 
     lista_preguntas = []
 
-    print("Preferencias del usuario: ")
+    print("Preferencias del candidato: ")
     print(preferencias_usuario)
-    print("Preferencias del candidato:")
+    print("Preferencias del usuario:")
     print(preferencias_candidato)
 
     
@@ -838,3 +835,44 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
     compatibilidad = compatibilidad_total(lista_preguntas, usuario1, usuario2)
 
     return compatibilidad
+
+
+    
+
+
+
+datos1 = [
+    OrderedDict([('categoria_id', '6817cc11a05c79868a61b640'), ('pregunta', '¿En qué momento del día sueles ser más activo?'), ('respuesta', 'Por las noches')]), 
+    OrderedDict([('categoria_id', '6817cdb3a05c79868a61b642'), ('pregunta', '¿Qué tan activo eres en redes?'), ('respuesta', 'Estoy al pendiente siempre')]), 
+    OrderedDict([('categoria_id', '6817cdf6a05c79868a61b643'), ('pregunta', '¿En qué zonas de CDMX te mueves más seguido?'), ('respuesta', 'Sur (Coyoacán, Tlalpan, Xochimilco)')]), 
+    OrderedDict([('categoria_id', '6817cf49a05c79868a61b644'), ('pregunta', '¿Qué días prefieres para asistir a eventos?'), ('respuesta', 'Entre semana (Lunes a Jueves)')]), 
+    OrderedDict([('categoria_id', '6817cf85a05c79868a61b645'), ('pregunta', '¿Qué tan dispuesto estás a desplazarte para un evento?'), ('respuesta', 'Estoy dispuesto a ir a cualquier parte de la ciudad')]), 
+    OrderedDict([('categoria_id', '6817cfb1a05c79868a61b646'), ('pregunta', '¿Fumas con frecuencia?'), ('respuesta', 'Sí, fumo con frecuencia')]), 
+    OrderedDict([('categoria_id', '6817d046a05c79868a61b648'), ('pregunta', '¿Cómo te sientes respecto a planes espontáneos?'), ('respuesta', 'Me encantan, siempre estoy listo/a')]), 
+    OrderedDict([('categoria_id', '6817d061a05c79868a61b649'), ('pregunta', '¿Qué tipo de interacción esperas durante un evento?'), ('respuesta', 'Muchas risas y diversión')]), 
+    OrderedDict([('categoria_id', '6817d128a05c79868a61b64a'), ('pregunta', '¿Tienes mascotas?'), ('respuesta', ['Otras', 'Conejo'])]), 
+    OrderedDict([('categoria_id', '6817d1cfa05c79868a61b64b'), ('pregunta', '¿Cuáles son tus intereses?'), ('respuesta', ['Tarot', 'Té', 'Sushi', 'Ramen', 'Tatuajes', 'Galerías de arte', 'Roblox', 'Anime', 'Peliculas', 'Conciertos', 'Vida nocturna', 'K-dramas'])]), 
+    OrderedDict([('categoria_id', '6817d200a05c79868a61b64c'), ('pregunta', '¿Qué tipo de eventos te interesan más en CDMX?'), ('respuesta', 'Eventos deportivos')]), 
+    OrderedDict([('categoria_id', '6817d224a05c79868a61b64d'), ('pregunta', '¿Qué valoras más en una compañía?'), ('respuesta', 'Gusto por las mismas actividades')]), 
+    OrderedDict([('categoria_id', '6817d473a05c79868a61b64e'), ('pregunta', '¿Qué tipo de acompañante te gustaría para un evento?'), ('respuesta', 'Alguien para conocer mejor con el tiempo')]), 
+    OrderedDict([('categoria_id', '6817d5fea05c79868a61b650'), ('pregunta', '¿Cuál es tu personalidad?'), ('respuesta', 'INFJ')])
+]
+
+datos2 = [
+    OrderedDict([('categoria_id', '6817cc11a05c79868a61b640'), ('pregunta', '¿En qué momento del día sueles ser más activo?'), ('respuesta', 'Por las noches')]), 
+    OrderedDict([('categoria_id', '6817cdb3a05c79868a61b642'), ('pregunta', '¿Qué tan activo eres en redes?'), ('respuesta', 'Estoy al pendiente siempre')]), 
+    OrderedDict([('categoria_id', '6817cdf6a05c79868a61b643'), ('pregunta', '¿En qué zonas de CDMX te mueves más seguido?'), ('respuesta', 'Sur (Coyoacán, Tlalpan, Xochimilco)')]), 
+    OrderedDict([('categoria_id', '6817cf49a05c79868a61b644'), ('pregunta', '¿Qué días prefieres para asistir a eventos?'), ('respuesta', 'Entre semana (Lunes a Jueves)')]), 
+    OrderedDict([('categoria_id', '6817cf85a05c79868a61b645'), ('pregunta', '¿Qué tan dispuesto estás a desplazarte para un evento?'), ('respuesta', 'Estoy dispuesto a ir a cualquier parte de la ciudad')]), 
+    OrderedDict([('categoria_id', '6817cfb1a05c79868a61b646'), ('pregunta', '¿Fumas con frecuencia?'), ('respuesta', 'Sí, fumo con frecuencia')]), 
+    OrderedDict([('categoria_id', '6817d046a05c79868a61b648'), ('pregunta', '¿Cómo te sientes respecto a planes espontáneos?'), ('respuesta', 'Me encantan, siempre estoy listo/a')]), 
+    OrderedDict([('categoria_id', '6817d061a05c79868a61b649'), ('pregunta', '¿Qué tipo de interacción esperas durante un evento?'), ('respuesta', 'Muchas risas y diversión')]), 
+    OrderedDict([('categoria_id', '6817d128a05c79868a61b64a'), ('pregunta', '¿Tienes mascotas?'), ('respuesta', ['Otras', 'Conejo'])]), 
+    OrderedDict([('categoria_id', '6817d1cfa05c79868a61b64b'), ('pregunta', '¿Cuáles son tus intereses?'), ('respuesta', ['Tarot', 'Té', 'Sushi', 'Ramen', 'Tatuajes', 'Galerías de arte', 'Roblox', 'Anime', 'Peliculas', 'Conciertos', 'Vida nocturna', 'K-dramas'])]), 
+    OrderedDict([('categoria_id', '6817d200a05c79868a61b64c'), ('pregunta', '¿Qué tipo de eventos te interesan más en CDMX?'), ('respuesta', 'Eventos deportivos')]), 
+    OrderedDict([('categoria_id', '6817d224a05c79868a61b64d'), ('pregunta', '¿Qué valoras más en una compañía?'), ('respuesta', 'Gusto por las mismas actividades')]), 
+    OrderedDict([('categoria_id', '6817d473a05c79868a61b64e'), ('pregunta', '¿Qué tipo de acompañante te gustaría para un evento?'), ('respuesta', 'Alguien para conocer mejor con el tiempo')]), 
+    OrderedDict([('categoria_id', '6817d5fea05c79868a61b650'), ('pregunta', '¿Cuál es tu personalidad?'), ('respuesta', 'INFJ')])
+]
+
+recomendacion_de_usuarios(datos1, datos2)

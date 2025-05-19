@@ -144,7 +144,7 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("api/guardar-respuestas/", { respuestas });
+            await api.post("guardar-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {

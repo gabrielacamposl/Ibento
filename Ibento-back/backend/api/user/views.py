@@ -24,6 +24,8 @@ import cloudinary.uploader
 #Recomendación de eventos
 from api.services.recommended_events import obtener_eventos_recomendados
 
+from api.services.recommended_users import recomendacion_de_usuarios
+
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
@@ -63,6 +65,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           UsuarioSerializerParaEventos
                           )
 
+from django.core.exceptions import FieldError
 
 # ----- Funcion de compatibilidad : provicional 
 def calcular_compatibilidad(pref_usuario, pref_otro):
@@ -74,10 +77,11 @@ def calcular_compatibilidad(pref_usuario, pref_otro):
 
 # ------ Función para calcular la edad según el cumpleaños
 def calcular_edad(birthday):
+    birth = birthday.split("-")
     if not birthday:
         return None
     today = date.today()
-    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))     
+    return today.year - int(birth[0]) - ((today.month, today.day) < (int(birth[1]), int(birth[2])))     
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 
@@ -445,50 +449,151 @@ def cambiar_modo_busqueda(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sugerencia_usuarios(request):
+
     usuario = request.user
 
-    # Obtener el parámetro 'save_events' de la URL (puede ser un solo valor o una lista separada por comas)
-    save_events_param = request.query_params.get('save_events', '')
-    
-    # Si hay un valor, asegurarnos de que es una lista
-    if save_events_param:
-        # Si solo hay un valor, lo convertimos en una lista
-        evento_ids = save_events_param.split(',')  # Esto manejará tanto una lista de IDs como un único ID
-    else:
-        evento_ids = []
+    # 
+    # opc_gender = request.query_params.get('gender')
+    # opc_range_age = request.query_params.get('rangeAge')
 
-    # Asegurarnos de que 'evento_ids' es una lista de cadenas válidas
-    if isinstance(evento_ids, list) and all(isinstance(evento, str) for evento in evento_ids):
-        # Buscar eventos guardados por el usuario basados en los IDs proporcionados
-        eventos_guardados = [
-            evento for evento in Evento.objects.filter(_id__in=evento_ids)
-            if getattr(evento, 'buscar_match', False) is True
-        ]
-    else:
-        eventos_guardados = []
+    us_preferencias_generales = usuario.preferencias_generales
+    us_id = usuario._id
+    us_eventos_guardados = usuario.save_events
+    us_modo_busqueda = usuario.modo_busqueda_match
 
     sugerencias = []
-    if usuario.modo_busqueda_match == 'evento' and eventos_guardados:
-        # Si el modo de búsqueda es por evento, buscar otros usuarios que tengan los mismos eventos guardados
-        for evento in eventos_guardados:
-            usuarios_en_evento = Usuario.objects.filter(save_events__in=[evento._id], modo_busqueda_match='evento')
-            for u in usuarios_en_evento:
-                if u._id != usuario._id:  # No sugerir al propio usuario
-                    sugerencias.append(u)
+    
+    candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
+        #Añadir validación para que tengan que tener filtro "modo_busqueda_match = ''global'"
+        #Añadir "gender = opc_gender"
 
-    # Si el modo de búsqueda es global, sugerir usuarios como antes
-    if usuario.modo_busqueda_match == 'global':
-        sugerencias = Usuario.objects.all()
-        sugerencias = [u for u in sugerencias if u._id != usuario._id]
+    if us_modo_busqueda == 'global':
+        
+        canceled = Interaccion.objects.filter(
+             Q(usuario_origen_id = us_id), 
+             (Q(tipo_interaccion = 'blocked') | Q(tipo_interaccion = 'disliked'))).values_list('usuario_destino_id', flat=True)
+        
+        if canceled:
+            candidatos = candidatos.exclude(_id__in=canceled)
 
-    # Serializar los usuarios sugeridos con el SugerenciaSerializer
-    serializer = SugerenciaSerializer(sugerencias, many=True)
+    if us_modo_busqueda == 'evento':
+        #Evento params?si
+        eventos_status = [evento_id for evento_id, status in us_eventos_guardados if status is True]
+
+        eventos = Evento.objects.filter(_id__in=eventos_status)
+
+        usuarios_eventos = []
+        for evento in eventos:
+            usuarios_eventos += evento.assistants
+        
+        candidatos = candidatos.filter(_id__in = usuarios_eventos)
+
+
+    sugerencias = {}
+    for candidato in candidatos:
+        if candidato._id == us_id:
+            continue
+        compatibilidad = recomendacion_de_usuarios(us_preferencias_generales, candidato.preferencias_generales)
+        sugerencias[candidato._id] = compatibilidad
+
+    print("Sugerencias: ")
+    print(sugerencias)
+    
+    sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)
+    sugerencias_ordenadas = sorted(sugerencias, key=lambda x: sugerencias[x], reverse=True)[:100]
+
+    #Enviar la edad, eventos en comun, num_eventos en comun
+
+    usuarios_filtrados = candidatos.filter(_id__in=sugerencias_ordenadas)
+
+    serializer = SugerenciaSerializer(usuarios_filtrados, many=True)
 
     # Añadir la edad a cada sugerencia
     for i, user_data in enumerate(serializer.data):
-        user_data['edad'] = calcular_edad(sugerencias[i].birthday)
+        user_data['edad'] = calcular_edad(candidatos[i].birthday)
 
-    return Response({"sugerencias": serializer.data})
+    return Response(serializer.data)
+
+
+
+    # usuario = request.user
+
+    # usuario_preferencias_generales = usuario.preferencias_generales
+
+    # usuario_id = usuario._id
+
+    # # Obtener el parámetro 'save_events' de la URL (puede ser un solo valor o una lista separada por comas)
+    # save_events_param = request.query_params.get('save_events', '')
+    
+    # # Si hay un valor, asegurarnos de que es una lista
+    # if save_events_param:
+    #     # Si solo hay un valor, lo convertimos en una lista
+    #     evento_ids = save_events_param.split(',')  # Esto manejará tanto una lista de IDs como un único ID
+    # else:
+    #     evento_ids = []
+
+    # # Asegurarnos de que 'evento_ids' es una lista de cadenas válidas
+    # if isinstance(evento_ids, list) and all(isinstance(evento, str) for evento in evento_ids):
+    #     # Buscar eventos guardados por el usuario basados en los IDs proporcionados
+    #     eventos_guardados = [
+    #         evento for evento in Evento.objects.filter(_id__in=evento_ids)
+    #         if getattr(evento, 'buscar_match', False) is True
+    #     ]
+    # else:
+    #     eventos_guardados = []
+
+    # sugerencias = []
+    # if usuario.modo_busqueda_match == 'evento' and eventos_guardados:
+    #     # Si el modo de búsqueda es por evento, buscar otros usuarios que tengan los mismos eventos guardados
+    #     for evento in eventos_guardados:
+    #         usuarios_en_evento = Usuario.objects.filter(save_events__in=[evento._id], modo_busqueda_match='evento')
+    #         for u in usuarios_en_evento:
+    #             if u._id != usuario._id:  # No sugerir al propio usuario
+    #                 sugerencias.append(u)
+
+    # # Si el modo de búsqueda es global, sugerir usuarios como antes
+    # if usuario.modo_busqueda_match == 'global':
+    #     try:
+    #         sugerencias = Usuario.objects.filter(is_ine_validated=True)
+    #         print(list(sugerencias))  # Fuerza la evaluación del QuerySet
+    #     except FieldError as e:
+    #         print(f"❌ El campo no existe: {e}")
+    #     #sugerencias = [u for u in sugerencias if u._id != usuario._id]
+
+    #     #Filtrar los usuarios por edad y genero dados los query params
+
+    #     print("Sugerencias: ")
+    #     print(sugerencias)
+
+    #     sugerencias_finales = {}
+    #     for user in sugerencias:
+    #         if user._id == usuario._id:
+    #             continue
+    #         compatibilidad = recomendacion_de_usuarios(user.preferencias_generales, usuario.preferencias_generales)
+    #         sugerencias_finales[user._id] = compatibilidad
+        
+    #     print(sugerencias_finales)
+
+    #     #sugerencias_ordenadas = sorted(sugerencias_finales.items(), key=lambda x: x[1], reverse=True)
+    #     sugerencias_ordenadas = sorted(sugerencias_finales, key=lambda x: sugerencias_finales[x], reverse=True)[:100]
+
+    #     usuarios_filtrados = sugerencias.filter(_id__in=sugerencias_ordenadas)
+
+    #     # usuarios_ordenados = usuarios_filtrados.annotate(
+    #     #     orden=Case(
+    #     #         *[When(_id=id, then=pos) for pos, id in enumerate(sugerencias_ordenadas)],
+    #     #         default=len(sugerencias_ordenadas)
+    #     #     )
+    #     # ).order_by('orden')
+
+    # # Serializar los usuarios sugeridos con el SugerenciaSerializer
+    # serializer = SugerenciaSerializer(usuarios_filtrados, many=True)
+
+    # # Añadir la edad a cada sugerencia
+    # for i, user_data in enumerate(serializer.data):
+    #     user_data['edad'] = calcular_edad(sugerencias[i].birthday)
+
+    # return Response({"sugerencias": serializer.data})
 
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
@@ -790,6 +895,7 @@ class EventoViewSet(viewsets.ModelViewSet):
     def most_liked(self, request):
 
         queryset = self.get_queryset().order_by('-numLike')[:100]
+        print(queryset)
         serializer = EventoSerializerLimitado(queryset, many=True)
         return Response(serializer.data)
     

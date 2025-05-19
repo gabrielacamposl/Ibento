@@ -132,9 +132,10 @@ class ValidacionRostro(serializers.ModelSerializer):
 class SugerenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales', 'modo_busqueda_match','birthday','gender','description','save_events']
-        read_only_fields = ['_id', 'nombre', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales','modo_busqueda_match','birthday','gender','description', 'save_events']
-
+        fields = ['_id', 'nombre', 'profile_pic', 'apellido', 'profile_pic', 'preferencias_evento', 'preferencias_generales', 'modo_busqueda_match','birthday','gender','description','save_events']
+        read_only_fields = ['_id', 'nombre', 'profile_pic', 'apellido', 'preferencias_evento', 'preferencias_generales','modo_busqueda_match','birthday','gender','description', 'save_events']
+        #, 'profile_pic'
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Lista de campos que deberían ser arrays
