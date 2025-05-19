@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+import traceback
 # Utils Django
 from django.utils import timezone
 from django.utils.timezone import now
@@ -533,32 +534,12 @@ def cambiar_modo_busqueda(request):
 def sugerencia_usuarios(request):
     usuario = request.user
 
-    # Obtener eventos desde los parámetros de la URL
+    # Obtener eventos para buscar coincidencias (desde la URL)
     save_events_param = request.query_params.get('save_events', '')
     evento_ids = save_events_param.split(',') if save_events_param else []
 
     sugerencias = []
 
-    # Obtener IDs de usuarios ya evaluados por este usuario (like o dislike)
-    usuarios_interactuados_ids = Interaccion.objects.filter(
-        usuario_origen=usuario
-    ).values_list('usuario_destino', flat=True)
-
-    # Obtener IDs de usuarios con los que ya hay match
-    matches_existentes = Matches.objects.filter(
-        Q(usuario_a=usuario) | Q(usuario_b=usuario)
-    ).values_list('usuario_a', 'usuario_b')
-
-    matches_ids = set()
-    for a, b in matches_existentes:
-        matches_ids.update([a, b])
-    matches_ids.discard(usuario._id)  # Eliminar el ID propio
-
-    # Construir lista de IDs a excluir
-    ids_a_excluir = set(usuarios_interactuados_ids).union(matches_ids)
-    ids_a_excluir.add(usuario._id)  # Excluir también al usuario actual
-
-    # ----------------------------- Búsqueda por evento
     if usuario.modo_busqueda_match == 'evento' and evento_ids:
         for evento_id in evento_ids:
             usuarios_en_evento = Usuario.objects.filter(
@@ -566,29 +547,27 @@ def sugerencia_usuarios(request):
                 modo_busqueda_match='evento',
                 is_ine_validated=True,
                 is_validated_camera=True
-            ).exclude(_id__in=ids_a_excluir)
+            ).exclude(_id=usuario._id)  
 
             sugerencias.extend(usuarios_en_evento)
 
         # Eliminar duplicados
         sugerencias = list(set(sugerencias))
 
-    # ----------------------------- Búsqueda global
     elif usuario.modo_busqueda_match == 'global':
         sugerencias = Usuario.objects.filter(
             is_ine_validated=True,
             is_validated_camera=True
-        ).exclude(_id__in=ids_a_excluir)
+        ).exclude(_id=usuario._id)
 
-    # Serializar usuarios sugeridos
+    # Serializar los usuarios sugeridos
     serializer = SugerenciaSerializer(sugerencias, many=True)
 
-    # Agregar edad al resultado
+    # Agregar edad
     for i, user_data in enumerate(serializer.data):
         user_data['edad'] = calcular_edad(sugerencias[i].birthday)
 
     return Response({"sugerencias": serializer.data})
-
 
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
@@ -641,50 +620,49 @@ def matches(request):
     return Response({"message": "Interacción registrada correctamente."}, status=200)
 
 # ------- Personas que me dieron like : *Futuros acompañantes*
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def personas_que_me_dieron_like(request):
-    usuario_actual = request.user
+    try:
+        usuario_actual = request.user
 
-    # Obtener IDs de usuarios con los que ya hay interacciones desde este usuario
-    interacciones_previas = Interaccion.objects.filter(
-        usuario_origen=usuario_actual
-    ).values_list('usuario_destino', flat=True)
+        # Obtener interacciones donde el usuario actual fue el destino de un like
+        interacciones = Interaccion.objects.filter(
+            usuario_destino=usuario_actual,
+            tipo_interaccion="like"
+        ).select_related("usuario_origen")
 
-    # Obtener IDs de usuarios con los que ya hay match
-    matches_existentes = Matches.objects.filter(
-        Q(usuario_a=usuario_actual) | Q(usuario_b=usuario_actual)
-    ).values_list('usuario_a', 'usuario_b')
+        usuarios = []
 
-    # Convertir a un set de IDs para excluir
-    matches_ids = set()
-    for a, b in matches_existentes:
-        matches_ids.update([a, b])
-    matches_ids.discard(usuario_actual._id)
+        for interaccion in interacciones:
+            u = interaccion.usuario_origen
 
-    interacciones = Interaccion.objects.filter(
-        usuario_destino=usuario_actual,
-        tipo_interaccion="like"
-    ).exclude(usuario_origen__in=interacciones_previas).exclude(usuario_origen__in=matches_ids)
+            # Calcular edad si la fecha de cumpleaños está disponible
+            edad = None
+            if u.birthday:
+                today = date.today()
+                edad = today.year - u.birthday.year - (
+                    (today.month, today.day) < (u.birthday.month, u.birthday.day)
+                )
 
-    usuarios = []
+            # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })
 
-    for interaccion in interacciones.select_related("usuario_origen"):
-        u = interaccion.usuario_origen
-        edad = calcular_edad(u.birthday) if u.birthday else None
+        return Response(usuarios, status=200)
 
-        usuarios.append({
-            "_id": u._id,
-            "nombre": u.nombre,
-            "apellido": u.apellido,
-            "profile_pic": u.profile_pic[0] if u.profile_pic else None,
-            "preferencias_evento": u.preferencias_evento,
-            "preferencias_generales": u.preferencias_generales,
-            "edad": edad,
-            "descripcion": u.description
-        })
-
-    return Response(usuarios, status=200)
+    except Exception as e:
+        print("Error en personas_que_me_dieron_like:", traceback.format_exc())
+        return Response({"error": str(e)}, status=500)
 
 
 # ------- Ver Matches
@@ -773,34 +751,6 @@ def eliminar_match(request, match_id):
         'mensajes_eliminados': mensajes_eliminados,
         'conversaciones_eliminadas': conversaciones_eliminadas
     }, status=200)
-
-#---- Ver matches activos
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def matches_activos(request):
-    usuario = request.user
-
-    matches = Matches.objects.filter(
-        Q(usuario_a=usuario) | Q(usuario_b=usuario)
-    ).select_related('usuario_a', 'usuario_b')
-
-    resultado = []
-
-    for match in matches:
-        otro_usuario = match.usuario_b if match.usuario_a == usuario else match.usuario_a
-        edad = calcular_edad(otro_usuario.birthday) if otro_usuario.birthday else None
-
-        resultado.append({
-            "_id": otro_usuario._id,
-            "nombre": otro_usuario.nombre,
-            "apellido": otro_usuario.apellido,
-            "profile_pic": otro_usuario.profile_pic[0] if otro_usuario.profile_pic else None,
-            "edad": edad,
-            "descripcion": otro_usuario.description,
-            "fecha_match": match.fecha_match
-        })
-
-    return Response(resultado, status=200)
 
 
 # --------------------------------------  CONVERSACIONES ------------------------------------------------
