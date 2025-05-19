@@ -13,6 +13,7 @@ Ibento-backend/backend/ibento-8e4fc.json
 # Firebase credentials
 backend/secrets/
 ibento-back/backend/backend/secrets/
+ibento-back/backend/backend/settings.py
 
 #Archivos de entorno
 *.env
