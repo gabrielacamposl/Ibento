@@ -7,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Configuración de la URL base
 
 const api = axios.create({
-  baseURL: "https://ibento.onrender.com", 
+  baseURL: API_BASE_URL, 
 
 });
 

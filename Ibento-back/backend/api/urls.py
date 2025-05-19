@@ -28,7 +28,7 @@ from api.user.views import (crear_usuario,
 
 router = DefaultRouter()
 
-router.register(r'eventos/', EventoViewSet, basename='evento')
+router.register(r'eventos', EventoViewSet, basename='evento')
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 
 urlpatterns = [
