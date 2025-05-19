@@ -22,18 +22,18 @@ from math import radians, sin, cos, sqrt, atan2
 import cloudinary.uploader
 
 #Recomendación de eventos
-from backend.api.services.recommended_events import obtener_eventos_recomendados
+from api.services.recommended_events import obtener_eventos_recomendados
 
 # Envio de correos
-from backend.api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
+from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
-from backend.api.services.ticketmaster import guardar_eventos_desde_json
+from api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio de INES
-from backend.api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
+from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
-from backend.api.models import Usuario, Evento, TokenBlackList
-from backend.api.models import Interaccion, Matches,Conversacion, Mensaje
-from backend.api.models import CategoriasPerfil
+from api.models import Usuario, Evento, TokenBlackList
+from api.models import Interaccion, Matches,Conversacion, Mensaje
+from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
                           LoginSerializer,

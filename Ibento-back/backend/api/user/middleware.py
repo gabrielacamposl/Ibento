@@ -1,6 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import JsonResponse
-from backend.api.models import TokenBlackList
+from api.models import TokenBlackList
 
 class JWTBlacklistMiddleware(MiddlewareMixin):
     def process_request(self, request):
