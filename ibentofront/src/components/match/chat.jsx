@@ -2,7 +2,7 @@ import React, { use, useState,useEffect,useRef } from 'react';
 import "../../assets/css/botones.css";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import api from '../../axiosConfig';
+import api from '../../api';
 const Chat = () => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([
@@ -282,7 +282,7 @@ useEffect(() => {
                                        {/*IMAGEN */}
                                         {message.receptor == myId && (
                                             
-                                            <img src={message.image} className="w-8 h-8 object-cover rounded-full mr-2" />
+                                            <img src={receptor.profile_pic} className="w-8 h-8 object-cover rounded-full mr-2" />
                                         )}
 
                                       
@@ -296,7 +296,7 @@ useEffect(() => {
                                         </span>
                                         {/*IMAGEN */}
                                         {message.receptor != myId && (
-                                            <img src={message.image} className=" w-8 h-8 object-cover rounded-full ml-2" />
+                                            <img src={Me.profile_pic} className=" w-8 h-8 object-cover rounded-full ml-2" />
                                         )}
                                       
                                     </div>

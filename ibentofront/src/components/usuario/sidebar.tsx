@@ -4,7 +4,7 @@ import { Button } from 'primereact/button';
 import "../../assets/css/botones.css";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import api from '../../axiosConfig';
+import api from '../../api';
 
 export default function PositionDemo() {
     

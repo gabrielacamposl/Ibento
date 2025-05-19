@@ -1,18 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import api from '../../axiosConfig';
+import api from '../../api';
 const verMatch = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState({
-        name: 'Harry Styles',
-        age: 31,
-        bio: 'Soy un cantante, compositor y actor británico. Me encanta la música y la moda, y disfruto de los desafíos creativos.',
-        pictures: ["/minovio.jpeg", "/juas.webp"],
-        interests: ['Música', 'Moda', 'Actuación', 'Viajes', 'Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
-        
-    });
+   
     const users = [
         {
             name: 'Lee Know',
@@ -58,13 +51,64 @@ const verMatch = () => {
         }
     ];
 
-    const handdleMatch = () => {
-        navigate('../itsMatch');
+    const handdleMatch = async(user_id) => {
+        console.log('match con ',user_id);
+         try {
+            const token = localStorage.getItem('access');
+           
+            const response = await api.post('interaccion/', {
+                "usuario_destino": user_id,
+                "tipo_interaccion": "like"}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
+            console.log(response.data)
+            if (response.data?.match_id ) {
+                navigate(`../itsMatch/?id=${response.data.match_id}`);
+
+            }
+            console.log('Respuesta de la API:', response);
+        }catch (error) {
+            console.error('Error:', error);
+        }
+
+       // navigate('../itsMatch');
     }
    
     const handdleVerLike = () => {
         navigate('../verLike');
     }
+    
+    const eliminarLike = (user_id) => async () => {
+        console.log(user_id);
+    }
+
+    //Ver Uusuarios que me han dado like
+    const [UsuarioLike, setUsuarioLike] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem('access');
+            try {
+                const response = await api.get('likes-recibidos/', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+                if (response.status === 200) {
+                    console.log('Usuarios disponibles:', response.data);
+                    setUsuarioLike(response.data);
+                } else {
+                    console.error('Error en la respuesta:', response.status);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+        fetchData();
+    }, []);
     return (
         <div className="text-black flex justify-center min-h-screen">
             <div className="degradadoPerfil p-5 max-w-lg w-full">
@@ -80,20 +124,21 @@ const verMatch = () => {
                 </div>
                 <div className="mt-5 ml-auto mr-auto grid grid-cols-3 sm:grid-cols-2 gap-4 p-3 w-full">
                     <React.Fragment>
-                        {users.map((user, index) => (
+                        {UsuarioLike.map((user, index) => (
                             <div key={index} className="flex justify-center">
                                 <div className="relative rounded-full">
                                     <img
                                         onClick={handdleVerLike}
-                                        src={user.pictures[0]}
-                                        className="w-30 h-40 sm:w-40 sm:h-50 md:w-50 md:h-60 object-cover rounded"
+                                        src={user.profile_pic}
+                                        className="w-35 h-45 object-cover rounded"
                                         alt={user.name}
                                     />
                                     <label className="absolute bottom-0 text-center w-full Transparencia cursor-pointer">
-                                        <span className="ml-2">{user.name}</span>
+                                        <span className="ml-2">{user.nombre}</span>
                                         <div className="flex justify-center items-center">
                                             <div className="flex flex-wrap justify-center space-x-10 mb-1">
-                                                <button className="botonTransparente text-white p-2 rounded-full size-8">
+                                                <button onClick={eliminarLike(user._id)} className="botonTransparente text-white p-2 rounded-full size-8">
+                                               
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
                                                         fill="none"
@@ -104,9 +149,10 @@ const verMatch = () => {
                                                     >
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                                                     </svg>
+                                                    
                                                 </button>
                                                 <button
-                                                    onClick={handdleMatch}
+                                                    onClick={()=> handdleMatch(user._id)}
                                                     className="botonTransparente text-white p-2 rounded-full size-8"
                                                 >
                                                     <svg

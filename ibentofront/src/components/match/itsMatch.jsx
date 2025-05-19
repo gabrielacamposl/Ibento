@@ -3,7 +3,7 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import api from '../../axiosConfig';
+import api from '../../api';
 import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
@@ -53,7 +53,7 @@ useEffect(() => {
     const matchId = queryParams.get('id');
     
     try {
-        const response = await api.get(`api/matches/${matchId}/`, {
+        const response = await api.get(`matches/${matchId}/`, {
            
             headers: {
                 'Content-Type': 'application/json',

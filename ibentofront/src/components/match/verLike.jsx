@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-import api from '../../axiosConfig';
+import api from '../../api';
 const Like = () => {
     const navigate = useNavigate();
 

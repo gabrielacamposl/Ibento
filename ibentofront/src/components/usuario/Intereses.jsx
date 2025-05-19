@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import "../../assets/css/botones.css";
-import api from '../../axiosConfig';
+import api from '../../api';
 import { Link } from 'react-router-dom';
 const categorias = [
     { id: 1, nombre: 'Deportes', valores: ['Fútbol', 'Baloncesto', 'Tenis', 'Natación', 'Ciclismo'] },
