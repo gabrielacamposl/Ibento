@@ -562,9 +562,18 @@ def personas_que_me_dieron_like(request):
         edad = None
         if u.birthday:
             today = date.today()
-            edad = today.year - u.birthday.year - (
-                (today.month, today.day) < (u.birthday.month, u.birthday.day)
-            )
+            birthday = u.birthday
+            if isinstance(birthday, str):
+                try:
+                    birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
+                except ValueError:
+                    birthday = None
+            if birthday:
+                edad = today.year - birthday.year - (
+                    (today.month, today.day) < (birthday.month, birthday.day)
+                )
+            else:
+                edad = None
 
         usuarios.append({
             "_id": u._id,
