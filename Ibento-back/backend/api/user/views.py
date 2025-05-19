@@ -76,8 +76,10 @@ def calcular_compatibilidad(pref_usuario, pref_otro):
 def calcular_edad(birthday):
     if not birthday:
         return None
+    if isinstance(birthday, str):
+        birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
     today = date.today()
-    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))     
+    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 
@@ -589,6 +591,37 @@ def obtener_matches(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ------ Eliminar match
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_match(request, match_id):
+    usuario = request.user
+
+    try:
+        match = Matches.objects.get(_id=match_id)
+       
+    except Matches.DoesNotExist:
+        return Response({'error': 'Match no encontrado'}, status=404)
+
+    if usuario not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para ver este match'}, status=403)
+    
+
+    conversacion_id = None
+    try:
+        conversacion = Conversacion.objects.get(match_id=match._id)
+        conversacion_id = conversacion._id
+    except Conversacion.DoesNotExist:
+        pass
+
+    serializer = MatchSerializer(match)
+    
+
+    return Response({
+        'match': serializer.data,
+        'conversacion_id': conversacion_id
+    }, status=200)
+
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def eliminar_match(request, match_id):
@@ -737,6 +770,56 @@ def obtener_mensajes (request, conversacion_id):
     mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by("fecha_envio")
     serializer = MensajesSerializer(mensajes, many=True)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuarios_conversacion(request, conversacion_id):
+    try:
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+    except Conversacion.DoesNotExist:
+        return Response({"error": "Conversación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({"error": "No tienes permiso para ver esta conversación."}, status=status.HTTP_403_FORBIDDEN)
+    usuarios= []
+    usuario_a = conversacion.usuario_a
+    usuario_b = conversacion.usuario_b
+
+    usuarios.append({
+            "_id": usuario_a._id,
+            "nombre": usuario_a.nombre,
+            "apellido": usuario_a.apellido,
+            "profile_pic": usuario_a.profile_pic[0] if usuario_a.profile_pic else None,
+            
+        })
+    usuarios.append({
+            "_id": usuario_b._id,
+            "nombre": usuario_b.nombre,
+            "apellido": usuario_b.apellido,
+            "profile_pic": usuario_b.profile_pic[0] if usuario_b.profile_pic else None,
+            
+        })
+
+
+
+    return Response(usuarios, status=status.HTTP_200_OK)
+
+# ------- Obtener Match ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_match_id(request, match_id):
+    try:
+        match = Conversacion.objects.get(_id=match_id)
+    except Conversacion.DoesNotExist:
+        return Response({'error': 'Conversación no encontrada'}, status=404)
+
+    if request.user not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para ver este match'}, status=403)
+
+    return Response(match.match_id, status=200)
+
+
 
 
 # --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------
@@ -1193,8 +1276,63 @@ def obtener_evento_por_id(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
-#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
+
+# ------- ¿Es favorito?
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def es_favorito(request, pk):
+    user = request.user
+    try:
+        evento = Evento.objects.get(pk=pk)
+        if evento.pk in user.favourite_events:
+            return Response({"es_favorito": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"es_favorito": False}, status=status.HTTP_200_OK)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ------- Obtener usuarios por ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuario_info(request, pk):
+    data = []
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        data.append({
+            "_id": usuario._id,
+            "nombre": usuario.nombre,
+            "apellido": usuario.apellido,
+            "profile_pic": usuario.profile_pic if usuario.profile_pic else None,
+            "preferencias_evento": usuario.preferencias_evento,
+            "preferencias_generales": usuario.preferencias_generales,
+            "edad": calcular_edad(usuario.birthday),
+            "descripcion": usuario.description,
+        })
+        return Response(data, status=status.HTTP_200_OK)
+    except Usuario.DoesNotExist:
+        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ---------- Bloquear usuario
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bloquear_usuario(request, pk):
+    user = request.user
+    try:
+        usuario_a_bloquear = Usuario.objects.get(pk=pk)
+        if usuario_a_bloquear.pk in user.blocked:
+            return Response({"detail": "El usuario ya está bloqueado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Agregar el usuario a la lista de bloqueados
+        user.blocked.append(usuario_a_bloquear.pk)
+        user.save(update_fields=['blocked'])
+        # Eliminar al usuario bloqueado del campo matches si existe
+        if usuario_a_bloquear._id in user.matches:
+            user.matches.remove(usuario_a_bloquear._id)
+            user.save(update_fields=['matches'])
+        # Eliminar match si existe
+        return Response({"detail": "Usuario bloqueado correctamente."}, status=status.HTTP_200_OK)
+    except Usuario.DoesNotExist:
+        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -1218,3 +1356,5 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         usuario = request.user
         serializer = UsuarioSerializerEdit(usuario)
         return Response(serializer.data)
+
+

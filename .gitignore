@@ -10,6 +10,7 @@ ibento-front/node_modules/
 
 #Claves Firebase
 Ibento-backend/backend/ibento-8e4fc.json
+Ibento-backend/backend/backend/secret/
 
 #Archivos de entorno
 *.env
@@ -26,3 +27,4 @@ __pycache__/
 modelos-algoritmos/INEValidation/dataset/
 node_modules/
 modelos-algoritmos/face-recognition-comp/envface/
+.vercel
