@@ -547,7 +547,7 @@ def sugerencia_usuarios(request):
                 modo_busqueda_match='evento',
                 is_ine_validated=True,
                 is_validated_camera=True
-            ).exclude(_id=usuario._id)  
+            ).exclude(_id=usuario._id)
 
             sugerencias.extend(usuarios_en_evento)
 
