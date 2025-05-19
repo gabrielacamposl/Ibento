@@ -4,8 +4,8 @@ import App from "./App";
 import "./index.css";
 import { PrimeReactProvider } from 'primereact/api';
 
-// const root = ReactDOM.createRoot(document.getElementById('root'))
-// root.render(<App />)
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <App />

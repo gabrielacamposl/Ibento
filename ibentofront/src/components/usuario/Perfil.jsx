@@ -8,25 +8,16 @@ import Favoritos from './Favoritos'; // Asegúrate de que la ruta sea correcta
 import Guardados from './Guardados'; // Asegúrate de que la ruta sea correcta
 import SideBar from '../usuario/sidebar'; // Asegúrate de que la ruta sea correcta
 import axios from 'axios';
-import api from '../../axiosConfig';
+import api from '../../api';
+import { useNavigate } from 'react-router-dom';
 const Perfil = () => {
 
     
-    const user = {
-        name: 'Harry Styles',
-        age: 31,
-        genero:"H",
-        cumpleanos: '1 de febrero',
-        bio: 'Soy un cantante, compositor y actor británico. Me encanta la música y la moda, y disfruto de los desafíos creativos. La moda también es una gran parte de quién soy. Para mí, la ropa es una forma de expresión, de libertad. No hay reglas, solo cómo te sientes en ella. Amo los trajes llamativos, las perlas, los colores y todo lo que me haga sentir auténtico.',
-        profilePicture: 'https://via.placeholder.com/150',
-        pictures: ["/jeje.webp", "/juas.webp"],
-        interests: ['Música', 'Moda', 'Actuación', 'Viajes', 'Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
-       
-    };
+   const navigate = useNavigate();
     const [favoritos, setFavoritos] = useState([]);
     const [saveEvents, setSaveEvents] = useState([]);
     const [userPerfil, setUserPerfil] = useState([]);
-
+    const [verificar, setVerificar] = useState(false);
 
 useEffect(() => {
     const Perfil = async () => {
@@ -51,6 +42,10 @@ useEffect(() => {
     };
     Perfil();
 }, []);
+
+
+
+      
 
 useEffect(() => {
     const fetchFavoritos = async () => {
@@ -192,6 +187,7 @@ const [loading, setLoading] = useState(true);
                                 </div>
                                 <SideBar />
                                 </div>
+                               
 
                                 <div className='p-5 mt-5'>
                                 <div className="text-black w-full">
@@ -249,7 +245,7 @@ const [loading, setLoading] = useState(true);
                                 Mis Favoritos
                             </span>
                         </button>
-                        <button onClick={() => handleTabChange(1)} className={index === 1 ? 'activo' : 'inactivo'}>
+                        <button onClick={() => {handleTabChange(1); isVerify();}} className={index === 1 ? 'activo' : 'inactivo'}>
                             <span className='flex'>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
@@ -264,7 +260,7 @@ const [loading, setLoading] = useState(true);
                             <Favoritos events={favoritos} />
                         </div>
                     ) : (
-                        <Guardados events={eventsSaved} />
+                        <Guardados events={eventsSaved} verify={verificar} />
                     )}
                 </div>
                 </div>

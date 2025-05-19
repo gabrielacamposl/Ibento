@@ -76,8 +76,10 @@ def calcular_compatibilidad(pref_usuario, pref_otro):
 def calcular_edad(birthday):
     if not birthday:
         return None
+    if isinstance(birthday, str):
+        birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
     today = date.today()
-    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))     
+    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 

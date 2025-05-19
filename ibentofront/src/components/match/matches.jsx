@@ -3,10 +3,10 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import api from '../../axiosConfig';
+import api from '../../api';
 const matches = () => {
     const navigate = useNavigate();
-    const [verificar, setVerificar] = useState(true);
+    const [verificar, setVerificar] = useState();
    
     
         // useEffect(() => {
@@ -33,7 +33,37 @@ const matches = () => {
     const [futureMatches , setFutureMatches] = useState([]);
 
     const [Likes, setLikes] = useState([]);
-   
+
+   //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchUserData = async () => {
+            try { 
+                const response = await api.get("estado-validacion/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const userData = response.data;
+                    const estado1 = userData.is_ine_validated 
+                    const estado2 =userData.is_validated_camera;
+                    
+                    console.log(estado1, estado2)
+                    if (estado1 == true && estado2 == true) {
+                        setVerificar(true);
+                    } else {
+                        setVerificar(false);
+                    }
+                    
+                }
+            }
+            catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
+        }
+        fetchUserData();
+    }, []);
 
     useEffect(() => {
         const likes=0;
@@ -115,7 +145,7 @@ const matches = () => {
     
 
     return (
-        <div className="justify-center text-black flex min-h-screen relative" >
+        <div className="justify-center text-black flex  max-w-lg w-full min-h-screen relative" >
             <div className="relative   flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
                 <div className="degradadoPerfil p-5 max-w-lg w-full  flex flex-col mx-auto bg-opacity-80 backdrop-blur-md">
                     <div className="flex justify-end items-end font-bold text-2xl w-full">
