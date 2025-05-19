@@ -499,7 +499,7 @@ def sugerencia_usuarios(request):
     print("Sugerencias: ")
     print(sugerencias)
     
-    sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)
+    #sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)
     sugerencias_ordenadas = sorted(sugerencias, key=lambda x: sugerencias[x], reverse=True)[:100]
 
     #Enviar la edad, eventos en comun, num_eventos en comun
