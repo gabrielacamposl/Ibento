@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-/*import { useEffect } from "react";
+import { useEffect } from "react";
 import { getToken } from "firebase/messaging";
 import { messaging } from "./firebase"; 
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
-*/
+
 // -------------------------- RUTAS -----------------------------------------
 // Auth & Register
 import Register from "./components/accounts/Register";
@@ -42,11 +42,11 @@ import Busqueda  from "./components/eventos/busqueda";
 import BusquedaCategoria from "./components/eventos/searchCategories";
 
 
-//const VAPID_P = import.meta.env.VAPID_PUBLICA;
+const VAPID_P = import.meta.env.VAPID_PUBLICA;
 
 
 export default function App() {
-/*
+
    useEffect(() => {
     if ('Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission().then(permission => {
@@ -69,7 +69,7 @@ export default function App() {
       });
     }
   }, []);
-*/
+
   return (
     <>
     <Router>
@@ -117,7 +117,7 @@ export default function App() {
         </Route>
       </Routes>
     </Router>
-    {/* <InstallPrompt /> */}
+    <InstallPrompt />
     </>
   );
 }
