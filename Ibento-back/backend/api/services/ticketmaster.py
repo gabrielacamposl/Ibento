@@ -1,4 +1,4 @@
-from api.models import Evento
+from backend.api.models import Evento
 import uuid
 
 def guardar_eventos_desde_json(eventos_json):

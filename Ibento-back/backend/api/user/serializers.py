@@ -3,7 +3,7 @@ import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth.hashers import check_password
-from api.services import ine_validation
+from backend.api.services import ine_validation
 import cloudinary.uploader
 from backend.api.models import (Usuario, 
                         TokenBlackList,

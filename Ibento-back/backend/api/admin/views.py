@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from api.models import CategoriaEvento, Subcategoria, CategoriasPerfil
+from backend.api.models import CategoriaEvento, Subcategoria, CategoriasPerfil
 from .serializers import (CategoriaEventoSerializer, 
                           SubcategoriaSerializer, 
                           CategoriaPerfilSerializer, 
