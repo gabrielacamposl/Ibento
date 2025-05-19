@@ -20,6 +20,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ['ibento.onrender.com',
                  'localhost',
+                 'ibento.com.mx',
                  '127.0.0.1']
 
 
@@ -39,6 +40,9 @@ INSTALLED_APPS = [
     'corsheaders', # Peticiones desde React  
     'api',  
     'api.user',
+    'channels',  # Para el uso de websockets
+    'daphne',  # Para el uso de websockets
+    
 ]
 
 # PUSH_NOTIFICATION_SETTINGS = {
@@ -94,9 +98,25 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = 'backend.backend.asgi.application'
 
 WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
+# Usando channel redis
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+# Channel layers in memory (solo para desarrollo local)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 DATABASES = {
     'default': {
@@ -107,8 +127,9 @@ DATABASES = {
         },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
+        }
     }
-}
+
 
 #CORS (permite conexión con el frontend)
 CORS_ALLOWED_ORIGINS = [
@@ -118,6 +139,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://ibento.vercel.app", 
     "https://ibento.onrender.com",
     "https://ibento-hazel.vercel.app",
+    "https://ibento.com.mx",
+
 ]
 
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
+import api from '../../api';
 const EditarPerfil = () => {
     const [user, setUser] = useState({
         name: 'Harry Styles',

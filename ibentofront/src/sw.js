@@ -1,3 +1,4 @@
+
 const CACHE_NAME = 'ibento-v1';
 const PRECACHE_URLS = [
   '/',
@@ -10,27 +11,45 @@ const PRECACHE_URLS = [
 ];
 
 const CACHE_EVENTOS = 'ibento-eventos';
+const EVENT_API_URLS = [
+  'https://ibento.onrender.com/api/eventos/most_liked/',
+  'https://ibento.onrender.com/api/eventos/recommended_events',
+  'https://ibento.onrender.com/api/eventos/upcoming_events/',
+  'https://ibento.onrender.com/api/eventos/by_category?category=Música',
+  'https://ibento.onrender.com/api/eventos/by_category?category=Deportes'
+];
 
-async function cacheEventosDestacados() {
-  try {
-    const res = await fetch('https://ibento-hazel.vercel.app/eventos/destacados');
-    const eventos = await res.json();
-
-    const cache = await caches.open(CACHE_EVENTOS);
-    for (const evento of eventos) {
-      try {
-        const resEvento = await fetch(evento.url);
-        if (resEvento.ok) {
-          await cache.put(evento.url, resEvento.clone());
-        }
-      } catch (err) {
-        console.warn('[SW] Error al cachear evento:', evento.url, err);
+// Cachear eventos destacados desde APIs
+async function cacheEventosDinamicos() {
+  const cache = await caches.open(CACHE_EVENTOS);
+  for (const url of EVENT_API_URLS) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        await cache.put(url, response.clone());
+        console.log('[SW] Cacheado:', url);
       }
+    } catch (err) {
+      console.warn('[SW] Falló al cachear:', url, err);
     }
-  } catch (err) {
-    console.warn('[SW] No se pudo obtener la lista de eventos.', err);
   }
 }
+
+self.addEventListener('activate', event => {
+  console.log('[SW] Activating SW ...');
+  event.waitUntil(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME && name !== CACHE_EVENTOS)
+          .map(name => caches.delete(name))
+      );
+      await cacheEventosDinamicos();
+      await self.clients.claim();
+    })()
+  );
+});
 
 self.addEventListener('push', function (event) {
   if (event.data) {
@@ -52,7 +71,7 @@ self.addEventListener('push', function (event) {
 self.addEventListener('notificationclick', function (event) {
   console.log('Notification click received.');
   event.notification.close();
-  event.waitUntil(clients.openWindow('https://ibento-hazel.vercel.app'));
+  event.waitUntil(clients.openWindow('https://ibento-hazel.vercel.app/eventos/recomended_eventos'));
 });
 
 self.addEventListener('install', event => {
@@ -64,28 +83,25 @@ self.addEventListener('install', event => {
   );
 });
 
-self.addEventListener('activate', event => {
-  console.log('[SW] Activating SW ...');
-  event.waitUntil(
-    (async () => {
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames
-          .filter(name => name !== CACHE_NAME && name !== CACHE_EVENTOS)
-          .map(name => caches.delete(name))
-      );
-
-      await cacheEventosDestacados();
-
-      await self.clients.claim();
-    })()
-  );
-});
-
 self.addEventListener('fetch', event => {
   const { request } = event;
-
   if (request.method !== 'GET') return;
+
+  if (EVENT_API_URLS.some(apiUrl => request.url.startsWith(apiUrl))) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        return (
+          cached ||
+          fetch(request).then(res => {
+            const resClone = res.clone();
+            caches.open(CACHE_EVENTOS).then(cache => cache.put(request, resClone));
+            return res;
+          })
+        );
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then(cached => {
