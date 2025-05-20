@@ -577,13 +577,22 @@ def personas_que_me_dieron_like(request):
         for interaccion in interacciones:
             u = interaccion.usuario_origen
 
-            # Calcular edad si la fecha de cumpleaños está disponible
-            edad = None
-            if u.birthday:
-                today = date.today()
-                edad = today.year - u.birthday.year - (
-                    (today.month, today.day) < (u.birthday.month, u.birthday.day)
+        # Calcular edad si hay birthday
+        edad = None
+        if u.birthday:
+            today = date.today()
+            birthday = u.birthday
+            if isinstance(birthday, str):
+                try:
+                    birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
+                except ValueError:
+                    birthday = None
+            if birthday:
+                edad = today.year - birthday.year - (
+                    (today.month, today.day) < (birthday.month, birthday.day)
                 )
+            else:
+                edad = None
 
             # Agregar datos del usuario
             usuarios.append({
@@ -596,8 +605,9 @@ def personas_que_me_dieron_like(request):
                 "edad": edad,
                 "descripcion": u.description or "",
             })
-
+            
         return Response(usuarios, status=200)
+
 
     except Exception as e:
         print("Error en personas_que_me_dieron_like:", traceback.format_exc())
