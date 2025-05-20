@@ -16,7 +16,13 @@ from api.user.views import (crear_usuario,
                             guardar_respuestas_perfil,
                             importar_ticketmaster,
                             like_event,
-                            obtener_eventos_favoritos
+                            obtener_eventos_favoritos,
+                            obtener_match,
+                            obtener_usuarios_conversacion,
+                            es_favorito,
+                            obtener_usuario_info,
+                            bloquear_usuario,
+                            obtener_match_id,
                             )
 
 
@@ -31,7 +37,6 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
     path('api/login/', login_usuario, name='login'),
-    path('logout/', logout_usuario, name='logout'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
     path("api/logout/", logout_usuario, name="logout"),
 
@@ -54,27 +59,40 @@ urlpatterns = [
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
     # Matches
+    # ---- Dar like o dislike
     path('api/interaccion/', matches, name='dar_like_dislike'),
+    # --- Selección de búsqueda de acompañantes - Por eventos o global-
     path('api/match/modo/', cambiar_modo_busqueda, name='cambiar_modo_busqueda'),
+    # --- Sugerencia de acompañantes
     path('api/matches/sugerencias/', sugerencia_usuarios, name='sugerencias_usuarios'),
+    # ---- Futuros acompañantes
+    path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
+    # --- Ver matches
     path('api/matches/', obtener_matches, name='obtener_matches'), 
+    # --- Eliminar match
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     
-    # Likes recibidos
-    path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
+    path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
+    path('api/bloquear/', bloquear_usuario, name='bloquear_usuario'),
+    path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
+    
 
     # Conversaciones
     path('api/mis-conversaciones/', mis_conversaciones, name='mis_conversaciones'),
     path('api/mensajes/enviar/', enviar_mensaje, name='enviar_mensaje'),
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
-  
+    path('api/usuarios/<str:conversacion_id>/conversacion/', obtener_usuarios_conversacion, name='obtener_usuarios_conversacion'),
+    path('api/usuarios/<str:pk>/info/', obtener_usuario_info, name='obtener_usuario_info'),
     #Otras
-    path('', include(router.urls)),
     path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
 
 
     #Acciones User
     path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
-    path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos')
 
+    path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
+
+    path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
+    path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
+  
 ]

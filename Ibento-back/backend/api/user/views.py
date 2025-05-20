@@ -1,10 +1,10 @@
 # Rest Framework Django
 from rest_framework import viewsets, status
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+import traceback
 # Utils Django
 from django.utils import timezone
 from django.utils.timezone import now
@@ -28,11 +28,13 @@ from api.services.recommended_events import obtener_eventos_recomendados
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
+# Servicio para comparación de rostros
+from api.services.face_validation import verificar_rostros
 # Servicio de INES
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
-from api.models import Interaccion, Matches,Conversacion, Mensaje
+from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -76,8 +78,10 @@ def calcular_compatibilidad(pref_usuario, pref_otro):
 def calcular_edad(birthday):
     if not birthday:
         return None
+    if isinstance(birthday, str):
+        birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
     today = date.today()
-    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))     
+    return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 
@@ -370,6 +374,7 @@ def delete_profile_picture(request, photo_url):
 def ine_validation_view(request):
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
+    selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
         return Response({"error": "Ambas imágenes de la INE son requeridas."}, status=status.HTTP_400_BAD_REQUEST)
@@ -385,7 +390,7 @@ def ine_validation_view(request):
         back_b64 = url_to_base64(back_url)
         
         # Extraer datos de la INE
-        cic, id_ciudadano = ocr_ine(front_b64, back_b64)
+        cic, id_ciudadano, curp= ocr_ine(front_b64, back_b64)
         if not cic or not id_ciudadano:
             return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -396,14 +401,32 @@ def ine_validation_view(request):
         # Guardar datos en el usuario
         user : Usuario = request.user
         user.is_ine_validated = is_valid
-        # if curp:
-        #     user.curp = curp
+        if curp:
+            user.curp = curp
+        user.save()
+        
+        rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
+        if not rostro_valido:
+            return Response({
+                "error": "El rostro no coincide con el de la INE.",
+                "distancia": round(distancia, 4),
+                "sugerencia": sugerencia
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        user : Usuario = request.user
+        user.is_validated_camera = rostro_valido
         user.save()
 
-        return Response({"mensaje": "INE validada exitosamente."}, status=status.HTTP_200_OK)
+        return Response({
+            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
+            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
+        }, status=status.HTTP_200_OK)
+    
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    # Comparar rostro
+        
     finally:
         # Eliminar imágenes de Cloudinary
         if front_id:
@@ -412,15 +435,12 @@ def ine_validation_view(request):
             delete_image_from_cloudinary(back_id)
 
 
-# ----------- Comparación de Rostros 
-
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def estado_validacion_view(request):
     user = request.user
-
     return Response({
         "is_ine_validated": user.is_ine_validated,
         "is_validated_camera": user.is_validated_camera
@@ -447,44 +467,42 @@ def cambiar_modo_busqueda(request):
 def sugerencia_usuarios(request):
     usuario = request.user
 
-    # Obtener el parámetro 'save_events' de la URL (puede ser un solo valor o una lista separada por comas)
-    save_events_param = request.query_params.get('save_events', '')
-    
-    # Si hay un valor, asegurarnos de que es una lista
-    if save_events_param:
-        # Si solo hay un valor, lo convertimos en una lista
-        evento_ids = save_events_param.split(',')  # Esto manejará tanto una lista de IDs como un único ID
-    else:
-        evento_ids = []
+    # Obtener IDs de usuarios a los que ya se les dio like o dislike
+    interacciones_realizadas = Interaccion.objects.filter(
+        usuario_origen=usuario
+    ).values_list('usuario_destino', flat=True)
 
-    # Asegurarnos de que 'evento_ids' es una lista de cadenas válidas
-    if isinstance(evento_ids, list) and all(isinstance(evento, str) for evento in evento_ids):
-        # Buscar eventos guardados por el usuario basados en los IDs proporcionados
-        eventos_guardados = [
-            evento for evento in Evento.objects.filter(_id__in=evento_ids)
-            if getattr(evento, 'buscar_match', False) is True
-        ]
-    else:
-        eventos_guardados = []
+    # Obtener usuarios bloqueados por el usuario actual
+    usuarios_bloqueados = Bloqueo.objects.filter(
+        usuario_bloqueador=usuario
+    ).values_list('usuario_bloqueado', flat=True)
+
+    save_events_param = request.query_params.get('save_events', '')
+    evento_ids = save_events_param.split(',') if save_events_param else []
 
     sugerencias = []
-    if usuario.modo_busqueda_match == 'evento' and eventos_guardados:
-        # Si el modo de búsqueda es por evento, buscar otros usuarios que tengan los mismos eventos guardados
-        for evento in eventos_guardados:
-            usuarios_en_evento = Usuario.objects.filter(save_events__in=[evento._id], modo_busqueda_match='evento')
-            for u in usuarios_en_evento:
-                if u._id != usuario._id:  # No sugerir al propio usuario
-                    sugerencias.append(u)
 
-    # Si el modo de búsqueda es global, sugerir usuarios como antes
-    if usuario.modo_busqueda_match == 'global':
-        sugerencias = Usuario.objects.all()
-        sugerencias = [u for u in sugerencias if u._id != usuario._id]
+    if usuario.modo_busqueda_match == 'evento' and evento_ids:
+        for evento_id in evento_ids:
+            usuarios_en_evento = Usuario.objects.filter(
+                eventos_buscar_match__contains=[evento_id],
+                modo_busqueda_match='evento',
+                is_ine_validated=True,
+                is_validated_camera=True
+            ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
 
-    # Serializar los usuarios sugeridos con el SugerenciaSerializer
+            sugerencias.extend(usuarios_en_evento)
+
+        sugerencias = list(set(sugerencias))
+
+    elif usuario.modo_busqueda_match == 'global':
+        sugerencias = Usuario.objects.filter(
+            is_ine_validated=True,
+            is_validated_camera=True
+        ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
+
     serializer = SugerenciaSerializer(sugerencias, many=True)
 
-    # Añadir la edad a cada sugerencia
     for i, user_data in enumerate(serializer.data):
         user_data['edad'] = calcular_edad(sugerencias[i].birthday)
 
@@ -540,42 +558,51 @@ def matches(request):
 
     return Response({"message": "Interacción registrada correctamente."}, status=200)
 
-# ------- Personas que me dieron like
+# ------- Personas que me dieron like : *Futuros acompañantes*
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def personas_que_me_dieron_like(request):
-    usuario_actual = request.user
+    try:
+        usuario_actual = request.user
 
-    interacciones = Interaccion.objects.filter(
-        usuario_destino=usuario_actual,
-        tipo_interaccion="like"
-    ).select_related("usuario_origen")
+        # Obtener interacciones donde el usuario actual fue el destino de un like
+        interacciones = Interaccion.objects.filter(
+            usuario_destino=usuario_actual,
+            tipo_interaccion="like"
+        ).select_related("usuario_origen")
 
-    usuarios = []
+        usuarios = []
 
-    for interaccion in interacciones:
-        u = interaccion.usuario_origen
+        for interaccion in interacciones:
+            u = interaccion.usuario_origen
 
-        # Calcular edad si hay birthday
-        edad = None
-        if u.birthday:
-            today = date.today()
-            edad = today.year - u.birthday.year - (
-                (today.month, today.day) < (u.birthday.month, u.birthday.day)
-            )
+            # Calcular edad si la fecha de cumpleaños está disponible
+            edad = None
+            if u.birthday:
+                today = date.today()
+                edad = today.year - u.birthday.year - (
+                    (today.month, today.day) < (u.birthday.month, u.birthday.day)
+                )
 
-        usuarios.append({
-            "_id": u._id,
-            "nombre": u.nombre,
-            "apellido": u.apellido,
-            "profile_pic": u.profile_pic[0] if u.profile_pic else None,
-            "preferencias_evento": u.preferencias_evento,
-            "preferencias_generales": u.preferencias_generales,
-            "edad": edad,
-            "descripcion": u.description
-        })
+            # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })
 
-    return Response(usuarios, status=200)
+        return Response(usuarios, status=200)
+
+    except Exception as e:
+        print("Error en personas_que_me_dieron_like:", traceback.format_exc())
+        return Response({"error": str(e)}, status=500)
+
 
 # ------- Ver Matches
 @api_view(["GET"])
@@ -588,6 +615,38 @@ def obtener_matches(request):
     serializer = MatchSerializer(matches, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_match(request, match_id):
+    usuario = request.user
+
+    try:
+        match = Matches.objects.get(_id=match_id)
+       
+    except Matches.DoesNotExist:
+        return Response({'error': 'Match no encontrado'}, status=404)
+
+    if usuario not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para ver este match'}, status=403)
+    
+
+    conversacion_id = None
+    try:
+        conversacion = Conversacion.objects.get(match_id=match._id)
+        conversacion_id = conversacion._id
+    except Conversacion.DoesNotExist:
+        pass
+
+    serializer = MatchSerializer(match)
+    
+
+    return Response({
+        'match': serializer.data,
+        'conversacion_id': conversacion_id
+    }, status=200)
+    
 # ------ Eliminar match
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
@@ -631,6 +690,44 @@ def eliminar_match(request, match_id):
         'mensajes_eliminados': mensajes_eliminados,
         'conversaciones_eliminadas': conversaciones_eliminadas
     }, status=200)
+
+# ------ Bloquear usuarios
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bloquear_usuario(request):
+    usuario_bloqueador = request.user
+    usuario_bloqueado_id = request.data.get("usuario_bloqueado")
+
+    if usuario_bloqueado_id == str(usuario_bloqueador._id):
+        return Response({"error": "No puedes bloquearte a ti mismo."}, status=400)
+
+    try:
+        usuario_bloqueado = Usuario.objects.get(_id=usuario_bloqueado_id)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=404)
+
+    # Crear el bloqueo si no existe
+    bloqueo, created = Bloqueo.objects.get_or_create(
+        usuario_bloqueador=usuario_bloqueador,
+        usuario_bloqueado=usuario_bloqueado
+    )
+
+    if not created:
+        return Response({"mensaje": "Ya habías bloqueado a este usuario."}, status=200)
+
+    # Buscar y eliminar el match (sin importar el orden)
+    match = Matches.objects.filter(
+        usuario_a__in=[usuario_bloqueador, usuario_bloqueado],
+        usuario_b__in=[usuario_bloqueador, usuario_bloqueado]
+    ).first()
+
+    if match:
+        # Eliminar conversación asociada
+        Conversacion.objects.filter(match=match).delete()
+        # Eliminar el match
+        match.delete()
+
+    return Response({"mensaje": "Usuario bloqueado exitosamente y match eliminado."}, status=201)
 
 
 # --------------------------------------  CONVERSACIONES ------------------------------------------------
@@ -737,6 +834,54 @@ def obtener_mensajes (request, conversacion_id):
     mensajes = Mensaje.objects.filter(conversacion=conversacion).order_by("fecha_envio")
     serializer = MensajesSerializer(mensajes, many=True)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuarios_conversacion(request, conversacion_id):
+    try:
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+    except Conversacion.DoesNotExist:
+        return Response({"error": "Conversación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+        return Response({"error": "No tienes permiso para ver esta conversación."}, status=status.HTTP_403_FORBIDDEN)
+    usuarios= []
+    usuario_a = conversacion.usuario_a
+    usuario_b = conversacion.usuario_b
+
+    usuarios.append({
+            "_id": usuario_a._id,
+            "nombre": usuario_a.nombre,
+            "apellido": usuario_a.apellido,
+            "profile_pic": usuario_a.profile_pic[0] if usuario_a.profile_pic else None,
+            
+        })
+    usuarios.append({
+            "_id": usuario_b._id,
+            "nombre": usuario_b.nombre,
+            "apellido": usuario_b.apellido,
+            "profile_pic": usuario_b.profile_pic[0] if usuario_b.profile_pic else None,
+            
+        })
+
+
+
+    return Response(usuarios, status=status.HTTP_200_OK)
+
+# ------- Obtener Match ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_match_id(request, match_id):
+    try:
+        match = Conversacion.objects.get(_id=match_id)
+    except Conversacion.DoesNotExist:
+        return Response({'error': 'Conversación no encontrada'}, status=404)
+
+    if request.user not in [match.usuario_a, match.usuario_b]:
+        return Response({'error': 'No tienes permiso para ver este match'}, status=403)
+
+    return Response(match.match_id, status=200)
 
 
 # --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------
@@ -1077,25 +1222,31 @@ class EventoViewSet(viewsets.ModelViewSet):
     def toggle_buscar_match(self, request):
         usuario = request.user
         id_event = request.query_params.get('eventId')
-        estado = request.query_params.get('estado')  # Valor boleano "true" o "false"
-        
+        estado = request.query_params.get('estado')  # "true" o "false"
+    
+    # Validación básica
         if not id_event or estado not in ['true', 'false']:
             return Response({"detail": "Parámetros inválidos."}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            evento = Evento.objects.get(_id=id_event)
-        except Evento.DoesNotExist:
-            return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Validar que el evento esté en los eventos guardados del usuario
-        if id_event not in usuario.save_events:
-           return Response({"detail": "Este evento no está guardado por el usuario."}, status=status.HTTP_400_BAD_REQUEST)
+    # Verifica que el evento esté guardado por el usuario
+        if not usuario.save_events or id_event not in usuario.save_events:
+            return Response({"detail": "Este evento no está guardado por el usuario."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Convertir estado a booleano y actualizar el campo
-        evento.buscar_match = True if estado == 'true' else False
-        evento.save(update_fields=['buscar_match'])
-        estado_str = "activado" if evento.buscar_match else "desactivado"
+    # Inicializa la lista si está vacía
+        if usuario.eventos_buscar_match is None:
+            usuario.eventos_buscar_match = []
+
+        if estado == 'true':
+           if id_event not in usuario.eventos_buscar_match:
+               usuario.eventos_buscar_match.append(id_event)
+        else:
+           if id_event in usuario.eventos_buscar_match:
+             usuario.eventos_buscar_match.remove(id_event)
+
+        usuario.save(update_fields=['eventos_buscar_match'])
+
+        estado_str = "activado" if estado == 'true' else "desactivado"
         return Response({"detail": f"Buscar match {estado_str} para el evento."}, status=status.HTTP_200_OK)
-
 
     @action(detail=False, methods=['delete'])
     @permission_classes([IsAuthenticated])
@@ -1236,8 +1387,43 @@ def obtener_evento_por_id(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
-#------------------------------------------ OBTENCIÓN DE INFORMACIÓN DE LOS USUARIOS ----------------------------------
+
+# ------- ¿Es favorito?
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def es_favorito(request, pk):
+    user = request.user
+    try:
+        evento = Evento.objects.get(pk=pk)
+        if evento.pk in user.favourite_events:
+            return Response({"es_favorito": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"es_favorito": False}, status=status.HTTP_200_OK)
+    except Evento.DoesNotExist:
+        return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ------- Obtener usuarios por ID
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_usuario_info(request, pk):
+    data = []
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        data.append({
+            "_id": usuario._id,
+            "nombre": usuario.nombre,
+            "apellido": usuario.apellido,
+            "profile_pic": usuario.profile_pic if usuario.profile_pic else None,
+            "preferencias_evento": usuario.preferencias_evento,
+            "preferencias_generales": usuario.preferencias_generales,
+            "edad": calcular_edad(usuario.birthday),
+            "descripcion": usuario.description,
+        })
+        return Response(data, status=status.HTTP_200_OK)
+    except Usuario.DoesNotExist:
+        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -1261,3 +1447,5 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         usuario = request.user
         serializer = UsuarioSerializerEdit(usuario)
         return Response(serializer.data)
+
+

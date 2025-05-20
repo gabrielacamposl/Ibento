@@ -2,22 +2,40 @@ import React, { useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-
+import api from '../../api';
 const Guardados = ({events}) => {
     const navigate = useNavigate();
-    const [valido, setValido] = useState('No');
+    const [verify, setVerificar] = useState();
+   
+     //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
 
-    const matchDisponible = (valido) => {
-        if(valido === 'No'){
-            alert("No puedes buscar match, crea una cuenta de matches");
-            navigate('../verificar');
-            return ;
-           
+    const isVerify = async () => {
+             const token = localStorage.getItem('access');
+            try { 
+                const response = await api.get("estado-validacion/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const userData = response.data;
+                    const estado1 = userData.is_ine_validated 
+                    const estado2 =userData.is_validated_camera;
+                    
+                    console.log(estado1, estado2)
+                    if (estado1 == true && estado2 == true) {
+                        setVerificar(true);
+                        navigate('../verificar');
+                    } else {
+                        setVerificar(false);
+                    }
+                    
+                }
+            }
+            catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
         }
-      
-        navigate('../matches');
-    }
-
     return (
         <div className="flex justify-cente text-black   ">
             <div className="relative flex flex-col items-center     max-w-lg w-full">
@@ -42,7 +60,7 @@ const Guardados = ({events}) => {
                             </div>
                             <div className='mt-2 b-2'>
                             {event.buscando === 'No' ? (
-                                <button onClick={() => matchDisponible(valido)} className="botonMatch absolute right-4 bottom-2 bg-green-500 text-white p-2 rounded fondoFavorito">
+                                <button onClick={() => isVerify()} className="botonMatch absolute right-4 bottom-2 bg-green-500 text-white p-2 rounded fondoFavorito">
                                     Buscar Match
                                 </button>
                             ) : (
@@ -51,7 +69,15 @@ const Guardados = ({events}) => {
                                 </button>
                             )}
                            </div>
-                            
+                             {verify == false && (
+                                                    <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
+                                                    <div className="text-center text-white">
+                                                        <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
+                                                        <p className="mt-2">¡Créalo ahora!.</p>
+                                                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={()=>navigate('../verificar')}>Crear</button>
+                                                    </div>
+                                                    </div>
+                                                    )}
                    
 
                                 

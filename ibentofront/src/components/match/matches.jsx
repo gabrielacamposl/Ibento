@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../../api';
 const matches = () => {
     const navigate = useNavigate();
-    const [verificar, setVerificar] = useState(true);
-    const [user, setUser] = useState({
-        
-        pictures: ["/minovio.jpeg", "/juas.webp"],
-        likes: 20,
-        
-    });
+    const [verificar, setVerificar] = useState();
+   
     
         // useEffect(() => {
         //     const token = localStorage.getItem("access");
@@ -19,87 +16,138 @@ const matches = () => {
         //         navigate("/login");
         //     }
         // }, []);
-    
-    
-    const users = [
-        {
-            name: 'Lee Know',
-            age: 26,
-            pictures: ["/lee2.jpeg", "/lee.jpeg"],
-            asistir: ['EDC', 'FlowFest'],
-            eventosComun: ['Fiesta de disfraces', 'Karaoke'],
-            ultimoMensaje:'Hola,¿Cómo estás?',
-            idChat: 1,
-        },
-        {
-            name: 'Felix',
-            age: 22,
-            pictures: ["/lee.jpeg", "/felix2.jpeg"],
-            asistir: ['Lollapalooza', 'Tomorrowland'],
-            eventosComun: ['Concierto de rock', 'Festival de cine'],
-            ultimoMensaje:'',
-            idChat: 2,
-        },
-        {
-            name: 'Hyunjin',
-            age: 23,
-            pictures: ["/jin.jpeg", "/hyunjin2.jpeg"],
-            asistir: ['Ultra Music Festival', 'Coachella'],
-            eventosComun: ['Exposición de arte', 'Torneo de videojuegos'],
-            ultimoMensaje:'Te amoooo <3',
-            idChat: 3,
-        },
-        {
-            name: 'Harry',
-            age: 28,
-            pictures: ["/harry.jpeg", "/jisoo2.jpeg"],
-            asistir: ['SXSW', 'Burning Man'],
-            eventosComun: ['Concierto de pop', 'Festival de comida'],
-            ultimoMensaje:'Te invito a mi concierto',
-            idChat: 4,
-        },
-        {
-            name: 'Chinos',
-            age: 27,
-            pictures: ["/bts.jpeg", "/jennie2.jpeg"],
-            asistir: ['Glastonbury', 'Reading Festival'],
-            eventosComun: ['Desfile de moda', 'Fiesta en la playa'],
-            ultimoMensaje:'',
-            idChat: 5,
-        },
-        {
-            name: 'Jung',
-            age: 26,
-            pictures: ["/jung.webp", "/lisa2.jpeg"],
-            asistir: ['Primavera Sound', 'Rock in Rio'],
-            eventosComun: ['Concierto de hip-hop', 'Competencia de baile'],
-            ultimoMensaje:'',
-            idChat: 6,
-        }
-    ];
-
-   const handdleSearch = () => {
-       navigate("../matches");
-
-    }
-
-
+   
+  
+   
     const handdleFuture = () => {
         navigate("../verMatches");
         }
 
-    const handdleChat = () => {
-        setTimeout(() => navigate("../chat"), 0);
-    }
-
-       
+   
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
     } 
+
+
+    const [conversaciones, setConversaciones] = useState([]);
+    const [futureMatches , setFutureMatches] = useState([]);
+
+    const [Likes, setLikes] = useState([]);
+
+   //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchUserData = async () => {
+            try { 
+                const response = await api.get("estado-validacion/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const userData = response.data;
+                    const estado1 = userData.is_ine_validated 
+                    const estado2 =userData.is_validated_camera;
+                    
+                    console.log(estado1, estado2)
+                    if (estado1 == true && estado2 == true) {
+                        setVerificar(true);
+                    } else {
+                        setVerificar(false);
+                    }
+                    
+                }
+            }
+            catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
+        }
+        fetchUserData();
+    }, []);
+
+    useEffect(() => {
+        const likes=0;
+        const token = localStorage.getItem('access');
+        const fetchUserData = async () => {
+            try {
+                const response = await api.get("likes-recibidos/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const userData = response.data;
+                    setLikes(userData);
+                    console.log(userData)
+                    
+                   
+                }
+            } catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
+        }
+        fetchUserData();
+    }
+    , []);
+ 
+    
+
+    useEffect(() => async () => {
+        const token = localStorage.getItem('access');
+        try {
+            const response = await api.get("mis-conversaciones/", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                    
+                console.log(response.data);
+          
+                
+                const mensajes = [];
+                const sinMensajes = [];
+                
+                response.data.forEach(conversacion => {
+                    const formattedConversacion = {
+                        conversacion_id: conversacion.conversacion_id,
+                        usuario: {
+                            nombre: conversacion.usuario.nombre,
+                            apellido: conversacion.usuario.apellido,
+                            profile_pic: conversacion.usuario.profile_pic,
+                            edad : conversacion.usuario.edad
+                        },
+                        ultimo_mensaje: conversacion.ultimo_mensaje || 'Sin mensajes aún',
+                    };
+
+                    if (conversacion.ultimo_mensaje) {
+                        mensajes.push(formattedConversacion);
+                    } else {
+                        sinMensajes.push(formattedConversacion);
+                    }
+                });
+                console.log(mensajes)
+                console.log(sinMensajes)
+                setConversaciones(mensajes);
+                setFutureMatches(sinMensajes);
+                
+            }else{
+               console.log("No se pudo obtener la información de los mensajes.");
+            }
+        }catch (error) {
+            console.error("Error al obtener los mensajes:", error);
+        }
+    },[]);
+
+
+   
+    
+
     return (
-        <div className="justify-center text-black flex min-h-screen relative">
-            <div className="">
-                <div className="degradadoPerfil p-5 max-w-lg w-full mx-auto bg-opacity-80 backdrop-blur-md">
+        <div className="justify-center text-black flex  max-w-lg w-full min-h-screen relative" >
+            <div className="relative   flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
+                <div className="degradadoPerfil p-5 max-w-lg w-full  flex flex-col mx-auto bg-opacity-80 backdrop-blur-md">
                     <div className="flex justify-end items-end font-bold text-2xl w-full">
                         <button className="cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
@@ -112,7 +160,6 @@ const matches = () => {
                         <h1 className="miPerfil text-2xl">Mis Matches</h1>
                     </div>
 
-
                     {verificar == false && (
                     <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
                     <div className="text-center text-white">
@@ -123,12 +170,13 @@ const matches = () => {
                     </div>
                     )}
 
+
                     <h3 className="font-bold">Nuevos Matches</h3>
                     <div className="m-2 flex overflow-x-scroll" style={{ cursor: 'grab' }}>
                         <React.Fragment>
                             <div className="m-1 flex-shrink-0 relative">
                                 <div className="rounded-full">
-                                    <img src={user.pictures[0]} className="w-30 h-40 object-cover rounded" alt={user.name} />
+                                    <img src={Likes.at(-1)?.profile_pic || '/profile_empty.webp'} className="w-30 h-40 object-cover rounded" alt={Likes.at(-1)?.nombre || 'Default User'} />
                                     <label onClick={handdleFuture} className="absolute bottom-0 text text-center h-full w-full TransparenciaFoto cursor-pointer">
                                         <div className="mt-10">
                                             <h1>Futuros Acompañantes</h1>
@@ -137,48 +185,51 @@ const matches = () => {
                                                     <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
                                                 </svg>
                                             </div>
-                                            <h1>{user.likes} Likes</h1>
+                                            <h1>{Likes.length} Likes</h1>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
-
+                          
+                            {futureMatches.map((user, index) => (
+                                 
+                                <div key={index} className="m-1 flex-shrink-0 relative">
+                                   
+                                    <div className="rounded-full relative">
+                                    <label onClick={()=>navigate(`../chat/?room=${user.conversacion_id}`)} >
+                                        <img src={user.usuario.profile_pic} className="w-30 h-40 object-cover rounded" alt={user.name} />
+                                        <p className="absolute bottom-0 left-0 w-full text-center  text-white py-1">
+                                            {user.usuario.nombre}, {user.usuario.edad}
+                                        </p>
+                                        </label>
+                                    </div>
+                                     
+                                     </div>
+                               
+                               
+                            ))}
+                            </React.Fragment>
+                            </div>
 
                           
-
-
-
-
-
-                            {users.map((user, index) => (
-                                <div key={index} className="m-1 flex-shrink-0 relative">
-                                    <div className="rounded-full">
-                                        <img src={user.pictures[0]} className="w-30 h-40 object-cover rounded" alt={user.name} />
-                                    </div>
-                                </div>
-                            ))}
-                        </React.Fragment>
-                    </div>
                     <h1 className="font-bold">Mensajes</h1>
 
-                
-
-
-
                     <div className="mt-4">
-                        {users.map((user, index) => (
-                            user.ultimoMensaje !== '' && (
-                                <div key={index} className="bordeBajo mb-4 p-2">
-                                    <button onClick={handdleChat} className="w-full ">
+                        {conversaciones.map((user, index) => (
+                            <div key={index} className="bordeBajo mb-4 p-2">
+                                <button onClick={() => navigate(`../chat/?room=${user.conversacion_id}`)} className="w-full">
                                     <div className="flex justify-start items-center space-x-2">
-                                        <img src={user.pictures[0]} className="w-10 h-10 object-cover rounded-full" alt={user.name} />
-                                        <h2 className="font-bold">{user.name}</h2>
+                                        {user.foto_perfil !== 'null' ? (
+                                            <img src={user.usuario.profile_pic} className="w-10 h-10 object-cover rounded-full" alt={user.nombre} />
+                                        ) : (
+                                            <img src={'/profile_empty.webp'} className="w-10 h-10 object-cover rounded-full" alt={user.nombre} />
+                                        )}
+                                        <h2 className="font-bold">{user.usuario.nombre } {user.usuario.apellido}</h2>
                                     </div>
-                                    <p className='flex justify-start mt-2'>{user.ultimoMensaje}</p>
-                                    </button>
-                                </div>
-                            )
+                                    <p className="flex justify-start mt-2">{user.ultimo_mensaje}</p>
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
-import api from '../../api';
+import api from '../../apilogin';
+import axios from "axios";
 import {
   FormControlLabel,
   Checkbox,
@@ -40,19 +41,15 @@ const Login = () => {
 
     try {
       const res = await api.post("login/", { email, password });
-
       // Guardar tokens
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
       // Opcionalmente, guarda más datos del usuario
       localStorage.setItem("user", JSON.stringify({
         id: res.data.id,
-        email: res.data.email,
-        nombre: res.data.nombre,
+        //email: res.data.email,
+        //nombre: res.data.nombre,
       }));
-
-      // Redirigir a vista principal
-      // navigate("/principal/eventos");
       window.location.href = '/ibento/eventos';
     } catch (err) {
       console.error("Error al iniciar sesión:", err);

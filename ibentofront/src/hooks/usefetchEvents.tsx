@@ -27,7 +27,7 @@ const useFetchEvents = (url: string) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<Event[]>(url);
+                const response = await api.get<Event[]>(url);
                 setData(response.data);
             } catch (err) {
                 setError('Error al cargar los datos.');
@@ -69,7 +69,7 @@ const useFetchEvent = (url: string) => {
 
 const useFetchNearestEvents = (url: string) => {
 
-    url = 'eventos/nearest/?lat=undefined&lon=undefined'
+    url = 'eventos/nearest  /?lat=undefined&lon=undefined'
 
     const [data, setData] = useState<Event[]>([]);;
     const [loading, setLoading] = useState(false);
