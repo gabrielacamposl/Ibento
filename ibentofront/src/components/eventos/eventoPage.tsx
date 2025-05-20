@@ -8,7 +8,7 @@ import { ArrowLeftIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Calendar } from 'primereact/calendar';
 import EventMap from './EventMap';
 import Carousel from './components/carousel';
-import { useFetchEvents } from "../../hooks/usefetchEvents";
+import { useFetchEvents, enListadoGuardados, enFavoritos} from "../../hooks/usefetchEvents";
 import { useFetchUserEvents } from "../../hooks/useFetchUser";
 
 import api from "../../api"
@@ -50,7 +50,11 @@ function Page() {
 
   const { data: evento, loading, error } = useFetchEvents("eventos/event_by_id?eventId=" +  eventId);
 
-  const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
+  const eventoEnGuardados = enListadoGuardados(eventId ?? "", localStorage.getItem("access") ?? "")
+  const eventoEnFavorios = enFavoritos(eventId ?? "", localStorage.getItem("access") ?? "")
+
+
+  //const { data: eventosUsuario, loading: loadingUsuario, error: errorUsuario } = useFetchUserEvents(localStorage.getItem("access") ?? "");
 
   if (loading) {
     return (
@@ -137,23 +141,12 @@ interface LikeResponse {
     numSaves,
   } = eventData;
 
-
-  // useEffect(() => {
-  //   if (eventosUsuario && eventosUsuario.length > 0 && eventosUsuario[0]?.save_event) {
-  //     const guardados = eventosUsuario[0].save_event;
-  //     if (guardados.some((guardado: any) => guardado._id === _id)) {
-  //       setIsBookmarked(true);
-  //     }
-  //     else {
-  //       setIsBookmarked(false);
-  //     }
-  //   }
-
-  // }, [eventosUsuario, _id]);
-
-
   const toggleLike = () => {
     setIsLiked(!isLiked);
+  };
+
+  const toggleSave = () => {
+    setIsBookmarked(!isBookmarked);
   };
 
   let likeString = "";

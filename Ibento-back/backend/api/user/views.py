@@ -1125,6 +1125,49 @@ class EventoViewSet(viewsets.ModelViewSet):
         
         return Response({"detail": "El evento no esta guardado."}, status=status.HTTP_400_BAD_REQUEST)
 
+    # -------- Obtener si esta el evento guardado
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def evento_en_guardados(self, request):
+        
+        usuario = request.user
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Buscar evento en guardados 
+        status = id_event in usuario.save_Events
+
+        return status
+
+    # -------- Obtener si esta el evento esta en favoritos
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def evento_en_favoritos(self, request):
+        
+        usuario = request.user
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Buscar evento en favoritos 
+        status = id_event in usuario.favourite_events
+        
+        return status
+
+
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
