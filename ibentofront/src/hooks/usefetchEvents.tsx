@@ -136,38 +136,6 @@ const useFetchRecommendedEvents = (url: string, token: string) => {
     return { data, loading, error };
 };
 
-// const enListadoGuardados = (eventId: string, token: string) => {
-//     const url = `eventos/evento_en_guardados?eventId=${eventId}`
-//     const [statusEvento, setStatusEvento] = useState(false);
-
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             try {
-//                 const response = await api.get(url,
-//                     {
-//                         headers: {
-//                             'Authorization': `Bearer ${token}`
-//                         }
-//                     }
-//                 );
-//                 if (response.status != 200) {
-//                     throw new Error(`HTTP error. Status: ${response.status}`)
-//                 }
-//                 setStatusEvento(response.data)
-//             }
-//             catch (e) {
-//                 console.error('Error obteniendo si el evento esta guardados: ', e);
-//             }
-//             finally {
-
-//             }
-//         };
-
-//         fetchData();
-
-//     }, []);
-//     return statusEvento
-// }
 
 const enListadoGuardados = async (eventId: string, token: string): Promise<{ status: boolean }> => {
     if (!eventId || !token) {
@@ -220,38 +188,6 @@ const enFavoritos = async (eventId: string, token: string): Promise<{ status: bo
         return { status: false };
     }
 };
-// const enFavoritos = (eventId: string, token: string) => {
-//     const url = `eventos/evento_en_favoritos?eventId=${eventId}`
-//     const [statusEvento, setStatusEvento] = useState(false);
-
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             try {
-//                 const response = await api.get(url,
-//                     {
-//                         headers: {
-//                             'Authorization': `Bearer ${token}`
-//                         }
-//                     }
-//                 );
-//                 if (response.status != 200) {
-//                     throw new Error(`HTTP error. Status: ${response.status}`)
-//                 }
-//                 setStatusEvento(response.data)
-//             }
-//             catch (e) {
-//                 console.error('Error obteniendo si el evento esta favoritos: ', e);
-//             }
-//             finally {
-
-//             }
-//         };
-
-//         fetchData();
-
-//     }, []);
-//     return statusEvento
-// }
 
 const saveEvent = (eventId: string) => {
 
