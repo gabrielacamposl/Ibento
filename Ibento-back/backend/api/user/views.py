@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+import traceback
 # Utils Django
 from django.utils import timezone
 from django.utils.timezone import now
@@ -28,7 +29,7 @@ from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio para comparación de rostros
-from api.services.face_validation import verificar_rostros
+#from api.services.face_validation import verificar_rostros
 # Servicio de INES
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
@@ -373,6 +374,7 @@ def delete_profile_picture(request, photo_url):
 def ine_validation_view(request):
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
+    selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
         return Response({"error": "Ambas imágenes de la INE son requeridas."}, status=status.HTTP_400_BAD_REQUEST)
@@ -402,13 +404,98 @@ def ine_validation_view(request):
         if curp:
             user.curp = curp
         user.save()
+        
+        # rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
+        # if not rostro_valido:
+        #     return Response({
+        #         "error": "El rostro no coincide con el de la INE.",
+        #         "distancia": round(distancia, 4),
+        #         "sugerencia": sugerencia
+        #     }, status=status.HTTP_400_BAD_REQUEST)
+            
+        # user : Usuario = request.user
+        # user.is_validated_camera = rostro_valido
+        # user.save()
 
-        return Response({"mensaje": "INE validada exitosamente."}, status=status.HTTP_200_OK)
+        return Response({
+            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
+            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
+        }, status=status.HTTP_200_OK)
+    
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    # Comparar rostro
+        
     finally:
         # Eliminar imágenes de Cloudinary
+        if front_id:
+            delete_image_from_cloudinary(front_id)
+        if back_id:
+            delete_image_from_cloudinary(back_id)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
+def ine_validation_view(request):
+    ine_front = request.FILES.get('ine_front')
+    ine_back = request.FILES.get('ine_back')
+    selfie = request.FILES.get('selfie')
+
+    if not ine_front or not ine_back or not selfie:
+        return Response({"error": "Se requieren imágenes de INE (frontal y reverso) y una selfie."}, status=status.HTTP_400_BAD_REQUEST)
+
+    front_id = back_id = None
+
+    try:
+        # Subir imágenes a Cloudinary
+        front_url, front_id = upload_image_to_cloudinary(ine_front, name="front_ine")
+        back_url, back_id = upload_image_to_cloudinary(ine_back, name="back_ine")
+
+        # Convertir a base64
+        front_b64 = url_to_base64(front_url)
+        back_b64 = url_to_base64(back_url)
+
+        # Extraer datos de INE
+        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        if not cic or not id_ciudadano:
+            return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar padrón
+        ine_valida = validate_ine(cic, id_ciudadano)
+        if not ine_valida:
+            return Response({"error": "La INE no es válida."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Comparar rostro
+        rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
+        if not rostro_valido:
+            return Response({
+                "error": "El rostro no coincide con el de la INE.",
+                "distancia": round(distancia, 4),
+                "sugerencia": sugerencia
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Guardar en el usuario
+        user: Usuario = request.user
+        user.is_ine_validated = True
+        user.is_validated_camera = True
+        if curp:
+            user.curp = curp
+        user.save()
+
+        return Response({
+            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
+            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
+            "distancia": round(distancia, 4),
+            "sugerencia": sugerencia
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    finally:
+        # Limpieza de imágenes
         if front_id:
             delete_image_from_cloudinary(front_id)
         if back_id:
@@ -421,7 +508,6 @@ def ine_validation_view(request):
 @permission_classes([IsAuthenticated])
 def estado_validacion_view(request):
     user = request.user
-
     return Response({
         "is_ine_validated": user.is_ine_validated,
         "is_validated_camera": user.is_validated_camera
@@ -533,42 +619,51 @@ def matches(request):
 
     return Response({"message": "Interacción registrada correctamente."}, status=200)
 
-# ------- Personas que me dieron like
+# ------- Personas que me dieron like : *Futuros acompañantes*
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def personas_que_me_dieron_like(request):
-    usuario_actual = request.user
+    try:
+        usuario_actual = request.user
 
-    interacciones = Interaccion.objects.filter(
-        usuario_destino=usuario_actual,
-        tipo_interaccion="like"
-    ).select_related("usuario_origen")
+        # Obtener interacciones donde el usuario actual fue el destino de un like
+        interacciones = Interaccion.objects.filter(
+            usuario_destino=usuario_actual,
+            tipo_interaccion="like"
+        ).select_related("usuario_origen")
 
-    usuarios = []
+        usuarios = []
 
-    for interaccion in interacciones:
-        u = interaccion.usuario_origen
+        for interaccion in interacciones:
+            u = interaccion.usuario_origen
 
-        # Calcular edad si hay birthday
-        edad = None
-        if u.birthday:
-            today = date.today()
-            edad = today.year - u.birthday.year - (
-                (today.month, today.day) < (u.birthday.month, u.birthday.day)
-            )
+            # Calcular edad si la fecha de cumpleaños está disponible
+            edad = None
+            if u.birthday:
+                today = date.today()
+                edad = today.year - u.birthday.year - (
+                    (today.month, today.day) < (u.birthday.month, u.birthday.day)
+                )
 
-        usuarios.append({
-            "_id": u._id,
-            "nombre": u.nombre,
-            "apellido": u.apellido,
-            "profile_pic": u.profile_pic[0] if u.profile_pic else None,
-            "preferencias_evento": u.preferencias_evento,
-            "preferencias_generales": u.preferencias_generales,
-            "edad": edad,
-            "descripcion": u.description
-        })
+            # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })
 
-    return Response(usuarios, status=200)
+        return Response(usuarios, status=200)
+
+    except Exception as e:
+        print("Error en personas_que_me_dieron_like:", traceback.format_exc())
+        return Response({"error": str(e)}, status=500)
+
 
 # ------- Ver Matches
 @api_view(["GET"])
@@ -581,7 +676,7 @@ def obtener_matches(request):
     serializer = MatchSerializer(matches, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-# ------ Eliminar match
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -612,7 +707,8 @@ def obtener_match(request, match_id):
         'match': serializer.data,
         'conversacion_id': conversacion_id
     }, status=200)
-
+    
+# ------ Eliminar match
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def eliminar_match(request, match_id):
@@ -809,8 +905,6 @@ def obtener_match_id(request, match_id):
         return Response({'error': 'No tienes permiso para ver este match'}, status=403)
 
     return Response(match.match_id, status=200)
-
-
 
 
 # --------------------------------------- OBTENCIÓN DE EVENTOS EN TICKETMASTER --------------------------------

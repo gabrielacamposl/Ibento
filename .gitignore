@@ -9,8 +9,16 @@ ibento-back/backend/db.sqlite3
 ibento-front/node_modules/
 
 #Claves Firebase
+<<<<<<< HEAD
 ibento-back/backend/backend/secret/
 backend/secret
+=======
+Ibento-backend/backend/ibento-8e4fc.json
+# Firebase credentials
+backend/secrets/
+ibento-back/backend/backend/secrets/
+ibento-back/backend/backend/settings.py
+>>>>>>> 43d2867c9137c4d899ffe02bece38fa5c0fb4704
 
 #Archivos de entorno
 *.env

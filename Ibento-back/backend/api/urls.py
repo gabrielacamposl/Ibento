@@ -23,7 +23,6 @@ from api.user.views import (crear_usuario,
                             obtener_usuario_info,
                             bloquear_usuario,
                             obtener_match_id,
-                           
                             )
 
 
@@ -60,15 +59,23 @@ urlpatterns = [
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
     # Matches
+    # ---- Dar like o dislike
     path('api/interaccion/', matches, name='dar_like_dislike'),
+    # --- Selección de búsqueda de acompañantes - Por eventos o global-
     path('api/match/modo/', cambiar_modo_busqueda, name='cambiar_modo_busqueda'),
+    # --- Sugerencia de acompañantes
     path('api/matches/sugerencias/', sugerencia_usuarios, name='sugerencias_usuarios'),
+    # ---- Futuros acompañantes
+    path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
+    # --- Ver matches
     path('api/matches/', obtener_matches, name='obtener_matches'), 
+    # --- Eliminar match
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
+    
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
     path('api/matches/<str:match_id>/bloquear/', bloquear_usuario, name='bloquear_usuario'),
     path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
-    path("api/likes-recibidos/", personas_que_me_dieron_like, name="likes-recibidos"),
+    
 
     # Conversaciones
     path('api/mis-conversaciones/', mis_conversaciones, name='mis_conversaciones'),

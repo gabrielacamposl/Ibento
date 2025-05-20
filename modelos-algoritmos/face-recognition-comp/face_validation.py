@@ -89,11 +89,14 @@ while True:
         frame = img.copy()
         print("Imagen capturada.")
         break
+<<<<<<< HEAD
     elif key & 0xFF == ord('q'):
         print("Cancelado.")
         cap.release()
         cv2.destroyAllWindows()
         exit()
+=======
+>>>>>>> 43d2867c9137c4d899ffe02bece38fa5c0fb4704
 
 cap.release()
 cv2.destroyAllWindows()
