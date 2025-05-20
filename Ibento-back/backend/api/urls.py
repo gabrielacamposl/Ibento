@@ -73,7 +73,7 @@ urlpatterns = [
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
-    path('api/matches/<str:match_id>/bloquear/', bloquear_usuario, name='bloquear_usuario'),
+    path('api/bloquear/', bloquear_usuario, name='bloquear_usuario'),
     path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
     
 
