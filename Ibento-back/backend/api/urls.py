@@ -23,6 +23,7 @@ from api.user.views import (crear_usuario,
                             obtener_usuario_info,
                             bloquear_usuario,
                             obtener_match_id,
+                            eliminar_evento_favorito
                             )
 
 
@@ -93,6 +94,7 @@ urlpatterns = [
     path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
 
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
+    path('api/eventos/<str:pk>/dislike/', eliminar_evento_favorito, name='QuitarLikeEvento'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
   
 ]
