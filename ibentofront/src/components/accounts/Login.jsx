@@ -63,7 +63,7 @@ const Login = () => {
 
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
-      <div className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden ">
+      <div className="hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
          {/* Fondo degradado y luces */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           {[...Array(7)].map((_, i) => {
