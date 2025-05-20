@@ -151,6 +151,18 @@ class Mensaje(models.Model):
     def __str__(self):
         return f"{self.remitente} -> {self.receptor}: {self.mensaje}"
 
+# ----- Bloqueos
+class Bloqueo(models.Model):
+    usuario_bloqueador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='bloqueos_realizados', to_field="_id")
+    usuario_bloqueado = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='bloqueos_recibidos', to_field="_id")
+    fecha_bloqueo = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('usuario_bloqueador', 'usuario_bloqueado')
+
+    def __str__(self):
+        return f"{self.usuario_bloqueador.email} bloqueó a {self.usuario_bloqueado.email}"
+
 
     
 #-------------------------------------- CREACIÓN DE EVENTOS ---------------------------------------------------

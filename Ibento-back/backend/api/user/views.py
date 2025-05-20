@@ -29,12 +29,12 @@ from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio para comparación de rostros
-#from api.services.face_validation import verificar_rostros
+from api.services.face_validation import verificar_rostros
 # Servicio de INES
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
-from api.models import Interaccion, Matches,Conversacion, Mensaje
+from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -405,17 +405,17 @@ def ine_validation_view(request):
             user.curp = curp
         user.save()
         
-        # rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
-        # if not rostro_valido:
-        #     return Response({
-        #         "error": "El rostro no coincide con el de la INE.",
-        #         "distancia": round(distancia, 4),
-        #         "sugerencia": sugerencia
-        #     }, status=status.HTTP_400_BAD_REQUEST)
+        rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
+        if not rostro_valido:
+            return Response({
+                "error": "El rostro no coincide con el de la INE.",
+                "distancia": round(distancia, 4),
+                "sugerencia": sugerencia
+            }, status=status.HTTP_400_BAD_REQUEST)
             
-        # user : Usuario = request.user
-        # user.is_validated_camera = rostro_valido
-        # user.save()
+        user : Usuario = request.user
+        user.is_validated_camera = rostro_valido
+        user.save()
 
         return Response({
             "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
@@ -429,73 +429,6 @@ def ine_validation_view(request):
         
     finally:
         # Eliminar imágenes de Cloudinary
-        if front_id:
-            delete_image_from_cloudinary(front_id)
-        if back_id:
-            delete_image_from_cloudinary(back_id)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-@parser_classes([MultiPartParser])
-def ine_validation_view(request):
-    ine_front = request.FILES.get('ine_front')
-    ine_back = request.FILES.get('ine_back')
-    selfie = request.FILES.get('selfie')
-
-    if not ine_front or not ine_back or not selfie:
-        return Response({"error": "Se requieren imágenes de INE (frontal y reverso) y una selfie."}, status=status.HTTP_400_BAD_REQUEST)
-
-    front_id = back_id = None
-
-    try:
-        # Subir imágenes a Cloudinary
-        front_url, front_id = upload_image_to_cloudinary(ine_front, name="front_ine")
-        back_url, back_id = upload_image_to_cloudinary(ine_back, name="back_ine")
-
-        # Convertir a base64
-        front_b64 = url_to_base64(front_url)
-        back_b64 = url_to_base64(back_url)
-
-        # Extraer datos de INE
-        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
-        if not cic or not id_ciudadano:
-            return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Validar padrón
-        ine_valida = validate_ine(cic, id_ciudadano)
-        if not ine_valida:
-            return Response({"error": "La INE no es válida."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Comparar rostro
-        rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
-        if not rostro_valido:
-            return Response({
-                "error": "El rostro no coincide con el de la INE.",
-                "distancia": round(distancia, 4),
-                "sugerencia": sugerencia
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # Guardar en el usuario
-        user: Usuario = request.user
-        user.is_ine_validated = True
-        user.is_validated_camera = True
-        if curp:
-            user.curp = curp
-        user.save()
-
-        return Response({
-            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
-            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
-            "distancia": round(distancia, 4),
-            "sugerencia": sugerencia
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    finally:
-        # Limpieza de imágenes
         if front_id:
             delete_image_from_cloudinary(front_id)
         if back_id:
@@ -534,7 +467,16 @@ def cambiar_modo_busqueda(request):
 def sugerencia_usuarios(request):
     usuario = request.user
 
-    # Obtener eventos para buscar coincidencias (desde la URL)
+    # Obtener IDs de usuarios a los que ya se les dio like o dislike
+    interacciones_realizadas = Interaccion.objects.filter(
+        usuario_origen=usuario
+    ).values_list('usuario_destino', flat=True)
+
+    # Obtener usuarios bloqueados por el usuario actual
+    usuarios_bloqueados = Bloqueo.objects.filter(
+        usuario_bloqueador=usuario
+    ).values_list('usuario_bloqueado', flat=True)
+
     save_events_param = request.query_params.get('save_events', '')
     evento_ids = save_events_param.split(',') if save_events_param else []
 
@@ -547,23 +489,20 @@ def sugerencia_usuarios(request):
                 modo_busqueda_match='evento',
                 is_ine_validated=True,
                 is_validated_camera=True
-            ).exclude(_id=usuario._id)
+            ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
 
             sugerencias.extend(usuarios_en_evento)
 
-        # Eliminar duplicados
         sugerencias = list(set(sugerencias))
 
     elif usuario.modo_busqueda_match == 'global':
         sugerencias = Usuario.objects.filter(
             is_ine_validated=True,
             is_validated_camera=True
-        ).exclude(_id=usuario._id)
+        ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
 
-    # Serializar los usuarios sugeridos
     serializer = SugerenciaSerializer(sugerencias, many=True)
 
-    # Agregar edad
     for i, user_data in enumerate(serializer.data):
         user_data['edad'] = calcular_edad(sugerencias[i].birthday)
 
@@ -751,6 +690,44 @@ def eliminar_match(request, match_id):
         'mensajes_eliminados': mensajes_eliminados,
         'conversaciones_eliminadas': conversaciones_eliminadas
     }, status=200)
+
+# ------ Bloquear usuarios
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bloquear_usuario(request):
+    usuario_bloqueador = request.user
+    usuario_bloqueado_id = request.data.get("usuario_bloqueado")
+
+    if usuario_bloqueado_id == str(usuario_bloqueador._id):
+        return Response({"error": "No puedes bloquearte a ti mismo."}, status=400)
+
+    try:
+        usuario_bloqueado = Usuario.objects.get(_id=usuario_bloqueado_id)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=404)
+
+    # Crear el bloqueo si no existe
+    bloqueo, created = Bloqueo.objects.get_or_create(
+        usuario_bloqueador=usuario_bloqueador,
+        usuario_bloqueado=usuario_bloqueado
+    )
+
+    if not created:
+        return Response({"mensaje": "Ya habías bloqueado a este usuario."}, status=200)
+
+    # Buscar y eliminar el match (sin importar el orden)
+    match = Matches.objects.filter(
+        usuario_a__in=[usuario_bloqueador, usuario_bloqueado],
+        usuario_b__in=[usuario_bloqueador, usuario_bloqueado]
+    ).first()
+
+    if match:
+        # Eliminar conversación asociada
+        Conversacion.objects.filter(match=match).delete()
+        # Eliminar el match
+        match.delete()
+
+    return Response({"mensaje": "Usuario bloqueado exitosamente y match eliminado."}, status=201)
 
 
 # --------------------------------------  CONVERSACIONES ------------------------------------------------
@@ -1403,27 +1380,7 @@ def obtener_usuario_info(request, pk):
     except Usuario.DoesNotExist:
         return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-# ---------- Bloquear usuario
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def bloquear_usuario(request, pk):
-    user = request.user
-    try:
-        usuario_a_bloquear = Usuario.objects.get(pk=pk)
-        if usuario_a_bloquear.pk in user.blocked:
-            return Response({"detail": "El usuario ya está bloqueado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Agregar el usuario a la lista de bloqueados
-        user.blocked.append(usuario_a_bloquear.pk)
-        user.save(update_fields=['blocked'])
-        # Eliminar al usuario bloqueado del campo matches si existe
-        if usuario_a_bloquear._id in user.matches:
-            user.matches.remove(usuario_a_bloquear._id)
-            user.save(update_fields=['matches'])
-        # Eliminar match si existe
-        return Response({"detail": "Usuario bloqueado correctamente."}, status=status.HTTP_200_OK)
-    except Usuario.DoesNotExist:
-        return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
