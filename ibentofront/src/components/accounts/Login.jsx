@@ -64,45 +64,37 @@ const Login = () => {
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
       <div className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden ">
-        <Grid container component="main" sx={{ height: "100vh", width: "100vw" }} className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden">
-          <CssBaseline />
-          {/* Animación */}
-          <Grid item xs={false} sm={4} md={7} sx={{ position: "relative", overflow: "hidden" }}>
-            <Box
-              sx={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(135deg,rgba(136, 174, 255, 0.87) 0%,rgb(229, 152, 255) 100%)",
-              }}
-            />
+         {/* Fondo degradado y luces */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[...Array(7)].map((_, i) => {
+            const color = colors[i % colors.length];
+            return (
+              <motion.div
+                key={i}
+                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
+                style={{ backgroundColor: color }}
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight / 2,
+                }}
+                animate={{
+                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
+                }}
+                transition={{
+                  duration: 8 + Math.random() * 4,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                  ease: "easeInOut",
+                }}
+              />
+            );
+          })}
+        </div>
 
-
-            {[...Array(10)].map((_, i) => {
-              const color = colors[i % colors.length];
-
-              return (
-                <motion.div
-                  key={i}
-                  className="absolute w-40 h-40 opacity-30 blur-2xl rounded-full"
-                  style={{ backgroundColor: color }}
-                  initial={{
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                  }}
-                  animate={{
-                    x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                    y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
-                  }}
-                  transition={{
-                    duration: 10 + Math.random() * 5,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    ease: "easeInOut",
-                  }}
-                />
-              );
-            })}
-          </Grid>
+        {/* Contenido */}
+        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
+          {/* Logo */}
           <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
             <Box
               sx={{
@@ -209,7 +201,7 @@ const Login = () => {
               </Box>
             </Box>
           </Grid>
-        </Grid>
+        </div>
       </div>
 
       
