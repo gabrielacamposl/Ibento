@@ -1,16 +1,24 @@
 #Ignorar entorno virtual de Python
 env/
 backend/venv/
-ibento-backend/backend/pycache/
-ibento-backend/backend/*.pyc
-ibento-backend/backend/db.sqlite3
+ibento-back/backend/pycache/
+ibento-back/backend/*.pyc
+ibento-back/backend/db.sqlite3
 *.pyc
 #Ignorar dependencias de Node.js
 ibento-front/node_modules/
 
 #Claves Firebase
+<<<<<<< HEAD
+ibento-back/backend/backend/secret/
+backend/secret
+=======
 Ibento-backend/backend/ibento-8e4fc.json
-Ibento-backend/backend/backend/secret/
+# Firebase credentials
+backend/secrets/
+ibento-back/backend/backend/secrets/
+ibento-back/backend/backend/settings.py
+>>>>>>> 43d2867c9137c4d899ffe02bece38fa5c0fb4704
 
 #Archivos de entorno
 *.env
@@ -22,7 +30,6 @@ __pycache__/
 .vscode/
 .idea/
 *.sublime-workspace
-
 
 modelos-algoritmos/INEValidation/dataset/
 node_modules/

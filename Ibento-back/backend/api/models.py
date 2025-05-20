@@ -48,6 +48,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         choices=[("global", "Global"), ("evento", "Por evento")],
         default="global"
     )
+    eventos_buscar_match = models.JSONField(default=list, blank=True, null=True)
 
     # Campos para la creación del perfil de acompañantes
     profile_pic = models.JSONField(default=list, null=True, blank=True)
@@ -150,6 +151,18 @@ class Mensaje(models.Model):
     def __str__(self):
         return f"{self.remitente} -> {self.receptor}: {self.mensaje}"
 
+# ----- Bloqueos
+class Bloqueo(models.Model):
+    usuario_bloqueador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='bloqueos_realizados', to_field="_id")
+    usuario_bloqueado = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='bloqueos_recibidos', to_field="_id")
+    fecha_bloqueo = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('usuario_bloqueador', 'usuario_bloqueado')
+
+    def __str__(self):
+        return f"{self.usuario_bloqueador.email} bloqueó a {self.usuario_bloqueado.email}"
+
 
     
 #-------------------------------------- CREACIÓN DE EVENTOS ---------------------------------------------------
@@ -170,7 +183,6 @@ class Evento(models.Model):
     numLike = models.IntegerField(default=0)
     numSaves = models.IntegerField(default=0)
     assistants = models.JSONField(default=list, null=True, blank=True)
-    buscar_match = models.BooleanField(default=False)  # Campo para saber si se quiere buscar acompañante para el evento
 
 
     def __str__(self):

@@ -89,4 +89,9 @@ def validate_ine(cic, id_ciudadano):
     status = r.json().get("response", {}).get("status", {})
     print(f"Resultado validación: {status}")
     
-    return status == "VALID"
+    if status == "VALID":
+        return True
+    else:
+       return False
+    
+ #   return status == "VALID"

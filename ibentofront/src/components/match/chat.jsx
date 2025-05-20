@@ -116,7 +116,7 @@ const idCarolina ="681e5ce72d5dcb8f92ac6f19"
 const socketRef = useRef(null);
 
 useEffect(() => {
-    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/mensajes/${roomName}/`);
+    const socket = new WebSocket(`ws://ibento.onrender.com/ws/mensajes/${roomName}/`);
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);

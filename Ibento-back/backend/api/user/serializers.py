@@ -1,7 +1,6 @@
 from rest_framework import serializers
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.pagination import PageNumberPagination  
 from django.contrib.auth.hashers import check_password
 from api.services import ine_validation
 import cloudinary.uploader

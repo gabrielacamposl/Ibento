@@ -98,7 +98,7 @@ TEMPLATES = [
         },
     },
 ]
-ASGI_APPLICATION = 'backend.asgi.application'
+ASGI_APPLICATION = 'backend.backend.asgi.application'
 
 WSGI_APPLICATION = 'backend.backend.wsgi.application'
 
@@ -127,12 +127,9 @@ DATABASES = {
         },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        #QUITAR ESTO SIEMPRE QUE SUBA CAMBIOS A PRODUCCIÓN
-        'ssl': True,
-        'tlsAllowInvalidCertificates': True,
         }
     }
-}
+
 
 #CORS (permite conexión con el frontend)
 CORS_ALLOWED_ORIGINS = [
