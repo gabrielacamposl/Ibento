@@ -489,16 +489,10 @@ function Page() {
           </button>
         </div>
       </div>
-
-      {/* Desktop View (sin cambios significativos en la lógica, solo en el JSX) */}
       <div className="hidden md:flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-indigo-500 to-white">
         {/* ... Contenido del Desktop View ... */}
         {/* Asegúrate de usar las variables desestructuradas de 'evento' aquí también */}
         <div className="flex flex-col items-center justify-center w-full max-w-6xl h-full bg-white rounded-lg shadow-lg mx-auto px-6">
-          <div className="w-auto h-auto">
-            {/* <Carousel imgs={imgs} /> Asumiendo que Carousel toma las imágenes */}
-            <Carousel />
-          </div>
           <div className="flex flex-col lg:flex-row w-full">
             <div className="flex flex-col space-y-6 items-center justify-center p-4 lg:w-2/3">
               <p className="text-black text-4xl antialiased font-bold px-4 mt-2">
@@ -514,7 +508,7 @@ function Page() {
                   <p className="text-black font-bold">{timeString}</p>
                 </div>
                 <div className="flex flex-row space-x-1 items-center justify-center">
-                  <MapPinIcon className="h-6 w-8 text-black" /> {/* Corregido h-8 */}
+                  <MapPinIcon className="h-6 w-8 text-black" />
                   <p className="text-black font-bold">{place || "Lugar no disponible"}</p>
                 </div>
               </div>
@@ -536,7 +530,7 @@ function Page() {
                     </button>
                   ))}
                   <div className="w-full hidden md:block">
-                    <EventMap location={coor} /> {/* Usar coor en lugar de coordenates directamente */}
+                    <EventMap location={coor} />
                   </div>
                 </div>
               </div>
