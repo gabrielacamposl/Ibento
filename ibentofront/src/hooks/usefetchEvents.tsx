@@ -136,65 +136,53 @@ const useFetchRecommendedEvents = (url: string, token: string) => {
     return { data, loading, error };
 };
 
-const enListadoGuardados = (eventId: string, token: string) => {
-    const url = `eventos/evento_en_guardados?eventId=${eventId}`
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await api.get(url,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }
-                );
-                if (response.status != 200) {
-                    throw new Error(`HTTP error. Status: ${response.status}`)
-                }
+const enListadoGuardados = async (eventId: string, token: string): Promise<{ status: boolean }> => {
+    if (!eventId || !token) {
+        console.warn("enListadoGuardados: eventId o token faltan.");
+        return { status: false };
+    }
+    const url = `eventos/evento_en_guardados?eventId=${eventId}`;
+    try {
+        const response = await api.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-            catch (e) {
-                console.error('Error obteniendo si el evento esta guardados: ', e);
-            }
-            finally {
+        });
+        if (response.status === 200 && typeof response.data.status === 'boolean') {
+            return response.data;
+        } else {
+            console.error('Respuesta inesperada de la API en enListadoGuardados:', response);
+            return { status: false };
+        }
+    } catch (e) {
+        console.error('Error obteniendo si el evento está guardado:', e);
+        return { status: false };
+    }
+};
 
-            }
-        };
-
-        fetchData();
-
-    }, []);
-}
-
-const enFavoritos = (eventId: string, token: string) => {
+const enFavoritos = async (eventId: string, token: string): Promise<{ status: boolean }> => {
+    if (!eventId || !token) {
+        console.warn("enListadoGuardados: eventId o token faltan.");
+        return { status: false };
+    }
     const url = `eventos/evento_en_favoritos?eventId=${eventId}`
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await api.get(url,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }
-                );
-                if (response.status != 200) {
-                    throw new Error(`HTTP error. Status: ${response.status}`)
-                }
+    try {
+        const response = await api.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-            catch (e) {
-                console.error('Error obteniendo si el evento esta favoritos: ', e);
-            }
-            finally {
-
-            }
-        };
-
-        fetchData();
-
-    }, []);
-}
+        });
+        if (response.status === 200 && typeof response.data.status === 'boolean') {
+            return response.data;
+        } else {
+            console.error('Respuesta inesperada de la API en enListadoGuardados:', response);
+            return { status: false };
+        }
+    } catch (e) {
+        console.error('Error obteniendo si el evento está guardado:', e);
+        return { status: false };
+    }
+};
 
 const saveEvent = (eventId: string) => {
 

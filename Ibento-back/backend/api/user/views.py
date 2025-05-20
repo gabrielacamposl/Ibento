@@ -1191,7 +1191,7 @@ class EventoViewSet(viewsets.ModelViewSet):
         except Evento.DoesNotExist:
             return Response(
                 {"detail": "Evento no encontrado."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         #Añadir evento a guardados del usuario
@@ -1215,6 +1215,27 @@ class EventoViewSet(viewsets.ModelViewSet):
             {"detail": "El evento ya está guardado."},
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+    # -------- Obtener si esta el evento guardado
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def evento_en_guardados(self, request):
+    
+        usuario = request.user
+        id_event = request.query_params.get('eventId')
+
+        # Validar que el parámetro de categoría esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Buscar evento en guardados
+        status_ev = id_event in usuario.save_events
+
+        return Response({"status": status_ev}, status=status.HTTP_200_OK)
+    
         
     # Activar y desactivar búsqueda de match en un evento
     @action(detail=False, methods=['post'])
@@ -1251,50 +1272,40 @@ class EventoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['delete'])
     @permission_classes([IsAuthenticated])
     def delete_save(self, request):
+
         usuario = request.user
 
         #Obtenemos los id del usuario y del evento
+
         id_event = request.query_params.get('eventId')
+
         id_user = usuario._id
-        
-        #Comprobamos si el evento existe
+
+        #Verificamos que el evento este en sus guardados
+
+        if id_event not in usuario.save_events:
+            return Response(
+                {"detail": "El evento no esta en sus guardados"},
+                status=status.HTTP_400_BAD_REQUEST
+                )
+
+         #Verificamos que el evento exista
         try:
-            evento = Evento.objects.get(_id = id_event)
+            evento = Evento.objects.get(_id=id_event)
         except Evento.DoesNotExist:
             return Response(
-                {"detail": "Evento no encontrado."}
-            )
-
-        #Comprobamos si el evento esta guardado
-        if id_event in usuario.save_events:
-            usuario.save_events.remove(id_event)
-            evento.numSaves -= 1
-            evento.assistants.remove(id_user)
-            evento.save(update_fields=['numSaves', 'assistants'])
-            usuario.save(update_fields=['save_events'])
-            return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
-        
-        return Response({"detail": "El evento no esta guardado."}, status=status.HTTP_400_BAD_REQUEST)
-
-    # -------- Obtener si esta el evento guardado
-    @action(detail=False, methods=['get'])
-    @permission_classes([IsAuthenticated])
-    def evento_en_guardados(self, request):
-        
-        usuario = request.user
-        id_event = request.query_params.get('eventId')
-
-        # Validar que el parámetro de categoría esté presente
-        if not id_event:
-            return Response(
-                {"detail": "Se requiere el parámetro de consulta 'id_event'."},
+                {"detail": "Evento no encontrado."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Buscar evento en guardados 
-        status = id_event in usuario.save_Events
 
-        return status
+        usuario.save_events.remove(id_event)
+
+        evento.numSaves -= 1
+        evento.assistants.remove(id_user)
+        evento.save(update_fields=['numSaves', 'assistants'])
+        usuario.save(update_fields=['save_events'])
+
+        return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
 
     # -------- Obtener si esta el evento esta en favoritos
     @action(detail=False, methods=['get'])
@@ -1312,9 +1323,9 @@ class EventoViewSet(viewsets.ModelViewSet):
             )
         
         # Buscar evento en favoritos 
-        status = id_event in usuario.favourite_events
+        status_ev = id_event in usuario.favourite_events
         
-        return status
+        return Response({"status": status_ev}, status=status.HTTP_200_OK)
 
 
 
@@ -1358,10 +1369,10 @@ def obtener_eventos_favoritos(request):
 # ------- Eliminar evento de favoritos
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
-def eliminar_evento_favorito(request, evento_id):
+def eliminar_evento_favorito(request, pk):
     user = request.user
     try:
-        evento = Evento.objects.get(pk=evento_id)
+        evento = Evento.objects.get(pk=pk)
         if evento.pk in user.favourite_events:
             user.favourite_events.remove(evento.pk)
             user.save(update_fields=['favourite_events'])
