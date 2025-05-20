@@ -1,70 +1,132 @@
 import dlib
 import cv2
+import numpy as np
+from scipy.spatial import distance
 
-
+# ==== DETECTOR DE ROSTROS ====
 face_detector = dlib.get_frontal_face_detector()
 
-# Cargar la imagen de la INE
+# ==== FUNCIÓN PARA DETECTAR ROSTRO CON ROTACIONES ====
+def detect_face_with_rotation(image, detector):
+    angles = [0, 90, 180, 270]
+    for angle in angles:
+        if angle != 0:
+            rot_matrix = cv2.getRotationMatrix2D((image.shape[1] // 2, image.shape[0] // 2), angle, 1.0)
+            rotated_image = cv2.warpAffine(image, rot_matrix, (image.shape[1], image.shape[0]))
+        else:
+            rotated_image = image.copy()
+
+        faces = detector(rotated_image)
+        if len(faces) > 0:
+            return rotated_image, faces[0], angle
+    return None, None, None
+
+# ==== CARGAR IMAGEN DE INE ====
 image_ine = dlib.load_rgb_image('D:/Proyectos/Ibento/modelos-algoritmos/INEValidation/dataset/ine_gaby.jpeg')
-#image_ine = dlib.load_rgb_image('D:/Proyectos/Ibento/modelos-algoritmos/INEValidation/dataset/gaby_f.jpg')
 faces_ine = face_detector(image_ine)
 
-if len(faces_ine) > 0:
-    face = faces_ine[0]
-    x1, y1, x2, y2 = face.left(), face.top(), face.right(), face.bottom() 
-    face_ine_crop = image_ine[y1:y2, x1:x2]
-else:
-    print("No se detectó rostro en la INE.")
+if len(faces_ine) == 0:
+    print(" No se detectó rostro en la INE.")
     exit()
 
+face_ine = faces_ine[0]
+x1, y1, x2, y2 = face_ine.left(), face_ine.top(), face_ine.right(), face_ine.bottom()
+image_ine_bgr = cv2.cvtColor(image_ine, cv2.COLOR_RGB2BGR)
+cv2.rectangle(image_ine_bgr, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-#Captura desde la webcam
+# Mostrar INE escalada
+resized_ine = cv2.resize(image_ine_bgr, (0, 0), fx=0.25, fy=0.25)
+cv2.imshow("Rostro detectado en INE (Escalado)", resized_ine)
+
+# ==== ABRIR CÁMARA LOCAL ====
+print("Abriendo cámara local...")
 cap = cv2.VideoCapture(0)
 
+if not cap.isOpened():
+    print("No se pudo abrir la cámara local.")
+    exit()
+print("Cámara abierta.\n")
 
-print("Presiona 'c' para capturar una imagen.")
+# ==== CAPTURAR IMAGEN CON CONTROL DE DISTANCIA DEL ROSTRO ====
+frame = None
 while True:
-    ret, frame = cap.read()
-    cv2.imshow("Webcam", frame)
-    if cv2.waitKey(1) & 0xFF == ord('c'):
+    ret, img = cap.read()
+    if not ret or img is None:
+        print("No se pudo leer el frame.")
+        continue
+
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    faces = face_detector(img_rgb)
+
+    msg = "Presiona 'C' para capturar" if len(faces) == 1 else "Rostro no detectado"
+    color = (0, 255, 0)
+
+    if len(faces) == 1:
+        face = faces[0]
+        face_width = face.right() - face.left()
+        frame_width = img.shape[1]
+        face_ratio = face_width / frame_width
+
+        # Verificar si está muy cerca o lejos
+        if face_ratio > 0.6:
+            msg = "Rostro demasiado cerca. Aléjate un poco."
+            color = (0, 0, 255)
+        elif face_ratio < 0.15:
+            msg = "Rostro muy lejos. Acércate un poco."
+            color = (0, 0, 255)
+        else:
+            msg = "Distancia correcta. Presiona 'C' para capturar"
+            color = (0, 255, 0)
+
+        cv2.rectangle(img, (face.left(), face.top()), (face.right(), face.bottom()), color, 2)
+
+    # Mostrar mensaje en pantalla
+    cv2.putText(img, msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+    cv2.imshow("📷 Cámara Local", img)
+
+    key = cv2.waitKey(1)
+    if key & 0xFF == ord('c') and msg.startswith("Distancia correcta"):
+        frame = img.copy()
+        print("Imagen capturada.")
         break
+<<<<<<< HEAD
+    elif key & 0xFF == ord('q'):
+        print("Cancelado.")
+        cap.release()
+        cv2.destroyAllWindows()
+        exit()
+=======
+>>>>>>> 43d2867c9137c4d899ffe02bece38fa5c0fb4704
 
 cap.release()
 cv2.destroyAllWindows()
 
-# Convertir a RGB y detectar rostro
+# ==== DETECTAR ROSTRO CON ROTACIÓN ====
 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-faces_cam = face_detector(frame_rgb)
+frame_rgb_rotated, face_cam, rotation_angle = detect_face_with_rotation(frame_rgb, face_detector)
 
-if len(faces_cam) > 0:
-    face = faces_cam[0]
-    x1, y1, x2, y2 = face.left(), face.top(), face.right(), face.bottom()
-    face_cam_crop = frame_rgb[y1:y2, x1:x2]
-else:
-    print("No se detectó rostro en la cámara.")
+if face_cam is None:
+    print("No se detectó rostro en la imagen capturada, incluso con rotaciones.")
     exit()
+else:
+    print(f"Rostro detectado con rotación de {rotation_angle}°")
 
-
-# Cargar los modelos necesarios
+# ==== CARGAR MODELOS DLIB ====
 shape_predictor = dlib.shape_predictor("modelos/shape_predictor_68_face_landmarks.dat")
 face_rec_model = dlib.face_recognition_model_v1("modelos/dlib_face_recognition_resnet_model_v1.dat")
 
-# Función para obtener descriptor de rostro
 def get_face_descriptor(image, face):
     shape = shape_predictor(image, face)
-    face_descriptor = face_rec_model.compute_face_descriptor(image, shape)
-    return face_descriptor
+    return face_rec_model.compute_face_descriptor(image, shape)
 
-# Obtener descriptores
-face_descriptor_ine = get_face_descriptor(image_ine, faces_ine[0])
-face_descriptor_cam = get_face_descriptor(frame_rgb, faces_cam[0])
+# ==== OBTENER DESCRIPTORES Y COMPARAR ====
+face_descriptor_ine = get_face_descriptor(image_ine, face_ine)
+face_descriptor_cam = get_face_descriptor(frame_rgb_rotated, face_cam)
 
-# Calcular distancia
-from scipy.spatial import distance
 dist = distance.euclidean(face_descriptor_ine, face_descriptor_cam)
+print(f"\nDistancia entre rostros: {dist:.4f}")
 
-print(f"Distancia entre rostros: {dist}")
 if dist < 0.6:
-    print("Rostros coinciden (probablemente la misma persona).")
+    print("✅ Rostros coinciden (probablemente la misma persona).")
 else:
-    print("Rostros diferentes.")
+    print("❌ Rostros diferentes.")

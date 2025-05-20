@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.user.views import password_reset_request, password_reset_validate, password_reset_resend, password_reset_change
-from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_like, obtener_matches, eliminar_match, cambiar_modo_busqueda, matches_activos    
+from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_like, obtener_matches, eliminar_match, cambiar_modo_busqueda
 from api.user.views import obtener_mensajes, mis_conversaciones, enviar_mensaje
 from api.user.views import estado_validacion_view, ine_validation_view
 from api.user.views import (crear_usuario, 
@@ -75,7 +75,6 @@ urlpatterns = [
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
     path('api/matches/<str:match_id>/bloquear/', bloquear_usuario, name='bloquear_usuario'),
     path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
-    path("api/matches/activos/", matches_activos, name="matches_activos"),
     
 
     # Conversaciones
