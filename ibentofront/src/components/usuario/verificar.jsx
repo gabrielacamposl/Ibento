@@ -17,6 +17,7 @@ const Verificar = () => {
         facePhoto: null,
     });
 
+    const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
