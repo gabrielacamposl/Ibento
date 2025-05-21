@@ -47,6 +47,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           UploadProfilePicture,
                           CategoriaPerfilSerializer,
                           RespuestaPerfilSerializer,
+                          ListaRespuestasPerfilSerializer,
                           # Serializers para creación de matches
                           MatchSerializer,
                           SugerenciaSerializer,
@@ -247,41 +248,18 @@ def get_categorias_perfil(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    usuario = request.user
-    respuestas = request.data
-
-    if not isinstance(respuestas, list):
-        return Response({"error": "Se debe enviar una lista de respuestas."}, status=status.HTTP_400_BAD_REQUEST)
-
-    serializer = RespuestaPerfilSerializer(data=respuestas, many=True)
+    serializer = ListaRespuestasPerfilSerializer(data={'respuestas': request.data})
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Aquí empieza el bloque que actualiza preferencias con filtro para evitar None
-    preferencias_actuales = usuario.preferencias_generales or []
-    preferencias_dict = {pref['categoria_id']: pref for pref in preferencias_actuales if 'categoria_id' in pref}
+    usuario = request.user
+    respuestas = serializer.validated_data['respuestas']
 
-    for item in serializer.validated_data:
-        categoria_id = item['categoria_id']
-        respuesta = item['respuesta']
-
-        if respuesta in [None, "", [], {}]:
-            preferencias_dict.pop(categoria_id, None)
-        else:
-            preferencias_dict[categoria_id] = {
-                "categoria_id": categoria_id,
-                "respuesta": respuesta
-            }
-
-    # Filtrar None para evitar error de Djongo
-    preferencias_validas = [p for p in preferencias_dict.values() if p is not None]
-
-    usuario.preferencias_generales = preferencias_validas
+    # Guardar respuestas en preferencias_generales
+    usuario.preferencias_generales = respuestas
     usuario.save()
 
-    return Response({"message": "Respuestas guardadas correctamente."}, status=status.HTTP_200_OK)
-
-
+    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])

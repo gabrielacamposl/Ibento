@@ -2,6 +2,7 @@ from rest_framework import serializers
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
+import ast
 from api.services import ine_validation
 import cloudinary.uploader
 from api.models import (Usuario, 
@@ -120,46 +121,47 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
 
 class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
-    respuesta = serializers.JSONField()
+    respuesta = serializers.JSONField()  # Puede ser string o lista según multi_option
 
     def validate(self, data):
-        categoria_id = data['categoria_id']
-        respuesta = data['respuesta']
+        categoria_id = data.get('categoria_id')
+        respuesta = data.get('respuesta')
 
         try:
             categoria = CategoriasPerfil.objects.get(_id=categoria_id)
         except CategoriasPerfil.DoesNotExist:
-            raise serializers.ValidationError(f"Categoría con id {categoria_id} no encontrada.")
+            raise serializers.ValidationError(f"Categoría con id {categoria_id} no existe.")
 
-        # Parsear respuestas válidas
-        try:
-            opciones_validas = categoria.answers
-            if isinstance(opciones_validas, str):
-                import ast
-                opciones_validas = ast.literal_eval(opciones_validas)
-        except Exception:
-            opciones_validas = categoria.answers or []
+        opciones = categoria.answers
+        if isinstance(opciones, str):
+            try:
+                opciones = ast.literal_eval(opciones)
+            except:
+                opciones = []
 
-        if respuesta in [None, "", [], {}]:
+        if respuesta is None:
             if not categoria.optional:
                 raise serializers.ValidationError(f"La pregunta '{categoria.question}' es obligatoria.")
             else:
-                # Si es opcional y no hay respuesta, permitimos vacío y retornamos
                 return data
 
         if categoria.multi_option:
             if not isinstance(respuesta, list):
-                raise serializers.ValidationError(f"La pregunta '{categoria.question}' requiere una lista de respuestas.")
+                raise serializers.ValidationError(f"La respuesta para '{categoria.question}' debe ser una lista.")
             for r in respuesta:
-                if r not in opciones_validas:
-                    raise serializers.ValidationError(f"Respuesta '{r}' no válida para la pregunta '{categoria.question}'.")
+                if r not in opciones:
+                    raise serializers.ValidationError(f"Respuesta '{r}' inválida para '{categoria.question}'.")
         else:
             if not isinstance(respuesta, str):
-                raise serializers.ValidationError(f"La pregunta '{categoria.question}' requiere una respuesta única (string).")
-            if respuesta not in opciones_validas:
-                raise serializers.ValidationError(f"Respuesta '{respuesta}' no válida para la pregunta '{categoria.question}'.")
+                raise serializers.ValidationError(f"La respuesta para '{categoria.question}' debe ser un string.")
+            if respuesta not in opciones:
+                raise serializers.ValidationError(f"Respuesta '{respuesta}' inválida para '{categoria.question}'.")
+        return data
 
-        return data 
+
+class ListaRespuestasPerfilSerializer(serializers.Serializer):
+    respuestas = RespuestaPerfilSerializer(many=True)
+
 
 #---------- Comparación de rostros segundo filtro
 class ValidacionRostro(serializers.ModelSerializer):
