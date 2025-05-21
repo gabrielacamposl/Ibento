@@ -18,7 +18,7 @@ import json
 import random
 from datetime import datetime, timedelta, date
 from math import radians, sin, cos, sqrt, atan2
-# Cloudinary
+import requests
 import cloudinary.uploader
 
 #Recomendación de eventos
@@ -28,8 +28,6 @@ from api.services.recommended_events import obtener_eventos_recomendados
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
-# Servicio para comparación de rostros
-from api.services.face_validation import verificar_rostros
 # Servicio de INES
 from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
 # Importar modelos 
@@ -405,17 +403,17 @@ def ine_validation_view(request):
             user.curp = curp
         user.save()
         
-        rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
-        if not rostro_valido:
-            return Response({
-                "error": "El rostro no coincide con el de la INE.",
-                "distancia": round(distancia, 4),
-                "sugerencia": sugerencia
-            }, status=status.HTTP_400_BAD_REQUEST)
+        # rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
+        # if not rostro_valido:
+        #     return Response({
+        #         "error": "El rostro no coincide con el de la INE.",
+        #         "distancia": round(distancia, 4),
+        #         "sugerencia": sugerencia
+        #     }, status=status.HTTP_400_BAD_REQUEST)
             
-        user : Usuario = request.user
-        user.is_validated_camera = rostro_valido
-        user.save()
+        # user : Usuario = request.user
+        # user.is_validated_camera = rostro_valido
+        # user.save()
 
         return Response({
             "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
