@@ -247,36 +247,46 @@ def get_categorias_perfil(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    usuario = request.user
-    respuestas = request.data
+    try:
+        usuario = request.user
+        respuestas = request.data
 
-    if not isinstance(respuestas, list):
-        return Response({"error": "Se debe enviar una lista de respuestas."}, status=status.HTTP_400_BAD_REQUEST)
+        print("Usuario:", usuario.email)  # para confirmar que está autenticado
+        print("Respuestas recibidas:", respuestas)
 
-    serializer = RespuestaPerfilSerializer(data=respuestas, many=True)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(respuestas, list):
+            return Response({"error": "Se debe enviar una lista de respuestas."}, status=status.HTTP_400_BAD_REQUEST)
 
-    preferencias_actuales = usuario.preferencias_generales or []
-    preferencias_dict = {pref['categoria_id']: pref for pref in preferencias_actuales if 'categoria_id' in pref}
+        serializer = RespuestaPerfilSerializer(data=respuestas, many=True)
+        if not serializer.is_valid():
+            print("Errores de validación:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    for item in serializer.validated_data:
-        categoria_id = item['categoria_id']
-        respuesta = item['respuesta']
+        preferencias_actuales = usuario.preferencias_generales or []
+        preferencias_dict = {pref['categoria_id']: pref for pref in preferencias_actuales if 'categoria_id' in pref}
 
-        if respuesta in [None, "", [], {}]:
-            # Si es opcional y vacía, eliminar respuesta previa si existe
-            preferencias_dict.pop(categoria_id, None)
-        else:
-            preferencias_dict[categoria_id] = {
-                "categoria_id": categoria_id,
-                "respuesta": respuesta
-            }
+        for item in serializer.validated_data:
+            categoria_id = item['categoria_id']
+            respuesta = item['respuesta']
 
-    usuario.preferencias_generales = list(preferencias_dict.values())
-    usuario.save()
+            if respuesta in [None, "", [], {}]:
+                preferencias_dict.pop(categoria_id, None)
+            else:
+                preferencias_dict[categoria_id] = {
+                    "categoria_id": categoria_id,
+                    "respuesta": respuesta
+                }
 
-    return Response({"message": "Respuestas guardadas correctamente."}, status=status.HTTP_200_OK)
+        usuario.preferencias_generales = list(preferencias_dict.values())
+        usuario.save()
+
+        return Response({"msg": "Respuestas guardadas correctamente"}, status=200)
+    
+    except Exception as e:
+        import traceback
+        print("⛔ EXCEPCIÓN DETECTADA")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=500)
 
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
