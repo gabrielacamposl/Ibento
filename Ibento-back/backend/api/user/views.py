@@ -248,18 +248,64 @@ def get_categorias_perfil(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    serializer = ListaRespuestasPerfilSerializer(data={'respuestas': request.data})
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        usuario = request.user
+        respuestas = request.data.get('respuestas', [])
 
-    usuario = request.user
-    respuestas = serializer.validated_data['respuestas']
+        if not isinstance(respuestas, list):
+            return Response({'error': 'El formato de las respuestas debe ser una lista'}, status=400)
 
-    # Guardar respuestas en preferencias_generales
-    usuario.preferencias_generales = respuestas
-    usuario.save()
+        respuestas_validas = []
 
-    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+        for item in respuestas:
+            categoria_id = item.get('categoria_id')
+            respuesta = item.get('respuesta')
+
+            if not categoria_id:
+                continue
+
+            try:
+                categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+            except CategoriasPerfil.DoesNotExist:
+                continue
+
+            # Validación de respuestas
+            opciones_validas = categoria.answers
+            if isinstance(opciones_validas, str):
+                import ast
+                try:
+                    opciones_validas = ast.literal_eval(opciones_validas)
+                except Exception:
+                    opciones_validas = []
+
+            # Validación según multi_option
+            if categoria.multi_option:
+                if not isinstance(respuesta, list):
+                    return Response({'error': f'Respuesta debe ser una lista para la categoría {categoria_id}'}, status=400)
+                for r in respuesta:
+                    if r not in opciones_validas:
+                        return Response({'error': f'Opción inválida: {r}'}, status=400)
+            else:
+                if not isinstance(respuesta, str):
+                    return Response({'error': f'Respuesta debe ser string para la categoría {categoria_id}'}, status=400)
+                if respuesta not in opciones_validas:
+                    return Response({'error': f'Opción inválida: {respuesta}'}, status=400)
+
+            respuestas_validas.append({
+                'categoria_id': categoria_id,
+                'respuesta': respuesta
+            })
+
+        # Guardamos en el campo preferencias_generales
+        usuario.preferencias_generales = respuestas_validas
+        usuario.save()
+
+        return Response({'message': 'Respuestas guardadas correctamente'}, status=200)
+    
+    except Exception as e:
+        print("ERROR en guardar_respuestas_perfil:", e)
+        traceback.print_exc()  # 👈 Esto imprime el traceback completo en los logs de Render
+        return Response({'error': 'Ocurrió un error interno en el servidor'}, status=500)
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
