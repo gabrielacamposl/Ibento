@@ -249,7 +249,7 @@ def get_categorias_perfil(request):
 # Guardar respuestas del perfil
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def guardar_respuestas(request):
+def guardar_respuestas_perfil(request):
     try:
         data = request.data
         respuestas = data.get("respuestas", [])
