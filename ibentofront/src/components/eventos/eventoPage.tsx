@@ -369,9 +369,9 @@ function Page() {
 
 
   return (
-    <div className="w-full">
+    <div className="w-full lg:items-center lg:justify-center">
       {/* Mobile View */}
-      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-90">
+      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-3/4">
         <Link
           to={urls} // O usa una función de navegación si es más complejo
           onClick={e => {

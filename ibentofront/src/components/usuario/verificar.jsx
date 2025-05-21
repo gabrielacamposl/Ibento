@@ -493,10 +493,17 @@ const Verificar = () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(1)}>
-                            Siguiente
-                        </Button>
-
+                        <>
+                            <Button className={buttonStyle} onClick={handleUploadPictures}>
+                                Siguiente
+                            </Button>
+                            <Button
+                                className={buttonStyle}
+                                onClick={() => setActiveIndex(2)} // New button to skip to step 3 (activeIndex 2)
+                            >
+                                Saltar a Paso 3
+                            </Button>
+                        </>
                     ) : activeIndex === 1 ? (
                         <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias

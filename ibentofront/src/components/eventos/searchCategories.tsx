@@ -19,7 +19,7 @@ function Page() {
 
     // Obtenemos los eventos mediante el hook
 
-    const { data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/by_category?category=' + query)
+    const { data: eventos, loading, error } = useFetchEvents('eventos/by_category?category=' + query)
 
     console.log("Eventos:", eventos[0]);
 
