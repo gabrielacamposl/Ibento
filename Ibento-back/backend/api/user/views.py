@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 import traceback
 # Utils Django
 from django.utils import timezone
@@ -245,54 +247,50 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
     usuario = request.user
     respuestas = request.data.get("respuestas", [])
-
     preferencias = []
 
-    for r in respuestas:
-        categoria_id = r.get("_id")
-        respuesta = r.get("respuesta")
+    try:
+        for r in respuestas:
+            categoria_id = r.get("_id")
+            respuesta = r.get("respuesta")
 
-        try:
             categoria = CategoriasPerfil.objects.get(_id=categoria_id)
-        except CategoriasPerfil.DoesNotExist:
-            continue  
 
-        # Validación: si multi_option es False, la respuesta debe ser una sola
-        if not categoria.multi_option and isinstance(respuesta, list):
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if not categoria.multi_option and isinstance(respuesta, list):
+                raise ValidationError(
+                    f"La pregunta '{categoria.question}' no permite múltiples opciones."
+                )
 
-        # Validación de respuesta vacía en campos obligatorios
-        if (respuesta is None or respuesta == "" or respuesta == []) and not categoria.optional:
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' es obligatoria."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if not respuesta and not categoria.optional:
+                raise ValidationError(
+                    f"La pregunta '{categoria.question}' es obligatoria."
+                )
 
-        preferencias.append({
-            "_id": categoria._id,
-            "pregunta": categoria.question,
-            "respuesta": respuesta
-        })
+            preferencias.append({
+                "_id": categoria._id,
+                "pregunta": categoria.question,
+                "respuesta": respuesta
+            })
 
-    # Guardamos en el campo preferencias_generales del usuario
-    usuario.preferencias_generales = preferencias
-    usuario.save()
+        usuario.preferencias_generales = preferencias
+        usuario.save()
 
-    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+        return Response({"message": "Preferencias guardadas correctamente."})
+
+    except ValidationError as ve:
+        print("❌ VALIDATION ERROR:", ve)
+        return Response({"error": str(ve)}, status=400)
+
+    except Exception as e:
+        print("❌ EXCEPCIÓN NO CONTROLADA:")
+        traceback.print_exc()
+        return Response({"error": "Error interno del servidor", "detalle": str(e)}, status=500)
+
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
