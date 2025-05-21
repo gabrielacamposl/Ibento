@@ -493,12 +493,12 @@ const Verificar = () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                        <Button className={buttonStyle} onClick={setActiveIndex(1)}>
                             Siguiente
                         </Button>
 
                     ) : activeIndex === 1 ? (
-                        <Button className={buttonStyle} onClick={handleSavePreferences}>
+                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
                             Guardar Preferencias
                         </Button>
                     ) : activeIndex === 2 ? (
