@@ -254,7 +254,6 @@ def guardar_respuestas_perfil(request):
         data = request.data
         respuestas = data.get("respuestas", [])
 
-        # Validación
         if not isinstance(respuestas, list):
             return Response({
                 "error": "El campo 'respuestas' debe ser una lista."
@@ -266,8 +265,8 @@ def guardar_respuestas_perfil(request):
             _id = item.get("_id")
             respuesta = item.get("respuesta")
 
-            if _id is None or respuesta is None:
-                continue  # Ignorar entradas incompletas
+            if not _id or respuesta is None:
+                continue
 
             try:
                 categoria = CategoriasPerfil.objects.get(_id=_id)
@@ -282,11 +281,16 @@ def guardar_respuestas_perfil(request):
 
         print("📦 Preferencias finales a guardar:")
         print(preferencias_finales)
+
         usuario = request.user
 
-        # Asegurar que nunca se guarde None, que rompe djongo
-        usuario.preferencias_generales = preferencias_finales or []
+        # 🔐 Validación extra por Djongo para evitar error "Value: None must be of type dict/list"
+        if preferencias_finales is None or not isinstance(preferencias_finales, list):
+            preferencias_finales = []
+
+        usuario.preferencias_generales = preferencias_finales
         usuario.save()
+
         return Response({"mensaje": "Preferencias guardadas correctamente."}, status=200)
 
     except Exception as e:
@@ -296,9 +300,6 @@ def guardar_respuestas_perfil(request):
             "error": "Error interno del servidor",
             "detalle": str(e)
         }, status=500)
-
-
-
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
