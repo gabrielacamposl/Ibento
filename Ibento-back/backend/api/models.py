@@ -52,7 +52,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     # Campos para la creación del perfil de acompañantes
     profile_pic = models.JSONField(default=list, null=True, blank=True)
-    preferencias_generales = models.JSONField(default=list, null=True, blank=True)
+    preferencias_generales = models.JSONField(default=list, blank=True)
     birthday = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=[('F', 'Femenino'), ('M', 'Masculino'), ('O', 'Otro')])
     description = models.TextField(null=True, blank=True)
