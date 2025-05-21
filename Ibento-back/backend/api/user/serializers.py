@@ -117,7 +117,7 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
         fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
         
 # ----- Respuestas para el perfil (Selección de opciones)   
-f
+
 class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
     respuesta = serializers.JSONField()
