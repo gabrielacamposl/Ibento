@@ -47,8 +47,8 @@ const Login = () => {
       // Opcionalmente, guarda más datos del usuario
       localStorage.setItem("user", JSON.stringify({
         id: res.data.id,
-        //email: res.data.email,
-        //nombre: res.data.nombre,
+        email: res.data.email,
+        nombre: res.data.nombre,
       }));
       window.location.href = '/ibento/eventos';
     } catch (err) {
