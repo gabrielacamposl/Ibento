@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
@@ -14,6 +14,31 @@ const EditarPerfil = () => {
         interests: ['Música', 'Moda', 'Actuación', 'Viajes', 'Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
         
     });
+    const [userPerfil, setUserPerfil] = useState({ profile_pic: [] })
+
+    useEffect(() => {
+        const Perfil = async () => {
+            try {
+                const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
+                const response = await api.get('usuarios/info_to_edit/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+    
+                if (response.status === 200) {
+                    setUserPerfil(response.data);
+                    
+                    console.log("Perfil obtenido:", response.data);
+                } else {
+                    console.error("Error al obtener perfil");
+                }
+            } catch (error) {
+                console.error("Error al obtener perfil:", error);
+            }
+        };
+        Perfil();
+    }, []);
 
    
     const handleImageChange = (e, index) => {
@@ -52,13 +77,22 @@ const EditarPerfil = () => {
                 
                 <div className="flex justify-center items-center m-2 space-x-4">
                     <div className="relative">
-                        <img src={user.pictures[0]} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={user.name} />
+                        <img src={userPerfil.profile_pic[0]} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={userPerfil.nombre} />
                     </div>
                    
                 </div>
 
-                <div className="text-black w-full">
-                    <h1 className="text-2xl font-semibold">{user.name}</h1>
+                <div className="text-black w-full -2xl">
+                    <div className='flex'>
+                    <div className='flex'>
+                    <h1 className=" font-semibold mr-2">Nombre: </h1>
+                    <textarea className=" border border-gray-200 rounded-lg  border rounded" defaultValue={userPerfil.nombre}></textarea>
+                    </div>
+                    <div className='flex'>
+                    <h1 className=" font-semibold mr-2">Apellido:</h1>
+                    <textarea className=" border border-gray-200 rounded-lg   border rounded" defaultValue={userPerfil.apellido}></textarea>
+                    </div>
+                    </div>
                     <div className='flex space-x-2'>
                         {user.genero === 'H' ? (
                             <i className="pi pi-mars mt-1" style={{ color: 'slateblue' }}></i>
@@ -77,14 +111,14 @@ const EditarPerfil = () => {
                 
                 <div className=" p-4 w-full overflow-x-auto min-h-screen">
                 <React.Fragment>
-                        <h2 className="">Fotos {user.pictures.length}/6</h2>
+                        <h2 className="">Fotos {userPerfil.profile_pic.length}/6</h2>
                         <h2 className=" mb-2 text-lg font-semibold">Mis fotografías</h2>
                         <div className="flex justify-center items-center gap-2 flex-wrap">
                             {Array.from({ length: 6 }).map((_, index) => (
                                 <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35   divBorder flex items-center justify-center">
-                                    {user.pictures[index] ? (
+                                    {userPerfil.profile_pic[index] ? (
                                         <>
-                                            <img src={user.pictures[index]} className="w-full h-full object-cover m" alt={user.name} />
+                                            <img src={userPerfil.profile_pic[index]} className="w-full h-full object-cover m" alt={user.name} />
                                             <button onClick={() => handleImageDelete(index)} className="w-7 h-7 sm:w-7 sm:h-7 md:w-7 md:h-7 Morado absolute top-0 right-0 text-white p-2 rounded-full btn-custom">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -116,7 +150,7 @@ const EditarPerfil = () => {
                             ))}
                         </div>
                         <h2 className="mt-5 text-lg font-semibold">Sobre mí</h2>
-                    <textarea className=" border border-gray-200 rounded-lg w-full h-30 p-2 border rounded" defaultValue={user.bio}></textarea>
+                    <textarea className=" border border-gray-200 rounded-lg w-full h-30 p-2 border rounded" defaultValue={userPerfil.descripcion}></textarea>
                    
                         <div className='mt-5'>
                             <h2 className="text-lg font-semibold">Mis intereses</h2>
