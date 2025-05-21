@@ -117,9 +117,49 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
         fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
         
 # ----- Respuestas para el perfil (Selección de opciones)   
+f
 class RespuestaPerfilSerializer(serializers.Serializer):
     categoria_id = serializers.CharField()
     respuesta = serializers.JSONField()
+
+    def validate(self, data):
+        categoria_id = data['categoria_id']
+        respuesta = data['respuesta']
+
+        try:
+            categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+        except CategoriasPerfil.DoesNotExist:
+            raise serializers.ValidationError(f"Categoría con id {categoria_id} no encontrada.")
+
+        # Parsear respuestas válidas
+        try:
+            opciones_validas = categoria.answers
+            if isinstance(opciones_validas, str):
+                import ast
+                opciones_validas = ast.literal_eval(opciones_validas)
+        except Exception:
+            opciones_validas = categoria.answers or []
+
+        if respuesta in [None, "", [], {}]:
+            if not categoria.optional:
+                raise serializers.ValidationError(f"La pregunta '{categoria.question}' es obligatoria.")
+            else:
+                # Si es opcional y no hay respuesta, permitimos vacío y retornamos
+                return data
+
+        if categoria.multi_option:
+            if not isinstance(respuesta, list):
+                raise serializers.ValidationError(f"La pregunta '{categoria.question}' requiere una lista de respuestas.")
+            for r in respuesta:
+                if r not in opciones_validas:
+                    raise serializers.ValidationError(f"Respuesta '{r}' no válida para la pregunta '{categoria.question}'.")
+        else:
+            if not isinstance(respuesta, str):
+                raise serializers.ValidationError(f"La pregunta '{categoria.question}' requiere una respuesta única (string).")
+            if respuesta not in opciones_validas:
+                raise serializers.ValidationError(f"Respuesta '{respuesta}' no válida para la pregunta '{categoria.question}'.")
+
+        return data 
 
 #---------- Comparación de rostros segundo filtro
 class ValidacionRostro(serializers.ModelSerializer):

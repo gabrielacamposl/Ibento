@@ -46,15 +46,12 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           CategoriaPerfilSerializer,
-                          ValidacionRostro,
+                          RespuestaPerfilSerializer,
                           # Serializers para creación de matches
                           MatchSerializer,
-                          EventoMatchSerializer,
                           SugerenciaSerializer,
-                          IntereccionSerializer,
                           # Serializer para los chats de los matches
                           MensajesSerializer,
-                          ConversacionSerializer,
                           # Seriallizer de Eventos
                           EventoSerializer,
                           EventoSerializerLimitado,
@@ -247,59 +244,40 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
-@api_view(["POST"])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    try:
-        data = request.data
-        respuestas = data.get("respuestas", [])
+    usuario = request.user
+    respuestas = request.data
 
-        if not isinstance(respuestas, list):
-            return Response({
-                "error": "El campo 'respuestas' debe ser una lista."
-            }, status=400)
+    if not isinstance(respuestas, list):
+        return Response({"error": "Se debe enviar una lista de respuestas."}, status=status.HTTP_400_BAD_REQUEST)
 
-        preferencias_finales = []
+    serializer = RespuestaPerfilSerializer(data=respuestas, many=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        for item in respuestas:
-            _id = item.get("_id")
-            respuesta = item.get("respuesta")
+    preferencias_actuales = usuario.preferencias_generales or []
+    preferencias_dict = {pref['categoria_id']: pref for pref in preferencias_actuales if 'categoria_id' in pref}
 
-            if not _id or respuesta is None:
-                continue
+    for item in serializer.validated_data:
+        categoria_id = item['categoria_id']
+        respuesta = item['respuesta']
 
-            try:
-                categoria = CategoriasPerfil.objects.get(_id=_id)
-                preferencias_finales.append({
-                    "_id": _id,
-                    "pregunta": categoria.question,
-                    "respuesta": respuesta
-                })
-            except CategoriasPerfil.DoesNotExist:
-                print(f"⚠️ Categoría con _id={_id} no encontrada. Se ignora.")
-                continue
+        if respuesta in [None, "", [], {}]:
+            # Si es opcional y vacía, eliminar respuesta previa si existe
+            preferencias_dict.pop(categoria_id, None)
+        else:
+            preferencias_dict[categoria_id] = {
+                "categoria_id": categoria_id,
+                "respuesta": respuesta
+            }
 
-        print("📦 Preferencias finales a guardar:")
-        print(preferencias_finales)
+    usuario.preferencias_generales = list(preferencias_dict.values())
+    usuario.save()
 
-        usuario = request.user
+    return Response({"message": "Respuestas guardadas correctamente."}, status=status.HTTP_200_OK)
 
-        # 🔐 Validación extra por Djongo para evitar error "Value: None must be of type dict/list"
-        if preferencias_finales is None or not isinstance(preferencias_finales, list):
-            preferencias_finales = []
-
-        usuario.preferencias_generales = preferencias_finales
-        usuario.save()
-
-        return Response({"mensaje": "Preferencias guardadas correctamente."}, status=200)
-
-    except Exception as e:
-        print("❌ EXCEPCIÓN NO CONTROLADA:")
-        traceback.print_exc()
-        return Response({
-            "error": "Error interno del servidor",
-            "detalle": str(e)
-        }, status=500)
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
