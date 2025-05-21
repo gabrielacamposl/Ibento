@@ -237,7 +237,6 @@ def password_reset_resend(request):
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 # ------- Seleccionar intereses para el perfil
 # Mostrar Intereses
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_categorias_perfil(request):
@@ -255,7 +254,7 @@ def guardar_respuestas_perfil(request):
     preferencias = []
 
     for r in respuestas:
-        categoria_id = r.get("categoria_id")
+        categoria_id = r.get("_id")
         respuesta = r.get("respuesta")
 
         try:
@@ -278,7 +277,7 @@ def guardar_respuestas_perfil(request):
             )
 
         preferencias.append({
-            "categoria_id": categoria._id,
+            "_id": categoria._id,
             "pregunta": categoria.question,
             "respuesta": respuesta
         })
