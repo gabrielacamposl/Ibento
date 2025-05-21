@@ -247,59 +247,55 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    usuario = request.user
-    respuestas = request.data.get("respuestas", [])
+    try:
+        usuario = request.user
+        respuestas = request.data.get("respuestas", [])
 
-    preferencias = []
-
-    for r in respuestas:
-        categoria_id = r.get("_id")
-        respuesta = r.get("respuesta")
-
-        try:
-            categoria = CategoriasPerfil.objects.get(_id=categoria_id)
-        except CategoriasPerfil.DoesNotExist:
-            # Puedes decidir si ignorar o devolver error
-            continue  # ignoramos si no existe la categoría
-
-        # Validación: si multi_option es False, la respuesta debe ser una sola (no lista)
-        if not categoria.multi_option and isinstance(respuesta, list):
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Validación: si la pregunta NO es opcional y no hay respuesta -> error
-        if (respuesta is None or respuesta == "" or respuesta == [] ) and not categoria.optional:
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' es obligatoria."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Solo agregamos respuestas válidas o vacías para opcionales
-        preferencias.append({
-            "_id": categoria._id,
-            "pregunta": categoria.question,
-            "respuesta": respuesta
-        })
-
-    # Validar que preferencias sea una lista antes de guardar
-    if not isinstance(preferencias, list):
         preferencias = []
 
-    usuario.preferencias_generales = preferencias
-    usuario.save()
+        for r in respuestas:
+            categoria_id = r.get("_id")
+            respuesta = r.get("respuesta")
 
-    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+            try:
+                categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+            except CategoriasPerfil.DoesNotExist:
+                # Ignorar categorías no existentes
+                continue
+
+            # Validación: si multi_option es False, la respuesta debe ser una sola (no lista)
+            if not categoria.multi_option and isinstance(respuesta, list):
+                return Response(
+                    {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validación: pregunta obligatoria sin respuesta
+            if (respuesta is None or respuesta == "" or respuesta == []) and not categoria.optional:
+                return Response(
+                    {"error": f"La pregunta '{categoria.question}' es obligatoria."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            preferencias.append({
+                "_id": categoria._id,
+                "pregunta": categoria.question,
+                "respuesta": respuesta
+            })
+
+        usuario.preferencias_generales = preferencias
+        usuario.save()
+
+        return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print("❌ EXCEPCIÓN NO CONTROLADA:")
+        traceback.print_exc()
+        return Response({"error": "Error interno del servidor", "detalle": str(e)}, status=500)
+
 
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
