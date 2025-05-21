@@ -215,7 +215,7 @@ const Verificar = () => {
         formData.append("selfie", base64ToFile(user.facePhoto, "selfie.jpg"));
 
         try {
-            const response = await api.post("api/validar-ine/", formData, {
+            const response = await api.post("validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
@@ -486,19 +486,19 @@ const Verificar = () => {
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
                     <Button className={buttonStyle}
-                        onClick={() => setActiveIndex(2)}
+                        onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
                         disabled={activeIndex === 0}
                     >
                         Anterior
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
                             Siguiente
                         </Button>
 
                     ) : activeIndex === 1 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
+                        <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias
                         </Button>
                     ) : activeIndex === 2 ? (
