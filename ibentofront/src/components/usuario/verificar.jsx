@@ -82,8 +82,8 @@ const Verificar = () => {
                 alert("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
-            if (picture.size > 5 * 1024 * 1024) { // 5MB
-                alert("Cada imagen debe pesar menos de 5MB.");
+            if (picture.size > 6 * 1024 * 1024) { // 5MB
+                alert("Cada imagen debe pesar menos de 6MB.");
                 return;
             }
         }
@@ -92,7 +92,6 @@ const Verificar = () => {
         user.pictures.forEach((picture) => {
             formData.append("pictures", picture);
         });
-        setIsUploading(true);
 
         try {
             const response = await api.post("perfil/subir-fotos/", formData, {
@@ -109,7 +108,6 @@ const Verificar = () => {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         } finally {
-            setIsUploading(false);
         }
 
     };
@@ -145,7 +143,7 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("api/guardar-respuestas/", { respuestas });
+            await api.post("intereses-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
@@ -217,7 +215,7 @@ const Verificar = () => {
         formData.append("selfie", base64ToFile(user.facePhoto, "selfie.jpg"));
 
         try {
-            const response = await api.post("api/validar-ine/", formData, {
+            const response = await api.post("validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
@@ -488,14 +486,14 @@ const Verificar = () => {
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
                     <Button className={buttonStyle}
-                        onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                        onClick={() => setActiveIndex(2)}
                         disabled={activeIndex === 0}
                     >
                         Anterior
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                        <Button className={buttonStyle} onClick={setActiveIndex(1)}>
                             Siguiente
                         </Button>
 
