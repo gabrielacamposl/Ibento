@@ -247,67 +247,47 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
-import traceback
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def guardar_respuestas_perfil(request):
+def guardar_respuestas(request):
     try:
-        usuario = request.user
-        respuestas = request.data.get("respuestas", [])
+        data = request.data
+        respuestas = data.get("respuestas", [])
 
+        # Validación
         if not isinstance(respuestas, list):
-            return Response({"error": "El formato de 'respuestas' debe ser una lista."}, status=400)
+            return Response({
+                "error": "El campo 'respuestas' debe ser una lista."
+            }, status=400)
 
-        preferencias = []
+        preferencias_finales = []
 
-        for r in respuestas:
-            if not isinstance(r, dict):
-                continue  # ignorar malformados
+        for item in respuestas:
+            _id = item.get("_id")
+            respuesta = item.get("respuesta")
 
-            categoria_id = r.get("_id")
-            respuesta = r.get("respuesta")
-
-            if not categoria_id:
-                continue
+            if _id is None or respuesta is None:
+                continue  # Ignorar entradas incompletas
 
             try:
-                categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+                categoria = CategoriasPerfil.objects.get(_id=_id)
+                preferencias_finales.append({
+                    "_id": _id,
+                    "pregunta": categoria.question,
+                    "respuesta": respuesta
+                })
             except CategoriasPerfil.DoesNotExist:
+                print(f"⚠️ Categoría con _id={_id} no encontrada. Se ignora.")
                 continue
-
-            if not categoria.multi_option and isinstance(respuesta, list):
-                return Response(
-                    {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
-                    status=400
-                )
-
-            if (respuesta is None or respuesta == "" or respuesta == []) and not categoria.optional:
-                return Response(
-                    {"error": f"La pregunta '{categoria.question}' es obligatoria."},
-                    status=400
-                )
-
-            if respuesta is None:
-                continue
-
-            preferencias.append({
-                "_id": categoria._id,
-                "pregunta": categoria.question,
-                "respuesta": respuesta
-            })
 
         print("📦 Preferencias finales a guardar:")
-        print(preferencias)  # <- Esto lo verás en Render
+        print(preferencias_finales)
+        usuario = request.user
 
-        usuario.preferencias_generales = preferencias
+        # Asegurar que nunca se guarde None, que rompe djongo
+        usuario.preferencias_generales = preferencias_finales or []
         usuario.save()
-
-        return Response({"message": "Preferencias guardadas correctamente."}, status=200)
+        return Response({"mensaje": "Preferencias guardadas correctamente."}, status=200)
 
     except Exception as e:
         print("❌ EXCEPCIÓN NO CONTROLADA:")
@@ -316,6 +296,7 @@ def guardar_respuestas_perfil(request):
             "error": "Error interno del servidor",
             "detalle": str(e)
         }, status=500)
+
 
 
 
