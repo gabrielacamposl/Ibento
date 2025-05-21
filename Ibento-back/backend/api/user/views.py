@@ -247,6 +247,12 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
+import traceback
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
@@ -254,31 +260,40 @@ def guardar_respuestas_perfil(request):
         usuario = request.user
         respuestas = request.data.get("respuestas", [])
 
+        if not isinstance(respuestas, list):
+            return Response({"error": "El formato de 'respuestas' debe ser una lista."}, status=400)
+
         preferencias = []
 
         for r in respuestas:
+            if not isinstance(r, dict):
+                continue  # ignorar malformados
+
             categoria_id = r.get("_id")
             respuesta = r.get("respuesta")
+
+            if not categoria_id:
+                continue
 
             try:
                 categoria = CategoriasPerfil.objects.get(_id=categoria_id)
             except CategoriasPerfil.DoesNotExist:
-                # Ignorar categorías no existentes
                 continue
 
-            # Validación: si multi_option es False, la respuesta debe ser una sola (no lista)
             if not categoria.multi_option and isinstance(respuesta, list):
                 return Response(
                     {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=400
                 )
 
-            # Validación: pregunta obligatoria sin respuesta
             if (respuesta is None or respuesta == "" or respuesta == []) and not categoria.optional:
                 return Response(
                     {"error": f"La pregunta '{categoria.question}' es obligatoria."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=400
                 )
+
+            if respuesta is None:
+                continue
 
             preferencias.append({
                 "_id": categoria._id,
@@ -286,15 +301,21 @@ def guardar_respuestas_perfil(request):
                 "respuesta": respuesta
             })
 
+        print("📦 Preferencias finales a guardar:")
+        print(preferencias)  # <- Esto lo verás en Render
+
         usuario.preferencias_generales = preferencias
         usuario.save()
 
-        return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+        return Response({"message": "Preferencias guardadas correctamente."}, status=200)
 
     except Exception as e:
         print("❌ EXCEPCIÓN NO CONTROLADA:")
         traceback.print_exc()
-        return Response({"error": "Error interno del servidor", "detalle": str(e)}, status=500)
+        return Response({
+            "error": "Error interno del servidor",
+            "detalle": str(e)
+        }, status=500)
 
 
 
