@@ -486,7 +486,7 @@ const Verificar = () => {
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
                     <Button className={buttonStyle}
-                        onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                        onClick={() => setActiveIndex(2)}
                         disabled={activeIndex === 0}
                     >
                         Anterior
