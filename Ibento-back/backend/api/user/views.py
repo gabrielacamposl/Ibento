@@ -245,6 +245,12 @@ def get_categorias_perfil(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # Guardar respuestas del perfil
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
@@ -260,7 +266,7 @@ def guardar_respuestas_perfil(request):
         try:
             categoria = CategoriasPerfil.objects.get(_id=categoria_id)
         except CategoriasPerfil.DoesNotExist:
-            continue  # o devuelve error ?
+            continue  
 
         # Validación: si multi_option es False, la respuesta debe ser una sola
         if not categoria.multi_option and isinstance(respuesta, list):
@@ -269,8 +275,8 @@ def guardar_respuestas_perfil(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validación opcional: ¿es obligatoria u opcional?
-        if not respuesta and not categoria.optional:
+        # Validación de respuesta vacía en campos obligatorios
+        if (respuesta is None or respuesta == "" or respuesta == []) and not categoria.optional:
             return Response(
                 {"error": f"La pregunta '{categoria.question}' es obligatoria."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -282,13 +288,11 @@ def guardar_respuestas_perfil(request):
             "respuesta": respuesta
         })
 
-    # Guardamos en el campo preferencias_generales
+    # Guardamos en el campo preferencias_generales del usuario
     usuario.preferencias_generales = preferencias
     usuario.save()
 
     return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
-
-#----- Devolver las respuestas como arreglo
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
