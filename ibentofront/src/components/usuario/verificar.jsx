@@ -17,7 +17,6 @@ const Verificar = () => {
         facePhoto: null,
     });
 
-    const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -93,7 +92,6 @@ const Verificar = () => {
         user.pictures.forEach((picture) => {
             formData.append("pictures", picture);
         });
-        setIsUploading(true);
 
         try {
             const response = await api.post("perfil/subir-fotos/", formData, {
@@ -110,7 +108,6 @@ const Verificar = () => {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         } finally {
-            setIsUploading(false);
         }
 
     };
