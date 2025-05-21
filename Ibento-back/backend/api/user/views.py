@@ -23,7 +23,6 @@ import cloudinary.uploader
 
 #Recomendación de eventos
 from api.services.recommended_events import obtener_eventos_recomendados
-
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
@@ -63,6 +62,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           UsuarioSerializerParaEventos
                           )
 
+# Validación de rostros
+FASTAPI_URL = "https://faceserv-production.up.railway.app/verificar"
 
 # ----- Funcion de compatibilidad : provicional 
 def calcular_compatibilidad(pref_usuario, pref_otro):
@@ -403,17 +404,26 @@ def ine_validation_view(request):
             user.curp = curp
         user.save()
         
-        # rostro_valido, distancia, sugerencia = verificar_rostros(ine_front, selfie)
-        # if not rostro_valido:
-        #     return Response({
-        #         "error": "El rostro no coincide con el de la INE.",
-        #         "distancia": round(distancia, 4),
-        #         "sugerencia": sugerencia
-        #     }, status=status.HTTP_400_BAD_REQUEST)
+        files = {
+            "ine_image" : ine_front,
+            "camera_image" : selfie,
+        }
+        response = requests.post(FASTAPI_URL, files=files)
+        if response.status_code != 200:
+            error = response.json()
+            return Response({
+                "error": "El rostro no coincide con el de la INE.",
+                "distancia": error.get("distancia", "N/A"),
+                "sugerencia": error.get("sugerencia", "Revisa la imagen"),
+            }, status=status.HTTP_400_BAD_REQUEST)
             
-        # user : Usuario = request.user
-        # user.is_validated_camera = rostro_valido
-        # user.save()
+        result = response.json()
+        distancia = result.get("distancia")
+        sugerencia = result.get("sugerencia")
+        rostro_valido = result.get("rostro_valido", True)
+        
+        user.is_validated_camera = rostro_valido
+        user.save()
 
         return Response({
             "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
@@ -612,8 +622,6 @@ def obtener_matches(request):
     )
     serializer = MatchSerializer(matches, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
