@@ -269,7 +269,6 @@ def guardar_respuestas_perfil(request):
             except CategoriasPerfil.DoesNotExist:
                 continue
 
-            # Validación de respuestas
             opciones_validas = categoria.answers
             if isinstance(opciones_validas, str):
                 import ast
@@ -278,17 +277,27 @@ def guardar_respuestas_perfil(request):
                 except Exception:
                     opciones_validas = []
 
-            # Validación según multi_option
             if categoria.multi_option:
+                if respuesta is None:
+                    if not categoria.optional:
+                        return Response({'error': f'Respuesta requerida para {categoria_id}'}, status=400)
+                    respuesta = []  # Normaliza respuesta vacía
+
                 if not isinstance(respuesta, list):
-                    return Response({'error': f'Respuesta debe ser una lista para la categoría {categoria_id}'}, status=400)
+                    return Response({'error': f'Respuesta debe ser una lista para {categoria_id}'}, status=400)
                 for r in respuesta:
                     if r not in opciones_validas:
                         return Response({'error': f'Opción inválida: {r}'}, status=400)
+
             else:
+                if respuesta is None:
+                    if not categoria.optional:
+                        return Response({'error': f'Respuesta requerida para {categoria_id}'}, status=400)
+                    respuesta = ""  # Normaliza respuesta vacía
+
                 if not isinstance(respuesta, str):
-                    return Response({'error': f'Respuesta debe ser string para la categoría {categoria_id}'}, status=400)
-                if respuesta not in opciones_validas:
+                    return Response({'error': f'Respuesta debe ser string para {categoria_id}'}, status=400)
+                if respuesta not in opciones_validas and respuesta != "":
                     return Response({'error': f'Opción inválida: {respuesta}'}, status=400)
 
             respuestas_validas.append({
@@ -296,16 +305,17 @@ def guardar_respuestas_perfil(request):
                 'respuesta': respuesta
             })
 
-        # Guardamos en el campo preferencias_generales
         usuario.preferencias_generales = respuestas_validas
         usuario.save()
 
         return Response({'message': 'Respuestas guardadas correctamente'}, status=200)
-    
+
     except Exception as e:
         print("ERROR en guardar_respuestas_perfil:", e)
-        traceback.print_exc()  # 👈 Esto imprime el traceback completo en los logs de Render
+        import traceback
+        traceback.print_exc()
         return Response({'error': 'Ocurrió un error interno en el servidor'}, status=500)
+
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
