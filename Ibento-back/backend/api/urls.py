@@ -55,7 +55,7 @@ urlpatterns = [
     path('api/estado-validacion/', estado_validacion_view, name='estado-validacion'),
     # ---- Obtener intereses
     path('api/categorias-perfil/', get_categorias_perfil, name='categorias-perfil'),
-    path('perfil/respuestas/', guardar_respuestas_perfil, name='guardar_respuestas_perfil'),
+    path('api/intereses-respuestas/', guardar_respuestas_perfil, name='guardar_respuestas_perfil'),
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 

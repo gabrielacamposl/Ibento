@@ -46,8 +46,6 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           CategoriaPerfilSerializer,
-                          RespuestaPerfilSerializer,
-                          ListaRespuestasPerfilSerializer,
                           # Serializers para creación de matches
                           MatchSerializer,
                           SugerenciaSerializer,
@@ -244,7 +242,7 @@ def get_categorias_perfil(request):
     serializer = CategoriaPerfilSerializer(categorias, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-# Guardar respuestas del perfil
+#--- Intereses del usuario
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
@@ -305,7 +303,23 @@ def guardar_respuestas_perfil(request):
                 'respuesta': respuesta
             })
 
-        usuario.preferencias_generales = respuestas_validas
+        # 🛠️ Fix corregido - asegurar que nunca sea None
+        usuario.preferencias_generales = respuestas_validas or []
+        
+        # 🛠️ También asegurar que otros campos JSONField no sean None
+        if usuario.preferencias_evento is None:
+            usuario.preferencias_evento = []
+        if usuario.save_events is None:
+            usuario.save_events = []
+        if usuario.favourite_events is None:
+            usuario.favourite_events = []
+        if usuario.eventos_buscar_match is None:
+            usuario.eventos_buscar_match = []
+        if usuario.profile_pic is None:
+            usuario.profile_pic = []
+        if usuario.tokens_fcm is None:
+            usuario.tokens_fcm = []
+            
         usuario.save()
 
         return Response({'message': 'Respuestas guardadas correctamente'}, status=200)
