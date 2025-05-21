@@ -18,7 +18,7 @@ import json
 import random
 from datetime import datetime, timedelta, date
 from math import radians, sin, cos, sqrt, atan2
-# Cloudinary
+import requests
 import cloudinary.uploader
 
 #Recomendación de eventos
