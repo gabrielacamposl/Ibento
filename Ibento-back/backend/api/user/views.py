@@ -1626,5 +1626,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             )
     
         usuario.eventos_buscar_match.remove(id_event)
+        usuario.save(update_fields=['eventos_buscar_match'])
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
