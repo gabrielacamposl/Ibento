@@ -1,10 +1,17 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+# Views para cambio restablecer contraseña
 from api.user.views import password_reset_request, password_reset_validate, password_reset_resend, password_reset_change
+# Views para el flujo de matches
 from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_like, obtener_matches, eliminar_match, cambiar_modo_busqueda
+# Views para chats
 from api.user.views import obtener_mensajes, mis_conversaciones, enviar_mensaje
+# views para validar user
 from api.user.views import estado_validacion_view, ine_validation_view
+# Views par el FCM
+from api.user.views import save_fcm_token,notification_status, test_notification,remove_fcm_token
+
 from api.user.views import (crear_usuario, 
                             EventoViewSet,
                             UsuarioViewSet,
@@ -89,17 +96,22 @@ urlpatterns = [
     path('api/mensajes/<str:conversacion_id>/', obtener_mensajes, name='obtener_mensajes'),
     path('api/usuarios/<str:conversacion_id>/conversacion/', obtener_usuarios_conversacion, name='obtener_usuarios_conversacion'),
     path('api/usuarios/<str:pk>/info/', obtener_usuario_info, name='obtener_usuario_info'),
-    #Otras
+    # Eventos
     path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
 
 
     #Acciones User
     path('api/eventos/<str:pk>/like/',like_event,name='DarLikeEvento'),
-
     path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
-
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
     path('api/eventos/<str:pk>/dislike/', eliminar_evento_favorito, name='QuitarLikeEvento'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
+    
+    # Notificaciones URLs para notificaciones FCM
+    path('api/save-fcm-token/', save_fcm_token, name='save_fcm_token'),
+    path('api/remove-fcm-token/', remove_fcm_token, name='remove_fcm_token'),
+    path('api/notification-status/', notification_status, name='notification_status'),
+    path('api/test-notification/', test_notification, name='test_notification'),  # Solo para desarrollo
+    
   
 ]

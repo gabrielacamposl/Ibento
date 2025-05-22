@@ -6,17 +6,15 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-API = os.getenv("API_KEY_KIBAN")
+API = ""
 
 # Convertir imagen a bytes
 def image_to_base64(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode('utf-8')
 
-ine_t_b64 = image_to_base64("D:/Proyectos/Ibento/modelos-algoritmos/INEValidation/dataset/memo_t.jpeg")
-ine_f_b64 = image_to_base64("D:/Proyectos/Ibento/modelos-algoritmos/INEValidation/dataset/memo_f.jpeg")
-print("INE_T Base64:", ine_t_b64)
-print("INE_F Base64:", ine_f_b64)
+ine_t_b64 = image_to_base64("C:/Users/Soporte TI/Downloads/Ibento/modelos-algoritmos/INEValidation/dataset/memo_f.jpeg")
+ine_f_b64 = image_to_base64("C:/Users/Soporte TI/Downloads/Ibento/modelos-algoritmos/INEValidation/dataset/memo_t.jpeg")
 
 # --------- API de extracción de datos de la INE -------------------
 url = "https://link.kiban.com/api/v2/ine/data_extraction/"
@@ -43,10 +41,15 @@ response = requests.post(url, json=payload, headers=headers)
 
 print(response.text) 
 
-data = response.json()
-cic = data["response"]["cic"]
-id_ciudadano = data["response"]["identificadorCiudadano"]
-
+if response.status_code != 200:
+    raise Exception("Error al extraer datos de la INE.")
+    
+data = response.json().get("response", {})
+cic = data.get("cic")
+id_ciudadano = data.get("identificadorCiudadano")
+metadata = data.get("metadata", {})
+curp = metadata.get("curp")
+    
 print("cic:", cic, "idciudadano:", id_ciudadano)
     # --------- API de validación de la INE -------------------
 
@@ -68,6 +71,7 @@ response_validation = requests.post(url_validation, json=payload_validation, hea
 print("response_validation:", response_validation)
 
 userinfo = response_validation.json()
+print(response_validation)
 status = userinfo["response"]["status"]
 print(status)
 is_valid = False
