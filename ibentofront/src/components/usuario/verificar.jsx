@@ -133,7 +133,7 @@ const Verificar = () => {
                 const respuesta = selectedAnswers[item._id] || [];
                 
                 // Si es multi_option, enviamos el array completo
-                // Si no es multi_option, enviamos solo el primer elemento (o array vacío)
+                // Si no es multi_option, enviamos solo el primer elemento (o string vacío si no hay respuesta)
                 return {
                     categoria_id: item._id,
                     respuesta: item.multi_option ? respuesta : (respuesta.length > 0 ? respuesta[0] : "")
@@ -151,14 +151,23 @@ const Verificar = () => {
                 return;
             }
 
-            console.log("Enviando respuestas:", { respuestas }); // Para debug
+            console.log("=== DEBUG RESPUESTAS ===");
+            console.log("selectedAnswers:", selectedAnswers);
+            console.log("itemsAboutMe:", itemsAboutMe);
+            console.log("respuestas a enviar:", respuestas);
+            console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
             
-            await api.post("intereses-respuestas/", { respuestas });
+            // Intentar con el endpoint que aparece en el error
+            const response = await api.post("intereses-respuestas/", { respuestas });
+            console.log("Respuesta del servidor:", response.data);
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
-            console.error("Error al guardar preferencias", err);
-            alert("Hubo un error al guardar tus preferencias.");
+            console.error("Error completo:", err);
+            console.error("Error response:", err.response?.data);
+            console.error("Error status:", err.response?.status);
+            console.error("Error message:", err.message);
+            alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
         }
     };
     
@@ -201,8 +210,13 @@ const Verificar = () => {
         return new File([u8arr], filename, { type: mime });
     };
 
-    // ------ Conexión con el backend ------
+ // ------ Conexión con el backend ------
     const handleIneValidation = async () => {
+        console.log("=== DEBUG VALIDACIÓN INE ===");
+        console.log("user.ine[0]:", user.ine[0]);
+        console.log("user.ine[1]:", user.ine[1]);
+        console.log("user.facePhoto:", user.facePhoto ? "Foto capturada" : "No hay foto");
+        
         if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
             return;
@@ -215,29 +229,52 @@ const Verificar = () => {
         setLoading(true);
         setMessage('');
 
-        const formData = new FormData();
-        formData.append("ine_front", user.ine[0]);
-        formData.append("ine_back", user.ine[1]);
-        formData.append("selfie", base64ToFile(user.facePhoto, "selfie.jpg"));
-
         try {
+            // Verificar que base64ToFile funcione correctamente
+            const selfieFile = base64ToFile(user.facePhoto, "selfie.jpg");
+            console.log("Selfie file creado:", selfieFile);
+            console.log("Selfie file size:", selfieFile.size);
+            console.log("Selfie file type:", selfieFile.type);
+
+            const formData = new FormData();
+            formData.append("ine_front", user.ine[0]);
+            formData.append("ine_back", user.ine[1]);
+            formData.append("selfie", selfieFile);
+
+            console.log("FormData creado:");
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ', pair[1]);
+            }
+
             const response = await api.post("validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
             });
 
+            console.log("Respuesta del servidor:", response.data);
             const data = response.data;
 
             if (data.mensaje_ine && data.mensaje_rostro) {
                 setMessage('Tu identidad ha sido validada exitosamente.');
-                setActiveIndex(3); // ✅ Corregido: era 4, ahora es 3
+                setActiveIndex(3);
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
-            console.error('Error al validar la identidad:', error);
-            setMessage('Hubo un error al validar tu identidad. Intenta de nuevo.');
+            console.error('=== ERROR COMPLETO ===');
+            console.error('Error:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            console.error('Error headers:', error.response?.headers);
+            
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.message || 
+                                error.message || 
+                                'Error desconocido';
+            
+            setMessage(`Error: ${errorMessage}`);
+            alert(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
         } finally {
             setLoading(false);
         }
@@ -509,7 +546,7 @@ const Verificar = () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
                             Subir Fotos
                         </Button>
                     ) : activeIndex === 1 ? (

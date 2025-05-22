@@ -118,11 +118,18 @@ const verPerfil = () => {
     //BLOQUEAR USUARIO
     const handleBlockUser = async () => {
         try {
-            const response = await api.post(`matches/${userId}/bloquear`, {
-                method: 'POST',
-            });
-            if(response.status === 200){
+            const token = localStorage.getItem('access');
+            const response = await api.post(`bloquear/`,
+                { usuario_bloqueado: userId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            if (response.status === 200) {
                 console.log('Usuario bloqueado');
+                console.log(response);
             }
         } catch (error) {
             console.error(error);
