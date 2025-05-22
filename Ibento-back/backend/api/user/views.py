@@ -30,7 +30,7 @@ from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio de INES
-from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
+from api.services.ine_validation import (process_ine_image_secure, ocr_ine, validate_ine)
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
@@ -447,10 +447,8 @@ def ine_validation_view(request):
     try: 
         print("=== INICIANDO VALIDACIÓN DE INE ===")
         user: Usuario = request.user
-        print(f"Usuario: {user.username}")
-        
-        # Importar función de procesamiento
-        from .utils import process_ine_image_secure, ocr_ine, validate_ine
+        print(f"Usuario: {user.nombre}")
+
         
         # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)
         print("Procesando imagen frontal...")
