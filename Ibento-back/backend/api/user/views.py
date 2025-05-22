@@ -431,71 +431,152 @@ def ine_validation_view(request):
     selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
-        return Response({"error": "Ambas imágenes de la INE son requeridas."}, status=status.HTTP_400_BAD_REQUEST)
-    # Subir imágenes a Cloudinary
+        return Response({
+            "error": "Ambas imágenes de la INE son requeridas.",
+            "codigo": "MISSING_IMAGES"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not selfie:
+        return Response({
+            "error": "La foto de selfie es requerida.",
+            "codigo": "MISSING_SELFIE"
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     try: 
-        #Subir imágenes a Cloudinary de manera temporal
-        front_url, front_id = upload_image_to_cloudinary(ine_front, name="front_ine")
-        back_url, back_id = upload_image_to_cloudinary(ine_back, name="ine_back")
+        print("=== INICIANDO VALIDACIÓN DE INE ===")
+        user: Usuario = request.user
+        print(f"Usuario: {user.username}")
         
-        # Convertir URLs a base64
-        front_b64 = url_to_base64(front_url)
-        back_b64 = url_to_base64(back_url)
+        # Importar función de procesamiento
+        from .utils import process_ine_image_secure, ocr_ine, validate_ine
         
-        # Extraer datos de la INE
-        cic, id_ciudadano, curp= ocr_ine(front_b64, back_b64)
+        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)
+        print("Procesando imagen frontal...")
+        front_b64 = process_ine_image_secure(ine_front)
+        
+        print("Procesando imagen trasera...")
+        back_b64 = process_ine_image_secure(ine_back)
+        
+        print("Imágenes procesadas exitosamente")
+        
+        # EXTRAER DATOS CON OCR
+        print("=== EXTRAYENDO DATOS DE LA INE ===")
+        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        
+        # Verificar que se extrajeron los datos esenciales
         if not cic or not id_ciudadano:
-            return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
+            print("OCR falló - no se extrajeron datos")
+            return Response({
+                "error": "No se pudieron extraer los datos de la INE.",
+                "sugerencia": "Asegúrate de que las imágenes estén bien iluminadas, sin reflejos y que el texto sea completamente legible. Intenta tomar las fotos en un lugar con buena luz natural.",
+                "codigo": "OCR_FAILED"
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validar la INE
+        print(f"Datos extraídos - CIC: {cic}, ID: {id_ciudadano}")
+        
+        # VALIDAR INE EN PADRÓN ELECTORAL
+        print("=== VALIDANDO INE EN PADRÓN ===")
         is_valid = validate_ine(cic, id_ciudadano)
+        
         if not is_valid:
-            return Response({"error": "La INE no es válida."}, status=status.HTTP_400_BAD_REQUEST)
-        # Guardar datos en el usuario
-        user : Usuario = request.user
-        user.is_ine_validated = is_valid
+            print("INE no válida en padrón electoral")
+            return Response({
+                "error": "La INE no es válida según el padrón electoral mexicano.",
+                "sugerencia": "Verifica que tu INE esté vigente y que las imágenes sean claras.",
+                "codigo": "INE_INVALID"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        print("INE válida en padrón electoral")
+        
+        # GUARDAR DATOS DE INE EN USUARIO
+        user.is_ine_validated = True
         if curp:
             user.curp = curp
         user.save()
         
-        files = {
-            "ine_image" : ine_front,
-            "camera_image" : selfie,
-        }
-        response = requests.post(FASTAPI_URL, files=files)
-        if response.status_code != 200:
-            error = response.json()
-            return Response({
-                "error": "El rostro no coincide con el de la INE.",
-                "distancia": error.get("distancia", "N/A"),
-                "sugerencia": error.get("sugerencia", "Revisa la imagen"),
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-        result = response.json()
-        distancia = result.get("distancia")
-        sugerencia = result.get("sugerencia")
-        rostro_valido = result.get("rostro_valido", True)
+        print("=== VALIDANDO ROSTRO CON SELFIE ===")
         
-        user.is_validated_camera = rostro_valido
-        user.save()
-
+        # VALIDAR ROSTRO CON FASTAPI
+        files = {
+            "ine_image": ine_front,
+            "camera_image": selfie,
+        }
+        
+        try:
+            response = requests.post(FASTAPI_URL, files=files, timeout=60)
+            
+            if response.status_code != 200:
+                error_data = response.json() if response.content else {}
+                print(f"Validación de rostro falló: {error_data}")
+                
+                return Response({
+                    "error": "Tu rostro no coincide con la foto de la INE.",
+                    "distancia": error_data.get("distancia", "N/A"),
+                    "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
+                    "codigo": "FACE_NO_MATCH"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            result = response.json()
+            rostro_valido = result.get("rostro_valido", False)
+            
+            if not rostro_valido:
+                return Response({
+                    "error": "La verificación facial no fue exitosa.",
+                    "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
+                    "codigo": "FACE_VERIFICATION_FAILED"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Guardar validación de rostro
+            user.is_validated_camera = True
+            user.save()
+            
+            print("Rostro validado exitosamente")
+            
+        except requests.RequestException as e:
+            print(f"Error en conexión con FastAPI: {str(e)}")
+            return Response({
+                "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
+                "codigo": "FACE_SERVICE_ERROR"
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
+        
+        # RESPUESTA EXITOSA
         return Response({
-            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
-            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
+            "success": True,
+            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
+            "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
+            "usuario_validado": True,
+            "ine_validada": True,
+            "rostro_validado": True
         }, status=status.HTTP_200_OK)
     
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    # Comparar rostro
+        print(f"=== ERROR EN VALIDACIÓN ===")
+        print(f"Error: {str(e)}")
+        print(f"Tipo: {type(e).__name__}")
         
+        # Log más detallado para debugging
+        import traceback
+        print(f"Stack trace: {traceback.format_exc()}")
+        
+        return Response({
+            "error": "Ocurrió un error durante la validación.",
+            "detalle": str(e),
+            "sugerencia": "Intenta nuevamente. Si el problema persiste, contacta soporte.",
+            "codigo": "VALIDATION_ERROR"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     finally:
-        # Eliminar imágenes de Cloudinary
-        if front_id:
-            delete_image_from_cloudinary(front_id)
-        if back_id:
-            delete_image_from_cloudinary(back_id)
+        print("=== LIMPIEZA DE MEMORIA ===")
+        
+        # Limpiar variables sensibles de la memoria
+        if 'front_b64' in locals():
+            del front_b64
+        if 'back_b64' in locals():
+            del back_b64
+        
+        print("Limpieza completada")
 
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
