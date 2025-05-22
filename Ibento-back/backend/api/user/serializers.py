@@ -402,3 +402,26 @@ class UsuarioSerializerEventosBuscarMatch(serializers.ModelSerializer):
                     pass
                     
         return data
+# Serializer para actgualizar el perfil
+class ActualizarPerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['nombre', 'apellido', 'birthday', 'gender']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Ensure all fields are not None, and if so, set to empty string or appropriate type
+        # If you have fields that are expected to be dict/list, set them accordingly
+        dict_fields = []  # Add field names here if any field is expected to be a dict
+        list_fields = []  # Add field names here if any field is expected to be a list
+
+        for field in self.Meta.fields:
+            if data.get(field) is None:
+                if field in dict_fields:
+                    data[field] = {}
+                elif field in list_fields:
+                    data[field] = []
+                else:
+                    data[field] = ''
+        return data
+

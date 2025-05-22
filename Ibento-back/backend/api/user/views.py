@@ -58,7 +58,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializers para la obtención de información de usuarios
                           UsuarioSerializerEdit,
                           UsuarioSerializerParaEventos,
-                          UsuarioSerializerEventosBuscarMatch
+                          UsuarioSerializerEventosBuscarMatch,
+                          ActualizarPerfilSerializer
                           )
 
 # Validación de rostros
@@ -331,6 +332,20 @@ def guardar_respuestas_perfil(request):
         traceback.print_exc()
         return Response({'error': 'Ocurrió un error interno en el servidor'}, status=500)
 
+#----- Actualizar Perfil
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def actualizar_perfil(request):
+    usuario = request.user
+    serializer = ActualizarPerfilSerializer(usuario, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"mensaje": "Perfil actualizado correctamente."}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+#----- Devolver las respuestas como arreglo
+
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])
@@ -510,6 +525,14 @@ def cambiar_modo_busqueda(request):
     usuario.save()
     return Response({"mensaje": f"Modo de búsqueda cambiado a {modo}"})
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_modo_busqueda(request):
+    usuario = request.user
+    modo = usuario.modo_busqueda_match
+    return Response({"modo": modo})
+
+
 # ------- Obtener sugerencias para match
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -626,13 +649,22 @@ def personas_que_me_dieron_like(request):
         for interaccion in interacciones:
             u = interaccion.usuario_origen
 
-            # Calcular edad si la fecha de cumpleaños está disponible
-            edad = None
-            if u.birthday:
-                today = date.today()
-                edad = today.year - u.birthday.year - (
-                    (today.month, today.day) < (u.birthday.month, u.birthday.day)
+        # Calcular edad si hay birthday
+        edad = None
+        if u.birthday:
+            today = date.today()
+            birthday = u.birthday
+            if isinstance(birthday, str):
+                try:
+                    birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
+                except ValueError:
+                    birthday = None
+            if birthday:
+                edad = today.year - birthday.year - (
+                    (today.month, today.day) < (birthday.month, birthday.day)
                 )
+            else:
+                edad = None
 
             # Agregar datos del usuario
             usuarios.append({
@@ -645,8 +677,9 @@ def personas_que_me_dieron_like(request):
                 "edad": edad,
                 "descripcion": u.description or "",
             })
-
+            
         return Response(usuarios, status=200)
+
 
     except Exception as e:
         print("Error en personas_que_me_dieron_like:", traceback.format_exc())
