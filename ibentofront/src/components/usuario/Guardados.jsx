@@ -6,6 +6,7 @@ import { InputSwitch } from "primereact/inputswitch";
 
 import api from '../../api';
 const Guardados = ({events}) => {
+    const [eventsCopy, setEventsCopy] = useState([...events]);
     const navigate = useNavigate();
     const [verify, setVerificar] = useState();
     const [checked, setChecked] = useState(false);
@@ -52,7 +53,12 @@ const Guardados = ({events}) => {
             console.error("Error al cambiar el modo:", error);
         }
     }
-
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', options);
+}
+   
      //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
     const isVerify = async () => {
              const token = localStorage.getItem('access');
@@ -81,59 +87,114 @@ const Guardados = ({events}) => {
                 console.error("Error al obtener los datos del usuario:", error);
             }
         }
+
+
+    const bucarMatch = async (eventId,index) => {
+        console.log("Buscar match para el evento:", eventId,index);
+        //cambiar a true el estado del evento
+        eventsCopy[index].status = true;
+        setEventsCopy([...eventsCopy]);
+        const token = localStorage.getItem('access');
+        try {
+            const response = await api.post(`usuarios/agregar_eventos_match/?idEvent=${eventId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                console.log("Match creado");
+            }
+        } catch (error) {
+            console.error("Error al crear el match:", error);
+        }
+       
+
+    }
+    const cancelarMatch = async (eventId,index) => {
+        console.log("Cancelar match para el evento:", eventId,index);
+        eventsCopy[index].status = false;
+        setEventsCopy([...eventsCopy]);
+        //Eliminar evento de evento para buscar match
+        const token = localStorage.getItem('access');
+        try {
+            const response = await api.delete(`usuarios/eliminar_eventos_match/?idEvent=${eventId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                console.log("Match cancelado");
+            }
+        } catch (error) {
+            console.error("Error al cancelar el match:", error);
+        }
+    }
     return (
         <div className=" justify-center text-black   ">
             <div className="relative flex flex-col items-center bg-white  rounded-xl max-w-lg w-full ">
                 <h2 className="font-bold text-2xl w-full mb-4 text-center">Eventos a los que asistiré</h2>
                 <div className=" flex-col w-full mb-2">
-                    {checked ==false?(
-                    <h2 className="text-base text-gray-700 text-center">
-                        Modo Global: Aparecer a todas las personas que asistan a cualquier evento.
-                    </h2>
-                    ):(
+                    {checked == false ? (
                         <h2 className="text-base text-gray-700 text-center">
-                        Modo Evento: Aparecer sólo a las personas que asistirán a los mismos eventos.
-                    </h2>
+                            Modo Global: Aparecer a todas las personas que asistan a cualquier evento.
+                        </h2>
+                    ) : (
+                        <h2 className="text-base text-gray-700 text-center">
+                            Modo Evento: Aparecer sólo a las personas que asistirán a los mismos eventos.
+                        </h2>
                     )}
-
                 </div>
                 <label className="switch mb-4">
-                <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(e) => setChecked(e.target.checked)}
-                    onClick={changeMode}
-                />
-                <span className="slider"></span>
+                    <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => setChecked(e.target.checked)}
+                        onClick={changeMode}
+                    />
+                    <span className="slider"></span>
                 </label>
 
                 <div className="flex flex-col w-full gap-4">
-                    {events.map(event => (
+                    {eventsCopy.map((event, index) => (
                         <div
-                            key={event.id}
-                            className="flex items-center mb-3 p-4 rounded-lg bg-gray-100 shadow relative transition hover:shadow-lg"
-                        >
+                            key={event._id}
+                            className="flex items-center mb-3 p-4 rounded-lg bg-gray-100 shadow relative transition hover:shadow-lg cursor-pointer"
+                        >   
+                            <Link to={`../eventos/${event._id}`} className="">
                             <img
-                                src={event.image}
+                                src={event.imgs[0]}
                                 className="w-20 h-20 object-cover rounded-lg mr-4 border-2 border-purple-300"
                                 alt={event.name}
                             />
+                            </Link>
+                            
                             <div className=" flex-col flex-1">
                                 <h2 className="text-lg font-semibold text-purple-800">{event.title}</h2>
-                                <p className="text-gray-600">{event.date}</p>
-                                <p className="mb-7 text-gray-500">{event.ubication}</p>
+                                <p className="text-gray-600">{formatDate(event.dates[0])}</p>
+                                <p className="mb-7 text-gray-500">{event.place}</p>
                             </div>
                             <div className="mt-2">
-                                {event.buscando === 'No' ? (
+                                {event.status === false ? (
                                     <button
-                                        onClick={() => isVerify()}
-                                        className="absolute right-4 bottom-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition"
+                                        disabled={checked === false}
+                                        onClick={() => bucarMatch(event._id, index)}
+                                        className={`absolute right-4 bottom-2 px-4 py-2 rounded-lg shadow transition text-white ${
+                                            checked === false
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-green-500 hover:bg-green-600'
+                                        }`}
                                     >
                                         Buscar Match
                                     </button>
                                 ) : (
                                     <button
-                                        className="absolute right-4 bottom-0 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition"
+                                        disabled={checked === false}
+                                        onClick={() => cancelarMatch(event._id, index)}
+                                        className={`absolute right-4 bottom-2 px-4 py-2 rounded-lg shadow transition text-white ${
+                                            checked === false
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-red-500 hover:bg-red-600'
+                                        }`}
                                     >
                                         Cancelar Match
                                     </button>

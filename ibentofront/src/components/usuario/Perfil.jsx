@@ -45,6 +45,27 @@ useEffect(() => {
 
 
 
+ useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchVerify = async () => {
+            try {
+                const response = await api.get("usuarios/obtener_eventos_guardados/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    setSaveEvents(response.data["Eventos guardados"]);
+                    console.log("Guardados",response.data["Eventos guardados"]);
+                    
+                }
+            } catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
+        }
+        fetchVerify();
+    }, []);
+
       
 
 useEffect(() => {
@@ -272,7 +293,7 @@ const [loading, setLoading] = useState(true);
                             <Favoritos events={favoritos} />
                         </div>
                     ) : (
-                        <Guardados events={eventsSaved} verify={verificar} />
+                        <Guardados events={saveEvents} verify={verificar} />
                     )}
                 </div>
                 </div>
