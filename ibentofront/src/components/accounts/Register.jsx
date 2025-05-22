@@ -11,7 +11,8 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { Button } from "primereact/button";
-import { buttonStyle } from "../../styles/styles";
+import { Dialog } from 'primereact/dialog';
+import { buttonStyle, buttonAccept } from "../../styles/styles";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "../../axiosConfig";
@@ -21,6 +22,14 @@ import ibentoLogo from "/images/ibentoLogo.png";
 
 import { name_regex, email_regex, password_regex } from "../../utils/regex";
 import apiaxios from "../../axiosConfig";
+
+import Page from "./Terminos"
+
+import "primereact/resources/themes/lara-light-indigo/theme.css";   
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+
+
 
 
 export default function Register() {
@@ -43,11 +52,43 @@ export default function Register() {
   const [selectedEvents, setSelectedEvents] = useState([]);
   const [categorias, setCategorias] = useState([]);
 
-  const [disable , setDisable] = useState(false);
+  const [disable, setDisable] = useState(false);
   const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
 
   const [message, setMessage] = useState("");
 
+  const [visible, setVisible] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  // Función para mostrar el diálogo
+  const showDialog = () => {
+    setVisible(true);
+  };
+
+  // Función para cerrar el diálogo
+  const hideDialog = () => {
+    setVisible(false);
+  };
+
+  // Footer personalizado para el diálogo
+  const dialogFooter = (
+    <div className="flex justify-between p-4">
+      <Button
+        label="Cancelar"
+        className="p-button-outlined text-purple-800"
+        onClick={hideDialog}
+      />
+      <Button
+        label="Aceptar"
+        // className="p-button-rounded text-white bg-purple-800"
+        className={buttonAccept}
+        onClick={() => {
+          setChecked(true);
+          hideDialog();
+        }}
+      />
+    </div>
+  );
 
   useEffect(() => {
     if (step === 2) {
@@ -206,17 +247,17 @@ export default function Register() {
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="relative">
-                  {/* Nombre y Apellido */}
-                  <div className="flex space-x-3">
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:<span className="text-red-500">*</span></label>
-                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                    {/* Nombre y Apellido */}
+                    <div className="flex space-x-3">
+                      <div className="w-1/2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:<span className="text-red-500">*</span></label>
+                        <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                      </div>
+                      <div className="w-1/2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:<span className="text-red-500">*</span></label>
+                        <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
+                      </div>
                     </div>
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:<span className="text-red-500">*</span></label>
-                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
-                    </div>
-                  </div>          
                   </div>
                   <div className="relative">
                     <Grid item xs={12}>
@@ -248,7 +289,7 @@ export default function Register() {
                         </button>
                       </div>
                       <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                      La contraseña debe tener al menos 8 caracteres, una mayúscula  y un número.
+                        La contraseña debe tener al menos 8 caracteres, una mayúscula  y un número.
                       </Typography>
                     </Grid>
                   </div>
@@ -306,14 +347,14 @@ export default function Register() {
                     type="button"
                     onClick={() => {
                       // Validar campos
-                      
+
                       // Validar que todos los campos estén llenos
                       for (const field of requiredFields) {
-                          if (!form[field]) {
-                            setMessage("Por favor completa todos los campos obligatorios.");
-                            return;
-                          }
+                        if (!form[field]) {
+                          setMessage("Por favor completa todos los campos obligatorios.");
+                          return;
                         }
+                      }
                       if (!name_regex.test(form.nombre)) {
                         setMessage("El nombre debe contener solo letras.");
                         return;
@@ -338,7 +379,7 @@ export default function Register() {
                         setMessage("Debes aceptar los términos y condiciones para continuar.");
                         return;
                       }
-                    
+
 
                       // Si todas las validaciones pasan, avanzar al siguiente paso
                       setMessage(""); // Limpia el mensaje si todo está bien
@@ -354,41 +395,41 @@ export default function Register() {
               </>)}
             {step === 2 && (
               <>
-              <div className="scroll-x-overflow">
-              
-                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
-                  ¿Qué tipo de eventos te gustan?
-                </Typography>
+                <div className="scroll-x-overflow">
 
-                <Grid container spacing={2}>
-                  <div className="intereses-container">
-                    {categorias.map((categoria) => (
-                      <div key={categoria.id} className="categoria mb-5">
-                        <div className={buttonStyle} style={{ cursor: 'default' }}>
-                          {categoria.nombre}
+                  <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
+                    ¿Qué tipo de eventos te gustan?
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <div className="intereses-container">
+                      {categorias.map((categoria) => (
+                        <div key={categoria.id} className="categoria mb-5">
+                          <div className={buttonStyle} style={{ cursor: 'default' }}>
+                            {categoria.nombre}
+                          </div>
+                          <ul className="flex flex-wrap">
+                            {categoria.valores.map((valor) => (
+                              <li
+                                key={valor}
+                                className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                  ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                  : 'btn-off'
+                                  }`}
+                                onClick={() => toggleSeleccionado(valor)}
+                              >
+                                {valor}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <ul className="flex flex-wrap">
-                          {categoria.valores.map((valor) => (
-                            <li
-                              key={valor}
-                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
-                                ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                : 'btn-off'
-                                }`}
-                              onClick={() => toggleSeleccionado(valor)}
-                            >
-                              {valor}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </Grid>
+                      ))}
+                    </div>
+                  </Grid>
 
-                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
-                  Crear Cuenta
-                </Button>
+                  <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
+                    Crear Cuenta
+                  </Button>
                 </div>
               </>
             )}
@@ -432,11 +473,11 @@ export default function Register() {
         <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
           {/* Logo */}
           <Box
-                component="img"
-                src={ibentoLogo}
-                alt="Ibento Logo"
-                sx={{ width: 80, height: "auto", mb: 2 }}
-              />
+            component="img"
+            src={ibentoLogo}
+            alt="Ibento Logo"
+            sx={{ width: 80, height: "auto", mb: 2 }}
+          />
 
           {/* Título */}
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
@@ -475,7 +516,7 @@ export default function Register() {
                         onChange={handleChange}
                         required
                       />
-                      
+
                       <button
                         type="button"
                         className="absolute inset-y-0 right-2 flex items-center"
@@ -486,7 +527,7 @@ export default function Register() {
                     </div>
                     <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
                       La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
-                      </Typography>
+                    </Typography>
                   </div>
 
                   {/* Confirmar Contraseña */}
@@ -522,13 +563,39 @@ export default function Register() {
                         />
                       }
                       label={
-                        <span style={{ fontSize: "12px" }} className={verifyStyle}>
-                          He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
+                        <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
+                          He leído y acepto el
+                          <span
+                            className="mx-1 text-purple-600 cursor-pointer"
+                          >
+                           <strong>Términos y condiciones</strong>
+                          </span>
+                          {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
+                          y los <strong>Aviso de privacidad</strong>.
                         </span>
                       }
                     />
                   </div>
 
+                  <div className="card flex justify-content-center">
+                    <Dialog
+                      visible={visible}
+                      style={{ width: "90vw", maxWidth: "1000px" }}
+                      onHide={hideDialog}
+                      footer={dialogFooter}
+                      draggable={false}
+                      resizable={false}
+                      className="p-1"
+                      contentClassName="p-0"
+                      header="Términos y condiciones"
+                      headerClassName="bg-white border-none p-3"
+                      closeIcon={<i className="pi pi-times text-gray-500 hover:text-gray-700" />}
+                    >
+                      <div className="dialog-content">
+                        <Page />
+                      </div>
+                    </Dialog>
+                  </div>
                   {/* Botón de Siguiente */}
                   {message && (
                     <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
@@ -573,7 +640,7 @@ export default function Register() {
                         setMessage("Debes aceptar los términos y condiciones para continuar.");
                         return;
                       }
-                      
+
                       // Si todas las validaciones pasan, avanzar al siguiente paso
                       setMessage(""); // Limpia el mensaje si todo está bien
                       setStep(2);
