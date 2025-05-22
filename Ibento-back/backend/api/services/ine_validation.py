@@ -30,7 +30,7 @@ def validate_ine_image(image_file):
         # Verificar que sea una imagen válida
         try:
             image = Image.open(image_file)
-            image_file.seek(0)  # Reset para uso posterior
+            image_file.seek(0)  
             
             # Verificar dimensiones
             width, height = image.size
@@ -53,8 +53,6 @@ def validate_ine_image(image_file):
         return False, f"Error de validación: {str(e)}"
 
 def process_ine_image_secure(image_file):
-    # Procesa imagen de INE de manera segura y optimizada para OCR
-    
     try:
         print("=== PROCESANDO IMAGEN DE INE ===")
         
@@ -97,31 +95,31 @@ def process_ine_image_secure(image_file):
         # Mejorar calidad para OCR
         print("Aplicando mejoras de calidad...")
         
-        # 1. Mejorar nitidez (importante para texto)
+        # Mejorar nitidez (importante para texto)
         enhancer = ImageEnhance.Sharpness(image)
         image = enhancer.enhance(1.8)
         
-        # 2. Mejorar contraste
+        # Mejorar contraste
         enhancer = ImageEnhance.Contrast(image)
         image = enhancer.enhance(1.5)
-        
-        # 3. Ajustar brillo ligeramente
+    
+        # Ajustar brillo ligeramente
         enhancer = ImageEnhance.Brightness(image)
         image = enhancer.enhance(1.1)
         
-        # 4. Convertir a OpenCV para procesamiento avanzado
+        # Convertir a OpenCV para procesamiento avanzado
         cv_image = np.array(image)
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
         
-        # 5. Reducir ruido manteniendo bordes
+        # Reducir ruido manteniendo bordes
         denoised = cv2.bilateralFilter(cv_image, 9, 75, 75)
         
-        # 6. Mejorar contraste adaptativamente
+        # Mejorar contraste adaptativamente
         gray = cv2.cvtColor(denoised, cv2.COLOR_BGR2GRAY)
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
         enhanced_gray = clahe.apply(gray)
         
-        # 7. Convertir de vuelta a color
+        # Convertir de vuelta a color
         enhanced_bgr = cv2.cvtColor(enhanced_gray, cv2.COLOR_GRAY2BGR)
         enhanced_rgb = cv2.cvtColor(enhanced_bgr, cv2.COLOR_BGR2RGB)
         
