@@ -227,7 +227,7 @@ def ocr_ine(front_b64, back_b64):
 
 def validate_ine(cic, id_ciudadano):
     print("Iniciando validación de INE...")
-    print(f" Enviando - CIC: {cic}, ID Ciudadano: {id_ciudadano}")
+    print(f"Enviando - CIC: {cic}, ID Ciudadano: {id_ciudadano}")
 
     headers = {
         "accept": "application/json",
