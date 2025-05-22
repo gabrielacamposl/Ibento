@@ -23,6 +23,8 @@ from api.user.views import (crear_usuario,
                             obtener_usuario_info,
                             bloquear_usuario,
                             obtener_match_id,
+                            obtener_modo_busqueda,
+                            actualizar_perfil,
                             eliminar_evento_favorito
                             )
 
@@ -51,6 +53,8 @@ urlpatterns = [
     # Creación de perfil para acompañantes
     # ---- Subir imágenes de perfil
      path('api/perfil/subir-fotos/', upload_profile_pictures, name='upload-profile-pictures'),
+    # ---- Actualizar perfil
+    path('api/perfil/actualizar/', actualizar_perfil, name='actualizar_perfil'),
     # ---- Está validado
     path('api/estado-validacion/', estado_validacion_view, name='estado-validacion'),
     # ---- Obtener intereses
@@ -64,6 +68,7 @@ urlpatterns = [
     path('api/interaccion/', matches, name='dar_like_dislike'),
     # --- Selección de búsqueda de acompañantes - Por eventos o global-
     path('api/match/modo/', cambiar_modo_busqueda, name='cambiar_modo_busqueda'),
+    path('api/match/modo/buscar/', obtener_modo_busqueda, name='obtener_modo_busqueda'),
     # --- Sugerencia de acompañantes
     path('api/matches/sugerencias/', sugerencia_usuarios, name='sugerencias_usuarios'),
     # ---- Futuros acompañantes
