@@ -4,6 +4,7 @@ import Search from "./components/Search";
 import Cards from "./components/CategoryCard";
 import EventWrapper from "./components/SearchCard";
 import axios from 'axios';
+import api from '../../api'
 import { useParams } from "react-router-dom";
 
 import { CardsSkeleton } from "../extras/skeletons";
@@ -52,7 +53,7 @@ function Page() {
       useEffect(() => {
           const fetchEvents = async () => {
           try {
-              const response = await axios.get("http://127.0.0.1:8000/eventos/");
+              const response = await api.get("eventos/");
               console.log("Eventos:", response.data);
               setEventos(response.data);
               setIsLoading(false);

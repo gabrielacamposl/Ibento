@@ -43,10 +43,12 @@ function Page() {
 
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const userString = localStorage.getItem("user");
         //const usuarioObj = localStorage.getItem("user")
-        if (token) {
-            setUsuarioName(token);
+        if (userString) {
+            const userObject = JSON.parse(userString);
+            const nombre = userObject.nombre;
+            setUsuarioName(nombre);
         }
     }, []);
 

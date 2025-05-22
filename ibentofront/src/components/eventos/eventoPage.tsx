@@ -369,9 +369,9 @@ function Page() {
 
 
   return (
-    <div className="w-full">
+    <div className="w-full lg:items-center lg:justify-center">
       {/* Mobile View */}
-      <div className="md:hidden flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white">
+      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-3/4">
         <Link
           to={urls} // O usa una función de navegación si es más complejo
           onClick={e => {
@@ -490,8 +490,9 @@ function Page() {
           </button>
         </div>
       </div>
-      <div className="hidden md:flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-indigo-500 to-white">
-        {/* ... Contenido del Desktop View ... */}
+      
+      {/* <div className="hidden md:flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-indigo-500 to-white">
+        {/* ... Contenido del Desktop View ...
         <div className="flex flex-col items-center justify-center w-full max-w-6xl h-full bg-white rounded-lg shadow-lg mx-auto px-6">
           <div className="flex flex-col lg:flex-row w-full">
             <div className="flex flex-col space-y-6 items-center justify-center p-4 lg:w-2/3">
@@ -537,7 +538,7 @@ function Page() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

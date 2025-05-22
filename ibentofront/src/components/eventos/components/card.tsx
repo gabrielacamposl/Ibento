@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { HeartIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { Avatar } from 'primereact/avatar';
@@ -24,6 +24,8 @@ interface ListEvent {
     numSaves : number;
   }
 
+  
+
 export default function CardWrapper(
     {
         name,
@@ -33,74 +35,69 @@ export default function CardWrapper(
     }
 ) {
 
-
-    // const { position, error: geoError, loading: geoLoading } = useGeolocation();
-    //     const [liga, setLiga] = useState<string | null>(null);
-    //     useEffect(() => {
-    //       if (position) {
-    //           console.log("Ubicación obtenida en el componente Page:", position.coords.latitude, position.coords.longitude);
-    //           setLiga('http://127.0.0.1:8000/eventos/nearest?lat=' + position?.coords.latitude + '&lon=' + position?.coords.longitude);
-    //           // Aquí podrías, por ejemplo, filtrar eventos por distancia si tu API lo permite
-    //       }
-    //   }, [position]);
-
     const {position, error: geoError, loading: geoLoading} = useGeolocation();
-    const [liga, setLiga] = useState<string | null>(null);
+    const [nearestEventsUrl, setNearestEventsUrl] = useState<string | null>(null);
 
-    const lat = position?.coords.latitude;
-    const lon = position?.coords.longitude;
 
     useEffect(() => {
-        setLiga('eventos/nearest?lat=' + lat + '&lon=' + lon);
-      }, [lat, lon]);
+        if (position?.coords){
+            const {latitude, longitude} = position.coords
+
+            if(typeof latitude === 'number' && typeof longitude === 'number'){
+                setNearestEventsUrl(
+                    `eventos/nearest?lat=${latitude}&lon=${longitude}`
+                );
+            }
+            else {
+                setNearestEventsUrl(null);
+            }
+        }
+      }, [position]);
     
 
     const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('eventos/upcoming_events/');
     
     const {data : musicalEvents, loading : musicalLoading, error : musicalError} = useFetchEvents('eventos/by_category?category=Música');
   
-    const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchNearestEvents(liga || '');
+    const {data : nearestEvents, loading : nearestLoading, error : nearestError} = useFetchNearestEvents(nearestEventsUrl || "");
 
     const {data : sportsEvents, loading : sportsLoading, error : sportsError} = useFetchEvents('eventos/by_category?category=Deportes');
 
     
+    const isLoading = useMemo(() => {
+    return upcomingLoading || musicalLoading || nearestLoading || sportsLoading || geoLoading;
+    }, [upcomingLoading, musicalLoading, nearestLoading, sportsLoading, geoLoading]);
 
+    const errors = useMemo(() => {
+    return [upcomingError, musicalError, nearestError, sportsError, geoError].filter(
+      (e): e is string => e !== null,
+    );
+    }, [upcomingError, musicalError, nearestError, sportsError, geoError]);
 
-    console.log(upcomingEvents)
-
-    if (upcomingLoading) {
+    
+    if (isLoading && errors.length === 0) {
         return (
-            <div className="flex min-h-screen justify-center items-center">
-                <p>Cargando...</p>
-            </div>
+        <div className="flex min-h-screen justify-center items-center">
+            <p>Cargando datos...</p>
+        </div>
         );
     }
   
-    if (sportsError) {
+    if (errors.length > 0) {
         return (
-            <div className="flex min-h-screen justify-center items-center text-red-600">
-                <p>Error al cargar eventos: Error de deportes </p>
-            </div>
+        <div className="flex min-h-screen flex-col justify-center items-center text-red-600">
+            <p>Ocurrieron uno o más errores:</p>
+            <ul>
+            {errors.map((errMsg, index) => (
+                <li key={index}>{errMsg}</li>
+            ))}
+            </ul>
+            {geoError && <p>Error de geolocalización: {geoError.message}</p>}
+        </div>
         );
     }
 
-    if (upcomingError) {
-        return (
-            <div className="flex min-h-screen justify-center items-center text-red-600">
-                <p>Error al cargar eventos: Error de proximos </p>
-            </div>
-        );
-    }
-
-    if (musicalError) {
-        return (
-            <div className="flex min-h-screen justify-center items-center text-red-600">
-                <p>Error al cargar eventos: Error de musicales </p>
-            </div>
-        );
-    }
-    
-    console.log(name)
+    console.log("Position:" + position)
 
     return (
         <>

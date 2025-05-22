@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 import traceback
 # Utils Django
 from django.utils import timezone
@@ -44,15 +46,11 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializer para creación del perfil para búsqueda de acompañantes
                           UploadProfilePicture,
                           CategoriaPerfilSerializer,
-                          ValidacionRostro,
                           # Serializers para creación de matches
                           MatchSerializer,
-                          EventoMatchSerializer,
                           SugerenciaSerializer,
-                          IntereccionSerializer,
                           # Serializer para los chats de los matches
                           MensajesSerializer,
-                          ConversacionSerializer,
                           # Seriallizer de Eventos
                           EventoSerializer,
                           EventoSerializerLimitado,
@@ -237,7 +235,6 @@ def password_reset_resend(request):
 # ------------- CREACIÓN DEL PERFIL PARA LA BUSQUEDA DE ACOMPAÑANTES --------------------------------
 # ------- Seleccionar intereses para el perfil
 # Mostrar Intereses
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_categorias_perfil(request):
@@ -245,51 +242,94 @@ def get_categorias_perfil(request):
     serializer = CategoriaPerfilSerializer(categorias, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-# Guardar respuestas del perfil
+#--- Intereses del usuario
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def guardar_respuestas_perfil(request):
-    usuario = request.user
-    respuestas = request.data.get("respuestas", [])
+    try:
+        usuario = request.user
+        respuestas = request.data.get('respuestas', [])
 
-    preferencias = []
+        if not isinstance(respuestas, list):
+            return Response({'error': 'El formato de las respuestas debe ser una lista'}, status=400)
 
-    for r in respuestas:
-        categoria_id = r.get("categoria_id")
-        respuesta = r.get("respuesta")
+        respuestas_validas = []
 
-        try:
-            categoria = CategoriasPerfil.objects.get(_id=categoria_id)
-        except CategoriasPerfil.DoesNotExist:
-            continue  # o devuelve error ?
+        for item in respuestas:
+            categoria_id = item.get('categoria_id')
+            respuesta = item.get('respuesta')
 
-        # Validación: si multi_option es False, la respuesta debe ser una sola
-        if not categoria.multi_option and isinstance(respuesta, list):
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' no permite múltiples opciones."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if not categoria_id:
+                continue
 
-        # Validación opcional: ¿es obligatoria u opcional?
-        if not respuesta and not categoria.optional:
-            return Response(
-                {"error": f"La pregunta '{categoria.question}' es obligatoria."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            try:
+                categoria = CategoriasPerfil.objects.get(_id=categoria_id)
+            except CategoriasPerfil.DoesNotExist:
+                continue
 
-        preferencias.append({
-            "categoria_id": categoria._id,
-            "pregunta": categoria.question,
-            "respuesta": respuesta
-        })
+            opciones_validas = categoria.answers
+            if isinstance(opciones_validas, str):
+                import ast
+                try:
+                    opciones_validas = ast.literal_eval(opciones_validas)
+                except Exception:
+                    opciones_validas = []
 
-    # Guardamos en el campo preferencias_generales
-    usuario.preferencias_generales = preferencias
-    usuario.save()
+            if categoria.multi_option:
+                if respuesta is None:
+                    if not categoria.optional:
+                        return Response({'error': f'Respuesta requerida para {categoria_id}'}, status=400)
+                    respuesta = []  # Normaliza respuesta vacía
 
-    return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
+                if not isinstance(respuesta, list):
+                    return Response({'error': f'Respuesta debe ser una lista para {categoria_id}'}, status=400)
+                for r in respuesta:
+                    if r not in opciones_validas:
+                        return Response({'error': f'Opción inválida: {r}'}, status=400)
 
-#----- Devolver las respuestas como arreglo
+            else:
+                if respuesta is None:
+                    if not categoria.optional:
+                        return Response({'error': f'Respuesta requerida para {categoria_id}'}, status=400)
+                    respuesta = ""  # Normaliza respuesta vacía
+
+                if not isinstance(respuesta, str):
+                    return Response({'error': f'Respuesta debe ser string para {categoria_id}'}, status=400)
+                if respuesta not in opciones_validas and respuesta != "":
+                    return Response({'error': f'Opción inválida: {respuesta}'}, status=400)
+
+            respuestas_validas.append({
+                'categoria_id': categoria_id,
+                'respuesta': respuesta
+            })
+
+        # 🛠️ Fix corregido - asegurar que nunca sea None
+        usuario.preferencias_generales = respuestas_validas or []
+        
+        # 🛠️ También asegurar que otros campos JSONField no sean None
+        if usuario.preferencias_evento is None:
+            usuario.preferencias_evento = []
+        if usuario.save_events is None:
+            usuario.save_events = []
+        if usuario.favourite_events is None:
+            usuario.favourite_events = []
+        if usuario.eventos_buscar_match is None:
+            usuario.eventos_buscar_match = []
+        if usuario.profile_pic is None:
+            usuario.profile_pic = []
+        if usuario.tokens_fcm is None:
+            usuario.tokens_fcm = []
+            
+        usuario.save()
+
+        return Response({'message': 'Respuestas guardadas correctamente'}, status=200)
+
+    except Exception as e:
+        print("ERROR en guardar_respuestas_perfil:", e)
+        import traceback
+        traceback.print_exc()
+        return Response({'error': 'Ocurrió un error interno en el servidor'}, status=500)
+
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
 @api_view(['POST'])

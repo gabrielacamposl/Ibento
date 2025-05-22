@@ -84,8 +84,8 @@ const Verificar = () => {
                 alert("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
-            if (picture.size > 5 * 1024 * 1024) { // 5MB
-                alert("Cada imagen debe pesar menos de 5MB.");
+            if (picture.size > 6 * 1024 * 1024) { // 5MB
+                alert("Cada imagen debe pesar menos de 6MB.");
                 return;
             }
         }
@@ -513,6 +513,7 @@ const Verificar = () => {
                             Subir Fotos
                         </Button>
                     ) : activeIndex === 1 ? (
+                        <Button className={buttonStyle} onClick={handleSavePreferences}>
                         <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias
                         </Button>

@@ -116,11 +116,6 @@ class CategoriaPerfilSerializer(serializers.ModelSerializer):
         model = CategoriasPerfil
         fields = ['_id', 'question', 'answers', 'multi_option', 'optional']
         
-# ----- Respuestas para el perfil (Selección de opciones)   
-class RespuestaPerfilSerializer(serializers.Serializer):
-    categoria_id = serializers.CharField()
-    respuesta = serializers.JSONField()
-
 #---------- Comparación de rostros segundo filtro
 class ValidacionRostro(serializers.ModelSerializer):
     foto_camara = serializers.ImageField(required=True)
