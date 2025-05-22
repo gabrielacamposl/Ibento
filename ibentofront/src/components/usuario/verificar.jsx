@@ -19,7 +19,7 @@ const Verificar = () => {
 
     const [loading, setLoading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
-    const [activeIndex, setActiveIndex] = useState(0);
+    const [activeIndex, setActiveIndex] = useState(0); // ✅ Ya estaba en 0
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [message, setMessage] = useState([]);
@@ -61,6 +61,7 @@ const Verificar = () => {
             };
         });
     };
+    
     const handleImageDelete = (indexToDelete) => {
         setUser((prev) => {
             const newPictures = [...prev.pictures];
@@ -71,6 +72,7 @@ const Verificar = () => {
             };
         });
     };
+    
     const handleUploadPictures = async () => {
         if (user.pictures.length < 3 || user.pictures.length > 6) {
             alert("Debes subir entre 3 y 6 fotos.");
@@ -100,16 +102,13 @@ const Verificar = () => {
                 },
             });
 
-
             console.log("Fotos subidas:", response.data.pictures);
             alert("¡Fotos subidas con éxito!");
             setActiveIndex(prev => prev + 1);
         } catch (error) {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
-        } finally {
         }
-
     };
 
     // ---------------------------- Intereses -----------------------------
@@ -126,16 +125,25 @@ const Verificar = () => {
 
         fetchQuestions();
     }, []);
+    
     const handleSavePreferences = async () => {
         try {
-            const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
-                categoria_id,
-                respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
-            }));
+            // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
+            const respuestas = itemsAboutMe.map(item => {
+                const respuesta = selectedAnswers[item._id] || [];
+                
+                // Si es multi_option, enviamos el array completo
+                // Si no es multi_option, enviamos solo el primer elemento (o array vacío)
+                return {
+                    categoria_id: item._id,
+                    respuesta: item.multi_option ? respuesta : (respuesta.length > 0 ? respuesta[0] : "")
+                };
+            });
 
             // Validación: asegurarse de que todas las obligatorias estén contestadas
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
-                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
+                const respuestaUsuario = selectedAnswers[item._id] || [];
+                return !item.optional && respuestaUsuario.length === 0;
             });
 
             if (obligatoriasNoRespondidas.length > 0) {
@@ -143,6 +151,8 @@ const Verificar = () => {
                 return;
             }
 
+            console.log("Enviando respuestas:", { respuestas }); // Para debug
+            
             await api.post("guardar-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
@@ -150,8 +160,8 @@ const Verificar = () => {
             console.error("Error al guardar preferencias", err);
             alert("Hubo un error al guardar tus preferencias.");
         }
-
     };
+    
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
 
@@ -179,7 +189,6 @@ const Verificar = () => {
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
 
-
     // Pasar a base 64 la foto
     // Base64 a File
     const base64ToFile = (base64Data, filename) => {
@@ -192,10 +201,7 @@ const Verificar = () => {
         return new File([u8arr], filename, { type: mime });
     };
 
-
-
     // ------ Conexión con el backend ------
-
     const handleIneValidation = async () => {
         if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
@@ -225,7 +231,7 @@ const Verificar = () => {
 
             if (data.mensaje_ine && data.mensaje_rostro) {
                 setMessage('Tu identidad ha sido validada exitosamente.');
-                setActiveIndex(4);
+                setActiveIndex(3); // ✅ Corregido: era 4, ahora es 3
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
@@ -237,22 +243,30 @@ const Verificar = () => {
         }
     };
 
-    const handdleNavigate = (index) => {
-
+    // ✅ FUNCIÓN CORREGIDA - Esta función tenía errores de lógica
+    const handleNavigate = (index) => {
         if (index === 1) {
             if (user.pictures.length < 3) {
-                // alert('Debes seleccionar al menos 3 fotos');
+                alert('Debes seleccionar al menos 3 fotos');
                 return;
             }
             setActiveIndex(index);
-        }
-        if (index === 2) {
-            if (Object.keys(selectedAnswers).length < itemsAboutMe.length) {
-                // alert('Debes responder todas las preguntas');
+        } else if (index === 2) {
+            // Validación opcional para las preferencias
+            const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
+                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
+            });
+            
+            if (obligatoriasNoRespondidas.length > 0) {
+                alert('Debes responder todas las preguntas obligatorias');
+                return;
             }
+            setActiveIndex(index);
+        } else {
             setActiveIndex(index);
         }
     };
+
     //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
     // -------- Capturar imagen con cámara
     const videoConstraints = {
@@ -278,7 +292,7 @@ const Verificar = () => {
                     </div>
                 </div>
 
-                <div className="w-full  overflow-y-auto gap-2 custom-scrollbar">
+                <div className="w-full overflow-y-auto gap-2 custom-scrollbar">
                     {/*VENTANA PARA INGRESAR IMAGENES */}
                     {activeIndex === 0 && (
                         <div className="">
@@ -322,10 +336,10 @@ const Verificar = () => {
                                             </div>
                                         </div>
                                     ))}
-
                                 </div>
                             </React.Fragment>
-                        </div>)}
+                        </div>
+                    )}
 
                     {/* SELECCIÓN DE INTERESES */}
                     {activeIndex === 1 && (
@@ -449,6 +463,7 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
+                    
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 3 && (
                         <div className='h-180'>
@@ -481,47 +496,37 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
-
                 </div>
 
+                {/* ✅ BOTONES CORREGIDOS */}
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
-                    <Button className={buttonStyle}
-                        onClick={() => setActiveIndex(2)}
+                    <Button 
+                        className={buttonStyle}
+                        onClick={() => setActiveIndex(prev => prev - 1)}
                         disabled={activeIndex === 0}
                     >
                         Anterior
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(1)}>
-                            Siguiente
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                            Subir Fotos
                         </Button>
-
                     ) : activeIndex === 1 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
+                        <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias
                         </Button>
                     ) : activeIndex === 2 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(3)}>
-
+                        <Button className={buttonStyle} onClick={() => setActiveIndex(3)}>
+                            Siguiente
                         </Button>
                     ) : activeIndex === 3 ? (
                         <Button className={buttonStyle} onClick={handleIneValidation} disabled={loading}>
                             {loading ? "Validando..." : "Validar identidad"}
                         </Button>
-                    ) : (
-                        <Button
-                            className={buttonStyle}
-                            onClick={() => handdleNavigate(activeIndex + 1)}
-                            disabled={activeIndex === items.length - 1}
-                        >
-                            Siguiente
-                        </Button>
-                    )}
+                    ) : null}
                 </div>
-
             </div>
-
         </div>
     );
 };
