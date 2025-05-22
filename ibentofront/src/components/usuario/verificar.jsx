@@ -3,7 +3,7 @@ import { Button } from "primereact/button";
 import { useNavigate } from 'react-router-dom';
 import { buttonStyle } from "../../styles/styles";
 import "../../assets/css/botones.css";
-//import Webcam from 'react-webcam';
+import Webcam from 'react-webcam';
 import api from "../../api";
 
 
@@ -17,13 +17,14 @@ const Verificar = () => {
         facePhoto: null,
     });
 
-    const [isUploading, setIsUploading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
-    const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [message, setMessage] = useState([]);
+    const [capturedPhoto, setCapturedPhoto] = useState(null);
+
     const items = [
         { label: 'Paso 1' },
         { label: 'Paso 2' },
@@ -81,8 +82,8 @@ const Verificar = () => {
                 alert("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
-            if (picture.size > 5 * 1024 * 1024) { // 5MB
-                alert("Cada imagen debe pesar menos de 5MB.");
+            if (picture.size > 6 * 1024 * 1024) { // 5MB
+                alert("Cada imagen debe pesar menos de 6MB.");
                 return;
             }
         }
@@ -91,7 +92,6 @@ const Verificar = () => {
         user.pictures.forEach((picture) => {
             formData.append("pictures", picture);
         });
-        setIsUploading(true);
 
         try {
             const response = await api.post("perfil/subir-fotos/", formData, {
@@ -108,7 +108,6 @@ const Verificar = () => {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
         } finally {
-            setIsUploading(false);
         }
 
     };
@@ -144,7 +143,7 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("api/guardar-respuestas/", { respuestas });
+            await api.post("intereses-respuestas/", { respuestas });
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
@@ -156,54 +155,93 @@ const Verificar = () => {
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
 
+    // Imagen INE
     const handleImageINE = (e, index) => {
         const file = e.target.files[0];
         if (file) {
             const newImages = [...ineImages];
             newImages[index] = file;
             setIneImages(newImages);
+
+            const updatedUserINE = [...user.ine];
+            updatedUserINE[index] = file;
+            setUser(prev => ({ ...prev, ine: updatedUserINE }));
         }
     };
+
     const handleImageDeleteINE = (index) => {
         const newImages = [...ineImages];
         newImages[index] = null;
         setIneImages(newImages);
+
+        const updatedUserINE = [...user.ine];
+        updatedUserINE[index] = null;
+        setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
+
+
+    // Pasar a base 64 la foto
+    // Base64 a File
+    const base64ToFile = (base64Data, filename) => {
+        const arr = base64Data.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        return new File([u8arr], filename, { type: mime });
+    };
+
+
+
     // ------ Conexión con el backend ------
+
     const handleIneValidation = async () => {
-        if (!ineImages[0] || !ineImages[1]) {
+        if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
             return;
         }
+        if (!user.facePhoto) {
+            setMessage('Por favor, captura una imagen de tu rostro.');
+            return;
+        }
+
+        setLoading(true);
+        setMessage('');
 
         const formData = new FormData();
-        formData.append("ine_front", ineImages[0]);
-        formData.append("ine_back", ineImages[1]);
+        formData.append("ine_front", user.ine[0]);
+        formData.append("ine_back", user.ine[1]);
+        formData.append("selfie", base64ToFile(user.facePhoto, "selfie.jpg"));
 
         try {
-            const response = await api.post("api/validar-ine/", formData, {
+            const response = await api.post("validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
             });
 
-            if (response.data.is_valid) {
-                setMessage('Tu identidad mediante la INE ha sido validada.');
-                setActiveIndex(3); // avanzar de sección
+            const data = response.data;
+
+            if (data.mensaje_ine && data.mensaje_rostro) {
+                setMessage('Tu identidad ha sido validada exitosamente.');
+                setActiveIndex(4);
             } else {
-                setMessage('La validación de la INE ha fallado. Por favor, verifica las imágenes.');
+                setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
-            setActiveIndex(prev => prev + 1);
         } catch (error) {
-            console.error('Error al validar la INE:', error);
-            setMessage('Hubo un error al validar la INE. Por favor, intenta nuevamente.');
+            console.error('Error al validar la identidad:', error);
+            setMessage('Hubo un error al validar tu identidad. Intenta de nuevo.');
+        } finally {
+            setLoading(false);
         }
     };
+
     const handdleNavigate = (index) => {
 
         if (index === 1) {
             if (user.pictures.length < 3) {
-                alert('Debes seleccionar al menos 3 fotos');
+                // alert('Debes seleccionar al menos 3 fotos');
                 return;
             }
             setActiveIndex(index);
@@ -214,20 +252,18 @@ const Verificar = () => {
             }
             setActiveIndex(index);
         }
-        if (index === 3) {
-            setActiveIndex(index);
-        }
     };
     //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
     // -------- Capturar imagen con cámara
     const videoConstraints = {
-    facingMode: "user", // Usa la cámara frontal
+        facingMode: "user", // Usa la cámara frontal
     };
-    
-  const capturarImagen = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setCapturedPhoto(imageSrc);
-  };
+
+    const capturarImagen = () => {
+        const imageSrc = webcamRef.current.getScreenshot();
+        setCapturedPhoto(imageSrc);
+        setUser(prev => ({ ...prev, facePhoto: imageSrc }));
+    };
 
     return (
         <div className="text-black flex justify-center items-center h-full">
@@ -374,82 +410,75 @@ const Verificar = () => {
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Verificar mi perfil</h1>
                             <p>Para verificar su identidad deberás subir foto de su INE.</p>
-                            <React.Fragment>
-                                <div className="w-full mt-2 items-center flex flex-col">
-                                    {Array.from({ length: 2 }).map((_, index) => (
-                                        <div key={index} className="relative w-80 h-45 m-2 border-dashed divBorder flex items-center justify-center mt-6">
-                                            {ineImages[index] ? (
-                                                <>
-                                                    <img
-                                                        src={URL.createObjectURL(ineImages[index])}
-                                                        alt={`Imagen ${index + 1}`}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <button
-                                                        className="w-7 h-7 btn-custom absolute top-0 right-0 text-white rounded-full"
-                                                        onClick={() => handleImageDeleteINE(index)}
-                                                    >
-                                                        {/* X icon */}
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto flex flex-col items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                    </svg>
-                                                    <span className="block mt-2 colorTexto text-center">
-                                                        {index === 0 ? 'Subir INE (parte frontal)' : 'Subir INE (parte trasera)'} en formato jpg, png
-                                                    </span>
-                                                </label>
-                                            )}
-                                            <input
-                                                id={`fileInput-${index}`}
-                                                type="file"
-                                                className="hidden"
-                                                accept="image/*"
-                                                onChange={(e) => handleImageINE(e, index)}
-                                            />
-                                        </div>
-                                    ))}
-
-                                </div>
-                            </React.Fragment>
+                            <div className="w-full mt-2 items-center flex flex-col">
+                                {Array.from({ length: 2 }).map((_, index) => (
+                                    <div key={index} className="relative w-80 h-45 m-2 border-dashed divBorder flex items-center justify-center mt-6">
+                                        {ineImages[index] ? (
+                                            <>
+                                                <img
+                                                    src={URL.createObjectURL(ineImages[index])}
+                                                    alt={`Imagen ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <button
+                                                    className="w-7 h-7 btn-custom absolute top-0 right-0 text-white rounded-full"
+                                                    onClick={() => handleImageDeleteINE(index)}
+                                                >
+                                                    X
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto flex flex-col items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                                <span className="block mt-2 colorTexto text-center">
+                                                    {index === 0 ? 'Subir INE (parte frontal)' : 'Subir INE (parte trasera)'} en formato jpg, png
+                                                </span>
+                                            </label>
+                                        )}
+                                        <input
+                                            id={`fileInput-${index}`}
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => handleImageINE(e, index)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
-
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 3 && (
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Verificar mi perfil</h1>
                             <p>Ahora, centra tu cara para verificar que la INE sea suya</p>
-                            <React.Fragment>
-                                <div className="w-full mt-2 items-center flex flex-col">
-                                    <div className="rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
-                                        {!capturedPhoto ? (
-                                            <Webcam
-                                                ref={webcamRef}
-                                                audio={false}
-                                                screenshotFormat="image/jpeg"
-                                                videoConstraints={videoConstraints}
-                                                className="w-72 h-96 object-cover"
-                                            />
-                                        ) : (
-                                            <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
-                                        )}
-                                    </div>
-
-                                    <button
-                                        onClick={capturarImagen}
-                                        className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
-                                    />
-                                    <p className="text-center mt-2">Capturar imagen</p>
-
-                                    {!capturedPhoto && (
-                                        <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                            <div className="w-full mt-2 items-center flex flex-col">
+                                <div className="rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
+                                    {!capturedPhoto ? (
+                                        <Webcam
+                                            ref={webcamRef}
+                                            audio={false}
+                                            screenshotFormat="image/jpeg"
+                                            videoConstraints={videoConstraints}
+                                            className="w-72 h-96 object-cover"
+                                        />
+                                    ) : (
+                                        <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
                                     )}
-
                                 </div>
-                            </React.Fragment>
+
+                                <button
+                                    onClick={capturarImagen}
+                                    className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
+                                />
+                                <p className="text-center mt-2">Capturar imagen</p>
+
+                                {!capturedPhoto && (
+                                    <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -457,28 +486,35 @@ const Verificar = () => {
 
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
                     <Button className={buttonStyle}
-                        onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+                        onClick={() => setActiveIndex(2)}
                         disabled={activeIndex === 0}
                     >
                         Anterior
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={handleUploadPictures}>
-                            Siguiente
-                        </Button>
-
+                        <>
+                            <Button className={buttonStyle} onClick={handleUploadPictures}>
+                                Siguiente
+                            </Button>
+                            <Button
+                                className={buttonStyle}
+                                onClick={() => setActiveIndex(2)} // New button to skip to step 3 (activeIndex 2)
+                            >
+                                Saltar a Paso 3
+                            </Button>
+                        </>
                     ) : activeIndex === 1 ? (
                         <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias
                         </Button>
                     ) : activeIndex === 2 ? (
-                        <Button className={buttonStyle} onClick={handleIneValidation}>
-                            Verificar
+                        <Button className={buttonStyle} onClick={setActiveIndex(3)}>
+
                         </Button>
                     ) : activeIndex === 3 ? (
-                        <Button className={buttonStyle} onClick={handleIneValidation}>
-                            Verificar Cuenta
+                        <Button className={buttonStyle} onClick={handleIneValidation} disabled={loading}>
+                            {loading ? "Validando..." : "Validar identidad"}
                         </Button>
                     ) : (
                         <Button

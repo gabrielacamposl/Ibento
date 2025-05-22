@@ -25,6 +25,7 @@ from api.user.views import (crear_usuario,
                             obtener_match_id,
                             obtener_modo_busqueda,
                             actualizar_perfil,
+                            eliminar_evento_favorito
                             )
 
 
@@ -58,7 +59,7 @@ urlpatterns = [
     path('api/estado-validacion/', estado_validacion_view, name='estado-validacion'),
     # ---- Obtener intereses
     path('api/categorias-perfil/', get_categorias_perfil, name='categorias-perfil'),
-    path('api/guardar-respuestas/', guardar_respuestas_perfil, name='guardar-respuestas'),
+    path('api/intereses-respuestas/', guardar_respuestas_perfil, name='guardar_respuestas_perfil'),
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
 
@@ -98,6 +99,7 @@ urlpatterns = [
     path('api/eventos/<str:pk>/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
 
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
+    path('api/eventos/<str:pk>/dislike/', eliminar_evento_favorito, name='QuitarLikeEvento'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
   
 ]
