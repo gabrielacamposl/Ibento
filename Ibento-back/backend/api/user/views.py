@@ -55,6 +55,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializer,
                           EventoSerializerLimitado,
                           EventoSerializerLimitadoWithFecha,
+                          EventoSerializerParaPerfil,
                           # Serializers para la obtención de información de usuarios
                           UsuarioSerializerEdit,
                           UsuarioSerializerParaEventos,
@@ -1546,6 +1547,31 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         serializer = UsuarioSerializerEventosBuscarMatch(usuario, many=False)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def obtener_eventos_guardados(self, request):
+
+        usuario = request.user
+
+        eventos_guardados = usuario.save_events
+        eventos_para_match = usuario.eventos_buscar_match
+
+        # Filtrar eventos cuyas IDs estén en eventos_guardados
+        eventos_filtrados = Evento.objects.filter(_id__in=eventos_guardados)
+
+        serializer = EventoSerializerParaPerfil(eventos_filtrados, many=True)
+
+        for i, evento_data in enumerate(serializer.data):
+
+            evento_id = evento_data['_id']
+        
+            evento_data['status'] = evento_id in eventos_para_match
+
+        return Response ({"Eventos guardados":serializer.data})
+            
+
+
 
     @action(detail=False, methods=['post'])
     @permission_classes([IsAuthenticated])

@@ -294,6 +294,30 @@ class EventoSerializerLimitadoWithFecha(serializers.ModelSerializer):
                     pass
         return data     
 
+class EventoSerializerParaPerfil(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        # Define la lista explícita de campos que quieres incluir
+        fields = ['_id', 'title', 'imgs', 'dates', 'place']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        #Lista de campos que deberían ser arrays
+        json_fields = ['imgs', 'dates']
+
+        for field in json_fields:
+            if field in data and isinstance(data[field], str):
+                # Si el campo es una string pero debería ser un array, convértelo
+                try:
+                    if data[field].startswith('[') and data[field].endswith(']'):
+                        # Reemplazar comillas simples por dobles para JSON válido
+                        json_str = data[field].replace("'", '"')
+                        data[field] = json.loads(json_str)
+                except (json.JSONDecodeError, AttributeError):
+                    # Mantener el valor original si falla la conversión
+                    pass
+        return data 
+
 # ---------------------------------- CREACIÓN DE EVENTOS ----------------- --------------
 
 class EventoSerializer(serializers.ModelSerializer):
