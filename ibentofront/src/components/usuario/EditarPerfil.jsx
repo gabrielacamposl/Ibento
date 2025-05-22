@@ -23,6 +23,9 @@ const EditarPerfil = () => {
     const [apellido, setApellido] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [fotos, setFotos] = useState([] );
+    const [itemsAboutMe, setItemsAboutMe] = useState([]);
+    const [myAwnsers, setMyAwnsers] = useState([]);
+    const [selectedAnswers, setSelectedAnswers] = useState({});
     useEffect(() => {
         const Perfil = async () => {
             try {
@@ -36,7 +39,8 @@ const EditarPerfil = () => {
                 if (response.status === 200) {
                     setUserPerfil(response.data);
                     setFotos(response.data.profile_pic);
-                    console.log("Perfil obtenido:", response.data);
+                    setMyAwnsers(response.data.preferencias_generales);
+                    console.log("Mis preferencias:", response.data.preferencias_generales);
                 } else {
                     console.error("Error al obtener perfil");
                 }
@@ -47,6 +51,19 @@ const EditarPerfil = () => {
         Perfil();
     }, []);
 
+     useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await api.get('categorias-perfil/');
+                console.log("categorias recibidas:", response.data);
+                setItemsAboutMe(response.data);
+                console.log("itemsAboutMe:", itemsAboutMe);
+            } catch (error) {
+                console.error("Error al cargar las preguntas", error);
+            }
+        };
+         fetchQuestions();
+    }, []);
    
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
@@ -127,7 +144,7 @@ const EditarPerfil = () => {
     }
 
     return (
-        <div className="flex justify-center items-center text-black">
+        <div className="flex shadow-lg justify-center items-center text-black">
             <div className="degradadoPerfil relative flex flex-col items-center p-5 max-w-lg w-full">
                 <div className="flex justify-center items-center m-2 space-x-4">
                     <div className="relative">
@@ -251,15 +268,85 @@ const EditarPerfil = () => {
                             onChange={(e) => setDescripcion(e.target.value)}
                             placeholder="Escribe algo sobre ti..."
                         ></textarea>
+
+
+
                         <div className='mt-5'>
                             <h2 className="text-lg font-semibold">Mis intereses</h2>
-                            <Link to="/editarIntereses">
-                                <button className="">Editar Intereses</button>
-                            </Link>
-                            <div className="mt-2 flex flex-wrap">
-                                {user.interests.map((interest, index) => (
-                                    <h1 key={index} className="btn-off rounded-full text-center mb-1 px-3 ml-3 mt-2 sm:w-auto negritas">{interest}</h1>
-                                ))}
+                            
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {itemsAboutMe.map((item, index) => {
+                                // 👇 Parseamos "answers" por si vienen mal como string
+                                let answers = [];
+                                try {
+                                    answers = Array.isArray(item.answers)
+                                        ? item.answers
+                                        : JSON.parse(item.answers.replace(/'/g, '"'));
+                                } catch (e) {
+                                    console.error("No se pudo parsear answers para:", item.question);
+                                    answers = [];
+                                }
+
+                                return (
+                                    <div key={index} className="flex flex-col">
+                                        {item.question === '¿Cuál es tu personalidad?' ? (
+                                            <div className="flex space-x-1 items-center">
+                                                <p className="text-black font-semibold">
+                                                    {item.question}
+                                                    {!item.optional && <span className="text-red-500"> *</span>}
+                                                </p>
+                                                <a
+                                                    className="botonLink"
+                                                    href="https://www.16personalities.com/es/test-de-personalidad"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    Hacer test de personalidad
+                                                </a>
+                                            </div>
+                                        ) : (
+                                            <p className="font-semibold">
+                                                {item.question}
+                                                {!item.optional && <span className="text-red-500"> *</span>}
+                                            </p>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-2 mt-2">
+                                            {answers.map((answer, i) => {
+                                                const isSelected = selectedAnswers[item._id]?.includes(answer);
+
+                                                return (
+                                                    <button
+                                                        key={i}
+                                                        className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
+                                                        onClick={() => {
+                                                            setSelectedAnswers((prev) => {
+                                                                const currentAnswers = prev[item._id] || [];
+
+                                                                if (item.multi_option) {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: currentAnswers.includes(answer)
+                                                                            ? currentAnswers.filter((a) => a !== answer)
+                                                                            : [...currentAnswers, answer]
+                                                                    };
+                                                                } else {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: [answer]
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        {answer}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                             </div>
                         </div>
                     </React.Fragment>
