@@ -15,7 +15,14 @@ const EditarPerfil = () => {
         
     });
     const [userPerfil, setUserPerfil] = useState({ profile_pic: [] })
-
+    
+    
+    const [cumpleanos, setCumpleanos] = useState('');
+    const [genero, setGenero] = useState('');
+    const [nombre, setNombre] = useState('');
+    const [apellido, setApellido] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [fotos, setFotos] = useState([] );
     useEffect(() => {
         const Perfil = async () => {
             try {
@@ -28,7 +35,7 @@ const EditarPerfil = () => {
     
                 if (response.status === 200) {
                     setUserPerfil(response.data);
-                    
+                    setFotos(response.data.profile_pic);
                     console.log("Perfil obtenido:", response.data);
                 } else {
                     console.error("Error al obtener perfil");
@@ -55,8 +62,8 @@ const EditarPerfil = () => {
     };
 
     const handleImageDelete = (index) => {
-        const newPictures = user.pictures.filter((_, i) => i !== index);
-        setUser({ ...user, pictures: newPictures });
+        const newFotos = fotos.filter((_, i) => i !== index);
+        setFotos(newFotos);
     };
 
     const handleAddImage = (e) => {
@@ -64,61 +71,149 @@ const EditarPerfil = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setUser({ ...user, pictures: [...user.pictures, reader.result] });
+                // Solo permite máximo 6 imágenes
+                if (fotos.length < 6) {
+                    setFotos([...fotos, reader.result]);
+                }
             };
             reader.readAsDataURL(file);
         }
     };
 
+//Convertir la fecha de cumpleaños AAAA-MM-DD a edad
+    const calculateAge = (birthday) => {
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+
+    const handleSubmit = async () => {
+        const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
+        // Construir el objeto de datos antes de enviar
+        const data = {
+            nombre: nombre || userPerfil.nombre,
+            apellido: apellido || userPerfil.apellido,
+            birthday: cumpleanos || userPerfil.birthday,
+            gender: (genero ? (genero === "Hombre" ? "H" : genero === "Mujer" ? "M" : genero) : userPerfil.genero),
+            description: descripcion || userPerfil.descripcion,
+            profile_pic: fotos,
+            preferencias_generales: userPerfil.preferencias_evento,
+            preferencias_eventos: userPerfil.preferencias_evento
+        };
+        console.log("Datos a enviar:", data);
+        try {
+            const response = await api.put('perfil/actualizar/', data, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                console.log("Perfil actualizado:", response.data);
+            } else {
+                console.error("Error al actualizar perfil");
+            }
+        } catch (error) {
+            console.error("Error al actualizar perfil:", error);
+        }
+    
+       
+    }
+
     return (
-        <div className="flex justify-center items-center  text-black">
-            <div className="degradadoPerfil relative flex flex-col items-center  p-5  max-w-lg w-full">
-               
-                
+        <div className="flex justify-center items-center text-black">
+            <div className="degradadoPerfil relative flex flex-col items-center p-5 max-w-lg w-full">
                 <div className="flex justify-center items-center m-2 space-x-4">
                     <div className="relative">
                         <img src={userPerfil.profile_pic[0]} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={userPerfil.nombre} />
                     </div>
-                   
                 </div>
 
                 <div className="text-black w-full -2xl">
-                    <div className='flex'>
-                    <div className='flex'>
-                    <h1 className=" font-semibold mr-2">Nombre: </h1>
-                    <textarea className=" border border-gray-200 rounded-lg  border rounded" defaultValue={userPerfil.nombre}></textarea>
+                    <div className='mb-2 items-center'>
+                        <div className='flex items-center mr-4 mb-2'>
+                            <h1 className="font-semibold mr-2">Nombre: </h1>
+                            <input type="text"
+                                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
+                                defaultValue={userPerfil.nombre}
+                                rows={1}
+                                onChange={(e) => setNombre(e.target.value)}
+                            ></input>
+                        </div>
+                        <div className='flex items-center'>
+                            <h1 className="font-semibold mr-2">Apellido:</h1>
+                            <input type="text"
+                                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
+                                defaultValue={userPerfil.apellido}
+                                rows={1}
+                                onChange={(e) => setApellido(e.target.value)}
+                                
+                            ></input>
+                        </div>
                     </div>
-                    <div className='flex'>
-                    <h1 className=" font-semibold mr-2">Apellido:</h1>
-                    <textarea className=" border border-gray-200 rounded-lg   border rounded" defaultValue={userPerfil.apellido}></textarea>
-                    </div>
-                    </div>
-                    <div className='flex space-x-2'>
-                        {user.genero === 'H' ? (
-                            <i className="pi pi-mars mt-1" style={{ color: 'slateblue' }}></i>
+                    <div className='flex items-center'>
+                        <h1 className="font-semibold mr-2">Sexo:</h1>    
+                    <div className='flex space-x-2 mr-2 items-center'>
+                        
+                        {genero === 'Hombre' ? (
+                            <i className="pi pi-mars mt-1 font-semibold " style={{ color: 'slateblue' }}></i>
                         ) : (
-                            <i className="pi pi-venus mt-1" style={{ color: 'pink' }}></i>
+                            <i className="pi pi-venus mt-1 font-semibold" style={{ color: 'orange' }}></i>
                         )}
-                        <h1 className="text-lg">{user.age} años</h1>
+                     
                     </div>
-                    <div className='flex space-x-2'>
+                    <div className="relative">
+                            <select
+                                className="appearance-none border border-indigo-400 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-base font-medium text-indigo-700 shadow-sm transition-all"
+                                value={genero || userPerfil.genero || user.genero}
+                                onChange={(e) => setGenero(e.target.value)}
+                            >
+                                <option value="Hombre">Hombre</option>
+                                <option value="Mujer">Mujer</option>
+                            </select>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-500">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div className='flex space-x-2 mt-2 items-center'>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0L3 16.5m15-3.379a48.474 48.474 0 0 0-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 0 1 6 13.12M12.265 3.11a.375.375 0 1 1-.53 0L12 2.845l.265.265Zm-3 0a.375.375 0 1 1-.53 0L9 2.845l.265.265Zm6 0a.375.375 0 1 1-.53 0L15 2.845l.265.265Z" />
                         </svg>
-                        <h1 className="text-lg">{user.cumpleanos}</h1>
+                        
+                        <input type="text"
+                            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
+                            defaultValue={userPerfil.birthday}
+                            rows={1}
+                            placeholder='AAAA-MM-DD'  
+                            onChange={(e) => {
+                                const birthday = e.target.value;
+                                const age = calculateAge(birthday);
+                                setCumpleanos(e.target.value);
+                            }}
+                        ></input>
+                        <h1 className="text-lg">{} años</h1>
                     </div>
                 </div>
                 
-                <div className=" p-4 w-full overflow-x-auto min-h-screen">
-                <React.Fragment>
-                        <h2 className="">Fotos {userPerfil.profile_pic.length}/6</h2>
-                        <h2 className=" mb-2 text-lg font-semibold">Mis fotografías</h2>
+                <div className="p-4 w-full overflow-x-auto min-h-screen">
+                    <React.Fragment>
+                        <h2 className="">Fotos {fotos.length}/6</h2>
+                        <h2 className="mb-2 text-lg font-semibold">Mis fotografías</h2>
                         <div className="flex justify-center items-center gap-2 flex-wrap">
                             {Array.from({ length: 6 }).map((_, index) => (
-                                <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35   divBorder flex items-center justify-center">
-                                    {userPerfil.profile_pic[index] ? (
+                                <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35 divBorder flex items-center justify-center">
+                                    {fotos[index] ? (
                                         <>
-                                            <img src={userPerfil.profile_pic[index]} className="w-full h-full object-cover m" alt={user.name} />
+                                            <img src={fotos[index]} className="w-full h-full object-cover m" alt={user.name} />
                                             <button onClick={() => handleImageDelete(index)} className="w-7 h-7 sm:w-7 sm:h-7 md:w-7 md:h-7 Morado absolute top-0 right-0 text-white p-2 rounded-full btn-custom">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -150,8 +245,12 @@ const EditarPerfil = () => {
                             ))}
                         </div>
                         <h2 className="mt-5 text-lg font-semibold">Sobre mí</h2>
-                    <textarea className=" border border-gray-200 rounded-lg w-full h-30 p-2 border rounded" defaultValue={userPerfil.descripcion}></textarea>
-                   
+                        <textarea
+                            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base w-full h-32"
+                            defaultValue={userPerfil.descripcion}
+                            onChange={(e) => setDescripcion(e.target.value)}
+                            placeholder="Escribe algo sobre ti..."
+                        ></textarea>
                         <div className='mt-5'>
                             <h2 className="text-lg font-semibold">Mis intereses</h2>
                             <Link to="/editarIntereses">
@@ -164,14 +263,10 @@ const EditarPerfil = () => {
                             </div>
                         </div>
                     </React.Fragment>
-
-                   
-           
-                   
                 </div>
-                <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2">
-                        <button className={buttonStyle}>Guardar</button>
-                    </Link>
+                {/* <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2"> */}
+                    <button onClick={handleSubmit} className={buttonStyle}>Guardar</button>
+                {/* </Link> */}
             </div>
         </div>
     );

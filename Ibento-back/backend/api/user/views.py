@@ -62,7 +62,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           EventoSerializerLimitadoWithFecha,
                           # Serializers para la obtención de información de usuarios
                           UsuarioSerializerEdit,
-                          UsuarioSerializerParaEventos
+                          UsuarioSerializerParaEventos,
+                          ActualizarPerfilSerializer
                           )
 
 
@@ -290,6 +291,17 @@ def guardar_respuestas_perfil(request):
 
     return Response({"message": "Preferencias guardadas correctamente."}, status=status.HTTP_200_OK)
 
+#----- Actualizar Perfil
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def actualizar_perfil(request):
+    usuario = request.user
+    serializer = ActualizarPerfilSerializer(usuario, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"mensaje": "Perfil actualizado correctamente."}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #----- Devolver las respuestas como arreglo
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
@@ -460,6 +472,14 @@ def cambiar_modo_busqueda(request):
     usuario.modo_busqueda_match = modo
     usuario.save()
     return Response({"mensaje": f"Modo de búsqueda cambiado a {modo}"})
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_modo_busqueda(request):
+    usuario = request.user
+    modo = usuario.modo_busqueda_match
+    return Response({"modo": modo})
+
 
 # ------- Obtener sugerencias para match
 @api_view(['GET'])
