@@ -10,7 +10,7 @@ from api.user.views import obtener_mensajes, mis_conversaciones, enviar_mensaje
 # views para validar user
 from api.user.views import estado_validacion_view, ine_validation_view
 # Views par el FCM
-from api.user.views import save_fcm_token,notification_status, test_notification,remove_fcm_token
+from api.user.views import save_fcm_token,notification_status, test_notification,remove_fcm_token, get_user_notifications
 
 from api.user.views import (crear_usuario, 
                             EventoViewSet,
@@ -107,6 +107,8 @@ urlpatterns = [
     path('api/eventos/<str:pk>/dislike/', eliminar_evento_favorito, name='QuitarLikeEvento'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
     
+    # Obtener notificaciones
+    path('api/notifications/', get_user_notifications, name='get_user_notifications'),
     # Notificaciones URLs para notificaciones FCM
     path('api/save-fcm-token/', save_fcm_token, name='save_fcm_token'),
     path('api/remove-fcm-token/', remove_fcm_token, name='remove_fcm_token'),

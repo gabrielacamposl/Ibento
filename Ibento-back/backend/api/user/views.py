@@ -1996,3 +1996,174 @@ def notification_status(request):
             {'error': 'Error interno del servidor'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+        
+# Obtener todas las notificaciones y mostrarlas en el slidebar
+
+# Vista para obtener todas las notificaciones del usuario
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_notifications(request):
+    """Obtiene todas las notificaciones del usuario autenticado"""
+    try:
+        user = request.user
+        
+        # Obtener notificaciones recientes (últimos 30 días)
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db.models import Q
+        
+        fecha_limite = timezone.now() - timedelta(days=30)
+        
+        notificaciones = []
+        
+        # 1. NOTIFICACIONES DE MATCHES
+        # Buscar matches donde el usuario sea parte
+        matches = Matches.objects.filter(
+            Q(usuario_a=user) | Q(usuario_b=user),
+            fecha_match__gte=fecha_limite
+        ).order_by('-fecha_match')
+        
+        for match in matches:
+            # Determinar quién es el otro usuario
+            otro_usuario = match.usuario_b if match.usuario_a == user else match.usuario_a
+            
+            # Obtener la conversación asociada al match
+            try:
+                conversacion = Conversacion.objects.get(match=match)
+                conversacion_id = conversacion._id
+            except Conversacion.DoesNotExist:
+                conversacion_id = None
+            
+            # Obtener foto de perfil (primer elemento del array profile_pic)
+            foto_perfil = None
+            if otro_usuario.profile_pic and len(otro_usuario.profile_pic) > 0:
+                foto_perfil = otro_usuario.profile_pic[0]
+            
+            notificaciones.append({
+                'id': f"match_{match._id}",
+                'tipo': 'match',
+                'titulo': '¡Nuevo Match!',
+                'mensaje': f'Tienes un nuevo match con {otro_usuario.nombre} {otro_usuario.apellido}',
+                'fecha': match.fecha_match,
+                'leido': False,  # Puedes agregar un campo leido al modelo si quieres
+                'usuario_relacionado': {
+                    'id': otro_usuario._id,
+                    'nombre': f"{otro_usuario.nombre} {otro_usuario.apellido}",
+                    'foto': foto_perfil
+                },
+                'accion': 'abrir_chat',
+                'data': {
+                    'match_id': match._id,
+                    'conversacion_id': conversacion_id
+                }
+            })
+        
+        # 2. NOTIFICACIONES DE LIKES RECIBIDOS
+        # Buscar interacciones de tipo 'like' dirigidas al usuario
+        likes_recibidos = Interaccion.objects.filter(
+            usuario_destino=user,
+            tipo_interaccion='like',
+            fecha_interaccion__gte=fecha_limite
+        ).order_by('-fecha_interaccion')
+        
+        for like in likes_recibidos:
+            # Verificar si ya hay match (para no duplicar notificaciones)
+            hay_match = Matches.objects.filter(
+                Q(usuario_a=user, usuario_b=like.usuario_origen) |
+                Q(usuario_a=like.usuario_origen, usuario_b=user)
+            ).exists()
+            
+            if not hay_match:  # Solo mostrar likes que no resultaron en match
+                # Obtener foto de perfil
+                foto_perfil = None
+                if like.usuario_origen.profile_pic and len(like.usuario_origen.profile_pic) > 0:
+                    foto_perfil = like.usuario_origen.profile_pic[0]
+                
+                notificaciones.append({
+                    'id': f"like_{like.id}",  # Usar id ya que Interaccion no tiene _id
+                    'tipo': 'like',
+                    'titulo': '¡Alguien te dio Like!',
+                    'mensaje': f'{like.usuario_origen.nombre} {like.usuario_origen.apellido} te dio like',
+                    'fecha': like.fecha_interaccion,
+                    'leido': False,
+                    'usuario_relacionado': {
+                        'id': like.usuario_origen._id,
+                        'nombre': f"{like.usuario_origen.nombre} {like.usuario_origen.apellido}",
+                        'foto': foto_perfil
+                    },
+                    'accion': 'ver_perfil',
+                    'data': {
+                        'usuario_id': like.usuario_origen._id
+                    }
+                })
+        
+        # 3. NOTIFICACIONES DE MENSAJES NUEVOS
+        # Buscar conversaciones donde el usuario participe
+        conversaciones = Conversacion.objects.filter(
+            Q(usuario_a=user) | Q(usuario_b=user)
+        )
+        
+        for conversacion in conversaciones:
+            # Obtener el último mensaje de cada conversación que no sea del usuario actual
+            ultimo_mensaje = Mensaje.objects.filter(
+                conversacion=conversacion,
+                fecha_envio__gte=fecha_limite
+            ).exclude(
+                remitente=user  # Excluir mensajes propios
+            ).order_by('-fecha_envio').first()
+            
+            if ultimo_mensaje:
+                otro_usuario = conversacion.usuario_b if conversacion.usuario_a == user else conversacion.usuario_a
+                
+                # Contar mensajes no leídos (últimos 7 días)
+                mensajes_no_leidos = Mensaje.objects.filter(
+                    conversacion=conversacion,
+                    fecha_envio__gte=timezone.now() - timedelta(days=7)
+                ).exclude(remitente=user).count()
+                
+                # Obtener foto de perfil
+                foto_perfil = None
+                if otro_usuario.profile_pic and len(otro_usuario.profile_pic) > 0:
+                    foto_perfil = otro_usuario.profile_pic[0]
+                
+                notificaciones.append({
+                    'id': f"mensaje_{ultimo_mensaje._id}",
+                    'tipo': 'mensaje',
+                    'titulo': 'Nuevo Mensaje',
+                    'mensaje': f'{otro_usuario.nombre}: {ultimo_mensaje.mensaje[:50]}{"..." if len(ultimo_mensaje.mensaje) > 50 else ""}',
+                    'fecha': ultimo_mensaje.fecha_envio,
+                    'leido': False,
+                    'usuario_relacionado': {
+                        'id': otro_usuario._id,
+                        'nombre': f"{otro_usuario.nombre} {otro_usuario.apellido}",
+                        'foto': foto_perfil
+                    },
+                    'accion': 'abrir_chat',
+                    'data': {
+                        'conversacion_id': conversacion._id,
+                        'mensajes_no_leidos': mensajes_no_leidos
+                    }
+                })
+        
+        # Ordenar todas las notificaciones por fecha (más recientes primero)
+        notificaciones_ordenadas = sorted(
+            notificaciones, 
+            key=lambda x: x['fecha'], 
+            reverse=True
+        )
+        
+        # Limitar a las 50 más recientes
+        notificaciones_limitadas = notificaciones_ordenadas[:50]
+        
+        return Response({
+            'notificaciones': notificaciones_limitadas,
+            'total': len(notificaciones_limitadas),
+            'no_leidas': len([n for n in notificaciones_limitadas if not n['leido']])
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error getting user notifications: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
