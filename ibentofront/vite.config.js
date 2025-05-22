@@ -10,7 +10,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+         // o excluye la carpeta entera
+        globIgnores: ['images_for_preview/**'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/ibento\.onrender\.com\/api\//,
