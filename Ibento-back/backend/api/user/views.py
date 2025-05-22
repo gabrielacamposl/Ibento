@@ -58,6 +58,7 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           # Serializers para la obtención de información de usuarios
                           UsuarioSerializerEdit,
                           UsuarioSerializerParaEventos,
+                          UsuarioSerializerEventosBuscarMatch,
                           ActualizarPerfilSerializer
                           )
 
@@ -1619,4 +1620,66 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer = UsuarioSerializerEdit(usuario)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def obtener_eventos_match(self, request):
+        usuario = request.user
 
+        serializer = UsuarioSerializerEventosBuscarMatch(usuario, many=False)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def agregar_eventos_match(self, request):
+
+        usuario = request.user
+        id_event = request.query_params.get('idEvent')
+
+        # Validar que el parámetro de idEvent esté presente
+        if not id_event:
+            return Response(
+                {"detail": "Se requiere el parámetro de consulta 'idEvent'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+        if usuario.eventos_buscar_match is None:
+            usuario.eventos_buscar_match = []
+        
+        if id_event not in usuario.eventos_buscar_match:
+            if id_event in usuario.save_events:
+                usuario.eventos_buscar_match.append(id_event)
+                usuario.save(update_fields=['eventos_buscar_match'])
+                return Response({"detail": "Evento guardado correctamente para buscar Match."}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"detail": "El evento ya está guardado para buscar Match o no esta guardado en tus eventos guardados."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(detail=False, methods=['delete'])
+    @permission_classes([IsAuthenticated])
+    def eliminar_eventos_match(self, request):
+
+        usuario = request.user
+
+        id_event = request.query_params.get('idEvent')
+
+        #Verificamos que el evento este en sus guardados de buscar match
+        if id_event not in usuario.eventos_buscar_match:
+            return Response(
+                {"detail": "El evento no esta en sus guardados de buscar match"},
+                status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        #Verificamos que el evento exista
+        try:
+            evento = Evento.objects.get(_id=id_event)
+        except Evento.DoesNotExist:
+            return Response(
+                {"detail": "Evento no encontrado."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+        usuario.eventos_buscar_match.remove(id_event)
+
+        return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
