@@ -75,7 +75,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,               # Blacklist tokens antiguos
     # "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     # "TOKEN_BLACKLIST_ENABLED": True,
-    # 'USER_ID_FIELD': '_id', 
+     'USER_ID_FIELD': '_id', 
 }
 
 REST_FRAMEWORK = {
