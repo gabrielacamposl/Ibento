@@ -130,23 +130,13 @@ def confirmar_usuario(request, token):
 @permission_classes([AllowAny])
 def login_usuario(request):
     try:
-        logger.info(f"Login attempt - Data received: {request.data}")
-        
         serializer = LoginSerializer(data=request.data)
-        
         if serializer.is_valid():
-            logger.info("Serializer is valid, returning response")
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         else:
-            logger.error(f"Serializer errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-    except Exception as e:
-        logger.error(f"Unexpected error in login_usuario: {str(e)}")
-        logger.error(f"Error type: {type(e)}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        
+    except Exception as e:    
         return Response(
             {"error": "Error interno del servidor", "detail": str(e)}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
