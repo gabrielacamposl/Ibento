@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
 const messaging = firebase.messaging();
-
+const FRONTEND_URL = 'https://ibento.com.mx'; 
 // Manejar mensajes en segundo plano
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
@@ -29,9 +29,9 @@ messaging.onBackgroundMessage(function(payload) {
     badge: '/icons/ibentoba.png',
     vibrate: [200, 100, 200],
     data: {
-      click_action: payload.data?.click_action || '/',
-      url: payload.data?.url || '/',
-      type: payload.data?.type || 'general'
+     click_action: payload.data?.click_action || `${FRONTEND_URL}/`,
+     url: payload.data?.url || `${FRONTEND_URL}/`,
+     type: payload.data?.type || 'general'
     },
     actions: [
       {
@@ -60,18 +60,18 @@ self.addEventListener('notificationclick', function(event) {
   const clickAction = event.notification.data.click_action || '/';
   const notificationType = event.notification.data.type;
   
-  let targetUrl = '/';
+  let targetUrl = `${FRONTEND_URL}/`;
   
   // Redirigir según el tipo de notificación
   switch(notificationType) {
-    case 'like':
-      targetUrl = '/ibento/verLike';
+    case 'event':
+      targetUrl = `${FRONTEND_URL}/ibento/eventos`;
       break;
     case 'match':
-      targetUrl = '/ibento/match';
+      targetUrl = `${FRONTEND_URL}/ibento/match`;
       break;
     case 'message':
-      targetUrl = '/ibento/chat';
+      targetUrl = `${FRONTEND_URL}/ibento/chat`;
       break;
     default:
       targetUrl = clickAction;
