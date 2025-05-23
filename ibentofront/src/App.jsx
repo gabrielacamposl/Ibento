@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
 import { useNotifications } from './hooks/useNotifications';
+import NotificationManager from './notificationManager';
 import api from './apilogin'
 
 // -------------------------- RUTAS -----------------------------------------
@@ -190,6 +191,7 @@ return (
       </Routes>
     </Router>
     <InstallPrompt />
+    <NotificationManager />
 
   </div>
 );
