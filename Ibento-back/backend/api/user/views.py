@@ -765,18 +765,19 @@ def sugerencia_usuarios(request):
 
 
 # Vista actualizada para crear matches (con notificaciones)
+# Vista actualizada para crear matches (con notificaciones)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def matches(request):
     usuario_origen = request.user
-    usuario_destino = request.data.get("usuario_destino")
+    usuario_destino_id = request.data.get("usuario_destino")
     tipo_interaccion = request.data.get("tipo_interaccion")
 
     if tipo_interaccion not in ["like", "dislike"]:
         return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        usuario_destino = Usuario.objects.get(_id=usuario_destino)
+        usuario_destino = Usuario.objects.get(_id=usuario_destino_id)
     except Usuario.DoesNotExist:
         return Response({"error": "Usuario destino no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -798,6 +799,7 @@ def matches(request):
                 liked_user_id=usuario_destino._id,
                 liker_name=f"{usuario_origen.nombre} {usuario_origen.apellido}"
             )
+            logger.info(f"Like notification sent from {usuario_origen._id} to {usuario_destino._id}")
         except Exception as e:
             logger.error(f"Error sending like notification: {str(e)}")
         
@@ -809,13 +811,14 @@ def matches(request):
         ).first()
 
         if interaccion_mutua:
-            match, created = Matches.objects.get_or_create(
+            # Crear match
+            match, match_created = Matches.objects.get_or_create(
                 usuario_a=min(usuario_origen, usuario_destino, key=lambda x: x._id),
                 usuario_b=max(usuario_origen, usuario_destino, key=lambda x: x._id)
             )
             
-
-            conversacion, created = Conversacion.objects.get_or_create(
+            # Crear conversación
+            conversacion, conv_created = Conversacion.objects.get_or_create(
                 match=match,
                 defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
             )
@@ -830,17 +833,21 @@ def matches(request):
                     user_id=usuario_destino._id,
                     match_name=f"{usuario_origen.nombre} {usuario_origen.apellido}"
                 )
+                logger.info(f"Match notifications sent for users {usuario_origen._id} and {usuario_destino._id}")
             except Exception as e:
                 logger.error(f"Error sending match notifications: {str(e)}")
             
             return Response({
                 "message": "¡Es un match!", 
                 "match_id": match._id,
-                "conversacion_id": conversacion._id
+                "conversacion_id": conversacion._id,
+                "is_match": True
             }, status=201)
 
-    return Response({"message": "Interacción registrada correctamente."}, status=200)
-
+    return Response({
+        "message": "Interacción registrada correctamente.",
+        "is_match": False
+    }, status=200)
 
 # ------- Personas que me dieron like : *Futuros acompañantes*
 
@@ -1114,6 +1121,7 @@ def mis_conversaciones(request):
 
 
 # Vista actualizada para enviar mensajes (con notificaciones)
+# Vista actualizada para enviar mensajes (con notificaciones)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def enviar_mensaje(request):
@@ -1123,6 +1131,11 @@ def enviar_mensaje(request):
     conversacion_id = request.data.get('conversacion')
     receptor_id = request.data.get('receptor')
     mensaje = request.data.get('mensaje')
+
+    if not all([conversacion_id, receptor_id, mensaje]):
+        return Response({
+            'error': 'Faltan datos requeridos: conversacion, receptor, mensaje'
+        }, status=400)
 
     # Verificar si la conversación existe
     try:
@@ -1145,33 +1158,29 @@ def enviar_mensaje(request):
         return Response({'error': 'Receptor no encontrado'}, status=404)
 
     # Crear el mensaje
-    mensaje_data = {
-        'conversacion': conversacion_id,
-        'receptor': receptor_id,
-        'mensaje': mensaje,
-    }
-
-    from .serializers import MensajesSerializer  # Asegúrate de importar
-    serializer = MensajesSerializer(data=mensaje_data)
+    mensaje_obj = Mensaje.objects.create(
+        conversacion=conversacion,
+        remitente=remitente,
+        receptor=receptor,
+        mensaje=mensaje
+    )
     
-    if serializer.is_valid():
-        # Guardar el mensaje
-        mensaje_guardado = serializer.save()
-        
-        # Enviar notificación al receptor
-        try:
-            NotificationService.send_message_notification(
-                receiver_id=receptor._id,
-                sender_name=f"{remitente.nombre} {remitente.apellido}",
-                message_preview=mensaje
-            )
-        except Exception as e:
-            logger.error(f"Error sending message notification: {str(e)}")
-        
-        return Response(serializer.data, status=201)
+    # Enviar notificación al receptor
+    try:
+        NotificationService.send_message_notification(
+            receiver_id=receptor._id,
+            sender_name=f"{remitente.nombre} {remitente.apellido}",
+            message_preview=mensaje
+        )
+        logger.info(f"Message notification sent from {remitente._id} to {receptor._id}")
+    except Exception as e:
+        logger.error(f"Error sending message notification: {str(e)}")
     
-    return Response(serializer.errors, status=400)
-
+    # Serializar respuesta
+    from .serializers import MensajesSerializer
+    serializer = MensajesSerializer(mensaje_obj)
+    
+    return Response(serializer.data, status=201)
 
 # ------- Obtener mensajes
 @api_view(["GET"])
@@ -1902,9 +1911,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
     
-    # ----------------------------------- VISTAS PARA TESTEO DE NOTIFICACIONES --------------------------
+# ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
 
 # Vista para guardar token FCM
+# ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
+
+# Vista para guardar token FCM (actualizada)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def save_fcm_token(request):
@@ -1934,6 +1946,18 @@ def save_fcm_token(request):
             fcm_token.save()
         
         logger.info(f"FCM token {'created' if created else 'updated'} for user {user._id}")
+        
+        # Enviar notificación de bienvenida si es nuevo token
+        if created:
+            try:
+                NotificationService.send_notification(
+                    user_id=user._id,
+                    title="¡Notificaciones activadas! 🔔",
+                    body="Ya puedes recibir notificaciones de Ibento",
+                    notification_type='welcome'
+                )
+            except Exception as e:
+                logger.error(f"Error sending welcome notification: {str(e)}")
         
         return Response({
             'message': 'Token FCM guardado correctamente',
@@ -1985,14 +2009,16 @@ def remove_fcm_token(request):
         )
 
 # Vista para probar notificaciones (opcional, para desarrollo)
+# Vista para probar notificaciones
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def test_notification(request):
+    """Vista para probar el envío de notificaciones"""
     try:
         user = request.user
         title = request.data.get('title', 'Notificación de prueba')
-        body = request.data.get('body', 'Esta es una notificación de prueba')
-        notification_type = request.data.get('type', 'general')
+        body = request.data.get('body', 'Esta es una notificación de prueba desde Ibento')
+        notification_type = request.data.get('type', 'test')
         
         success = NotificationService.send_notification(
             user_id=user._id,
@@ -2002,12 +2028,15 @@ def test_notification(request):
         )
         
         if success:
-            return Response({'message': 'Notificación enviada correctamente'})
+            return Response({
+                'message': 'Notificación enviada correctamente',
+                'success': True
+            })
         else:
-            return Response(
-                {'error': 'No se pudo enviar la notificación'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({
+                'error': 'No se pudo enviar la notificación. Verifica que tengas tokens FCM activos.',
+                'success': False
+            }, status=status.HTTP_400_BAD_REQUEST)
             
     except Exception as e:
         logger.error(f"Error testing notification: {str(e)}")
@@ -2017,20 +2046,31 @@ def test_notification(request):
         )
 
 # Vista para obtener estado de notificaciones del usuario
+# Vista para obtener estado de notificaciones del usuario
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def notification_status(request):
+    """Obtiene el estado de las notificaciones del usuario"""
     try:
         user = request.user
         active_tokens = FCMToken.objects.filter(
             usuario=user, 
             is_active=True
-        ).count()
+        )
+        
+        tokens_info = []
+        for token in active_tokens:
+            tokens_info.append({
+                'device_type': token.device_type,
+                'created_at': token.created_at,
+                'token_preview': token.token[:20] + "..." if len(token.token) > 20 else token.token
+            })
         
         return Response({
-            'notifications_enabled': active_tokens > 0,
-            'active_devices': active_tokens,
-            'user_id': user._id
+            'notifications_enabled': len(tokens_info) > 0,
+            'active_devices': len(tokens_info),
+            'user_id': user._id,
+            'tokens': tokens_info
         })
         
     except Exception as e:
@@ -2039,8 +2079,6 @@ def notification_status(request):
             {'error': 'Error interno del servidor'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        
-# Obtener todas las notificaciones y mostrarlas en el slidebar
 
 # Vista para obtener todas las notificaciones del usuario
 @api_view(['GET'])

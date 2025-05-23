@@ -1,13 +1,8 @@
-// Import the functions you need from the SDKs you need
+// src/firebase/config.js
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyC9cLzJYYBPB1ERFyjUrnbVeB-gewCIkbM",
   authDomain: "ibento-8e4fc.firebaseapp.com",
@@ -21,42 +16,40 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
 const messaging = getMessaging(app);
 
-// VAPID Key Pública
-const VAPID_KEY = import.meta.env.VAPID_PUBLICA;
-
+// VAPID Key (reemplaza con tu clave VAPID real)
+const VAPID_KEY = import.meta.env.VITE_VAPID_KEY || "TU_VAPID_KEY_AQUI";
 
 // Función para solicitar permisos y obtener token
 export const requestNotificationPermission = async () => {
   try {
-    console.log('Requesting notification permission...');
+    console.log('🔔 Requesting notification permission...');
     
-    // Verificar si el navegador soporta notificaciones
+    // Verificar soporte del navegador
     if (!('Notification' in window)) {
-      console.log('This browser does not support notifications');
-      return null;
+      console.log('❌ Browser does not support notifications');
+      return { success: false, error: 'Browser not supported' };
     }
 
     // Verificar si ya tenemos permisos
     if (Notification.permission === 'granted') {
-      console.log('Notification permission already granted');
+      console.log('✅ Notification permission already granted');
       return await getFirebaseToken();
     }
 
     // Solicitar permisos
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      console.log('Notification permission granted');
+      console.log('✅ Notification permission granted');
       return await getFirebaseToken();
     } else {
-      console.log('Notification permission denied');
-      return null;
+      console.log('❌ Notification permission denied');
+      return { success: false, error: 'Permission denied' };
     }
   } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return null;
+    console.error('❌ Error requesting notification permission:', error);
+    return { success: false, error: error.message };
   }
 };
 
@@ -68,178 +61,410 @@ const getFirebaseToken = async () => {
     });
     
     if (token) {
-      console.log('Firebase token generated:', token);
-      return token;
+      console.log('🎯 Firebase token generated successfully');
+      return { success: true, token };
     } else {
-      console.log('No registration token available.');
-      return null;
+      console.log('❌ No registration token available');
+      return { success: false, error: 'No token available' };
     }
   } catch (error) {
-    console.error('An error occurred while retrieving token:', error);
-    return null;
+    console.error('❌ Error retrieving token:', error);
+    return { success: false, error: error.message };
   }
 };
 
-// Función para manejar mensajes cuando la app está en primer plano
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      console.log('Message received in foreground:', payload);
-      
-      // Mostrar notificación personalizada cuando la app está activa
-      if (payload.notification) {
-        const notificationTitle = payload.notification.title;
-        const notificationOptions = {
-          body: payload.notification.body,
-          icon: payload.notification.icon || '/icons/ibento192x192.png',
-          badge: '/icons/ibentoba.png',
-          tag: payload.data?.type || 'ibento-notification',
-          data: payload.data
-        };
-
-        // Solo mostrar si el documento no está visible
-        if (document.hidden) {
-          new Notification(notificationTitle, notificationOptions);
-        }
-      }
-      
-      resolve(payload);
-    });
-  });
-
 // Función para enviar token al servidor
-export const sendTokenToServer = async (token, userId) => {
+export const sendTokenToServer = async (token) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/save-fcm-token/`, {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      throw new Error('No auth token found');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}save-fcm-token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // Tu método de auth
+        'Authorization': `Bearer ${authToken}`
       },
       body: JSON.stringify({
         token: token,
-        user_id: userId
+        device_type: 'web'
       })
     });
 
     if (response.ok) {
-      console.log('Token sent to server successfully');
-      return true;
+      const data = await response.json();
+      console.log('✅ Token sent to server successfully:', data);
+      return { success: true, data };
     } else {
-      console.error('Failed to send token to server');
-      return false;
+      const error = await response.json();
+      console.error('❌ Failed to send token to server:', error);
+      return { success: false, error: error.error || 'Server error' };
     }
   } catch (error) {
-    console.error('Error sending token to server:', error);
-    return false;
+    console.error('❌ Error sending token to server:', error);
+    return { success: false, error: error.message };
   }
 };
 
-// Función para verificar si la app puede ser instalada
-export const checkInstallPrompt = () => {
-  let deferredPrompt = null;
-  
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('Install prompt available');
-    e.preventDefault();
-    deferredPrompt = e;
+// Función para configurar notificaciones
+export const setupNotifications = async () => {
+  try {
+    console.log('🚀 Setting up notifications...');
     
-    // Mostrar tu botón/banner personalizado de instalación
-    showInstallBanner(deferredPrompt);
-  });
+    // Solicitar permisos y obtener token
+    const tokenResult = await requestNotificationPermission();
+    
+    if (!tokenResult.success) {
+      console.log('❌ Failed to get token:', tokenResult.error);
+      return { success: false, error: tokenResult.error };
+    }
 
-  return deferredPrompt;
+    // Enviar token al servidor
+    const serverResult = await sendTokenToServer(tokenResult.token);
+    
+    if (!serverResult.success) {
+      console.log('❌ Failed to register token on server:', serverResult.error);
+      return { success: false, error: serverResult.error };
+    }
+
+    // Configurar listener para mensajes en primer plano
+    setupForegroundMessageListener();
+    
+    console.log('🎉 Notifications setup completed successfully!');
+    return { success: true, token: tokenResult.token };
+    
+  } catch (error) {
+    console.error('❌ Error setting up notifications:', error);
+    return { success: false, error: error.message };
+  }
 };
 
-// Función para mostrar banner de instalación personalizado
-const showInstallBanner = (deferredPrompt) => {
-  // Solo mostrar si no se ha instalado ya
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    return; // Ya está instalada
-  }
+// Función para manejar mensajes cuando la app está en primer plano
+const setupForegroundMessageListener = () => {
+  onMessage(messaging, (payload) => {
+    console.log('📨 Message received in foreground:', payload);
+    
+    // Mostrar notificación personalizada
+    if (payload.notification) {
+      showCustomNotification(payload);
+    }
+    
+    // Manejar acciones específicas según el tipo
+    handleNotificationAction(payload);
+  });
+};
 
-  // Crear banner de instalación
-  const installBanner = document.createElement('div');
-  installBanner.id = 'install-banner';
-  installBanner.innerHTML = `
+// Función para mostrar notificación personalizada
+const showCustomNotification = (payload) => {
+  const { notification, data } = payload;
+  
+  // Solo mostrar si la página no está visible
+  if (document.hidden) {
+    const notificationOptions = {
+      body: notification.body,
+      icon: notification.icon || '/icons/ibento192x192.png',
+      badge: '/icons/ibentoba.png',
+      tag: data?.type || 'ibento-notification',
+      data: data,
+      vibrate: [200, 100, 200],
+      renotify: true,
+      requireInteraction: true
+    };
+
+    const customNotification = new Notification(notification.title, notificationOptions);
+    
+    customNotification.onclick = () => {
+      console.log('🖱️ Notification clicked');
+      handleNotificationClick(data);
+      customNotification.close();
+    };
+  } else {
+    // Si la app está visible, mostrar notificación in-app
+    showInAppNotification(payload);
+  }
+};
+
+// Función para mostrar notificación dentro de la app
+const showInAppNotification = (payload) => {
+  const { notification, data } = payload;
+  
+  // Crear elemento de notificación
+  const notificationElement = document.createElement('div');
+  notificationElement.className = 'in-app-notification';
+  notificationElement.innerHTML = `
     <div style="
       position: fixed;
-      bottom: 20px;
-      left: 20px;
+      top: 20px;
       right: 20px;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
-      padding: 16px;
+      padding: 16px 20px;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      animation: slideUp 0.3s ease-out;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 10000;
+      max-width: 350px;
+      animation: slideInRight 0.3s ease-out;
+      cursor: pointer;
     ">
-      <div style="flex: 1;">
-        <div style="font-weight: bold; margin-bottom: 4px;">¡Instala Ibento!</div>
-        <div style="font-size: 14px; opacity: 0.9;">Accede más rápido y recibe notificaciones</div>
-      </div>
-      <div>
-        <button id="install-later" style="
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="font-size: 24px;">${getNotificationIcon(data?.type)}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: bold; margin-bottom: 4px;">${notification.title}</div>
+          <div style="font-size: 14px; opacity: 0.9;">${notification.body}</div>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" style="
           background: rgba(255,255,255,0.2);
           border: none;
           color: white;
-          padding: 8px 12px;
-          border-radius: 6px;
-          margin-right: 8px;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
           cursor: pointer;
-        ">Más tarde</button>
-        <button id="install-now" style="
-          background: white;
-          border: none;
-          color: #6366f1;
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-weight: bold;
-          cursor: pointer;
-        ">Instalar</button>
+          font-size: 16px;
+        ">×</button>
       </div>
     </div>
   `;
-
-  // Agregar estilos para la animación
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-  `;
-  document.head.appendChild(style);
-
-  document.body.appendChild(installBanner);
-
-  // Manejar clics
-  document.getElementById('install-now').addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to install prompt: ${outcome}`);
-      deferredPrompt = null;
-    }
-    installBanner.remove();
-  });
-
-  document.getElementById('install-later').addEventListener('click', () => {
-    installBanner.remove();
-    // Guardar que el usuario eligió "más tarde" para no mostrar de nuevo por un tiempo
-    localStorage.setItem('install-banner-dismissed', Date.now().toString());
-  });
-
-  // Auto-remover después de 10 segundos
+  
+  // Agregar evento click
+  notificationElement.onclick = () => {
+    handleNotificationClick(data);
+    notificationElement.remove();
+  };
+  
+  // Agregar al DOM
+  document.body.appendChild(notificationElement);
+  
+  // Auto-remover después de 5 segundos
   setTimeout(() => {
-    if (document.getElementById('install-banner')) {
-      installBanner.remove();
+    if (notificationElement.parentNode) {
+      notificationElement.remove();
     }
-  }, 10000);
+  }, 5000);
 };
 
-export { app, analytics, messaging, getToken, onMessage };
+// Función para obtener icono según tipo de notificación
+const getNotificationIcon = (type) => {
+  const icons = {
+    'like': '💕',
+    'match': '🎉',
+    'message': '💬',
+    'event': '🎪',
+    'welcome': '🔔',
+    'test': '🧪',
+    'general': '📱'
+  };
+  return icons[type] || icons.general;
+};
+
+// Función para manejar acciones de notificación
+const handleNotificationAction = (payload) => {
+  const { data } = payload;
+  
+  if (!data) return;
+  
+  // Disparar eventos personalizados según el tipo
+  switch (data.type) {
+    case 'like':
+      window.dispatchEvent(new CustomEvent('notification:like', { 
+        detail: { liker_name: data.liker_name } 
+      }));
+      break;
+      
+    case 'match':
+      window.dispatchEvent(new CustomEvent('notification:match', { 
+        detail: { match_name: data.match_name } 
+      }));
+      break;
+      
+    case 'message':
+      window.dispatchEvent(new CustomEvent('notification:message', { 
+        detail: { sender_name: data.sender_name } 
+      }));
+      break;
+      
+    case 'event':
+      window.dispatchEvent(new CustomEvent('notification:event', { 
+        detail: { 
+          event_title: data.event_title, 
+          event_type: data.event_type 
+        } 
+      }));
+      break;
+      
+    default:
+      window.dispatchEvent(new CustomEvent('notification:general', { 
+        detail: data 
+      }));
+  }
+};
+
+// Función para manejar clicks en notificaciones
+const handleNotificationClick = (data) => {
+  // Enfocar la ventana
+  window.focus();
+  
+  if (!data) return;
+  
+  // Navegar según la acción
+  switch (data.action) {
+    case 'view_likes':
+      window.location.href = '/ibento/match';
+      break;
+      
+    case 'open_chat':
+      window.location.href = '/ibento/chat';
+      break;
+      
+    case 'view_event':
+      window.location.href = '/ibento/eventos';
+      break;
+      
+    default:
+      if (data.click_action) {
+        window.location.href = data.click_action;
+      }
+  }
+};
+
+// Función para desactivar notificaciones
+export const disableNotifications = async () => {
+  try {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      throw new Error('No auth token found');
+    }
+
+    // Obtener token actual
+    const tokenResult = await getFirebaseToken();
+    if (!tokenResult.success) {
+      return { success: false, error: 'Could not get current token' };
+    }
+
+    // Enviar solicitud al servidor para desactivar
+    const response = await fetch(`${import.meta.env.VITE_API_URL}remove-fcm-token/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({
+        token: tokenResult.token
+      })
+    });
+
+    if (response.ok) {
+      console.log('✅ Notifications disabled successfully');
+      return { success: true };
+    } else {
+      const error = await response.json();
+      console.error('❌ Failed to disable notifications:', error);
+      return { success: false, error: error.error || 'Server error' };
+    }
+  } catch (error) {
+    console.error('❌ Error disabling notifications:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Función para verificar estado de notificaciones
+export const getNotificationStatus = async () => {
+  try {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      return { success: false, error: 'No auth token found' };
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}notification-status/`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { success: true, data };
+    } else {
+      const error = await response.json();
+      return { success: false, error: error.error || 'Server error' };
+    }
+  } catch (error) {
+    console.error('❌ Error getting notification status:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Función para probar notificaciones
+export const testNotification = async (title = 'Prueba', body = 'Esta es una notificación de prueba') => {
+  try {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      throw new Error('No auth token found');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}test-notification/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({
+        title,
+        body,
+        type: 'test'
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Test notification sent successfully');
+      return { success: true, data };
+    } else {
+      const error = await response.json();
+      console.error('❌ Failed to send test notification:', error);
+      return { success: false, error: error.error || 'Server error' };
+    }
+  } catch (error) {
+    console.error('❌ Error sending test notification:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Agregar estilos CSS para animaciones
+const addNotificationStyles = () => {
+  if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      .in-app-notification {
+        transition: all 0.3s ease-out;
+      }
+      
+      .in-app-notification:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+};
+
+// Inicializar estilos cuando se carga el módulo
+addNotificationStyles();
+
+// Exportar instancias de Firebase
+export { app, analytics, messaging };
