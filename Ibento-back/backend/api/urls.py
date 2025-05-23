@@ -17,6 +17,7 @@ from api.user.views import (crear_usuario,
                             UsuarioViewSet,
                             confirmar_usuario, 
                             login_usuario, 
+                            refresh_token,
                             logout_usuario,
                             upload_profile_pictures,
                             get_categorias_perfil,
@@ -48,6 +49,7 @@ urlpatterns = [
     path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
     path('api/login/', login_usuario, name='login'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
+    path('api/refresh-token/', refresh_token, name='refresh_token'),
     path("api/logout/", logout_usuario, name="logout"),
 
     # Cambiar contraseña

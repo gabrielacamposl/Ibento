@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.exceptions import ValidationError
 import traceback
 # Utils Django
@@ -132,18 +134,53 @@ def login_usuario(request):
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# ----- Token Refresh
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def refresh_token(request):
+    refresh_token = request.data.get('refresh')
+    
+    if not refresh_token:
+        return Response(
+            {"error": "Token de actualización requerido"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        refresh = RefreshToken(refresh_token)
+        new_access_token = str(refresh.access_token)
+        
+        return Response({
+            "access": new_access_token
+        }, status=status.HTTP_200_OK)
+        
+    except TokenError:
+        return Response(
+            {"error": "Token de actualización inválido"}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
 # ------------- Logout
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def logout_usuario(request):
-    auth_header = request.headers.get("Authorization", "")
-
-    if auth_header.startswith("Bearer "):
-        token = auth_header.split(" ")[1]
+    """Logout que agrega el token a la blacklist"""
+    auth_header = request.headers.get('Authorization', '')
+    
+    if auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        
+        # Agregar token a blacklist
         TokenBlackList.objects.get_or_create(token=token)
-        return Response({"mensaje": "Sesión cerrada correctamente."}, status=status.HTTP_205_RESET_CONTENT)
-
-    return Response({"error": "Token no proporcionado"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(
+            {"message": "Logout exitoso"}, 
+            status=status.HTTP_200_OK
+        )
+    
+    return Response(
+        {"error": "Token no proporcionado"}, 
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 # ------------- CAMBIAR CONTRASEÑA -----------------------------------------------------------------
 # ---- Enviar Token al correo

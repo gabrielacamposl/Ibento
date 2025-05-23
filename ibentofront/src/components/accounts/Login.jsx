@@ -28,33 +28,76 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+   const handleLogin = async (e) => {
     e.preventDefault();
-    // Validar campos
+    setLoading(true);
+    setMessage('');
 
-    // if (!email_regex.test(form.email) || !password_regex.test(form.password)) {
-    //   setMessage("El correo electrónico o contraseña son incorrectos.");
-    //   return;
-    // }
+    // Validaciones básicas
+    if (!email || !password) {
+      setMessage("Por favor completa todos los campos");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await api.post("login/", { email, password });
-      // Guardar tokens
+      const res = await api.post("login/", { 
+        email: email.trim(), 
+        password: password 
+      });
+
+      // Limpiar cualquier sesión anterior
+      localStorage.clear();
+      
+      // Guardar nuevos tokens y datos del usuario
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
-      // Opcionalmente, guarda más datos del usuario
       localStorage.setItem("user", JSON.stringify({
         id: res.data.id,
         email: res.data.email,
         nombre: res.data.nombre,
       }));
+
+      // Opcional: Guardar timestamp del login para debugging
+      localStorage.setItem("login_time", new Date().toISOString());
+
+      // Redirigir al usuario
       window.location.href = '/ibento/eventos';
+      
     } catch (err) {
+      setLoading(false);
       console.error("Error al iniciar sesión:", err);
-      const mensajeError = err.response?.data?.detail || "Correo o contraseña incorrectos";
-      alert("Error al iniciar sesión: " + mensajeError);
+      
+      // Manejo específico de errores del backend
+      let mensajeError = "Error al iniciar sesión";
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Errores específicos de tu serializer
+        if (typeof errorData === 'string') {
+          mensajeError = errorData;
+        } else if (errorData.detail) {
+          mensajeError = errorData.detail;
+        } else if (errorData.non_field_errors) {
+          mensajeError = errorData.non_field_errors[0];
+        } else if (errorData.email) {
+          mensajeError = "Email: " + errorData.email[0];
+        } else if (errorData.password) {
+          mensajeError = "Contraseña: " + errorData.password[0];
+        } else {
+          // Para errores de validación custom de tu LoginSerializer
+          mensajeError = Object.values(errorData)[0];
+        }
+      } else if (err.request) {
+        // Error de red
+        mensajeError = "Error de conexión. Verifica tu internet.";
+      }
+      
+      setMessage(mensajeError);
     }
   };
 

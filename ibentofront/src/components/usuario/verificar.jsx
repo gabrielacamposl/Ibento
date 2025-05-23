@@ -315,7 +315,7 @@ const Verificar = () => {
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
     };
-
+    
     return (
         <div className="text-black flex justify-center items-center h-full">
             <div className="degradadoPerfil relative flex flex-col items-center p-5 shadow-t max-w-lg w-full">
@@ -546,7 +546,7 @@ const Verificar = () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(2)}>
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
                             Subir Fotos
                         </Button>
                     ) : activeIndex === 1 ? (
