@@ -48,7 +48,7 @@ export const useNotifications = () => {
         throw new Error('No hay token de acceso');
       }
 
-      const response = await api.get('/api/notificaciones/', {
+      const response = await api.get('notificaciones/', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

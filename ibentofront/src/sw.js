@@ -1,5 +1,5 @@
 // IMPORTANTE: Cambiar la ver cada vez que se haga updates
-const CACHE_VERSION = 'v2'; // <- INCREMENTAR ESTO CON CADA DEPLOY
+const CACHE_VERSION = 'v2.1'; // <- INCREMENTAR ESTO CON CADA DEPLOY
 const CACHE_NAME = `ibento-${CACHE_VERSION}`;
 const CACHE_EVENTOS = `ibento-eventos-${CACHE_VERSION}`;
 
@@ -77,15 +77,21 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 // --------------------------- Función para limpiar caches viejos más agresiva ------------------
 async function limpiarCachesViejos() {
   const cacheNames = await caches.keys();
-  const cachesToDelete = cacheNames.filter(name => 
-    (name.startsWith('ibento-') && name !== CACHE_NAME && name !== CACHE_EVENTOS) ||
-    name === 'ibento-v1' // eliminar el cache viejo específicamente
-  );
-  
-  console.log('[SW] Eliminando caches viejos:', cachesToDelete);
-  await Promise.all(cachesToDelete.map(name => caches.delete(name)));
-}
 
+  const cachesToDelete = cacheNames.filter(name => 
+    // Elimina si no es uno de los actuales
+    (name.startsWith('ibento-') && name !== CACHE_NAME && name !== CACHE_EVENTOS) ||
+    // Elimina específicamente estos dos caches antiguos
+    name === 'ibento-v2' || name === 'ibento-eventos-v2'
+  );
+
+  await Promise.all(
+    cachesToDelete.map(name => {
+      console.log(`🧹 Borrando cache: ${name}`);
+      return caches.delete(name);
+    })
+  );
+}
 // Cachear eventos con timestamp para invalidar cache viejo
 async function cacheEventosDinamicos() {
   const cache = await caches.open(CACHE_EVENTOS);
