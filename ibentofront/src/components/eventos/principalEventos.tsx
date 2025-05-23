@@ -14,6 +14,7 @@ import api from '../../api';
 import { Sidebar } from 'primereact/sidebar';
 
 import { BellDot, Search } from 'lucide-react';
+import { Bell, Heart, MessageCircle, User, X } from 'lucide-react';
 
 
 function Page() {

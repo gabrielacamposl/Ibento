@@ -45,11 +45,23 @@ INSTALLED_APPS = [
     
 ]
 
-# PUSH_NOTIFICATION_SETTINGS = {
-#     "FCM_API_KEY" : os.getenv("FCM_API"),
-#     "FCM_ERROR_TIMEOUT": 5,
-#     "UPDATE_ON_DUPLICATE_REG_ID": True,
-# }
+# PUSH_NOTIFICATION_SETTINGS 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Token válido 

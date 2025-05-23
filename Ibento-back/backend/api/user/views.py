@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, action, parser_classes
 from rest_framework.parsers import MultiPartParser
-from rest_framework import status
 from rest_framework.exceptions import ValidationError
 import traceback
 # Utils Django
@@ -21,7 +20,9 @@ import random
 from datetime import datetime, timedelta, date
 from math import radians, sin, cos, sqrt, atan2
 import requests
+import logging
 import cloudinary.uploader
+
 
 #Recomendación de eventos
 from api.services.recommended_events import obtener_eventos_recomendados
@@ -30,10 +31,13 @@ from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
 # Servicio de INES
-from api.services.ine_validation import (upload_image_to_cloudinary, delete_image_from_cloudinary, url_to_base64, ocr_ine, validate_ine)
+from api.services.ine_validation import (process_ine_image_secure, ocr_ine, validate_ine)
+#Servicio para envío y recibo de notificaciones
+from api.services.notification_service import NotificationService
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
+from api.models import FCMToken
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -82,6 +86,10 @@ def calcular_edad(birthday):
         birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
     today = date.today()
     return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
+
+# loggin para las notificaciones push
+logger = logging.getLogger(__name__)
+
 # ------------------------------------------- CREACIÓN DEL USUARIO   --------------------------------------
 # --------- Crear un nuevo usuario
 
@@ -433,71 +441,150 @@ def ine_validation_view(request):
     selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
-        return Response({"error": "Ambas imágenes de la INE son requeridas."}, status=status.HTTP_400_BAD_REQUEST)
-    # Subir imágenes a Cloudinary
+        return Response({
+            "error": "Ambas imágenes de la INE son requeridas.",
+            "codigo": "MISSING_IMAGES"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not selfie:
+        return Response({
+            "error": "La foto de selfie es requerida.",
+            "codigo": "MISSING_SELFIE"
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     try: 
-        #Subir imágenes a Cloudinary de manera temporal
-        front_url, front_id = upload_image_to_cloudinary(ine_front, name="front_ine")
-        back_url, back_id = upload_image_to_cloudinary(ine_back, name="ine_back")
+        print("=== INICIANDO VALIDACIÓN DE INE ===")
+        user: Usuario = request.user
+        print(f"Usuario: {user.nombre}")
+
         
-        # Convertir URLs a base64
-        front_b64 = url_to_base64(front_url)
-        back_b64 = url_to_base64(back_url)
+        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)
+        print("Procesando imagen frontal...")
+        front_b64 = process_ine_image_secure(ine_front)
         
-        # Extraer datos de la INE
-        cic, id_ciudadano, curp= ocr_ine(front_b64, back_b64)
+        print("Procesando imagen trasera...")
+        back_b64 = process_ine_image_secure(ine_back)
+        
+        print("Imágenes procesadas exitosamente")
+        
+        # EXTRAER DATOS CON OCR
+        print("=== EXTRAYENDO DATOS DE LA INE ===")
+        cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
+        
+        # Verificar que se extrajeron los datos esenciales
         if not cic or not id_ciudadano:
-            return Response({"error": "Error al extraer datos de la INE."}, status=status.HTTP_400_BAD_REQUEST)
+            print("OCR falló - no se extrajeron datos")
+            return Response({
+                "error": "No se pudieron extraer los datos de la INE.",
+                "sugerencia": "Asegúrate de que las imágenes estén bien iluminadas, sin reflejos y que el texto sea completamente legible. Intenta tomar las fotos en un lugar con buena luz natural.",
+                "codigo": "OCR_FAILED"
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validar la INE
+        print(f"Datos extraídos - CIC: {cic}, ID: {id_ciudadano}")
+        
+        # VALIDAR INE EN PADRÓN ELECTORAL
+        print("=== VALIDANDO INE EN PADRÓN ===")
         is_valid = validate_ine(cic, id_ciudadano)
+        
         if not is_valid:
-            return Response({"error": "La INE no es válida."}, status=status.HTTP_400_BAD_REQUEST)
-        # Guardar datos en el usuario
-        user : Usuario = request.user
-        user.is_ine_validated = is_valid
+            print("INE no válida en padrón electoral")
+            return Response({
+                "error": "La INE no es válida según el padrón electoral mexicano.",
+                "sugerencia": "Verifica que tu INE esté vigente y que las imágenes sean claras.",
+                "codigo": "INE_INVALID"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        print("INE válida en padrón electoral")
+        
+        # GUARDAR DATOS DE INE EN USUARIO
+        user.is_ine_validated = True
         if curp:
             user.curp = curp
         user.save()
         
-        files = {
-            "ine_image" : ine_front,
-            "camera_image" : selfie,
-        }
-        response = requests.post(FASTAPI_URL, files=files)
-        if response.status_code != 200:
-            error = response.json()
-            return Response({
-                "error": "El rostro no coincide con el de la INE.",
-                "distancia": error.get("distancia", "N/A"),
-                "sugerencia": error.get("sugerencia", "Revisa la imagen"),
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-        result = response.json()
-        distancia = result.get("distancia")
-        sugerencia = result.get("sugerencia")
-        rostro_valido = result.get("rostro_valido", True)
+        print("=== VALIDANDO ROSTRO CON SELFIE ===")
         
-        user.is_validated_camera = rostro_valido
-        user.save()
-
+        # VALIDAR ROSTRO CON FASTAPI
+        files = {
+            "ine_image": ine_front,
+            "camera_image": selfie,
+        }
+        
+        try:
+            response = requests.post(FASTAPI_URL, files=files, timeout=60)
+            
+            if response.status_code != 200:
+                error_data = response.json() if response.content else {}
+                print(f"Validación de rostro falló: {error_data}")
+                
+                return Response({
+                    "error": "Tu rostro no coincide con la foto de la INE.",
+                    "distancia": error_data.get("distancia", "N/A"),
+                    "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
+                    "codigo": "FACE_NO_MATCH"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            result = response.json()
+            rostro_valido = result.get("rostro_valido", False)
+            
+            if not rostro_valido:
+                return Response({
+                    "error": "La verificación facial no fue exitosa.",
+                    "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
+                    "codigo": "FACE_VERIFICATION_FAILED"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Guardar validación de rostro
+            user.is_validated_camera = True
+            user.save()
+            
+            print("Rostro validado exitosamente")
+            
+        except requests.RequestException as e:
+            print(f"Error en conexión con FastAPI: {str(e)}")
+            return Response({
+                "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
+                "codigo": "FACE_SERVICE_ERROR"
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
+        
+        # RESPUESTA EXITOSA
         return Response({
-            "mensaje_ine": "INE validada exitosamente en el padrón electoral.",
-            "mensaje_rostro": "Rostro verificado correctamente con la selfie.",
+            "success": True,
+            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
+            "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
+            "usuario_validado": True,
+            "ine_validada": True,
+            "rostro_validado": True
         }, status=status.HTTP_200_OK)
     
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    # Comparar rostro
+        print(f"=== ERROR EN VALIDACIÓN ===")
+        print(f"Error: {str(e)}")
+        print(f"Tipo: {type(e).__name__}")
         
+        # Log más detallado para debugging
+        import traceback
+        print(f"Stack trace: {traceback.format_exc()}")
+        
+        return Response({
+            "error": "Ocurrió un error durante la validación.",
+            "detalle": str(e),
+            "sugerencia": "Intenta nuevamente. Si el problema persiste, contacta soporte.",
+            "codigo": "VALIDATION_ERROR"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     finally:
-        # Eliminar imágenes de Cloudinary
-        if front_id:
-            delete_image_from_cloudinary(front_id)
-        if back_id:
-            delete_image_from_cloudinary(back_id)
+        print("=== LIMPIEZA DE MEMORIA ===")
+        
+        # Limpiar variables sensibles de la memoria
+        if 'front_b64' in locals():
+            del front_b64
+        if 'back_b64' in locals():
+            del back_b64
+        
+        print("Limpieza completada")
 
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
@@ -584,6 +671,55 @@ def sugerencia_usuarios(request):
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
 # ------- Crear Match
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def matches(request):
+#     usuario_origen = request.user
+#     usuario_destino = request.data.get("usuario_destino")
+#     tipo_interaccion = request.data.get("tipo_interaccion")
+
+#     if tipo_interaccion not in ["like", "dislike"]:
+#         return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     try:
+#         usuario_destino = Usuario.objects.get(_id=usuario_destino)
+#     except Usuario.DoesNotExist:
+#         return Response({"error": "Usuario destino no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+#     if usuario_destino == usuario_origen:
+#         return Response({"error": "No puedes interactuar contigo mismo."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     # Crear la interacción
+#     interaccion, created = Interaccion.objects.get_or_create(
+#         usuario_origen=usuario_origen,
+#         usuario_destino=usuario_destino,
+#         defaults={"tipo_interaccion": tipo_interaccion}
+#     )
+
+#     # Si la interacción es un like y hay like mutuo se genera el match
+#     if tipo_interaccion == "like":
+#         interaccion_mutua = Interaccion.objects.filter(
+#             usuario_origen=usuario_destino,
+#             usuario_destino=usuario_origen,
+#             tipo_interaccion="like"
+#         ).first()
+
+#         if interaccion_mutua:
+#             match, created = Matches.objects.get_or_create(
+#                 usuario_a=min(usuario_origen, usuario_destino, key=lambda x: x._id),
+#                 usuario_b=max(usuario_origen, usuario_destino, key=lambda x: x._id)
+#             )
+#             conversacion, created = Conversacion.objects.get_or_create(
+#                 match=match,
+#                 defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
+#             )
+#             return Response({"message": "¡Es un match!", "match_id": match._id}, status=201)
+
+
+#     return Response({"message": "Interacción registrada correctamente."}, status=200)
+
+
+# Vista actualizada para crear matches (con notificaciones)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def matches(request):
@@ -609,8 +745,18 @@ def matches(request):
         defaults={"tipo_interaccion": tipo_interaccion}
     )
 
-    # Si la interacción es un like y hay like mutuo se genera el match
+    # Si la interacción es un like, enviar notificación y verificar match
     if tipo_interaccion == "like":
+        # Enviar notificación de like
+        try:
+            NotificationService.send_like_notification(
+                liked_user_id=usuario_destino._id,
+                liker_name=f"{usuario_origen.nombre} {usuario_origen.apellido}"
+            )
+        except Exception as e:
+            logger.error(f"Error sending like notification: {str(e)}")
+        
+        # Verificar si hay like mutuo para crear match
         interaccion_mutua = Interaccion.objects.filter(
             usuario_origen=usuario_destino,
             usuario_destino=usuario_origen,
@@ -622,14 +768,34 @@ def matches(request):
                 usuario_a=min(usuario_origen, usuario_destino, key=lambda x: x._id),
                 usuario_b=max(usuario_origen, usuario_destino, key=lambda x: x._id)
             )
+            
+
             conversacion, created = Conversacion.objects.get_or_create(
                 match=match,
                 defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
             )
-            return Response({"message": "¡Es un match!", "match_id": match._id}, status=201)
-
+            
+            # Enviar notificaciones de match a ambos usuarios
+            try:
+                NotificationService.send_match_notification(
+                    user_id=usuario_origen._id,
+                    match_name=f"{usuario_destino.nombre} {usuario_destino.apellido}"
+                )
+                NotificationService.send_match_notification(
+                    user_id=usuario_destino._id,
+                    match_name=f"{usuario_origen.nombre} {usuario_origen.apellido}"
+                )
+            except Exception as e:
+                logger.error(f"Error sending match notifications: {str(e)}")
+            
+            return Response({
+                "message": "¡Es un match!", 
+                "match_id": match._id,
+                "conversacion_id": conversacion._id
+            }, status=201)
 
     return Response({"message": "Interacción registrada correctamente."}, status=200)
+
 
 # ------- Personas que me dieron like : *Futuros acompañantes*
 
@@ -864,11 +1030,50 @@ def mis_conversaciones(request):
 
 
 #--------- Enviar mensaje
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def enviar_mensaje(request):
+#     remitente = request.user  # El usuario que envía el mensaje
+
+#     # Obtenemos los datos de la solicitud
+#     conversacion_id = request.data.get('conversacion')
+#     receptor_id = request.data.get('receptor')
+#     mensaje = request.data.get('mensaje')
+
+#     # Verificar si la conversación existe
+#     try:
+#         conversacion = Conversacion.objects.get(_id=conversacion_id)
+#     except Conversacion.DoesNotExist:
+#         return Response({'error': 'Conversación no encontrada'}, status=404)
+
+#     # Verificar que el remitente esté en la conversación
+#     if remitente._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+#         return Response({'error': 'No puedes enviar mensajes en esta conversación'}, status=403)
+
+#     # Verificar que el receptor sea parte de la conversación
+#     if receptor_id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
+#         return Response({'error': 'El receptor no pertenece a esta conversación'}, status=403)
+
+#     # Crear el mensaje
+#     mensaje_data = {
+#         'conversacion': conversacion_id,
+#         'receptor': receptor_id,
+#         'mensaje': mensaje,
+#     }
+
+#     serializer = MensajesSerializer(data=mensaje_data)
+#     if serializer.is_valid():
+#         serializer.save()  # Guardamos el mensaje
+#         return Response(serializer.data, status=201)  # Devolvemos el mensaje guardado
+#     return Response(serializer.errors, status=400)
+
+
+# Vista actualizada para enviar mensajes (con notificaciones)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def enviar_mensaje(request):
-    remitente = request.user  # El usuario que envía el mensaje
-
+    remitente = request.user
+    
     # Obtenemos los datos de la solicitud
     conversacion_id = request.data.get('conversacion')
     receptor_id = request.data.get('receptor')
@@ -888,6 +1093,12 @@ def enviar_mensaje(request):
     if receptor_id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
         return Response({'error': 'El receptor no pertenece a esta conversación'}, status=403)
 
+    # Obtener el receptor
+    try:
+        receptor = Usuario.objects.get(_id=receptor_id)
+    except Usuario.DoesNotExist:
+        return Response({'error': 'Receptor no encontrado'}, status=404)
+
     # Crear el mensaje
     mensaje_data = {
         'conversacion': conversacion_id,
@@ -895,11 +1106,27 @@ def enviar_mensaje(request):
         'mensaje': mensaje,
     }
 
+    from .serializers import MensajesSerializer  # Asegúrate de importar
     serializer = MensajesSerializer(data=mensaje_data)
+    
     if serializer.is_valid():
-        serializer.save()  # Guardamos el mensaje
-        return Response(serializer.data, status=201)  # Devolvemos el mensaje guardado
+        # Guardar el mensaje
+        mensaje_guardado = serializer.save()
+        
+        # Enviar notificación al receptor
+        try:
+            NotificationService.send_message_notification(
+                receiver_id=receptor._id,
+                sender_name=f"{remitente.nombre} {remitente.apellido}",
+                message_preview=mensaje
+            )
+        except Exception as e:
+            logger.error(f"Error sending message notification: {str(e)}")
+        
+        return Response(serializer.data, status=201)
+    
     return Response(serializer.errors, status=400)
+
 
 # ------- Obtener mensajes
 @api_view(["GET"])
@@ -1629,3 +1856,314 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         usuario.save(update_fields=['eventos_buscar_match'])
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
+    
+    # ----------------------------------- VISTAS PARA TESTEO DE NOTIFICACIONES --------------------------
+
+# Vista para guardar token FCM
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_fcm_token(request):
+    """Guarda o actualiza el token FCM del usuario"""
+    try:
+        user = request.user
+        token = request.data.get('token')
+        device_type = request.data.get('device_type', 'web')
+        
+        if not token:
+            return Response(
+                {'error': 'Token FCM es requerido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Crear o actualizar token
+        fcm_token, created = FCMToken.objects.get_or_create(
+            usuario=user,
+            token=token,
+            defaults={'device_type': device_type, 'is_active': True}
+        )
+        
+        if not created:
+            # Si ya existe, actualizarlo
+            fcm_token.is_active = True
+            fcm_token.device_type = device_type
+            fcm_token.save()
+        
+        logger.info(f"FCM token {'created' if created else 'updated'} for user {user._id}")
+        
+        return Response({
+            'message': 'Token FCM guardado correctamente',
+            'created': created
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error saving FCM token: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+# Vista para desactivar token FCM
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def remove_fcm_token(request):
+    """Desactiva un token FCM específico"""
+    try:
+        user = request.user
+        token = request.data.get('token')
+        
+        if not token:
+            return Response(
+                {'error': 'Token FCM es requerido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Desactivar token
+        tokens_updated = FCMToken.objects.filter(
+            usuario=user,
+            token=token
+        ).update(is_active=False)
+        
+        if tokens_updated > 0:
+            logger.info(f"FCM token deactivated for user {user._id}")
+            return Response({'message': 'Token desactivado correctamente'})
+        else:
+            return Response(
+                {'error': 'Token no encontrado'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+    except Exception as e:
+        logger.error(f"Error removing FCM token: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+# Vista para probar notificaciones (opcional, para desarrollo)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def test_notification(request):
+    """Vista para probar notificaciones - solo para desarrollo"""
+    try:
+        user = request.user
+        title = request.data.get('title', 'Notificación de prueba')
+        body = request.data.get('body', 'Esta es una notificación de prueba')
+        notification_type = request.data.get('type', 'general')
+        
+        success = NotificationService.send_notification(
+            user_id=user._id,
+            title=title,
+            body=body,
+            notification_type=notification_type
+        )
+        
+        if success:
+            return Response({'message': 'Notificación enviada correctamente'})
+        else:
+            return Response(
+                {'error': 'No se pudo enviar la notificación'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+    except Exception as e:
+        logger.error(f"Error testing notification: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+# Vista para obtener estado de notificaciones del usuario
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def notification_status(request):
+    """Obtiene el estado de las notificaciones del usuario"""
+    try:
+        user = request.user
+        active_tokens = FCMToken.objects.filter(
+            usuario=user, 
+            is_active=True
+        ).count()
+        
+        return Response({
+            'notifications_enabled': active_tokens > 0,
+            'active_devices': active_tokens,
+            'user_id': user._id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting notification status: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        
+# Obtener todas las notificaciones y mostrarlas en el slidebar
+
+# Vista para obtener todas las notificaciones del usuario
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_notifications(request):
+    """Obtiene todas las notificaciones del usuario autenticado"""
+    try:
+        user = request.user
+        
+        # Obtener notificaciones recientes (últimos 30 días)
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db.models import Q
+        
+        fecha_limite = timezone.now() - timedelta(days=30)
+        
+        notificaciones = []
+        
+        # 1. NOTIFICACIONES DE MATCHES
+        # Buscar matches donde el usuario sea parte
+        matches = Matches.objects.filter(
+            Q(usuario_a=user) | Q(usuario_b=user),
+            fecha_match__gte=fecha_limite
+        ).order_by('-fecha_match')
+        
+        for match in matches:
+            # Determinar quién es el otro usuario
+            otro_usuario = match.usuario_b if match.usuario_a == user else match.usuario_a
+            
+            # Obtener la conversación asociada al match
+            try:
+                conversacion = Conversacion.objects.get(match=match)
+                conversacion_id = conversacion._id
+            except Conversacion.DoesNotExist:
+                conversacion_id = None
+            
+            # Obtener foto de perfil (primer elemento del array profile_pic)
+            foto_perfil = None
+            if otro_usuario.profile_pic and len(otro_usuario.profile_pic) > 0:
+                foto_perfil = otro_usuario.profile_pic[0]
+            
+            notificaciones.append({
+                'id': f"match_{match._id}",
+                'tipo': 'match',
+                'titulo': '¡Nuevo Match!',
+                'mensaje': f'Tienes un nuevo match con {otro_usuario.nombre} {otro_usuario.apellido}',
+                'fecha': match.fecha_match,
+                'leido': False,  # Puedes agregar un campo leido al modelo si quieres
+                'usuario_relacionado': {
+                    'id': otro_usuario._id,
+                    'nombre': f"{otro_usuario.nombre} {otro_usuario.apellido}",
+                    'foto': foto_perfil
+                },
+                'accion': 'abrir_chat',
+                'data': {
+                    'match_id': match._id,
+                    'conversacion_id': conversacion_id
+                }
+            })
+        
+        # 2. NOTIFICACIONES DE LIKES RECIBIDOS
+        # Buscar interacciones de tipo 'like' dirigidas al usuario
+        likes_recibidos = Interaccion.objects.filter(
+            usuario_destino=user,
+            tipo_interaccion='like',
+            fecha_interaccion__gte=fecha_limite
+        ).order_by('-fecha_interaccion')
+        
+        for like in likes_recibidos:
+            # Verificar si ya hay match (para no duplicar notificaciones)
+            hay_match = Matches.objects.filter(
+                Q(usuario_a=user, usuario_b=like.usuario_origen) |
+                Q(usuario_a=like.usuario_origen, usuario_b=user)
+            ).exists()
+            
+            if not hay_match:  # Solo mostrar likes que no resultaron en match
+                # Obtener foto de perfil
+                foto_perfil = None
+                if like.usuario_origen.profile_pic and len(like.usuario_origen.profile_pic) > 0:
+                    foto_perfil = like.usuario_origen.profile_pic[0]
+                
+                notificaciones.append({
+                    'id': f"like_{like.id}",  # Usar id ya que Interaccion no tiene _id
+                    'tipo': 'like',
+                    'titulo': '¡Alguien te dio Like!',
+                    'mensaje': f'{like.usuario_origen.nombre} {like.usuario_origen.apellido} te dio like',
+                    'fecha': like.fecha_interaccion,
+                    'leido': False,
+                    'usuario_relacionado': {
+                        'id': like.usuario_origen._id,
+                        'nombre': f"{like.usuario_origen.nombre} {like.usuario_origen.apellido}",
+                        'foto': foto_perfil
+                    },
+                    'accion': 'ver_perfil',
+                    'data': {
+                        'usuario_id': like.usuario_origen._id
+                    }
+                })
+        
+        # 3. NOTIFICACIONES DE MENSAJES NUEVOS
+        # Buscar conversaciones donde el usuario participe
+        conversaciones = Conversacion.objects.filter(
+            Q(usuario_a=user) | Q(usuario_b=user)
+        )
+        
+        for conversacion in conversaciones:
+            # Obtener el último mensaje de cada conversación que no sea del usuario actual
+            ultimo_mensaje = Mensaje.objects.filter(
+                conversacion=conversacion,
+                fecha_envio__gte=fecha_limite
+            ).exclude(
+                remitente=user  # Excluir mensajes propios
+            ).order_by('-fecha_envio').first()
+            
+            if ultimo_mensaje:
+                otro_usuario = conversacion.usuario_b if conversacion.usuario_a == user else conversacion.usuario_a
+                
+                # Contar mensajes no leídos (últimos 7 días)
+                mensajes_no_leidos = Mensaje.objects.filter(
+                    conversacion=conversacion,
+                    fecha_envio__gte=timezone.now() - timedelta(days=7)
+                ).exclude(remitente=user).count()
+                
+                # Obtener foto de perfil
+                foto_perfil = None
+                if otro_usuario.profile_pic and len(otro_usuario.profile_pic) > 0:
+                    foto_perfil = otro_usuario.profile_pic[0]
+                
+                notificaciones.append({
+                    'id': f"mensaje_{ultimo_mensaje._id}",
+                    'tipo': 'mensaje',
+                    'titulo': 'Nuevo Mensaje',
+                    'mensaje': f'{otro_usuario.nombre}: {ultimo_mensaje.mensaje[:50]}{"..." if len(ultimo_mensaje.mensaje) > 50 else ""}',
+                    'fecha': ultimo_mensaje.fecha_envio,
+                    'leido': False,
+                    'usuario_relacionado': {
+                        'id': otro_usuario._id,
+                        'nombre': f"{otro_usuario.nombre} {otro_usuario.apellido}",
+                        'foto': foto_perfil
+                    },
+                    'accion': 'abrir_chat',
+                    'data': {
+                        'conversacion_id': conversacion._id,
+                        'mensajes_no_leidos': mensajes_no_leidos
+                    }
+                })
+        
+        # Ordenar todas las notificaciones por fecha (más recientes primero)
+        notificaciones_ordenadas = sorted(
+            notificaciones, 
+            key=lambda x: x['fecha'], 
+            reverse=True
+        )
+        
+        # Limitar a las 50 más recientes
+        notificaciones_limitadas = notificaciones_ordenadas[:50]
+        
+        return Response({
+            'notificaciones': notificaciones_limitadas,
+            'total': len(notificaciones_limitadas),
+            'no_leidas': len([n for n in notificaciones_limitadas if not n['leido']])
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error getting user notifications: {str(e)}")
+        return Response(
+            {'error': 'Error interno del servidor'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
