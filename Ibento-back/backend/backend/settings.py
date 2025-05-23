@@ -60,6 +60,11 @@ LOGGING = {
             'level': 'INFO',
         },
     },
+    # ver los logs
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
 }
 
 
