@@ -110,7 +110,7 @@ urlpatterns = [
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
     
     # Obtener notificaciones
-    path('api/notifications/', get_user_notifications, name='get_user_notifications'),
+    path('api/notificaciones/', get_user_notifications, name='get_user_notifications'),
     # Notificaciones URLs para notificaciones FCM
     path('api/save-fcm-token/', save_fcm_token, name='save_fcm_token'),
     path('api/remove-fcm-token/', remove_fcm_token, name='remove_fcm_token'),

@@ -1988,7 +1988,6 @@ def remove_fcm_token(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def test_notification(request):
-    """Vista para probar notificaciones - solo para desarrollo"""
     try:
         user = request.user
         title = request.data.get('title', 'Notificación de prueba')
@@ -2021,7 +2020,6 @@ def test_notification(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def notification_status(request):
-    """Obtiene el estado de las notificaciones del usuario"""
     try:
         user = request.user
         active_tokens = FCMToken.objects.filter(
@@ -2048,15 +2046,8 @@ def notification_status(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_notifications(request):
-    """Obtiene todas las notificaciones del usuario autenticado"""
     try:
         user = request.user
-        
-        # Obtener notificaciones recientes (últimos 30 días)
-        from django.utils import timezone
-        from datetime import timedelta
-        from django.db.models import Q
-        
         fecha_limite = timezone.now() - timedelta(days=30)
         
         notificaciones = []
