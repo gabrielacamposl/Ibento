@@ -8,8 +8,7 @@ import Cards from './components/cards';
 import SearchMenu from './components/menu';
 import CircularDemo from './components/carousel2';
 
-// Nuevos componentes
-import NotificationsSidebar from './components/NotificationsSidebar';
+import NotificationsSidebar from './components/SidebarNotif';
 
 // Hooks
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
