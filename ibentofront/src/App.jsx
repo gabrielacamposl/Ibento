@@ -18,6 +18,7 @@ import VerificarCorreo from "./components/accounts/VerificarCorreo";
 import RecuperarContrasena from "./components/accounts/resetPassword/recuperarContrasena";
 import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
 import NuevaContrasena from "./components/accounts/resetPassword/nuevaContrasena";
+
 // Match
 import Perfil from "./components/usuario/Perfil";
 import SideBar from "./components/usuario/sidebar";
@@ -35,165 +36,304 @@ import Matches from "./components/match/itsMatch";
 import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
+
 // Eventos
 import EventoPage from "./components/eventos/eventoPage";
 import PrincipalEventos from "./components/eventos/principalEventos";
 import MainLayout from "./layouts/MainLayout";
 import Busqueda from "./components/eventos/busqueda";
 import BusquedaCategoria from "./components/eventos/searchCategories";
-import axios from "axios";
-
-
-const VAPID_P = import.meta.env.VAPID_PUBLICA;
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { token, notification, isSupported, requestPermissions } = useNotifications(user);
 
+  // Obtener usuario actual desde localStorage o API
   useEffect(() => {
-    // Obtener usuario actual (ajusta según tu lógica de auth)
-    const getCurrentUser = async () => {
+    const initializeUser = async () => {
       try {
-        const res = await api.post("login/", { email, password });
-        // Guardar tokens
-        localStorage.setItem("access", res.data.access);
-        localStorage.setItem("refresh", res.data.refresh);
-        // Opcionalmente, guarda más datos del usuario
-        localStorage.setItem("user", JSON.stringify({
-          id: res.data.id,
-          email: res.data.email,
-          nombre: res.data.nombre,
-        }));
-        window.location.href = '/ibento/eventos';
+        // Intentar obtener usuario desde localStorage primero
+        const storedUser = localStorage.getItem('user');
+        const accessToken = localStorage.getItem('access');
+        
+        if (storedUser && accessToken) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          console.log('✅ Usuario cargado desde localStorage:', userData);
+        } else {
+          // Si no hay usuario en localStorage, verificar si hay token válido
+          if (accessToken) {
+            try {
+              // Verificar token con el servidor
+              const response = await api.get('/user/profile/', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+              });
+              
+              if (response.data) {
+                setUser(response.data);
+                localStorage.setItem('user', JSON.stringify(response.data));
+                console.log('✅ Usuario obtenido del servidor:', response.data);
+              }
+            } catch (error) {
+              console.log('❌ Token inválido, limpiando localStorage');
+              localStorage.removeItem('access');
+              localStorage.removeItem('refresh');
+              localStorage.removeItem('user');
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error getting user:', error);
+        console.error('❌ Error inicializando usuario:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    getCurrentUser();
+
+    initializeUser();
   }, []);
 
-
-useEffect(() => {
-  // Registrar el service worker si no está registrado
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  }
-}, []);
-
-useEffect(() => {
-  // Manejar notificaciones recibidas cuando la app está activa
-  if (notification) {
-    console.log('Nueva notificación recibida:', notification);
-
-    // Aquí puedes agregar lógica adicional como:
-    // - Actualizar contadores de notificaciones
-    // - Refrescar datos si es necesario
-    // - Mostrar toast o modal
-
-    if (notification.data?.type === 'message') {
-      // Actualizar lista de conversaciones
-      // refreshConversations();
-    } else if (notification.data?.type === 'match') {
-      // Actualizar lista de matches
-      // refreshMatches();
-    } else if (notification.data?.type === 'like') {
-      // Actualizar contador de likes
-      // refreshLikes();
+  // Registrar service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('✅ SW registered:', registration);
+        })
+        .catch((registrationError) => {
+          console.log('❌ SW registration failed:', registrationError);
+        });
     }
-  }
-}, [notification]);
+  }, []);
 
-const handleRequestNotifications = async () => {
-  if (isSupported) {
-    const token = await requestPermissions();
-    if (token) {
-      console.log('Notificaciones habilitadas exitosamente');
-      // Mostrar mensaje de éxito al usuario
-    } else {
-      console.log('No se pudieron habilitar las notificaciones');
-      // Mostrar mensaje de error al usuario
+  // Manejar notificaciones recibidas
+  useEffect(() => {
+    if (notification) {
+      console.log('📨 Nueva notificación recibida:', notification);
+
+      // Manejar diferentes tipos de notificaciones
+      const { data } = notification;
+      
+      if (data?.type === 'message') {
+        // Mostrar toast para mensajes
+        showNotificationToast(`💬 Nuevo mensaje de ${data.sender_name}`, 'message');
+        
+        // Opcional: actualizar lista de conversaciones si estás en la página de chat
+        if (window.location.pathname.includes('/chat')) {
+          window.dispatchEvent(new CustomEvent('refreshChats'));
+        }
+      } 
+      else if (data?.type === 'match') {
+        showNotificationToast(`🎉 ¡Nuevo match con ${data.match_name}!`, 'match');
+        
+        // Actualizar contador de matches
+        if (window.location.pathname.includes('/match')) {
+          window.dispatchEvent(new CustomEvent('refreshMatches'));
+        }
+      } 
+      else if (data?.type === 'like') {
+        showNotificationToast(`💕 ${data.liker_name} te dio like!`, 'like');
+        
+        // Actualizar contador de likes
+        if (window.location.pathname.includes('/verLike')) {
+          window.dispatchEvent(new CustomEvent('refreshLikes'));
+        }
+      }
+      else if (data?.type === 'event') {
+        showNotificationToast(`🎪 ${data.event_title}`, 'event');
+      }
     }
+  }, [notification]);
+
+  // Función para mostrar toasts de notificaciones
+  const showNotificationToast = (message, type) => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 10000;
+      max-width: 350px;
+      animation: slideInRight 0.3s ease-out;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    const icons = {
+      message: '💬',
+      match: '🎉',
+      like: '💕',
+      event: '🎪',
+      default: '🔔'
+    };
+    
+    toast.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="font-size: 24px;">${icons[type] || icons.default}</div>
+        <div style="flex: 1; font-weight: 500;">${message}</div>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 16px;
+        ">×</button>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOutRight 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 4000);
+  };
+
+  // Función para solicitar permisos de notificación
+  const handleRequestNotifications = async () => {
+    if (isSupported && user) {
+      try {
+        console.log('🔔 Solicitando permisos de notificación...');
+        const fcmToken = await requestPermissions();
+        
+        if (fcmToken) {
+          console.log('✅ Notificaciones habilitadas exitosamente');
+          showNotificationToast('🔔 ¡Notificaciones activadas correctamente!', 'success');
+        } else {
+          console.log('❌ No se pudieron habilitar las notificaciones');
+          showNotificationToast('❌ No se pudieron activar las notificaciones', 'error');
+        }
+      } catch (error) {
+        console.error('❌ Error al solicitar notificaciones:', error);
+        showNotificationToast('❌ Error al activar notificaciones', 'error');
+      }
+    }
+  };
+
+  // Mostrar loading mientras se carga el usuario
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando Ibento...</p>
+        </div>
+      </div>
+    );
   }
-};
 
-return (
-  <div className="App">
-    {user && isSupported && !token && (
-      <div className="bg-blue-500 text-white p-4 text-center">
-        <p className="mb-2">¡Habilita las notificaciones para no perderte ningún match o mensaje! 🔔</p>
-        <button
-          onClick={handleRequestNotifications}
-          className="bg-white text-blue-500 px-4 py-2 rounded font-semibold hover:bg-gray-100"
-        >
-          Habilitar Notificaciones
-        </button>
-      </div>
-    )}
+  return (
+    <div className="App">
+      {/* Banner para solicitar notificaciones */}
+      {user && isSupported && !token && (
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 text-center shadow-lg">
+          <p className="mb-3 font-medium">
+            🔔 ¡Activa las notificaciones para no perderte ningún match o mensaje!
+          </p>
+          <button
+            onClick={handleRequestNotifications}
+            className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors shadow-md"
+          >
+            Activar Notificaciones
+          </button>
+        </div>
+      )}
 
-    {/* Debug info - remover en producción */}
-    {process.env.NODE_ENV === 'development' && (
-      <div className="fixed bottom-4 left-4 bg-gray-800 text-white p-2 rounded text-xs">
-        <div>Notificaciones: {isSupported ? 'Soportadas' : 'No soportadas'}</div>
-        <div>Token: {token ? 'Configurado' : 'No configurado'}</div>
-        <div>Usuario: {user ? user.nombre : 'No logueado'}</div>
-      </div>
-    )}
+      {/* Panel de debug (solo desarrollo) */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-4 left-4 bg-gray-900 text-white p-3 rounded-lg text-xs font-mono shadow-lg z-50">
+          <div className="space-y-1">
+            <div>🔔 Notificaciones: {isSupported ? '✅ Soportadas' : '❌ No soportadas'}</div>
+            <div>🎯 Token FCM: {token ? '✅ Configurado' : '❌ No configurado'}</div>
+            <div>👤 Usuario: {user ? `✅ ${user.nombre || user.email}` : '❌ No logueado'}</div>
+            <div>🌐 Entorno: {import.meta.env.DEV ? 'Desarrollo' : 'Producción'}</div>
+          </div>
+        </div>
+      )}
 
-    <Router>
-      <Routes>
-        {/* Auth & Register*/}
-        <Route path="/" element={<Login />} />
-        <Route path="/crear-cuenta" element={<Register />} />
-        <Route path="/verificar-correo" element={<VerificarCorreo />} />
-        <Route path="/confirmar/:token" element={<Confirm />} />
+      <Router>
+        <Routes>
+          {/* Rutas de autenticación */}
+          <Route path="/" element={<Login />} />
+          <Route path="/crear-cuenta" element={<Register />} />
+          <Route path="/verificar-correo" element={<VerificarCorreo />} />
+          <Route path="/confirmar/:token" element={<Confirm />} />
+          <Route path="/logout" element={<Logout />} />
 
-        <Route path="/logout" element={<Logout />} />
+          {/* Rutas de recuperación de contraseña */}
+          <Route path="/recuperar-cuenta" element={<RecuperarContrasena />} />
+          <Route path="/recuperar-cuenta-codigo" element={<IngresarCodigo />} />
+          <Route path="/recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
 
-        {/* Matches*/}
+          {/* Rutas principales de la aplicación */}
+          <Route path="/ibento" element={<MainLayout />}>
+            {/* Eventos */}
+            <Route path="eventos" element={<PrincipalEventos />} />
+            <Route path="eventos/:eventId" element={<EventoPage />} />
+            <Route path="busqueda" element={<Busqueda />} />
+            <Route path="busqueda/:query" element={<BusquedaCategoria />} />
 
-        <Route path="/ibento" element={<MainLayout />}>
+            {/* Perfil y usuario */}
+            <Route path="perfil" element={<Perfil />} />
+            <Route path="editarPerfil" element={<EditarPerfil />} />
+            <Route path="editarIntereses" element={<EditarIntereses />} />
+            <Route path="favoritos" element={<Favoritos />} />
+            <Route path="guardados" element={<Guardados />} />
+            <Route path="verificar" element={<VerificarPerfil />} />
+            <Route path="profileVerify" element={<PerfilCheck />} />
+            <Route path="profileRepeat" element={<PerfilRepetido />} />
 
-          {/*Eventos*/}
-          <Route path="eventos" element={<PrincipalEventos />} />
-          <Route path="eventos/:eventId" element={<EventoPage />} />
-          <Route path="busqueda" element={<Busqueda />} />
-          <Route path="busqueda/:query" element={<BusquedaCategoria />} />
+            {/* Matches y chat */}
+            <Route path="matches" element={<BuscarMatches />} />
+            <Route path="verPerfil" element={<Perfiles />} />
+            <Route path="verMatches" element={<VerMatch />} />
+            <Route path="itsMatch" element={<Matches />} />
+            <Route path="match" element={<MisMatches />} />
+            <Route path="verLike" element={<Like />} />
+            <Route path="chat" element={<Chat />} />
+          </Route>
+        </Routes>
+      </Router>
 
-          <Route path="perfil" element={<Perfil />} />
-          <Route path="editarPerfil" element={<EditarPerfil />} />
-          <Route path="editarIntereses" element={<EditarIntereses />} />
-          <Route path="verPerfil" element={<Perfiles />} />
-          <Route path="favoritos" element={<Favoritos />} />
-          <Route path="guardados" element={<Guardados />} />
-          <Route path="matches" element={<BuscarMatches />} />
-          <Route path="verMatches" element={<VerMatch />} />
-          <Route path="itsMatch" element={<Matches />} />
-          <Route path="match" element={<MisMatches />} />
-          <Route path="verLike" element={<Like />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="profileVerify" element={<PerfilCheck />} />
-          <Route path="profileRepeat" element={<PerfilRepetido />} />
+      {/* Componentes adicionales */}
+      <InstallPrompt />
+      <NotificationManager />
 
-          {/* Recuperar Contraseña */}
-          <Route path="recuperar-cuenta" element={<RecuperarContrasena />} />
-          <Route path="recuperar-cuenta-codigo" element={<IngresarCodigo />} />
-          <Route path="recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
-
-          <Route path="verificar" element={<VerificarPerfil />} />
-
-        </Route>
-      </Routes>
-    </Router>
-    <InstallPrompt />
-    <NotificationManager />
-
-  </div>
-);
+      {/* Estilos para animaciones */}
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideOutRight {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
+  );
 }
-
