@@ -18,10 +18,9 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const messaging = getMessaging(app);
 
-// VAPID Key (reemplaza con tu clave VAPID real)
-const VAPID_KEY = import.meta.env.VITE_VAPID_KEY || "TU_VAPID_KEY_AQUI";
+const VAPID_KEY = import.meta.env.VAPID_PUBLICA;
 
-// Función para solicitar permisos y obtener token
+// Función para solicitar permisos y obtener token (simplificada para el hook)
 export const requestNotificationPermission = async () => {
   try {
     console.log('🔔 Requesting notification permission...');
@@ -29,7 +28,7 @@ export const requestNotificationPermission = async () => {
     // Verificar soporte del navegador
     if (!('Notification' in window)) {
       console.log('❌ Browser does not support notifications');
-      return { success: false, error: 'Browser not supported' };
+      return null;
     }
 
     // Verificar si ya tenemos permisos
@@ -45,15 +44,15 @@ export const requestNotificationPermission = async () => {
       return await getFirebaseToken();
     } else {
       console.log('❌ Notification permission denied');
-      return { success: false, error: 'Permission denied' };
+      return null;
     }
   } catch (error) {
     console.error('❌ Error requesting notification permission:', error);
-    return { success: false, error: error.message };
+    return null;
   }
 };
 
-// Función para obtener el token de Firebase
+// Función para obtener el token de Firebase (simplificada para el hook)
 const getFirebaseToken = async () => {
   try {
     const token = await getToken(messaging, { 
@@ -62,26 +61,36 @@ const getFirebaseToken = async () => {
     
     if (token) {
       console.log('🎯 Firebase token generated successfully');
-      return { success: true, token };
+      return token;
     } else {
       console.log('❌ No registration token available');
-      return { success: false, error: 'No token available' };
+      return null;
     }
   } catch (error) {
     console.error('❌ Error retrieving token:', error);
-    return { success: false, error: error.message };
+    return null;
   }
 };
 
-// Función para enviar token al servidor
-export const sendTokenToServer = async (token) => {
+// Función para configurar listener de mensajes en primer plano (requerida por el hook)
+export const onMessageListener = () => {
+  return new Promise((resolve, reject) => {
+    onMessage(messaging, (payload) => {
+      console.log('📨 Message received in foreground:', payload);
+      resolve(payload);
+    });
+  });
+};
+
+// Función para enviar token al servidor (simplificada para el hook)
+export const sendTokenToServer = async (token, userId) => {
   try {
     const authToken = localStorage.getItem('token');
     if (!authToken) {
       throw new Error('No auth token found');
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}save-fcm-token/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}save-fcm-token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,6 +98,7 @@ export const sendTokenToServer = async (token) => {
       },
       body: JSON.stringify({
         token: token,
+        user_id: userId,
         device_type: 'web'
       })
     });
@@ -96,16 +106,59 @@ export const sendTokenToServer = async (token) => {
     if (response.ok) {
       const data = await response.json();
       console.log('✅ Token sent to server successfully:', data);
-      return { success: true, data };
+      return data;
     } else {
       const error = await response.json();
       console.error('❌ Failed to send token to server:', error);
-      return { success: false, error: error.error || 'Server error' };
+      throw new Error(error.error || 'Server error');
     }
   } catch (error) {
     console.error('❌ Error sending token to server:', error);
-    return { success: false, error: error.message };
+    throw error;
   }
+};
+
+// Variables para PWA Install Prompt
+let deferredPrompt;
+let installPromptShown = false;
+
+// Función para verificar prompt de instalación PWA (requerida por el hook)
+export const checkInstallPrompt = () => {
+  // Escuchar el evento beforeinstallprompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('🔽 PWA Install prompt intercepted');
+    
+    // Prevenir que se muestre automáticamente
+    e.preventDefault();
+    
+    // Guardar el evento para uso posterior
+    deferredPrompt = e;
+    
+    // Mostrar botón de instalación personalizado (opcional)
+    showInstallButton();
+  });
+
+  // Escuchar cuando la app es instalada
+  window.addEventListener('appinstalled', (e) => {
+    console.log('🎉 PWA was installed successfully');
+    hideInstallButton();
+    
+    // Opcional: enviar evento a analytics
+    if (window.gtag) {
+      window.gtag('event', 'pwa_install', {
+        'event_category': 'PWA',
+        'event_label': 'App Installed'
+      });
+    }
+  });
+
+  // Verificar si ya está instalado
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('📱 PWA is already installed');
+    return true;
+  }
+  
+  return false;
 };
 
 // Función para configurar notificaciones
@@ -114,26 +167,26 @@ export const setupNotifications = async () => {
     console.log('🚀 Setting up notifications...');
     
     // Solicitar permisos y obtener token
-    const tokenResult = await requestNotificationPermission();
+    const token = await requestNotificationPermission();
     
-    if (!tokenResult.success) {
-      console.log('❌ Failed to get token:', tokenResult.error);
-      return { success: false, error: tokenResult.error };
+    if (!token) {
+      console.log('❌ Failed to get token');
+      return { success: false, error: 'Failed to get token' };
     }
 
     // Enviar token al servidor
-    const serverResult = await sendTokenToServer(tokenResult.token);
-    
-    if (!serverResult.success) {
-      console.log('❌ Failed to register token on server:', serverResult.error);
-      return { success: false, error: serverResult.error };
+    try {
+      await sendTokenToServer(token);
+    } catch (error) {
+      console.log('❌ Failed to register token on server:', error.message);
+      return { success: false, error: error.message };
     }
 
     // Configurar listener para mensajes en primer plano
     setupForegroundMessageListener();
     
     console.log('🎉 Notifications setup completed successfully!');
-    return { success: true, token: tokenResult.token };
+    return { success: true, token };
     
   } catch (error) {
     console.error('❌ Error setting up notifications:', error);
@@ -338,20 +391,20 @@ export const disableNotifications = async () => {
     }
 
     // Obtener token actual
-    const tokenResult = await getFirebaseToken();
-    if (!tokenResult.success) {
+    const token = await getFirebaseToken();
+    if (!token) {
       return { success: false, error: 'Could not get current token' };
     }
 
     // Enviar solicitud al servidor para desactivar
-    const response = await fetch(`${import.meta.env.VITE_API_URL}remove-fcm-token/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}remove-fcm-token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authToken}`
       },
       body: JSON.stringify({
-        token: tokenResult.token
+        token: token
       })
     });
 
@@ -377,7 +430,7 @@ export const getNotificationStatus = async () => {
       return { success: false, error: 'No auth token found' };
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}notification-status/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}notification-status/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${authToken}`
@@ -405,7 +458,7 @@ export const testNotification = async (title = 'Prueba', body = 'Esta es una not
       throw new Error('No auth token found');
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}test-notification/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}test-notification/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -431,87 +484,6 @@ export const testNotification = async (title = 'Prueba', body = 'Esta es una not
     console.error('❌ Error sending test notification:', error);
     return { success: false, error: error.message };
   }
-};
-
-// Agregar estilos CSS para animaciones
-const addNotificationStyles = () => {
-  if (!document.getElementById('notification-styles')) {
-    const style = document.createElement('style');
-    style.id = 'notification-styles';
-    style.textContent = `
-      @keyframes slideInRight {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      
-      .in-app-notification {
-        transition: all 0.3s ease-out;
-      }
-      
-      .in-app-notification:hover {
-        transform: translateX(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-};
-
-// Inicializar estilos cuando se carga el módulo
-addNotificationStyles();
-
-// Exportar instancias de Firebase
-export { app, analytics, messaging };
-
-// Agregar estas funciones al final de tu firebase/config.js
-
-// Variables para PWA Install Prompt
-let deferredPrompt;
-let installPromptShown = false;
-
-// Función para manejar el prompt de instalación de PWA
-export const checkInstallPrompt = () => {
-  // Escuchar el evento beforeinstallprompt
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('🔽 PWA Install prompt intercepted');
-    
-    // Prevenir que se muestre automáticamente
-    e.preventDefault();
-    
-    // Guardar el evento para uso posterior
-    deferredPrompt = e;
-    
-    // Mostrar botón de instalación personalizado (opcional)
-    showInstallButton();
-  });
-
-  // Escuchar cuando la app es instalada
-  window.addEventListener('appinstalled', (e) => {
-    console.log('🎉 PWA was installed successfully');
-    hideInstallButton();
-    
-    // Opcional: enviar evento a analytics
-    if (window.gtag) {
-      window.gtag('event', 'pwa_install', {
-        'event_category': 'PWA',
-        'event_label': 'App Installed'
-      });
-    }
-  });
-
-  // Verificar si ya está instalado
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('📱 PWA is already installed');
-    return true;
-  }
-  
-  return false;
 };
 
 // Función para mostrar botón de instalación
@@ -574,6 +546,23 @@ const showInstallButton = () => {
         50% { transform: scale(1.05); opacity: 0.8; }
         70% { transform: scale(0.9); opacity: 0.9; }
         100% { transform: scale(1); opacity: 1; }
+      }
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      .in-app-notification {
+        transition: all 0.3s ease-out;
+      }
+      .in-app-notification:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
       }
     `;
     document.head.appendChild(style);
@@ -653,3 +642,6 @@ export const isPWAInstalled = () => {
   return window.matchMedia('(display-mode: standalone)').matches ||
          window.navigator.standalone === true;
 };
+
+// Exportar instancias de Firebase
+export { app, analytics, messaging };
