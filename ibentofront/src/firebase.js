@@ -468,3 +468,188 @@ addNotificationStyles();
 
 // Exportar instancias de Firebase
 export { app, analytics, messaging };
+
+// Agregar estas funciones al final de tu firebase/config.js
+
+// Variables para PWA Install Prompt
+let deferredPrompt;
+let installPromptShown = false;
+
+// Función para manejar el prompt de instalación de PWA
+export const checkInstallPrompt = () => {
+  // Escuchar el evento beforeinstallprompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('🔽 PWA Install prompt intercepted');
+    
+    // Prevenir que se muestre automáticamente
+    e.preventDefault();
+    
+    // Guardar el evento para uso posterior
+    deferredPrompt = e;
+    
+    // Mostrar botón de instalación personalizado (opcional)
+    showInstallButton();
+  });
+
+  // Escuchar cuando la app es instalada
+  window.addEventListener('appinstalled', (e) => {
+    console.log('🎉 PWA was installed successfully');
+    hideInstallButton();
+    
+    // Opcional: enviar evento a analytics
+    if (window.gtag) {
+      window.gtag('event', 'pwa_install', {
+        'event_category': 'PWA',
+        'event_label': 'App Installed'
+      });
+    }
+  });
+
+  // Verificar si ya está instalado
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('📱 PWA is already installed');
+    return true;
+  }
+  
+  return false;
+};
+
+// Función para mostrar botón de instalación
+const showInstallButton = () => {
+  if (installPromptShown) return;
+  
+  // Crear botón de instalación flotante
+  const installButton = document.createElement('div');
+  installButton.id = 'pwa-install-button';
+  installButton.innerHTML = `
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      cursor: pointer;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: bounceIn 0.5s ease-out;
+      transition: all 0.3s ease;
+    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <span>📱</span>
+      <span>Instalar App</span>
+      <button onclick="document.getElementById('pwa-install-button').remove()" style="
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 12px;
+        margin-left: 8px;
+      ">×</button>
+    </div>
+  `;
+  
+  // Agregar evento click para instalar
+  installButton.onclick = (e) => {
+    if (e.target.tagName === 'BUTTON') return; // Ignorar click en botón cerrar
+    triggerInstallPrompt();
+  };
+  
+  // Agregar estilos de animación
+  if (!document.getElementById('pwa-install-styles')) {
+    const style = document.createElement('style');
+    style.id = 'pwa-install-styles';
+    style.textContent = `
+      @keyframes bounceIn {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        70% { transform: scale(0.9); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(installButton);
+  installPromptShown = true;
+  
+  // Auto-ocultar después de 10 segundos si no se usa
+  setTimeout(() => {
+    const button = document.getElementById('pwa-install-button');
+    if (button) {
+      button.style.opacity = '0.7';
+      button.style.transform = 'scale(0.9)';
+    }
+  }, 10000);
+};
+
+// Función para ocultar botón de instalación
+const hideInstallButton = () => {
+  const installButton = document.getElementById('pwa-install-button');
+  if (installButton) {
+    installButton.style.animation = 'fadeOut 0.3s ease-out';
+    setTimeout(() => {
+      installButton.remove();
+    }, 300);
+  }
+};
+
+// Función para mostrar el prompt de instalación
+export const triggerInstallPrompt = async () => {
+  if (!deferredPrompt) {
+    console.log('❌ No install prompt available');
+    return { success: false, error: 'Install prompt not available' };
+  }
+
+  try {
+    // Mostrar el prompt
+    deferredPrompt.prompt();
+    
+    // Esperar la respuesta del usuario
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    console.log(`👤 User response to install prompt: ${outcome}`);
+    
+    // Limpiar el prompt
+    deferredPrompt = null;
+    hideInstallButton();
+    
+    // Opcional: enviar evento a analytics
+    if (window.gtag) {
+      window.gtag('event', 'pwa_install_prompt', {
+        'event_category': 'PWA',
+        'event_label': outcome
+      });
+    }
+    
+    return { 
+      success: true, 
+      outcome,
+      installed: outcome === 'accepted'
+    };
+    
+  } catch (error) {
+    console.error('❌ Error showing install prompt:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Función para verificar si la PWA puede ser instalada
+export const canInstallPWA = () => {
+  return !!deferredPrompt;
+};
+
+// Función para verificar si la PWA ya está instalada
+export const isPWAInstalled = () => {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+};
