@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
+from bson import ObjectId
 
 # Libraries
 import json
@@ -30,6 +31,10 @@ from api.services.recommended_events import obtener_eventos_recomendados
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 from api.services.ticketmaster import guardar_eventos_desde_json
+#Servicio de recomendación de usuarios
+from api.services.recommended_users import recomendacion_de_usuarios
+#Creación de usuarios
+from api.services.create_users import crearUsuarios
 # Servicio de INES
 from api.services.ine_validation import (process_ine_image_secure, ocr_ine, validate_ine)
 #Servicio para envío y recibo de notificaciones
@@ -625,7 +630,14 @@ def obtener_modo_busqueda(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sugerencia_usuarios(request):
+
     usuario = request.user
+
+    us_preferencias_generales = usuario.preferencias_generales
+    us_id = usuario._id
+    us_eventos_guardados = usuario.save_events
+    us_modo_busqueda = usuario.modo_busqueda_match
+
 
     # Obtener IDs de usuarios a los que ya se les dio like o dislike
     interacciones_realizadas = Interaccion.objects.filter(
@@ -634,39 +646,72 @@ def sugerencia_usuarios(request):
 
     # Obtener usuarios bloqueados por el usuario actual
     usuarios_bloqueados = Bloqueo.objects.filter(
-        usuario_bloqueador=usuario
-    ).values_list('usuario_bloqueado', flat=True)
+        usuario_bloqueador_id=usuario
+    ).values_list('usuario_bloqueado_id', flat=True)
 
-    save_events_param = request.query_params.get('save_events', '')
-    evento_ids = save_events_param.split(',') if save_events_param else []
+    candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
+
+    print("Candidatos")
+    print(candidatos)
+
+    print("Interacciones realizadas")
+    print(interacciones_realizadas)
+
+    print("Bloqueados")
+    print(usuarios_bloqueados)
 
     sugerencias = []
 
-    if usuario.modo_busqueda_match == 'evento' and evento_ids:
-        for evento_id in evento_ids:
-            usuarios_en_evento = Usuario.objects.filter(
-                eventos_buscar_match__contains=[evento_id],
-                modo_busqueda_match='evento',
-                is_ine_validated=True,
-                is_validated_camera=True
-            ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
+    if us_modo_busqueda == 'global':
+        if interacciones_realizadas:
+            ids_objeto = [ObjectId(id_str) for id_str in interacciones_realizadas if id_str]
+            candidatos = candidatos.exclude(_id__in=ids_objeto)
+        
+        if usuarios_bloqueados:
+            ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
+            candidatos = candidatos.exclude(_id__in=ids_objeto)
 
-            sugerencias.extend(usuarios_en_evento)
+    if us_modo_busqueda == 'evento':
 
-        sugerencias = list(set(sugerencias))
+        eventos_status = usuario.eventos_buscar_match
 
-    elif usuario.modo_busqueda_match == 'global':
-        sugerencias = Usuario.objects.filter(
-            is_ine_validated=True,
-            is_validated_camera=True
-        ).exclude(_id__in=interacciones_realizadas).exclude(_id=usuario._id).exclude(_id__in=usuarios_bloqueados)
+        eventos = Evento.objects.filter(_id__in=eventos_status)
 
-    serializer = SugerenciaSerializer(sugerencias, many=True)
+        usuarios_eventos = []
+        for evento in eventos:
+            usuarios_eventos += evento.assistants
 
+        candidatos = candidatos.filter(_id__in = usuarios_eventos)
+
+    print("Candidatos despues de filtros")
+    if candidatos:
+        print(candidatos)
+
+    #Falta comprobar que el otro usuario este buscando para alguno de esos eventos
+    sugerencias = {}
+    for candidato in candidatos:
+        if candidato._id == us_id:
+            continue
+        compatibilidad = recomendacion_de_usuarios(us_preferencias_generales, candidato.preferencias_generales)
+        sugerencias[candidato._id] = compatibilidad
+
+    print("Sugerencias: ")
+    print(sugerencias)
+    
+    #sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)
+    sugerencias_ordenadas = sorted(sugerencias, key=lambda x: sugerencias[x], reverse=True)[:100]
+
+    #Enviar la edad, eventos en comun, num_eventos en comun
+
+    usuarios_filtrados = candidatos.filter(_id__in=sugerencias_ordenadas)
+
+    serializer = SugerenciaSerializer(usuarios_filtrados, many=True)
+
+    # Añadir la edad a cada sugerencia
     for i, user_data in enumerate(serializer.data):
-        user_data['edad'] = calcular_edad(sugerencias[i].birthday)
+        user_data['edad'] = calcular_edad(candidatos[i].birthday)
 
-    return Response({"sugerencias": serializer.data})
+    return Response(serializer.data)
 
 
 # -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
@@ -1720,6 +1765,16 @@ def es_favorito(request, pk):
             return Response({"es_favorito": False}, status=status.HTTP_200_OK)
     except Evento.DoesNotExist:
         return Response({"detail": "Evento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+# ------ Creación de usuarios
+@api_view(["POST"])
+def crear_usuarios(request):
+    valid = crearUsuarios()
+
+    if valid:
+        return Response({'mensaje': 'Usuarios creados correctamente'})
+    
+    return Response({'mensaje': 'Ocurrio un error'})
 
 # ------- Obtener usuarios por ID
 @api_view(["GET"])
