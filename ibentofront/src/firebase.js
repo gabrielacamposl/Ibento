@@ -18,8 +18,9 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const messaging = getMessaging(app);
 
-// VAPID Key - Necesitas obtener esto de Firebase Console
-const VAPID_KEY = "YOUR_VAPID_KEY_HERE"; // ⚠️ REEMPLAZA CON TU VAPID KEY
+
+
+const VAPID_KEY = import.meta.env.VAPID_PUBLICA;
 
 // Función para solicitar permisos y obtener token
 export const requestNotificationPermission = async () => {
