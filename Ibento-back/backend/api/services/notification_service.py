@@ -22,9 +22,10 @@ class NotificationService:
         try:
            
             tokens = FCMToken.objects.filter(
-                usuario__id=user_id, 
+                usuario___id=user_id,
                 is_active=True
             ).values_list('token', flat=True)
+
             
             if not tokens:
                 logger.info(f"No active tokens found for user {user_id}")
