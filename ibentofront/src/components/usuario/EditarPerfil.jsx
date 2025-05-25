@@ -1,7 +1,9 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect, use } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import apiaxios from "../../axiosConfig";
 import api from '../../api';
 const EditarPerfil = () => {
     const [user, setUser] = useState({
@@ -15,8 +17,9 @@ const EditarPerfil = () => {
         
     });
     const [userPerfil, setUserPerfil] = useState({ profile_pic: [] })
-    
-    
+    const [categorias, setCategorias] = useState([]);
+    const [selectedEvents, setSelectedEvents] = useState([]);
+
     const [cumpleanos, setCumpleanos] = useState('');
     const [genero, setGenero] = useState('');
     const [nombre, setNombre] = useState('');
@@ -26,6 +29,40 @@ const EditarPerfil = () => {
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [myAwnsers, setMyAwnsers] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
+    
+
+    // Función para obtener categorías de eventos
+useEffect(() => {
+  const fetchCategorias = async () => {
+    try {
+      const res = await apiaxios.get('eventos/categorias/');
+      const categoriasFormateadas = res.data.map(cat => ({
+        id: cat._id,
+        nombre: cat.nombre,
+        valores: cat.subcategorias.map(sub => sub.nombre_subcategoria),
+      }));
+      setCategorias(categoriasFormateadas);
+      console.log("categorias", categoriasFormateadas);
+    } catch (err) {
+      console.error('Error al obtener categorías:', err);
+    }
+  };
+    fetchCategorias();
+}, []);
+
+// Función para manejar la selección y deselección de eventos
+  const toggleSeleccionado = (valor) => {
+    setSelectedEvents((prevSelected) => {
+      if (prevSelected.includes(valor)) {
+        // Si el valor ya está seleccionado, lo quitamos
+        return prevSelected.filter((item) => item !== valor);
+      } else {
+        // Si no está seleccionado, lo agregamos
+        return [...prevSelected, valor];
+      }
+    });
+  };
+    
     useEffect(() => {
         const Perfil = async () => {
             try {
@@ -38,9 +75,12 @@ const EditarPerfil = () => {
     
                 if (response.status === 200) {
                     setUserPerfil(response.data);
+                   
                     setFotos(response.data.profile_pic);
+                    
+                    setSelectedEvents(response.data.preferencias_evento);
                     setMyAwnsers(response.data.preferencias_generales);
-                    console.log("Mis preferencias:", response.data.preferencias_generales);
+                   
                 } else {
                     console.error("Error al obtener perfil");
                 }
@@ -55,9 +95,9 @@ const EditarPerfil = () => {
         const fetchQuestions = async () => {
             try {
                 const response = await api.get('categorias-perfil/');
-                console.log("categorias recibidas:", response.data);
+                
                 setItemsAboutMe(response.data);
-                console.log("itemsAboutMe:", itemsAboutMe);
+              
             } catch (error) {
                 console.error("Error al cargar las preguntas", error);
             }
@@ -97,6 +137,11 @@ const EditarPerfil = () => {
         }
     };
 
+
+
+
+    
+
 //Convertir la fecha de cumpleaños AAAA-MM-DD a edad
     const calculateAge = (birthday) => {
         const today = new Date();
@@ -120,12 +165,12 @@ const EditarPerfil = () => {
             gender: (genero ? (genero === "Hombre" ? "H" : genero === "Mujer" ? "M" : genero) : userPerfil.genero),
             description: descripcion || userPerfil.descripcion,
             profile_pic: fotos,
-            preferencias_generales: userPerfil.preferencias_evento,
-            preferencias_eventos: userPerfil.preferencias_evento
+            preferencias_evento:  selectedEvents || userPerfil.preferencias_evento,
+            //preferencias_eventos: userPerfil.preferencias_evento
         };
         console.log("Datos a enviar:", data);
         try {
-            const response = await api.put('perfil/actualizar/', data, {
+            const response = await api.patch('perfil/actualizar/', data, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -230,7 +275,12 @@ const EditarPerfil = () => {
                                 <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35 divBorder flex items-center justify-center">
                                     {fotos[index] ? (
                                         <>
-                                            <img src={fotos[index]} className="w-full h-full object-cover m" alt={user.name} />
+                                            <img 
+                                            src={typeof fotos[index] === "string"
+                                                                ? fotos[index]
+                                                                : URL.createObjectURL(fotos[index])
+                                                    } 
+                                            className="w-full h-full object-cover m" alt={user.name} />
                                             <button onClick={() => handleImageDelete(index)} className="w-7 h-7 sm:w-7 sm:h-7 md:w-7 md:h-7 Morado absolute top-0 right-0 text-white p-2 rounded-full btn-custom">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -264,15 +314,51 @@ const EditarPerfil = () => {
                         <h2 className="mt-5 text-lg font-semibold">Sobre mí</h2>
                         <textarea
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base w-full h-32"
-                            defaultValue={userPerfil.descripcion}
+                            defaultValue={userPerfil.description}
                             onChange={(e) => setDescripcion(e.target.value)}
                             placeholder="Escribe algo sobre ti..."
                         ></textarea>
-
-
-
                         <div className='mt-5'>
-                            <h2 className="text-lg font-semibold">Mis intereses</h2>
+                           <Accordion multiple >
+                            <AccordionTab className="text-lg font-semibold mb-3" header="Mis Intereses">
+                                <div className="scroll-x-overflow">
+              
+                               
+                                <h1>¿Qué tipo de eventos te gustan?</h1>
+                                
+
+                                
+                                <div className="intereses-container">
+                                    {categorias.map((categoria) => (
+                                    <div key={categoria.id} className="categoria mb-5">
+                                        <div className={buttonStyle} style={{ cursor: 'default' }}>
+                                        {categoria.nombre}
+                                        </div>
+                                        <ul className="flex flex-wrap">
+                                        {categoria.valores.map((valor) => (
+                                            <li
+                                            key={valor}
+                                            className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                                : 'btn-off'
+                                                }`}
+                                            onClick={() => toggleSeleccionado(valor)}
+                                            >
+                                            {valor}
+                                            </li>
+                                        ))}
+                                        </ul>
+                                    </div>
+                                    ))}
+                                </div>
+                                
+
+                                
+                                </div>
+                            </AccordionTab>
+                            <AccordionTab className="text-lg font-semibold" header="Intereses de Eventos">
+                                 <div className='mt-5'>
+                           
                             
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {itemsAboutMe.map((item, index) => {
@@ -286,7 +372,7 @@ const EditarPerfil = () => {
                                     console.error("No se pudo parsear answers para:", item.question);
                                     answers = [];
                                 }
-
+                               
                                 return (
                                     <div key={index} className="flex flex-col">
                                         {item.question === '¿Cuál es tu personalidad?' ? (
@@ -313,8 +399,8 @@ const EditarPerfil = () => {
 
                                         <div className="grid grid-cols-2 gap-2 mt-2">
                                             {answers.map((answer, i) => {
-                                                const isSelected = selectedAnswers[item._id]?.includes(answer);
-
+                                                const isSelected =  selectedAnswers[item._id]?.includes(answer);
+                                                
                                                 return (
                                                     <button
                                                         key={i}
@@ -348,7 +434,16 @@ const EditarPerfil = () => {
                                 );
                             })}
                             </div>
+                           
                         </div>
+                            </AccordionTab>
+                        
+    
+                        </Accordion>
+                        </div>
+
+
+                       
                     </React.Fragment>
                 </div>
                 {/* <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2"> */}

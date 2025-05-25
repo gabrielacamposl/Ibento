@@ -80,7 +80,18 @@ useEffect(() => {
             });
             console.log(response);
             if (response.status === 200) {
-                setFavoritos(response.data);
+                const favoritosData = response.data.map((favorito) => ({
+                    _id: favorito._id,
+                    title: favorito.title,
+                    description: favorito.description,
+                    place: favorito.place,
+                    dates: favorito.dates,
+                    imgs: favorito.imgs,
+                    isFavorite: true
+                    
+                   
+                }));
+                setFavoritos(favoritosData);
                 console.log("Favoritos obtenidos:", response.data);
             } else {
                 console.error("Error al obtener favoritos");
@@ -251,7 +262,7 @@ const [loading, setLoading] = useState(true);
                                     <h2 className="w-full text-black text-lg mt-3 font-semibold">Preferencias de eventos</h2>
                                     <div className=" flex flex-wrap">
                                         {userPerfil.preferencias_evento && userPerfil.preferencias_evento.map((interest, index) => (
-                                            <h1 key={index} className="btn-off rounded-full text-center mb-1 px-2 ml-3 mt-2 sm:w-auto negritas">{interest}</h1>
+                                            <h1 key={index} className="btn-off rounded-full text-center mb-1 px-2 ml-3 mt-2 sm:w-auto negritas shadow">{interest}</h1>
                                         ))}
                                     </div>
                                 </div>
@@ -264,11 +275,12 @@ const [loading, setLoading] = useState(true);
                                         ))}
                                     </div>
                                 </div> */}
+                                 <h2 className="text-black text-lg font-semibold">Sobre mí</h2>
+                                 <p className='text-black text-justify'>{userPerfil.description}</p> 
+                
 
                 <div className="bg-white p-5 w-full">
-                    <h2 className="text-black text-lg font-semibold">Sobre mí</h2>
-                    <p className='text-black text-justify'>{userPerfil.description}</p> 
-                
+                   
                     <div className="flex justify-start mb-5 space-x-5 mt-10 text-black">
                         <button onClick={() => handleTabChange(0)} className={index === 0 ? 'activo' : 'inactivo'}>
                             <span className='flex'>
@@ -278,7 +290,7 @@ const [loading, setLoading] = useState(true);
                                 Mis Favoritos
                             </span>
                         </button>
-                        <button onClick={() => {handleTabChange(1); isVerify();}} className={index === 1 ? 'activo' : 'inactivo'}>
+                        <button onClick={() => {handleTabChange(1); }} className={index === 1 ? 'activo' : 'inactivo'}>
                             <span className='flex'>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
