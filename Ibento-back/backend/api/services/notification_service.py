@@ -22,9 +22,9 @@ class NotificationService:
         Envía una notificación a un usuario específico
         """
         try:
-            # Obtener tokens activos del usuario
+            # Obtener tokens activos del usuario - CORREGIDO el filtro
             tokens = FCMToken.objects.filter(
-                usuario___id=user_id, 
+                usuario___id=user_id,  # Cambiar por usuario__id
                 is_active=True
             ).values_list('token', flat=True)
             
@@ -33,13 +33,20 @@ class NotificationService:
                 return False
             
             tokens_list = list(tokens)
+            logger.info(f"Found {len(tokens_list)} active tokens for user {user_id}")
             
-            # Preparar data payload
-            notification_data = data or {}
+            # Preparar data payload - todos los valores deben ser strings
+            notification_data = {}
+            if data:
+                # Convertir todos los valores a string
+                for key, value in data.items():
+                    notification_data[str(key)] = str(value)
+                    
             notification_data.update({
-                'type': notification_type,
-                'user_id': user_id,
-                'click_action': click_action or f'https://ibento.com.mx/',
+                'type': str(notification_type),
+                'user_id': str(user_id),
+                'click_action': str(click_action or 'https://ibento.com.mx/'),
+                'timestamp': str(int(__import__('time').time()))
             })
             
             # Crear mensaje
@@ -47,7 +54,7 @@ class NotificationService:
                 notification=messaging.Notification(
                     title=title,
                     body=body,
-                    image=None  # Puedes agregar imagen si necesitas
+                    image=None
                 ),
                 data=notification_data,
                 android=messaging.AndroidConfig(
@@ -56,7 +63,7 @@ class NotificationService:
                         color='#6366f1',
                         sound='default',
                         tag=notification_type,
-                        click_action=click_action or f'https://ibento.com.mx/',
+                        click_action=click_action or 'https://ibento.com.mx/',
                     ),
                     priority='high'
                 ),
@@ -81,7 +88,7 @@ class NotificationService:
                         badge='/icons/ibentoba.png',
                         tag=notification_type,
                         renotify=True,
-                        require_interaction=True,
+                        require_interaction=notification_type in ['match', 'message'],
                         vibrate=[200, 100, 200],
                         actions=[
                             messaging.WebpushNotificationAction(
@@ -91,7 +98,7 @@ class NotificationService:
                         ]
                     ),
                     fcm_options=messaging.WebpushFCMOptions(
-                        link=click_action or f'https://ibento.com.mx/'
+                        link=click_action or 'https://ibento.com.mx/'
                     )
                 ),
                 tokens=tokens_list
@@ -112,6 +119,7 @@ class NotificationService:
                 for idx, resp in enumerate(response.responses):
                     if not resp.success:
                         error_code = resp.exception.code if resp.exception else 'unknown'
+                        logger.warning(f"Failed to send to token {idx}: {error_code}")
                         if error_code in ['registration-token-not-registered', 'invalid-registration-token']:
                             invalid_tokens.append(tokens_list[idx])
                             logger.info(f"Invalid token found: {tokens_list[idx][:20]}...")
@@ -125,6 +133,8 @@ class NotificationService:
             
         except Exception as e:
             logger.error(f"Error sending notification to user {user_id}: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return False
     
     @staticmethod
@@ -135,7 +145,7 @@ class NotificationService:
             title="¡Alguien te dio like! 💕",
             body=f"{liker_name} está interesado en ser tu acompañante",
             notification_type='like',
-            click_action='https://ibento.com.mx/ibento/match',
+            click_action='https://ibento.com.mx/ibento/verLike',
             data={
                 'liker_name': liker_name,
                 'action': 'view_likes'

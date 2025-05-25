@@ -18,41 +18,42 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const messaging = getMessaging(app);
 
-const VAPID_KEY = import.meta.env.VAPID_PUBLICA;
+// VAPID Key - Necesitas obtener esto de Firebase Console
+const VAPID_KEY = "YOUR_VAPID_KEY_HERE"; // ⚠️ REEMPLAZA CON TU VAPID KEY
 
-// Función para solicitar permisos y obtener token (simplificada para el hook)
+// Función para solicitar permisos y obtener token
 export const requestNotificationPermission = async () => {
   try {
-    console.log('🔔 Requesting notification permission...');
+    console.log('🔔 Solicitando permisos de notificación...');
     
     // Verificar soporte del navegador
     if (!('Notification' in window)) {
-      console.log('❌ Browser does not support notifications');
+      console.log('❌ El navegador no soporta notificaciones');
       return null;
     }
 
     // Verificar si ya tenemos permisos
     if (Notification.permission === 'granted') {
-      console.log('✅ Notification permission already granted');
+      console.log('✅ Permisos ya otorgados');
       return await getFirebaseToken();
     }
 
     // Solicitar permisos
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      console.log('✅ Notification permission granted');
+      console.log('✅ Permisos otorgados');
       return await getFirebaseToken();
     } else {
-      console.log('❌ Notification permission denied');
+      console.log('❌ Permisos denegados');
       return null;
     }
   } catch (error) {
-    console.error('❌ Error requesting notification permission:', error);
+    console.error('❌ Error solicitando permisos:', error);
     return null;
   }
 };
 
-// Función para obtener el token de Firebase (simplificada para el hook)
+// Función para obtener el token de Firebase
 const getFirebaseToken = async () => {
   try {
     const token = await getToken(messaging, { 
@@ -60,37 +61,37 @@ const getFirebaseToken = async () => {
     });
     
     if (token) {
-      console.log('🎯 Firebase token generated successfully');
+      console.log('🎯 Token FCM generado:', token);
       return token;
     } else {
-      console.log('❌ No registration token available');
+      console.log('❌ No se pudo generar el token');
       return null;
     }
   } catch (error) {
-    console.error('❌ Error retrieving token:', error);
+    console.error('❌ Error obteniendo token:', error);
     return null;
   }
 };
 
-// Función para configurar listener de mensajes en primer plano (requerida por el hook)
+// Función para configurar listener de mensajes en primer plano
 export const onMessageListener = () => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     onMessage(messaging, (payload) => {
-      console.log('📨 Message received in foreground:', payload);
+      console.log('📨 Mensaje recibido en primer plano:', payload);
       resolve(payload);
     });
   });
 };
 
-// Función para enviar token al servidor (simplificada para el hook)
-export const sendTokenToServer = async (token, userId) => {
+// Función para enviar token al servidor
+export const sendTokenToServer = async (token) => {
   try {
-    const authToken = localStorage.getItem('token');
+    const authToken = localStorage.getItem('access');
     if (!authToken) {
-      throw new Error('No auth token found');
+      throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}save-fcm-token/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/save-fcm-token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,98 +99,54 @@ export const sendTokenToServer = async (token, userId) => {
       },
       body: JSON.stringify({
         token: token,
-        user_id: userId,
         device_type: 'web'
       })
     });
 
     if (response.ok) {
       const data = await response.json();
-      console.log('✅ Token sent to server successfully:', data);
+      console.log('✅ Token enviado al servidor:', data);
       return data;
     } else {
       const error = await response.json();
-      console.error('❌ Failed to send token to server:', error);
-      throw new Error(error.error || 'Server error');
+      console.error('❌ Error enviando token al servidor:', error);
+      throw new Error(error.error || 'Error del servidor');
     }
   } catch (error) {
-    console.error('❌ Error sending token to server:', error);
+    console.error('❌ Error enviando token:', error);
     throw error;
   }
 };
 
-// Variables para PWA Install Prompt
-let deferredPrompt;
-let installPromptShown = false;
-
-// Función para verificar prompt de instalación PWA (requerida por el hook)
-export const checkInstallPrompt = () => {
-  // Escuchar el evento beforeinstallprompt
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('🔽 PWA Install prompt intercepted');
-    
-    // Prevenir que se muestre automáticamente
-    e.preventDefault();
-    
-    // Guardar el evento para uso posterior
-    deferredPrompt = e;
-    
-    // Mostrar botón de instalación personalizado (opcional)
-    showInstallButton();
-  });
-
-  // Escuchar cuando la app es instalada
-  window.addEventListener('appinstalled', (e) => {
-    console.log('🎉 PWA was installed successfully');
-    hideInstallButton();
-    
-    // Opcional: enviar evento a analytics
-    if (window.gtag) {
-      window.gtag('event', 'pwa_install', {
-        'event_category': 'PWA',
-        'event_label': 'App Installed'
-      });
-    }
-  });
-
-  // Verificar si ya está instalado
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('📱 PWA is already installed');
-    return true;
-  }
-  
-  return false;
-};
-
-// Función para configurar notificaciones
+// Función para configurar notificaciones completamente
 export const setupNotifications = async () => {
   try {
-    console.log('🚀 Setting up notifications...');
+    console.log('🚀 Configurando notificaciones...');
     
     // Solicitar permisos y obtener token
     const token = await requestNotificationPermission();
     
     if (!token) {
-      console.log('❌ Failed to get token');
-      return { success: false, error: 'Failed to get token' };
+      console.log('❌ No se pudo obtener token');
+      return { success: false, error: 'No se pudo obtener token' };
     }
 
     // Enviar token al servidor
     try {
       await sendTokenToServer(token);
     } catch (error) {
-      console.log('❌ Failed to register token on server:', error.message);
+      console.log('❌ Error registrando token en servidor:', error.message);
       return { success: false, error: error.message };
     }
 
     // Configurar listener para mensajes en primer plano
     setupForegroundMessageListener();
     
-    console.log('🎉 Notifications setup completed successfully!');
+    console.log('🎉 Notificaciones configuradas exitosamente!');
     return { success: true, token };
     
   } catch (error) {
-    console.error('❌ Error setting up notifications:', error);
+    console.error('❌ Error configurando notificaciones:', error);
     return { success: false, error: error.message };
   }
 };
@@ -197,46 +154,16 @@ export const setupNotifications = async () => {
 // Función para manejar mensajes cuando la app está en primer plano
 const setupForegroundMessageListener = () => {
   onMessage(messaging, (payload) => {
-    console.log('📨 Message received in foreground:', payload);
+    console.log('📨 Mensaje recibido en primer plano:', payload);
     
     // Mostrar notificación personalizada
     if (payload.notification) {
-      showCustomNotification(payload);
+      showInAppNotification(payload);
     }
     
-    // Manejar acciones específicas según el tipo
+    // Disparar eventos personalizados
     handleNotificationAction(payload);
   });
-};
-
-// Función para mostrar notificación personalizada
-const showCustomNotification = (payload) => {
-  const { notification, data } = payload;
-  
-  // Solo mostrar si la página no está visible
-  if (document.hidden) {
-    const notificationOptions = {
-      body: notification.body,
-      icon: notification.icon || '/icons/ibento192x192.png',
-      badge: '/icons/ibentoba.png',
-      tag: data?.type || 'ibento-notification',
-      data: data,
-      vibrate: [200, 100, 200],
-      renotify: true,
-      requireInteraction: true
-    };
-
-    const customNotification = new Notification(notification.title, notificationOptions);
-    
-    customNotification.onclick = () => {
-      console.log('🖱️ Notification clicked');
-      handleNotificationClick(data);
-      customNotification.close();
-    };
-  } else {
-    // Si la app está visible, mostrar notificación in-app
-    showInAppNotification(payload);
-  }
 };
 
 // Función para mostrar notificación dentro de la app
@@ -364,7 +291,7 @@ const handleNotificationClick = (data) => {
   // Navegar según la acción
   switch (data.action) {
     case 'view_likes':
-      window.location.href = '/ibento/match';
+      window.location.href = '/ibento/verLike';
       break;
       
     case 'open_chat':
@@ -382,266 +309,24 @@ const handleNotificationClick = (data) => {
   }
 };
 
-// Función para desactivar notificaciones
-export const disableNotifications = async () => {
-  try {
-    const authToken = localStorage.getItem('token');
-    if (!authToken) {
-      throw new Error('No auth token found');
-    }
-
-    // Obtener token actual
-    const token = await getFirebaseToken();
-    if (!token) {
-      return { success: false, error: 'Could not get current token' };
-    }
-
-    // Enviar solicitud al servidor para desactivar
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}remove-fcm-token/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({
-        token: token
-      })
-    });
-
-    if (response.ok) {
-      console.log('✅ Notifications disabled successfully');
-      return { success: true };
-    } else {
-      const error = await response.json();
-      console.error('❌ Failed to disable notifications:', error);
-      return { success: false, error: error.error || 'Server error' };
-    }
-  } catch (error) {
-    console.error('❌ Error disabling notifications:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Función para verificar estado de notificaciones
-export const getNotificationStatus = async () => {
-  try {
-    const authToken = localStorage.getItem('token');
-    if (!authToken) {
-      return { success: false, error: 'No auth token found' };
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}notification-status/`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authToken}`
+// Agregar estilos CSS para animaciones
+if (!document.getElementById('notification-styles')) {
+  const style = document.createElement('style');
+  style.id = 'notification-styles';
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
       }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return { success: true, data };
-    } else {
-      const error = await response.json();
-      return { success: false, error: error.error || 'Server error' };
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
-  } catch (error) {
-    console.error('❌ Error getting notification status:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Función para probar notificaciones
-export const testNotification = async (title = 'Prueba', body = 'Esta es una notificación de prueba') => {
-  try {
-    const authToken = localStorage.getItem('token');
-    if (!authToken) {
-      throw new Error('No auth token found');
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}test-notification/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({
-        title,
-        body,
-        type: 'test'
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Test notification sent successfully');
-      return { success: true, data };
-    } else {
-      const error = await response.json();
-      console.error('❌ Failed to send test notification:', error);
-      return { success: false, error: error.error || 'Server error' };
-    }
-  } catch (error) {
-    console.error('❌ Error sending test notification:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Función para mostrar botón de instalación
-const showInstallButton = () => {
-  if (installPromptShown) return;
-  
-  // Crear botón de instalación flotante
-  const installButton = document.createElement('div');
-  installButton.id = 'pwa-install-button';
-  installButton.innerHTML = `
-    <div style="
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 25px;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-      cursor: pointer;
-      z-index: 9999;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      animation: bounceIn 0.5s ease-out;
-      transition: all 0.3s ease;
-    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-      <span>📱</span>
-      <span>Instalar App</span>
-      <button onclick="document.getElementById('pwa-install-button').remove()" style="
-        background: rgba(255,255,255,0.2);
-        border: none;
-        color: white;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 12px;
-        margin-left: 8px;
-      ">×</button>
-    </div>
   `;
-  
-  // Agregar evento click para instalar
-  installButton.onclick = (e) => {
-    if (e.target.tagName === 'BUTTON') return; // Ignorar click en botón cerrar
-    triggerInstallPrompt();
-  };
-  
-  // Agregar estilos de animación
-  if (!document.getElementById('pwa-install-styles')) {
-    const style = document.createElement('style');
-    style.id = 'pwa-install-styles';
-    style.textContent = `
-      @keyframes bounceIn {
-        0% { transform: scale(0.3); opacity: 0; }
-        50% { transform: scale(1.05); opacity: 0.8; }
-        70% { transform: scale(0.9); opacity: 0.9; }
-        100% { transform: scale(1); opacity: 1; }
-      }
-      @keyframes slideInRight {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      .in-app-notification {
-        transition: all 0.3s ease-out;
-      }
-      .in-app-notification:hover {
-        transform: translateX(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-  
-  document.body.appendChild(installButton);
-  installPromptShown = true;
-  
-  // Auto-ocultar después de 10 segundos si no se usa
-  setTimeout(() => {
-    const button = document.getElementById('pwa-install-button');
-    if (button) {
-      button.style.opacity = '0.7';
-      button.style.transform = 'scale(0.9)';
-    }
-  }, 10000);
-};
-
-// Función para ocultar botón de instalación
-const hideInstallButton = () => {
-  const installButton = document.getElementById('pwa-install-button');
-  if (installButton) {
-    installButton.style.animation = 'fadeOut 0.3s ease-out';
-    setTimeout(() => {
-      installButton.remove();
-    }, 300);
-  }
-};
-
-// Función para mostrar el prompt de instalación
-export const triggerInstallPrompt = async () => {
-  if (!deferredPrompt) {
-    console.log('❌ No install prompt available');
-    return { success: false, error: 'Install prompt not available' };
-  }
-
-  try {
-    // Mostrar el prompt
-    deferredPrompt.prompt();
-    
-    // Esperar la respuesta del usuario
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    console.log(`👤 User response to install prompt: ${outcome}`);
-    
-    // Limpiar el prompt
-    deferredPrompt = null;
-    hideInstallButton();
-    
-    // Opcional: enviar evento a analytics
-    if (window.gtag) {
-      window.gtag('event', 'pwa_install_prompt', {
-        'event_category': 'PWA',
-        'event_label': outcome
-      });
-    }
-    
-    return { 
-      success: true, 
-      outcome,
-      installed: outcome === 'accepted'
-    };
-    
-  } catch (error) {
-    console.error('❌ Error showing install prompt:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Función para verificar si la PWA puede ser instalada
-export const canInstallPWA = () => {
-  return !!deferredPrompt;
-};
-
-// Función para verificar si la PWA ya está instalada
-export const isPWAInstalled = () => {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         window.navigator.standalone === true;
-};
+  document.head.appendChild(style);
+}
 
 // Exportar instancias de Firebase
 export { app, analytics, messaging };

@@ -22,7 +22,7 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Interceptor de REQUEST - Agregar token a las peticiones
+
 api.interceptors.request.use(config => {
   // Omitir token en login y refresh
   if (

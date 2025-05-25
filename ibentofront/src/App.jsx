@@ -65,21 +65,27 @@ export default function App() {
           // Si no hay usuario en localStorage, verificar si hay token válido
           if (accessToken) {
             try {
-              // Verificar token con el servidor
-              const response = await api.get('/user/profile/', {
+              // Verificar token con el servidor - CORREGIR LA RUTA
+              const response = await api.get('/api/usuarios/info_to_edit/', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
               });
               
               if (response.data) {
-                setUser(response.data);
-                localStorage.setItem('user', JSON.stringify(response.data));
-                console.log('✅ Usuario obtenido del servidor:', response.data);
+                const userData = {
+                  id: response.data._id,
+                  _id: response.data._id,
+                  email: response.data.email || '',
+                  nombre: response.data.nombre || ''
+                };
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                console.log('✅ Usuario obtenido del servidor:', userData);
               }
             } catch (error) {
               console.log('❌ Token inválido, limpiando localStorage');
               localStorage.removeItem('access');
               localStorage.removeItem('refresh');
-              localStorage.removeItem('user');
+              localStorage.removeUser('user');
             }
           }
         }
@@ -93,17 +99,26 @@ export default function App() {
     initializeUser();
   }, []);
 
-  // Registrar service worker
+  // Registrar service workers
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('✅ SW registered:', registration);
-        })
-        .catch((registrationError) => {
-          console.log('❌ SW registration failed:', registrationError);
-        });
-    }
+    const registerServiceWorkers = async () => {
+      if ('serviceWorker' in navigator) {
+        try {
+          // Registrar el service worker principal (sw.js)
+          const swRegistration = await navigator.serviceWorker.register('/sw.js');
+          console.log('✅ SW principal registrado:', swRegistration);
+
+          // Registrar el service worker de Firebase Messaging
+          const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('✅ FCM SW registrado:', fcmRegistration);
+          
+        } catch (registrationError) {
+          console.log('❌ Error registrando Service Workers:', registrationError);
+        }
+      }
+    };
+
+    registerServiceWorkers();
   }, []);
 
   // Manejar notificaciones recibidas

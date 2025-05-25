@@ -23,7 +23,7 @@ const messaging = firebase.messaging();
 
 // Manejar mensajes en segundo plano
 messaging.onBackgroundMessage((payload) => {
-  console.log('[Service Worker] Received background message:', payload);
+  console.log('[firebase-messaging-sw.js] Received background message:', payload);
 
   const { notification, data } = payload;
   
@@ -31,7 +31,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = notification?.title || 'Ibento';
   const notificationOptions = {
     body: notification?.body || 'Nueva notificación',
-    icon: notification?.icon || '/icons/ibento192x192.png',
+    icon: '/icons/ibento192x192.png',
     badge: '/icons/ibentoba.png',
     tag: data?.type || 'ibento-notification',
     data: {
@@ -60,31 +60,31 @@ function getRequireInteraction(type) {
 function getNotificationActions(type) {
   const actions = {
     'like': [
-      { action: 'view', title: '👀 Ver perfil', icon: '/icons/view.png' },
-      { action: 'dismiss', title: '❌ Cerrar', icon: '/icons/close.png' }
+      { action: 'view', title: '👀 Ver perfil' },
+      { action: 'dismiss', title: '❌ Cerrar' }
     ],
     'match': [
-      { action: 'chat', title: '💬 Chatear', icon: '/icons/chat.png' },
-      { action: 'view', title: '👀 Ver perfil', icon: '/icons/view.png' }
+      { action: 'chat', title: '💬 Chatear' },
+      { action: 'view', title: '👀 Ver perfil' }
     ],
     'message': [
-      { action: 'reply', title: '↩️ Responder', icon: '/icons/reply.png' },
-      { action: 'view', title: '👀 Ver chat', icon: '/icons/chat.png' }
+      { action: 'reply', title: '↩️ Responder' },
+      { action: 'view', title: '👀 Ver chat' }
     ],
     'event': [
-      { action: 'view', title: '🎪 Ver evento', icon: '/icons/event.png' },
-      { action: 'dismiss', title: '❌ Cerrar', icon: '/icons/close.png' }
+      { action: 'view', title: '🎪 Ver evento' },
+      { action: 'dismiss', title: '❌ Cerrar' }
     ]
   };
 
   return actions[type] || [
-    { action: 'open', title: '🔍 Abrir', icon: '/icons/open.png' }
+    { action: 'open', title: '🔍 Abrir' }
   ];
 }
 
 // Manejar clicks en notificaciones
 self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification clicked:', event);
+  console.log('[firebase-messaging-sw.js] Notification clicked:', event);
   
   const { notification, action } = event;
   const data = notification.data || {};
@@ -98,7 +98,7 @@ self.addEventListener('notificationclick', (event) => {
   switch (action) {
     case 'view':
       if (data.type === 'like') {
-        targetUrl = 'https://ibento.com.mx/ibento/match';
+        targetUrl = 'https://ibento.com.mx/ibento/verLike';
       } else if (data.type === 'event') {
         targetUrl = 'https://ibento.com.mx/ibento/eventos';
       } else if (data.type === 'message' || data.type === 'match') {
@@ -127,8 +127,7 @@ self.addEventListener('notificationclick', (event) => {
       for (const client of clientList) {
         if (client.url.includes('ibento.com.mx') && 'focus' in client) {
           client.focus();
-          client.navigate(targetUrl);
-          return;
+          return client.navigate ? client.navigate(targetUrl) : clients.openWindow(targetUrl);
         }
       }
       
@@ -142,64 +141,17 @@ self.addEventListener('notificationclick', (event) => {
 
 // Manejar cierre de notificaciones
 self.addEventListener('notificationclose', (event) => {
-  console.log('[Service Worker] Notification closed:', event);
-  
-  const data = event.notification.data || {};
-  
-  // Enviar evento analítico (opcional)
-  if (data.type) {
-    console.log(`[Analytics] Notification dismissed: ${data.type}`);
-  }
+  console.log('[firebase-messaging-sw.js] Notification closed:', event);
 });
 
 // Manejar instalación del service worker
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
-  
-  // Forzar activación inmediata
+  console.log('[firebase-messaging-sw.js] Installing...');
   self.skipWaiting();
 });
 
 // Manejar activación del service worker
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activated');
-  
-  // Tomar control de todos los clientes inmediatamente
+  console.log('[firebase-messaging-sw.js] Activated');
   event.waitUntil(self.clients.claim());
 });
-
-// Manejar errores de push
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push event received:', event);
-  
-  if (!event.data) {
-    console.log('[Service Worker] Push event but no data');
-    return;
-  }
-  
-  try {
-    const payload = event.data.json();
-    console.log('[Service Worker] Push payload:', payload);
-    
-    // Firebase ya maneja esto automáticamente con onBackgroundMessage
-    // pero podemos agregar lógica adicional aquí si es necesario
-    
-  } catch (error) {
-    console.error('[Service Worker] Error parsing push data:', error);
-  }
-});
-
-// Manejar errores
-self.addEventListener('error', (event) => {
-  console.error('[Service Worker] Error:', event.error);
-});
-
-// Función utilitaria para logging
-function logWithTimestamp(message, data = null) {
-  const timestamp = new Date().toISOString();
-  if (data) {
-    console.log(`[${timestamp}] ${message}`, data);
-  } else {
-    console.log(`[${timestamp}] ${message}`);
-  }
-}

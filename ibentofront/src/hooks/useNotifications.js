@@ -4,7 +4,7 @@ import {
   requestNotificationPermission, 
   onMessageListener, 
   sendTokenToServer,
-  checkInstallPrompt 
+  setupNotifications 
 } from '../firebase';
 
 export const useNotifications = (user) => {
@@ -15,85 +15,126 @@ export const useNotifications = (user) => {
   useEffect(() => {
     // Verificar soporte del navegador
     const checkSupport = () => {
-      const supported = 'serviceWorker' in navigator && 'PushManager' in window;
+      const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
       setIsSupported(supported);
+      console.log('🔍 Soporte de notificaciones:', supported);
       return supported;
     };
 
     if (checkSupport() && user) {
+      console.log('👤 Usuario detectado, inicializando notificaciones para:', user);
       initializeNotifications();
     }
-
-    // Verificar prompt de instalación
-    checkInstallPrompt();
   }, [user]);
 
   const initializeNotifications = async () => {
     try {
+      console.log('🚀 Inicializando notificaciones...');
+      
+      // Configurar service worker si no está registrado
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('✅ Service Worker registrado:', registration);
+        } catch (swError) {
+          console.error('❌ Error registrando Service Worker:', swError);
+        }
+      }
+
       // Solicitar permisos y obtener token
       const fcmToken = await requestNotificationPermission();
       
       if (fcmToken) {
         setToken(fcmToken);
+        console.log('✅ Token FCM obtenido:', fcmToken);
         
         // Enviar token al servidor
-        if (user?.id) {
-          await sendTokenToServer(fcmToken, user.id);
+        if (user?.id || user?._id) {
+          try {
+            await sendTokenToServer(fcmToken);
+            console.log('✅ Token enviado al servidor');
+          } catch (error) {
+            console.error('❌ Error enviando token al servidor:', error);
+          }
         }
         
         // Configurar listener para mensajes en primer plano
-        const unsubscribe = onMessageListener()
-          .then((payload) => {
-            console.log('Received foreground message:', payload);
-            setNotification(payload);
-            
-            // Mostrar notificación personalizada en la UI
-            showInAppNotification(payload);
-          })
-          .catch((err) => console.log('Failed to receive message:', err));
-
-        return unsubscribe;
+        setupForegroundListener();
       }
     } catch (error) {
-      console.error('Error initializing notifications:', error);
+      console.error('❌ Error inicializando notificaciones:', error);
     }
   };
 
+  const setupForegroundListener = () => {
+    console.log('👂 Configurando listener para mensajes en primer plano...');
+    
+    onMessageListener()
+      .then((payload) => {
+        console.log('📨 Mensaje recibido en primer plano:', payload);
+        setNotification(payload);
+        
+        // Mostrar notificación personalizada en la UI
+        showInAppNotification(payload);
+      })
+      .catch((err) => console.error('❌ Error en listener de mensajes:', err));
+  };
+
   const showInAppNotification = (payload) => {
+    console.log('🎨 Mostrando notificación in-app:', payload);
+    
     // Crear notificación in-app personalizada
     const notificationElement = document.createElement('div');
+    notificationElement.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 10000;
+      max-width: 350px;
+      animation: slideInRight 0.3s ease-out;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
     notificationElement.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        z-index: 10000;
-        max-width: 350px;
-        animation: slideInRight 0.3s ease-out;
-      ">
-        <div style="display: flex; align-items: start; gap: 12px;">
-          <img src="${payload.notification?.icon || '/icons/ibento48x48.png'}" 
-               style="width: 40px; height: 40px; border-radius: 50%;" />
-          <div style="flex: 1;">
-            <div style="font-weight: bold; margin-bottom: 4px; color: #111827;">
-              ${payload.notification?.title || 'Nueva notificación'}
-            </div>
-            <div style="color: #6b7280; font-size: 14px; line-height: 1.4;">
-              ${payload.notification?.body || ''}
-            </div>
+      <div style="display: flex; align-items: start; gap: 12px;">
+        <div style="font-size: 24px;">${getNotificationIcon(payload.data?.type)}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: bold; margin-bottom: 4px;">
+            ${payload.notification?.title || 'Nueva notificación'}
           </div>
-          <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                  style="background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 18px;">
-            ×
-          </button>
+          <div style="font-size: 14px; opacity: 0.9; line-height: 1.4;">
+            ${payload.notification?.body || ''}
+          </div>
         </div>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">×</button>
       </div>
     `;
+
+    // Agregar evento click para navegar
+    notificationElement.onclick = (e) => {
+      if (e.target.tagName === 'BUTTON') return; // Ignorar click en botón cerrar
+      
+      handleNotificationNavigation(payload.data);
+      notificationElement.remove();
+    };
 
     // Agregar estilos de animación si no existen
     if (!document.getElementById('notification-styles')) {
@@ -113,20 +154,70 @@ export const useNotifications = (user) => {
     // Auto-remover después de 5 segundos
     setTimeout(() => {
       if (notificationElement.parentNode) {
-        notificationElement.remove();
+        notificationElement.style.animation = 'slideInRight 0.3s ease-out reverse';
+        setTimeout(() => notificationElement.remove(), 300);
       }
     }, 5000);
   };
 
-  const requestPermissions = async () => {
-    const fcmToken = await requestNotificationPermission();
-    if (fcmToken) {
-      setToken(fcmToken);
-      if (user?.id) {
-        await sendTokenToServer(fcmToken, user.id);
-      }
+  const getNotificationIcon = (type) => {
+    const icons = {
+      'like': '💕',
+      'match': '🎉',
+      'message': '💬',
+      'event': '🎪',
+      'welcome': '🔔',
+      'test': '🧪',
+      'general': '📱'
+    };
+    return icons[type] || icons.general;
+  };
+
+  const handleNotificationNavigation = (data) => {
+    console.log('🧭 Navegando por notificación:', data);
+    
+    if (!data) return;
+    
+    // Navegar según el tipo de notificación
+    switch (data.type) {
+      case 'like':
+        window.location.href = '/ibento/verLike';
+        break;
+      case 'match':
+        window.location.href = '/ibento/match';
+        break;
+      case 'message':
+        window.location.href = '/ibento/chat';
+        break;
+      case 'event':
+        window.location.href = '/ibento/eventos';
+        break;
+      default:
+        if (data.click_action) {
+          window.location.href = data.click_action;
+        }
     }
-    return fcmToken;
+  };
+
+  const requestPermissions = async () => {
+    console.log('🔔 Solicitando permisos manualmente...');
+    
+    try {
+      const result = await setupNotifications();
+      
+      if (result.success) {
+        setToken(result.token);
+        setupForegroundListener();
+        console.log('✅ Notificaciones configuradas exitosamente');
+        return result.token;
+      } else {
+        console.error('❌ Error configurando notificaciones:', result.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error en requestPermissions:', error);
+      return null;
+    }
   };
 
   return {
