@@ -92,7 +92,7 @@ export const sendTokenToServer = async (token) => {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/save-fcm-token/`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}save-fcm-token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
