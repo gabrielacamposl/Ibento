@@ -1,7 +1,7 @@
 # api/services/notification_service.py
 import logging
 from firebase_admin import messaging
-from ..models import FCMToken, Usuario
+from api.models import FCMToken, Usuario
 from typing import Optional, List, Dict, Any
 
 logger = logging.getLogger(__name__)
@@ -18,13 +18,11 @@ class NotificationService:
         data: Optional[Dict[str, str]] = None,
         click_action: Optional[str] = None
     ) -> bool:
-        """
-        Envía una notificación a un usuario específico
-        """
+
         try:
-            # Obtener tokens activos del usuario - CORREGIDO el filtro
+           
             tokens = FCMToken.objects.filter(
-                usuario___id=user_id,  # Cambiar por usuario__id
+                usuario__id=user_id, 
                 is_active=True
             ).values_list('token', flat=True)
             
