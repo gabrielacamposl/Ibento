@@ -7,7 +7,6 @@ const PRECACHE_URLS = [
   '/index.html',
   '/icons/ibento.png',
   '/icons/ibentoba.png',
-  '/favicon.svg',
   '/manifest.webmanifest',
   '/offline.html',
 ];
