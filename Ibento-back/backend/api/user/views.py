@@ -397,8 +397,6 @@ def actualizar_perfil(request):
         serializer.save()
         return Response({"mensaje": "Perfil actualizado correctamente."}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-  
-#----- Devolver las respuestas como arreglo
 
 
 # ---- Subir fotos de perfil para búsqueda de acompañantes
@@ -765,7 +763,6 @@ def sugerencia_usuarios(request):
 
 
 # Vista actualizada para crear matches (con notificaciones)
-# Vista actualizada para crear matches (con notificaciones)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def matches(request):
@@ -1120,7 +1117,7 @@ def mis_conversaciones(request):
 #     return Response(serializer.errors, status=400)
 
 
-# Vista actualizada para enviar mensajes (con notificaciones)
+
 # Vista actualizada para enviar mensajes (con notificaciones)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -1911,9 +1908,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
     
-# ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
 
-# Vista para guardar token FCM
 # ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
 
 # Vista para guardar token FCM (actualizada)
@@ -1931,7 +1926,10 @@ def save_fcm_token(request):
                 {'error': 'Token FCM es requerido'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+        print("🔐 Token FCM recibido:", token)
+        print("📱 Tipo de dispositivo recibido:", device_type)
+        logger.info(f"🔐 Token FCM recibido: {token}")
+        logger.info(f"📱 Tipo de dispositivo recibido: {device_type}")
         # Crear o actualizar token
         fcm_token, created = FCMToken.objects.get_or_create(
             usuario=user,
@@ -1992,6 +1990,8 @@ def remove_fcm_token(request):
             token=token
         ).update(is_active=False)
         
+        
+        
         if tokens_updated > 0:
             logger.info(f"FCM token deactivated for user {user._id}")
             return Response({'message': 'Token desactivado correctamente'})
@@ -2008,7 +2008,7 @@ def remove_fcm_token(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-# Vista para probar notificaciones (opcional, para desarrollo)
+
 # Vista para probar notificaciones
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2046,7 +2046,6 @@ def test_notification(request):
         )
 
 # Vista para obtener estado de notificaciones del usuario
-# Vista para obtener estado de notificaciones del usuario
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def notification_status(request):
@@ -2065,7 +2064,8 @@ def notification_status(request):
                 'created_at': token.created_at,
                 'token_preview': token.token[:20] + "..." if len(token.token) > 20 else token.token
             })
-        
+            
+
         return Response({
             'notifications_enabled': len(tokens_info) > 0,
             'active_devices': len(tokens_info),
