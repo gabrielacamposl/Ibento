@@ -1,51 +1,33 @@
-import React, { use } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BellDot, Search } from 'lucide-react';
+
 import Carousel from './components/carousel';
 import Cards from './components/cards';
 import SearchMenu from './components/menu';
 import CircularDemo from './components/carousel2';
 
-
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
-import useGeolocation from '../../hooks/useGeolocation';
-import api from '../../api';
 import { Sidebar } from 'primereact/sidebar';
 
-import { BellDot, Search } from 'lucide-react';
-import { Bell, Heart, MessageCircle, User, X } from 'lucide-react';
-
+import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
+import { useNotifications } from '../../hooks/useNotifications';
 
 function Page() {
-
     const navigate = useNavigate();
-
-    //const {data: eventos, loading, error } = useFetchEvents('http://127.0.0.1:8000/eventos/everything/');
-    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
-    const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('eventos/recommended_events', localStorage.getItem("access") ?? "");
 
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);
+
+    const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
+    const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('eventos/recommended_events', localStorage.getItem("access") ?? "");
+    const { unreadCount } = useNotifications();
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    // useEffect(() => {
-    //     const token = localStorage.getItem("token");
-    //     if (!token) {
-    //         // Redirige si no hay token
-    //         navigate("/login");
-    //     }
-    //     window.scrollTo(0, 0);
-    // }, []);
-
-
-
     useEffect(() => {
         const userString = localStorage.getItem("user");
-        //const usuarioObj = localStorage.getItem("user")
         if (userString) {
             const userObject = JSON.parse(userString);
             const nombre = userObject.nombre;
@@ -69,47 +51,61 @@ function Page() {
         );
     }
 
-    //   if (geoError) {
-    //        return (
-    //           <div className="flex min-h-screen justify-center items-center text-yellow-600">
-    //               <p>Error al obtener ubicación: {geoError.message}</p>
-    //               {/* Opcional: renderizar la página sin geolocalización */}
-    //               {/* ... renderiza el resto de la página aquí ... */}
-    //           </div>
-    //       );
-    //   }
-
     return (
         <>
-            <div className="flex flex-col gap-4 min-h-screen justify-center w-full  items-center bg-white lg:max-w-3/4">
-                <div className="flex gap-4 w-full items-center h-16  border border-b border-gray-200">
-                    <h1 className="text-3xl font-bold text-center text-black text-nowrap">Bienvenido {usuarioName}!</h1>
-                    <div className='flex w-full flex-row gap-4 justify-end mr-4'>
-                        <div className="card flex justify-content-center">
+            <div className="flex flex-col gap-4 min-h-screen justify-center w-full items-center bg-white lg:max-w-3/4">
+                <div className="flex gap-4 w-full items-center h-16 border-b border-gray-200">
+                    <h1 className="text-3xl font-bold text-center text-black text-nowrap">
+                        Bienvenido {usuarioName}!
+                    </h1>
+
+                    <div className="flex w-full flex-row gap-4 justify-end mr-4">
+                        <div className="card flex justify-content-center items-center gap-4">
+                            {/* Sidebar */}
                             <Sidebar visible={visible} onHide={() => setVisible(false)} fullScreen>
-                                <h2>Sidebar</h2>
+                                <h2 className="text-2xl font-bold mb-4">Notificaciones</h2>
                                 <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                    Aquí aparecerán tus notificaciones. Esta sección está en desarrollo.
                                 </p>
                             </Sidebar>
-                            <Search className="w-6 h-6 text-black align-left hover:text-purple-700 cursor-pointer" onClick={() => navigate('../busqueda')} />
+
+                            {/* Botón de búsqueda */}
+                            <Search 
+                                className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer" 
+                                onClick={() => navigate('../busqueda')} 
+                            />
+
+                            {/* Icono de notificaciones */}
+                            <div className="relative">
+                                {unreadCount > 0 ? (
+                                    <>
+                                        <BellDot 
+                                            className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer"
+                                            onClick={() => setVisible(true)} 
+                                        />
+                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full min-w-[18px] h-[18px]">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <BellDot 
+                                        className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer"
+                                        onClick={() => setVisible(true)} 
+                                    />
+                                )}
+                            </div>
                         </div>
-                        {/* <Search className="w-6 h-6 text-black align-left hover:text-purple-700 cursor-pointer" onClick={() => navigate('/buscador')}/> */}
-                        <BellDot className="w-6 h-6 text-black align-left hover:text-purple-700 cursor-pointer" onClick={() => setVisible(true)} />
                     </div>
                 </div>
+
                 <CircularDemo />
-                {/* <Cards listEvents = {eventosRecomendados} name = {"Recomendados para ti"} /> */}
-                <Cards listEvents={popularEvents} name={"Populares"} />
-                <Cards listEvents={recommendedEvents} name={"Recomendados para ti"} />
+                <Cards listEvents={popularEvents} name="Populares" />
+                <Cards listEvents={recommendedEvents} name="Recomendados para ti" />
                 <SearchMenu />
-                <div className='h-16'></div>
+                <div className="h-16"></div>
             </div>
-
         </>
-    )
-
+    );
 }
 
 export default Page;

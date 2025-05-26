@@ -17,6 +17,7 @@ from api.user.views import (crear_usuario,
                             UsuarioViewSet,
                             confirmar_usuario, 
                             login_usuario, 
+                            refresh_token,
                             logout_usuario,
                             upload_profile_pictures,
                             get_categorias_perfil,
@@ -49,6 +50,7 @@ urlpatterns = [
     path('api/crear-cuenta/', crear_usuario, name='crear_cuenta'),
     path('api/login/', login_usuario, name='login'),
     path('api/confirmar/<uuid:token>/', confirmar_usuario, name="confirmar_usuario"),  
+    path('api/refresh-token/', refresh_token, name='refresh_token'),
     path("api/logout/", logout_usuario, name="logout"),
 
     # Cambiar contraseña
@@ -110,7 +112,7 @@ urlpatterns = [
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
     
     # Obtener notificaciones
-    path('api/notifications/', get_user_notifications, name='get_user_notifications'),
+    path('api/notificaciones/', get_user_notifications, name='get_user_notifications'),
     # Notificaciones URLs para notificaciones FCM
     path('api/save-fcm-token/', save_fcm_token, name='save_fcm_token'),
     path('api/remove-fcm-token/', remove_fcm_token, name='remove_fcm_token'),

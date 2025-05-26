@@ -60,17 +60,22 @@ LOGGING = {
             'level': 'INFO',
         },
     },
+    # ver los logs
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
 }
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Token válido 
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),     # Refresh token 
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "TOKEN_BLACKLIST_ENABLED": True,
-    'USER_ID_FIELD': '_id', 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token de acceso dura 1 hora
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh token dura 7 días
+    'ROTATE_REFRESH_TOKENS': True,                   # Rota refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,               # Blacklist tokens antiguos
+    # "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    # "TOKEN_BLACKLIST_ENABLED": True,
+     'USER_ID_FIELD': '_id', 
 }
 
 REST_FRAMEWORK = {
