@@ -200,7 +200,7 @@ export default function App() {
   return (
     <div className="App">
       {/* Banner para solicitar notificaciones */}
-      {user && isSupported && !token && (
+      {/* {user && isSupported && !token && (
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 text-center shadow-lg">
           <p className="mb-3 font-medium">
             🔔 ¡Activa las notificaciones para no perderte ningún match o mensaje!
@@ -212,7 +212,7 @@ export default function App() {
             Activar Notificaciones
           </button>
         </div>
-      )}
+      )} */}
 
 
       <Router>
