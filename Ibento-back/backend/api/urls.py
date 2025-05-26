@@ -23,6 +23,7 @@ from api.user.views import (crear_usuario,
                             get_categorias_perfil,
                             guardar_respuestas_perfil,
                             importar_ticketmaster,
+                            crear_usuarios,
                             like_event,
                             obtener_eventos_favoritos,
                             obtener_match,
@@ -100,6 +101,7 @@ urlpatterns = [
     path('api/usuarios/<str:pk>/info/', obtener_usuario_info, name='obtener_usuario_info'),
     # Eventos
     path('api/importar-ticketmaster/', importar_ticketmaster, name='importar_ticketmaster'),
+    path('api/crear-usuarios/', crear_usuarios, name="Crear usuarios"),
 
 
     #Acciones User

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 import json
+from collections import OrderedDict
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from api.services import ine_validation
@@ -132,7 +133,7 @@ class SugerenciaSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Lista de campos que deberían ser arrays
-        json_fields = ['profile_pic']
+        json_fields = ['profile_pic', 'preferencias_evento', 'preferencias_generales', 'save_events']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -374,6 +375,17 @@ class UsuarioSerializerParaEventos(serializers.ModelSerializer):
 
 class UsuarioSerializerEdit(serializers.ModelSerializer):
 
+    preferencias_generales = serializers.SerializerMethodField()
+    
+    def get_preferencias_generales(self, obj):
+        if hasattr(obj, 'preferencias_generales') and obj.preferencias_generales:
+            # Convertir OrderedDict a dict normales
+            if isinstance(obj.preferencias_generales, list):
+                return [dict(item) if isinstance(item, OrderedDict) else item 
+                       for item in obj.preferencias_generales]
+            return obj.preferencias_generales
+        return []
+
     class Meta:
         model = Usuario
         fields = ['nombre', 'apellido', 'password', 
@@ -401,6 +413,8 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
                     pass
                     
         return data
+
+    
 
 class UsuarioSerializerEventosBuscarMatch(serializers.ModelSerializer):
     class Meta:
