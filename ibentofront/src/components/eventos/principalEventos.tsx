@@ -10,10 +10,10 @@ import CircularDemo from './components/carousel2';
 import { Sidebar } from 'primereact/sidebar';
 
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
-import { useNotifications } from '../../hooks/useNotifications';
+import { useUserNotifications } from '../../hooks/useNotificationSidebar';
 
 const token = localStorage.getItem("access") ?? "";
-const { notifications, loading: notifLoading, error: notifError, unreadCount, markAsRead } = useNotifications(token);
+const { notifications, loading: notifLoading, error: notifError, unreadCount, markAsRead } = useUserNotifications(token);
 
 function Page() {
     const navigate = useNavigate();
