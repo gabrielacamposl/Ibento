@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from 'react';
+import React, { use, useEffect,useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 
@@ -65,7 +65,17 @@ useEffect(() => {
         }
         fetchVerify();
     }, []);
-
+useEffect(() => {
+    //Obtener el queryParameter "verificar" de la URL
+    const queryParams = new URLSearchParams(window.location.search);
+    const verificarParam = queryParams.get('buscar');
+    if (verificarParam === 'ok') {
+        setIndex(1);
+        
+       
+    }
+    // eslint-disable-next-line
+}, []);
       
 
 useEffect(() => {
