@@ -21,6 +21,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['ibento.onrender.com',
                  'localhost',
                  'ibento.com.mx',
+                 'ibento-gamma.vercel.app'
                  '127.0.0.1']
 
 
@@ -157,6 +158,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://ibento.onrender.com",
     "https://ibento-hazel.vercel.app",
     "https://ibento.com.mx",
+    'https://ibento-gamma.vercel.app'
 
 ]
 
