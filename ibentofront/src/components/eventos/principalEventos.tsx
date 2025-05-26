@@ -12,14 +12,15 @@ import { Sidebar } from 'primereact/sidebar';
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
 import { useUserNotifications } from '../../hooks/useNotificationSidebar';
 
-const token = localStorage.getItem("access") ?? "";
-const { notifications, loading: notifLoading, error: notifError, unreadCount, markAsRead } = useUserNotifications(token);
 
 function Page() {
     const navigate = useNavigate();
 
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);
+    const token = localStorage.getItem("access") ?? "";
+    const { notifications, loading: notifLoading, error: notifError, unreadCount, markAsRead } = useUserNotifications(token);
+
 
     const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
     const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('eventos/recommended_events', localStorage.getItem("access") ?? "");
