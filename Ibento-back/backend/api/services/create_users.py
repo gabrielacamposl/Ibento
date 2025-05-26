@@ -277,7 +277,7 @@ def crearUsuarios():
         Usuario.objects.create(
             nombre = "Usuario " + str(i),
             apellido = "Sanchez",
-            password = "Usuario123",
+            password = make_password("Usuario123"),
             is_confirmed = True,
             email = f"usuario{i}@ibento.com",
             preferencias_evento = random.choices(events_classification, k=7),

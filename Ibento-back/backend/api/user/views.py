@@ -779,6 +779,11 @@ def sugerencia_usuarios(request):
     # Añadir la edad a cada sugerencia
     for i, user_data in enumerate(serializer.data):
         user_data['edad'] = calcular_edad(candidatos[i].birthday)
+        user_data['eventos_en_comun'] = len(set(candidatos[i].save_events)&set(us_eventos_guardados))
+        user_data['nombres_eventos'] = [Evento.objects.filter(_id__in = set(candidatos[i].save_events)&set(us_eventos_guardados)).values_list("title", flat=True)]
+        
+
+    
 
     return Response(serializer.data)
 
@@ -891,6 +896,10 @@ def matches(request):
                 match=match,
                 defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
             )
+
+            Interaccion.objects.filter(
+                Q(usuario_origen_id = usuario_destino._id) &
+                Q(usuario_destino_id = usuario_origen._id)).delete()
             
             # Enviar notificaciones de match a ambos usuarios
             try:
@@ -912,6 +921,21 @@ def matches(request):
                 "conversacion_id": conversacion._id,
                 "is_match": True
             }, status=201)
+
+    else:
+        # Verificar si hay like se cambia por un dislike
+        interaccion_mutua = Interaccion.objects.filter(
+            usuario_origen=usuario_destino,
+            usuario_destino=usuario_origen,
+            tipo_interaccion="like"
+        ).first()
+
+        if interaccion_mutua:
+            print("Interaccion mutua para dislike")
+            interaccion_mutua.tipo_interaccion = "dislike"
+            interaccion_mutua.save()
+        else:
+            print("Sin interaccion mutua")
 
     return Response({
         "message": "Interacción registrada correctamente.",
@@ -937,34 +961,34 @@ def personas_que_me_dieron_like(request):
         for interaccion in interacciones:
             u = interaccion.usuario_origen
 
-        # Calcular edad si hay birthday
-        edad = None
-        if u.birthday:
-            today = date.today()
-            birthday = u.birthday
-            if isinstance(birthday, str):
-                try:
-                    birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
-                except ValueError:
-                    birthday = None
-            if birthday:
-                edad = today.year - birthday.year - (
-                    (today.month, today.day) < (birthday.month, birthday.day)
-                )
-            else:
-                edad = None
+            # Calcular edad si hay birthday
+            edad = None
+            if u.birthday:
+                today = date.today()
+                birthday = u.birthday
+                if isinstance(birthday, str):
+                    try:
+                        birthday = datetime.strptime(birthday, "%Y-%m-%d").date()
+                    except ValueError:
+                        birthday = None
+                if birthday:
+                    edad = today.year - birthday.year - (
+                        (today.month, today.day) < (birthday.month, birthday.day)
+                    )
+                else:
+                    edad = None
 
-            # Agregar datos del usuario
-            usuarios.append({
-                "_id": str(u._id),
-                "nombre": u.nombre,
-                "apellido": u.apellido,
-                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
-                "preferencias_evento": u.preferencias_evento or [],
-                "preferencias_generales": u.preferencias_generales or [],
-                "edad": edad,
-                "descripcion": u.description or "",
-            })
+                # Agregar datos del usuario
+                usuarios.append({
+                    "_id": str(u._id),
+                    "nombre": u.nombre,
+                    "apellido": u.apellido,
+                    "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                    "preferencias_evento": u.preferencias_evento or [],
+                    "preferencias_generales": u.preferencias_generales or [],
+                    "edad": edad,
+                    "descripcion": u.description or "",
+                })
             
         return Response(usuarios, status=200)
 
@@ -1728,13 +1752,19 @@ class EventoViewSet(viewsets.ModelViewSet):
                 {"detail": "Evento no encontrado."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
 
         usuario.save_events.remove(id_event)
+
+        #Checamos si el evento esta en eventos buscar match
+        if id_event in usuario.eventos_buscar_match:
+            usuario.eventos_buscar_match.remove(id_event)
 
         evento.numSaves -= 1
         evento.assistants.remove(id_user)
         evento.save(update_fields=['numSaves', 'assistants'])
-        usuario.save(update_fields=['save_events'])
+        usuario.save(update_fields=['save_events', 'eventos_buscar_match']) 
+
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
 
