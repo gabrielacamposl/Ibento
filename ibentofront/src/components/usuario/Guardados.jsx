@@ -160,20 +160,22 @@ function formatDate(dateString) {
                             key={event._id}
                             className="flex items-center mb-3 p-4 rounded-lg bg-gray-100 shadow relative transition hover:shadow-lg cursor-pointer"
                         >   
-                            <Link to={`../eventos/${event._id}`} className="">
+                           
                             <img
                                 src={event.imgs[0]}
                                 className="w-20 h-20 object-cover rounded-lg mr-4 border-2 border-purple-300"
                                 alt={event.name}
                             />
-                            </Link>
                             
-                            <div className=" flex-col flex-1">
+                             <Link to={`../eventos/${event._id}`} className="">
+                            <div className="flex-col flex-1">
                                 <h2 className="text-lg font-semibold text-purple-800">{event.title}</h2>
                                 <p className="text-gray-600">{formatDate(event.dates[0])}</p>
                                 <p className="mb-7 text-gray-500">{event.place}</p>
                             </div>
+                            </Link>
                             <div className="mt-2">
+                                
                                 {event.status === false ? (
                                     <button
                                         disabled={checked === false}

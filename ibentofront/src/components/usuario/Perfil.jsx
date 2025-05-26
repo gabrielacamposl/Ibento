@@ -136,36 +136,6 @@ useEffect(() => {
    
 
 
-        const eventsSaved = [
-            {
-                id: 1,
-                name: 'Love yourself BTS',
-                date: '2023-11-01',
-                description: 'Un concierto de KPOP para que Gaby se emocione.',
-                image: '/bts.jpeg',
-                ubication: 'Estadio Azteca',
-                buscando:'Sí'
-            },
-            
-            {
-                id: 2,
-                name: 'Love On Tour - Harry Styles',
-                date: '2023-12-01',
-                description: 'Harry Styles en su gira mundial Love On Tour, presentando su último álbum.',
-                image: '/love.jpeg',
-                ubication:'Palacio de los Deportes',
-                buscando:'Sí'
-            },
-            {
-                id: 3,
-                name: 'Torneo de League of Legends',
-                date: '2025-01-01',
-                description: 'Un torneo de LOL para que Gaby se emocione.',
-                image: '/lol.jpeg',
-                ubication:'Bellas Artes',
-                buscando:'No'
-            }
-        ];
 
         const productTemplate = (product) => {
             return (
@@ -184,6 +154,19 @@ const [loading, setLoading] = useState(true);
       </div>
     );
   }
+
+
+  //Convertir la fecha de cumpleaños AAAA-MM-DD a edad
+    const calculateAge = (birthday) => {
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
     return (
         <div  className="flex justify-center  min-h-screen overflow-x-auto" style={{ width: '100vw' }}>
             
@@ -239,14 +222,14 @@ const [loading, setLoading] = useState(true);
                                     <div className='space-x-2'>
                                     <h1 className="flex space-x-2 text-lg ">
                                         <div className="flex ">
-                                        {userPerfil.gender === 'Hombre' ? (
+                                        {userPerfil.gender == 'H' || userPerfil.gender == 'Hombre' ? (
                                             <i className="pi pi-mars mt-1" style={{ color: 'slateblue' }}></i>
                                         ) : (
                                             <i className="pi pi-venus mt-1" style={{ color: 'pink' }}></i>
                                         )}
                                         </div>
                                         <div>
-                                         {userPerfil.edad} años
+                                         {calculateAge(userPerfil.birthday)} años
                                          </div>
                                          </h1>
                                     </div>
@@ -275,8 +258,8 @@ const [loading, setLoading] = useState(true);
                                         ))}
                                     </div>
                                 </div> */}
-                                 <h2 className="text-black text-lg font-semibold">Sobre mí</h2>
-                                 <p className='text-black text-justify'>{userPerfil.description}</p> 
+                                 <h2 className="text-black text-lg font-semibold mt-2">Sobre mí</h2>
+                                 <p className='text-black text-justify ml-5'>{userPerfil.description}</p> 
                 
 
                 <div className="bg-white p-5 w-full">
