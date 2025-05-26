@@ -71,7 +71,8 @@ from .serializers import (UsuarioSerializer,   # Serializers para el auth & regi
                           UsuarioSerializerEdit,
                           UsuarioSerializerParaEventos,
                           UsuarioSerializerEventosBuscarMatch,
-                          ActualizarPerfilSerializer
+                          ActualizarPerfilSerializer,
+                          UsuarioSerializerModoBusqueda
                           )
 
 # Validación de rostros
@@ -670,7 +671,7 @@ def obtener_modo_busqueda(request):
 
 
 # ------- Obtener sugerencias para match
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def sugerencia_usuarios(request):
 
@@ -681,6 +682,12 @@ def sugerencia_usuarios(request):
     us_eventos_guardados = usuario.save_events
     us_modo_busqueda = usuario.modo_busqueda_match
 
+    #Datos del json
+    gender = request.data.get('gender', None)
+    age_range = request.data.get('ageRange', None)
+    min_age = age_range.get('min')
+    max_age = age_range.get('max')
+    modo_busqueda = request.data.get('searchMode', None)
 
     # Obtener IDs de usuarios a los que ya se les dio like o dislike
     interacciones_realizadas = Interaccion.objects.filter(
@@ -694,6 +701,25 @@ def sugerencia_usuarios(request):
 
     # Usuarios que ya esta registrados para matches
     candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
+
+    #Filtrar por genero y edad si se especifica
+    if gender != None and gender != 'Todos':
+        if gender == 'Hombre':
+            g = 'H'
+        elif gender == 'Mujer':
+            g = 'M'
+        else: 
+            g = 'O'
+        candidatos = candidatos.filter(gender = g)
+    
+    usuarios_no = []
+    if age_range != None:
+        for candidato in candidatos:
+            edad = calcular_edad(candidato.birthday)
+            if edad >= min_age and edad <= max_age:
+                continue
+            usuarios_no.append(candidato._id)
+        candidatos = candidatos.exclude(_id__in=usuarios_no)
 
     print("Candidatos")
     print(candidatos)
@@ -1958,7 +1984,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         return Response ({"Eventos guardados":serializer.data})
             
 
+    @action(detail=False, methods=['get'])
+    @permission_classes([IsAuthenticated])
+    def obtener_modo_busqueda(self, request):
 
+        usuario = request.user
+
+        serializer = UsuarioSerializerModoBusqueda(usuario, many=False)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     @permission_classes([IsAuthenticated])

@@ -14,40 +14,47 @@ const buscarMatchx = () => {
     const [currentUserIndex, setCurrentUserIndex] = useState(0);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isChecked, setIsChecked] = useState(true);
-    const [value, setValue] = useState([18, 100]);
+    const [value, setValue] = useState([18, 60]);
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState()
 
-    // useEffect(() => {
-    //     async function fetchData() {
-    //         const token = localStorage.getItem('access');
-    //         try {
-    //             const response = await api.get('matches/sugerencias/', {
-    //                 headers: {
-    //                     'Authorization': `Bearer ${token}`,
-    //                 }
-    //             });
-    //             if (response.status === 200) {
+    const [filters, setFilters] = useState({
+        searchMode: 'global', // 'evento' o 'global'
+        gender: 'Todos',
+        ageRange: [18, 65],
+        isLoading: false
+    });
 
-    //                 setUserMatch(response.data);
-    //                 setData(response.data)
-    //                 console.log('Usuarios disponibles:', response.data);
+    useEffect(() => {
+        async function fetchData() {
+            const token = localStorage.getItem('access');
+            try {
+                const response = await api.post('matches/sugerencias/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+                if (response.status === 200) {
 
-    //             } else {
-    //                 console.error('Error en la respuesta:', response.status);
-    //             }
-    //         } catch (error) {
-    //             console.error('Error:', error);
-    //             setError("Error al cargar los datos.")
-    //             setVerificar(false);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     }
-    //     fetchData();
-    // }, []);
+                    setUserMatch(response.data);
+                    setData(response.data)
+                    console.log('Usuarios disponibles:', response.data);
+
+                } else {
+                    console.error('Error en la respuesta:', response.status);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setError("Error al cargar los datos.")
+                setVerificar(false);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
 
     if (loading) {
         return (
@@ -56,6 +63,60 @@ const buscarMatchx = () => {
             </div>
         )
     }
+
+    // Handle para aplicar los filtros
+    const handleApplyFilters = async () => {
+        try {
+
+            const token = localStorage.getItem('access');
+            // Activar estado de carga
+            setFilters(prev => ({ ...prev, isLoading: true }));
+
+            // Recopilar todos los datos del filtro
+            const filterData = {
+                searchMode: isChecked ? 'global' : 'evento',
+                gender: document.querySelector('select').value,
+                ageRange: {
+                    min: value[0],
+                    max: value[1]
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            console.log('Filtros aplicados:', filterData);
+
+            const response = await api.post('matches/sugerencias/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(filterData)
+            });
+
+            if (response.status === 200) {
+
+                setUserMatch(response.data);
+                console.log('Usuarios disponibles:', response.data);
+
+            } else {
+                console.error('Error en la respuesta:', response.status);
+            }
+            // Actualizar estado global o context
+            // setGlobalFilters(filterData);
+
+            // Cerrar el modal
+            document.getElementById('my_modal_2').close();
+
+            toast.success('Filtros aplicados correctamente');
+
+        } catch (error) {
+            console.error('Error:', error);
+            setError("Error al cargar los datos.")
+        } finally {
+            // Desactivar estado de carga
+            setFilters(prev => ({ ...prev, isLoading: false }));
+        }
+    };
 
     //Darle Dislike a un usuario
     const handleNextUser = async (user_id) => {
@@ -145,60 +206,132 @@ const buscarMatchx = () => {
                     </svg>
                 </label>
                 <dialog id="my_modal_2" className="modal">
-                    <div className="modal-box">
-                        <h2 className="font-bold text-lg">Ajustes</h2>
-                        <Divider />
-                        <br />
-                        <div className='flex flex-col'>
-                            <div className='flex flex-row space-x-4 justify-center mb-5'>
-                                <h3>Modo de busqueda</h3>
-                                <h2
-                                    className={`text-xl transition-colors ${isChecked
-                                        ? "text-gray-400 font-normal"
-                                        : "text-blue-600 font-bold"
-                                        }`}
-                                >
-                                    Evento
-                                </h2>
-                                <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    className="toggle"
-                                    onChange={() => setIsChecked(!isChecked)}
-                                />
-                                <h2
-                                    className={`text-xl transition-colors ${isChecked
-                                        ? "text-blue-600 font-bold"
-                                        : "text-gray-400 font-normal"
-                                        }`}
-                                >
-                                    Global
-                                </h2>
-                            </div>
-                            <div className='flex flex-row'>
-                                <h3>Genero</h3>
-                                <select defaultValue="Pick a color" className="select">
-                                    <option disabled={true}>Busqueda de acompañante</option>
-                                    <option>Hombre</option>
-                                    <option>Mujer</option>
-                                    <option>Otro</option>
-                                    <option>Todos</option>
-                                </select>
-                            </div>
-                            <div className='flex flex-col gap-4'>
-                                <div>
-                                    <h3>Rango de edad</h3>
-                                    <h4>Min</h4>
-                                    <h4>Max</h4>
+                    <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
-                                <Slider value={value} onChange={(e) => setValue(e.value)} className="w-14rem" range />
+                                <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
                             </div>
+                            <form method="dialog">
+                                <button className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Content */}
+                        <div className="px-6 pb-6 space-y-6">
+                            {/* Modo de búsqueda */}
+                            <div className="bg-white rounded-2xl p-5 shadow-sm">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                    Modo de búsqueda
+                                </h3>
+                                <div className="flex items-center justify-between bg-gray-100 rounded-xl p-1">
+                                    <button
+                                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${!isChecked
+                                            ? "bg-white text-gray-800 shadow-sm"
+                                            : "text-gray-500"
+                                            }`}
+                                        onClick={() => setIsChecked(false)}
+                                    >
+                                        Evento
+                                    </button>
+                                    <button
+                                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${isChecked
+                                            ? "bg-white text-gray-800 shadow-sm"
+                                            : "text-gray-500"
+                                            }`}
+                                        onClick={() => setIsChecked(true)}
+                                    >
+                                        Global
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Género */}
+                            <div className="bg-white rounded-2xl p-5 shadow-sm">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Género</h3>
+                                <div className="relative">
+                                    <select className="w-full bg-gray-100 border-0 rounded-xl py-3 px-4 text-gray-800 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>Búsqueda de acompañante</option>
+                                        <option>Hombre</option>
+                                        <option>Mujer</option>
+                                        <option>Otro</option>
+                                        <option>Todos</option>
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Rango de edad */}
+                            <div className="bg-white rounded-2xl p-5 shadow-sm">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                    Rango de edad
+                                </h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-500 mb-1">Mínimo</p>
+                                        <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                            <span className="text-lg font-bold text-gray-800">{value[0]}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 mx-4">
+                                        <div className="h-px bg-gray-200"></div>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-500 mb-1">Máximo</p>
+                                        <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                            <span className="text-lg font-bold text-gray-800">{value[1]}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="px-2">
+                                    <Slider
+                                        value={value}
+                                        onChange={(e) => setValue(e.value)}
+                                        className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
+                                        range
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Botón de aplicar */}
+                            <button
+                                onClick={handleApplyFilters}
+                                disabled={filters.isLoading}
+                                className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            >
+                                {filters.isLoading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Aplicando...
+                                    </div>
+                                ) : (
+                                    'Aplicar filtros'
+                                )}
+                            </button>
                         </div>
                     </div>
-                    <form method="dialog" className="modal-backdrop">
-                        <button>close</button>
+
+                    <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
+                        <button className="cursor-pointer">cerrar</button>
                     </form>
                 </dialog>
+
                 <div className="w-full relative flex flex-col items-center max-w-lg w-full">
                     <div className="flex justify-center items-center mt-auto mb-auto font-bold text-2xl">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
