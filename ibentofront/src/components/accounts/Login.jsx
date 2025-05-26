@@ -66,7 +66,7 @@ const Login = () => {
       localStorage.setItem("login_time", new Date().toISOString());
 
       // Redirigir al usuario
-      window.location.href = '/eventos';
+      window.location.href = '/ibento/eventos';
       
     } catch (err) {
       setLoading(false);
