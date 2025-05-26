@@ -6,9 +6,7 @@ from typing import Optional, List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
-class NotificationService:
-    """Servicio para manejar notificaciones push con Firebase"""
-    
+class NotificationService:    
     @staticmethod
     def send_notification(
         user_id: str, 
@@ -22,10 +20,9 @@ class NotificationService:
         try:
            
             tokens = FCMToken.objects.filter(
-                usuario___id=user_id,
-                is_active=True
-            ).values_list('token', flat=True)
-
+                usuario_id=user_id,
+                is_active__in=[True]
+                ).values_list('token', flat=True)
             
             if not tokens:
                 logger.info(f"No active tokens found for user {user_id}")

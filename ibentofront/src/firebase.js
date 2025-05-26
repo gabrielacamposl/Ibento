@@ -29,27 +29,27 @@ export const requestNotificationPermission = async () => {
     
     // Verificar soporte del navegador
     if (!('Notification' in window)) {
-      console.log('❌ El navegador no soporta notificaciones');
+      console.log('El navegador no soporta notificaciones');
       return null;
     }
 
     // Verificar si ya tenemos permisos
     if (Notification.permission === 'granted') {
-      console.log('✅ Permisos ya otorgados');
+      console.log('Permisos ya otorgados');
       return await getFirebaseToken();
     }
 
     // Solicitar permisos
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      console.log('✅ Permisos otorgados');
+      console.log('Permisos otorgados');
       return await getFirebaseToken();
     } else {
-      console.log('❌ Permisos denegados');
+      console.log('Permisos denegados');
       return null;
     }
   } catch (error) {
-    console.error('❌ Error solicitando permisos:', error);
+    console.error('Error solicitando permisos:', error);
     return null;
   }
 };
@@ -62,14 +62,14 @@ const getFirebaseToken = async () => {
     });
     
     if (token) {
-      console.log('🎯 Token FCM generado:', token);
+      console.log('Token FCM generado:', token);
       return token;
     } else {
-      console.log('❌ No se pudo generar el token');
+      console.log('No se pudo generar el token');
       return null;
     }
   } catch (error) {
-    console.error('❌ Error obteniendo token:', error);
+    console.error('Error obteniendo token:', error);
     return null;
   }
 };
@@ -110,11 +110,11 @@ export const sendTokenToServer = async (token) => {
       return data;
     } else {
       const error = await response.json();
-      console.error('❌ Error enviando token al servidor:', error);
+      console.error('Error enviando token al servidor:', error);
       throw new Error(error.error || 'Error del servidor');
     }
   } catch (error) {
-    console.error('❌ Error enviando token:', error);
+    console.error('Error enviando token:', error);
     throw error;
   }
 };
@@ -122,13 +122,13 @@ export const sendTokenToServer = async (token) => {
 // Función para configurar notificaciones completamente
 export const setupNotifications = async () => {
   try {
-    console.log('🚀 Configurando notificaciones...');
+    console.log('onfigurando notificaciones...');
     
     // Solicitar permisos y obtener token
     const token = await requestNotificationPermission();
     
     if (!token) {
-      console.log('❌ No se pudo obtener token');
+      console.log('No se pudo obtener token');
       return { success: false, error: 'No se pudo obtener token' };
     }
 
@@ -136,7 +136,7 @@ export const setupNotifications = async () => {
     try {
       await sendTokenToServer(token);
     } catch (error) {
-      console.log('❌ Error registrando token en servidor:', error.message);
+      console.log('Error registrando token en servidor:', error.message);
       return { success: false, error: error.message };
     }
 
@@ -147,7 +147,7 @@ export const setupNotifications = async () => {
     return { success: true, token };
     
   } catch (error) {
-    console.error('❌ Error configurando notificaciones:', error);
+    console.error('Error configurando notificaciones:', error);
     return { success: false, error: error.message };
   }
 };

@@ -1,5 +1,5 @@
 // IMPORTANTE: Cambiar la ver cada vez que se haga updates
-const CACHE_VERSION = 'v2.3.1'; // <- INCREMENTAR ESTO CON CADA DEPLOY
+const CACHE_VERSION = 'v2.3.4.2'; // <- INCREMENTAR ESTO CON CADA DEPLOY
 const CACHE_NAME = `ibento-${CACHE_VERSION}`;
 const CACHE_EVENTOS = `ibento-eventos-${CACHE_VERSION}`;
 
@@ -7,7 +7,6 @@ const PRECACHE_URLS = [
   '/index.html',
   '/icons/ibento.png',
   '/icons/ibentoba.png',
-  '/favicon.svg',
   '/manifest.webmanifest',
   '/offline.html',
 ];
@@ -82,7 +81,7 @@ async function limpiarCachesViejos() {
     // Elimina si no es uno de los actuales
     (name.startsWith('ibento-') && name !== CACHE_NAME && name !== CACHE_EVENTOS) ||
     // Elimina específicamente estos dos caches antiguos
-    name === 'ibento-v2.3' || name === 'ibento-eventos-v2.3'
+    name === 'ibento-v2.3.4.1' || name === 'ibento-eventos-v2.3.4.1'
   );
 
   await Promise.all(
@@ -281,7 +280,7 @@ self.addEventListener('notificationclick', function(event) {
       targetUrl = 'ibento/chat';
       break;
     default:
-      targetUrl = clickAction || 'https://ibento.com.mx/ibento/eventos';
+      targetUrl = clickAction;
   }
   
   if (event.action === 'close') {
