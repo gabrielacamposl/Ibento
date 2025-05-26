@@ -280,7 +280,7 @@ self.addEventListener('notificationclick', function(event) {
       targetUrl = 'ibento/chat';
       break;
     default:
-      targetUrl = 'ibento/eventos';
+      targetUrl = clickAction;
   }
   
   if (event.action === 'close') {
