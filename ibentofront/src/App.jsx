@@ -223,6 +223,7 @@ export default function App() {
           <Route path="/verificar-correo" element={<VerificarCorreo />} />
           <Route path="/confirmar/:token" element={<Confirm />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="eventos" element={<PrincipalEventos />} />
 
           {/* Rutas de recuperación de contraseña */}
           <Route path="/recuperar-cuenta" element={<RecuperarContrasena />} />
