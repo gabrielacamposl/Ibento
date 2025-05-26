@@ -263,7 +263,7 @@ def crearUsuarios():
         "https://res.cloudinary.com/dgvfyneo0/image/upload/v1748067969/usuarios/perfiles_genericos/rtb6jdf8q9jb9byg8ihd.jpg" 
         ]
 
-    gender = ["Hombre", "Mujer", "Hombre", "Mujer", "Hombre", "Mujer", "Otro"]
+    gender = ["H", "M", "H", "M", "H", "M", "Otro"]
     
     inicio = datetime(1997, 1, 1)
     final =  datetime(2007, 12, 12)
@@ -325,7 +325,7 @@ def random_respuestas(preguntas):
             "respuesta": respuesta
         })
 
-    return {"respuestas": respuestas}
+    return respuestas
 
 
 def eventos_guardados():

@@ -3,6 +3,8 @@ import numpy as np
 from pprint import pprint
 from sklearn.metrics.pairwise import cosine_similarity
 
+import pdb;
+
 from collections import OrderedDict
 
 questions = [
@@ -617,17 +619,20 @@ def compatibilidad_interaccion(respuesta_a, respuesta_b):
 def compatibilidad_mascotas(respuesta_a, respuesta_b):
 
     if not isinstance(respuesta_a, list):
-        respuesta_a = [respuesta_a]
+        respuesta_a = set(respuesta_a)
 
     if not isinstance(respuesta_b, list):
-        respuesta_b = [respuesta_b]
+        respuesta_b = set(respuesta_b)
+
+    respuesta_a = set(respuesta_a)
+    respuesta_b = set(respuesta_b)
 
     # Definir la lógica de compatibilidad para mascotas
     if respuesta_a == respuesta_b:
         return 1.0
     
-    if len(respuesta_a & respuesta_b & ["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"]) > 0:
-        if len(respuesta_a & respuesta_b & ["Soy alérgico", "No me gustan"]) == 0:
+    if len(respuesta_a & respuesta_b & set(["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"])) > 0:
+        if len(respuesta_a & respuesta_b & set(["Soy alérgico", "No me gustan"])) == 0:
             return 0.8
         else:
             return -0.2
@@ -694,7 +699,8 @@ def compatibilidad_tipoAcompañante(respuesta_a, respuesta_b):
 def compatibilidad_personalidad(respuesta_a, respuesta_b):
     type1, type2 = respuesta_a.upper(), respuesta_b.upper()
     if type1 not in compatibility_matrix_personality or type2 not in compatibility_matrix_personality:
-        return "Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types)
+        print("Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types))
+        return 0.0
     index = types.index(type2)
     print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
     return compatibility_matrix_personality[type1][index]
@@ -833,14 +839,10 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
     print("Preferencias del candidato:")
     print(preferencias_candidato)
 
-    
-
     for respuesta_usuario in preferencias_usuario:
         for respuesta_candidato in preferencias_candidato:
-            print("Respuesta candidato: ")
-            print(respuesta_candidato)
 
-            if respuesta_usuario['categoria_id'] == respuesta_candidato['respuesta']:
+            if respuesta_usuario['categoria_id'] == respuesta_candidato['categoria_id']:
                 usuario1[respuesta_usuario['categoria_id']] = respuesta_usuario['respuesta']
                 usuario2[respuesta_candidato['categoria_id']] = respuesta_candidato['respuesta']
                 lista_preguntas.append(respuesta_usuario['categoria_id'])
@@ -850,6 +852,15 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
     print("Lista preguntas 1: ")
     print(lista_preguntas)
 
+    print("Usuario 1: ")
+    print(usuario1)
+
+    print("Usuario 2: ")
+    print(usuario2)
+
     compatibilidad = compatibilidad_total(lista_preguntas, usuario1, usuario2)
+
+    print("Compatibilidad de : ")
+    print(compatibilidad)
 
     return compatibilidad

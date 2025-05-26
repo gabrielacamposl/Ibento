@@ -649,6 +649,7 @@ def sugerencia_usuarios(request):
         usuario_bloqueador_id=usuario
     ).values_list('usuario_bloqueado_id', flat=True)
 
+    # Usuarios que ya esta registrados para matches
     candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
 
     print("Candidatos")
@@ -673,15 +674,38 @@ def sugerencia_usuarios(request):
 
     if us_modo_busqueda == 'evento':
 
-        eventos_status = usuario.eventos_buscar_match
+        try:
+            eventos_status = usuario.eventos_buscar_match
+            
+            if not eventos_status:
+                return Response({"error": "No hay usuarios en eventos para buscar match"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                eventos = Evento.objects.filter(_id__in=eventos_status)
+                
+                print(f"Eventos filtrados: {eventos.count()}")
+                print(eventos)
+                
+                if not eventos.exists():
+                     return Response({"error": "No hay eventos validos"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    # Recopilar IDs de usuarios únicos
+                    usuarios_eventos_ids = set()
+                    for evento in eventos:
+                        # Obtener IDs de asistentes
+                        asistentes_ids = evento.assistants
+                        usuarios_eventos_ids.update(asistentes_ids)
+                    
+                    print(f"Usuarios asistentes únicos: {len(usuarios_eventos_ids)}")
+                    print(list(usuarios_eventos_ids))
+                    
+                    if usuarios_eventos_ids:
+                        candidatos = candidatos.filter(_id__in=usuarios_eventos_ids)
+                    else:
+                        candidatos = candidatos.none()
+                    
+        except Exception as e:
+            return Response(f"Error en filtrado por evento: {e}", status=status.HTTP_400_BAD_REQUEST)
 
-        eventos = Evento.objects.filter(_id__in=eventos_status)
-
-        usuarios_eventos = []
-        for evento in eventos:
-            usuarios_eventos += evento.assistants
-
-        candidatos = candidatos.filter(_id__in = usuarios_eventos)
 
     print("Candidatos despues de filtros")
     if candidatos:
