@@ -66,7 +66,7 @@ export default function App() {
           if (accessToken) {
             try {
               // Verificar token con el servidor - CORREGIR LA RUTA
-              const response = await api.get('/api/usuarios/info_to_edit/', {
+              const response = await api.get('/usuarios/info_to_edit/', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
               });
               
@@ -266,7 +266,7 @@ export default function App() {
       )}
 
       {/* Panel de debug (solo desarrollo) */}
-      {import.meta.env.DEV && (
+      {True && (
         <div className="fixed bottom-4 left-4 bg-gray-900 text-white p-3 rounded-lg text-xs font-mono shadow-lg z-50">
           <div className="space-y-1">
             <div>🔔 Notificaciones: {isSupported ? '✅ Soportadas' : '❌ No soportadas'}</div>
@@ -276,6 +276,7 @@ export default function App() {
           </div>
         </div>
       )}
+
 
       <Router>
         <Routes>

@@ -1,127 +1,94 @@
-import { useState, useEffect, useCallback } from 'react';
-import api from '../api'; 
+import { useEffect, useState, useRef, useCallback } from 'react';
+import axios from 'axios';
 
-export interface NotificationUser {
-  id: string;
-  nombre: string;
-  foto?: string;
+interface Notificacion {
+    id: string;
+    tipo: string;
+    titulo: string;
+    mensaje: string;
+    fecha: string;
+    leido: boolean;
+    usuario_relacionado?: any;
+    accion?: string;
+    data?: any;
 }
 
-export interface NotificationData {
-  match_id?: string;
-  conversacion_id?: string;
-  usuario_id?: string;
-  mensajes_no_leidos?: number;
-}
+export function useUserNotifications(token: string | null) {
+    const [notifications, setNotifications] = useState<Notificacion[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [unreadCount, setUnreadCount] = useState<number>(0);
 
-export interface Notification {
-  id: string;
-  tipo: 'match' | 'like' | 'mensaje';
-  titulo: string;
-  mensaje: string;
-  fecha: string;
-  leido: boolean;
-  usuario_relacionado: NotificationUser;
-  accion: 'abrir_chat' | 'ver_perfil';
-  data: NotificationData;
-}
+    const prevUnreadRef = useRef<number>(0);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
-export interface NotificationsResponse {
-  notificaciones: Notification[];
-  total: number;
-  no_leidas: number;
-}
+    const markAsRead = async () => {
+    if (!token) return;
 
-export const useNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchNotifications = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-      
-      const token = localStorage.getItem('access');
-      if (!token) {
-        throw new Error('No hay token de acceso');
-      }
+        await axios.post('https://ibento.onrender.com/api/notificaciones/marcar_leidas/', {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-      const response = await api.get('notificaciones/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data: NotificationsResponse = response.data;
-      setNotifications(data.notificaciones);
-      setUnreadCount(data.no_leidas);
-      
-    } catch (err: any) {
-      console.error('Error fetching notifications:', err);
-      setError(err.response?.data?.error || 'Error al cargar notificaciones');
-    } finally {
-      setLoading(false);
+        // Marcar como leídas localmente
+        setNotifications(prev =>
+            prev.map(n => ({ ...n, leido: true }))
+        );
+        setUnreadCount(0);
+    } catch (err) {
+        console.error("Error al marcar como leídas", err);
     }
-  }, []);
-
-  const markAsRead = useCallback((notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, leido: true }
-          : notification
-      )
-    );
-    
-    setUnreadCount(prev => Math.max(0, prev - 1));
-  }, []);
-
-  const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, leido: true }))
-    );
-    setUnreadCount(0);
-  }, []);
-
-  const handleNotificationAction = useCallback((notification: Notification, navigate: any) => {
-    // Marcar como leída
-    markAsRead(notification.id);
-
-    // Ejecutar acción según el tipo
-    switch (notification.accion) {
-      case 'abrir_chat':
-        if (notification.data.conversacion_id) {
-          navigate(`/chat/${notification.data.conversacion_id}`);
-        }
-        break;
-      case 'ver_perfil':
-        if (notification.data.usuario_id) {
-          navigate(`/perfil/${notification.data.usuario_id}`);
-        }
-        break;
-    }
-  }, [markAsRead]);
-
-  useEffect(() => {
-    fetchNotifications();
-    
-    // Opcional: Configurar polling para actualizar notificaciones cada cierto tiempo
-    const interval = setInterval(fetchNotifications, 60000); // Cada minuto
-    
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
-
-  return {
-    notifications,
-    unreadCount,
-    loading,
-    error,
-    fetchNotifications,
-    markAsRead,
-    markAllAsRead,
-    handleNotificationAction,
-  };
 };
+
+
+    const fetchNotifications = useCallback(async () => {
+        if (!token) return;
+
+        try {
+            const response = await axios.get('https://ibento.onrender.com/api/notificaciones/', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const data = response.data.notificaciones;
+            const unread = data.filter((n: Notificacion) => !n.leido).length;
+
+            // Detectar nuevos
+            if (unread > prevUnreadRef.current) {
+                audioRef.current?.play().catch(err => console.error("Error reproduciendo sonido", err));
+            }
+
+            prevUnreadRef.current = unread;
+            setUnreadCount(unread);
+            setNotifications(data);
+        } catch (err) {
+            console.error(err);
+            setError("Error cargando notificaciones");
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        audioRef.current = new Audio('/sounds/notification.mp3');
+
+        fetchNotifications(); // inicial
+
+        const interval = setInterval(() => {
+            fetchNotifications();
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [fetchNotifications, token]);
+
+    return { notifications, unreadCount, loading, error, fetchNotifications, markAsRead };
+
+
+    
+}
+

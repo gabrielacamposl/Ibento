@@ -12,6 +12,9 @@ import { Sidebar } from 'primereact/sidebar';
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
 import { useNotifications } from '../../hooks/useNotifications';
 
+const token = localStorage.getItem("access") ?? "";
+const { notifications, loading: notifLoading, error: notifError, unreadCount, markAsRead } = useNotifications(token);
+
 function Page() {
     const navigate = useNavigate();
 
@@ -20,11 +23,17 @@ function Page() {
 
     const { data: popularEvents, loading: popularLoading, error: popularError } = useFetchEvents('eventos/most_liked/');
     const { data: recommendedEvents, loading: recommendedLoading, error: recommendedError } = useFetchRecommendedEvents('eventos/recommended_events', localStorage.getItem("access") ?? "");
-    const { unreadCount } = useNotifications();
+
+    const handleSidebarOpen = () => {
+        setVisible(true);
+        markAsRead();
+    };
+
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
 
     useEffect(() => {
         const userString = localStorage.getItem("user");
@@ -64,34 +73,71 @@ function Page() {
                             {/* Sidebar */}
                             <Sidebar visible={visible} onHide={() => setVisible(false)} fullScreen>
                                 <h2 className="text-2xl font-bold mb-4">Notificaciones</h2>
-                                <p>
-                                    Aquí aparecerán tus notificaciones. Esta sección está en desarrollo.
-                                </p>
+
+                                {notifLoading ? (
+                                    <p>Cargando notificaciones...</p>
+                                ) : notifError ? (
+                                    <p className="text-red-600">{notifError}</p>
+                                ) : notifications.length === 0 ? (
+                                    <p>No tienes notificaciones recientes.</p>
+                                ) : (
+                                    <ul className="space-y-4">
+                                        {notifications.map((notif: any) => (
+                                            <li key={notif.id} className="border-b pb-2">
+                                                <div className="flex gap-2 items-center">
+                                                    {notif.usuario_relacionado?.foto && (
+                                                        <img src={notif.usuario_relacionado.foto} alt="perfil" className="w-10 h-10 rounded-full" />
+                                                    )}
+                                                    <div>
+                                                        <p className="font-semibold">{notif.titulo}</p>
+                                                        <p className="text-sm text-gray-600">{notif.mensaje}</p>
+                                                        <button
+                                                            onClick={() => {
+                                                                if (notif.accion === 'abrir_chat') {
+                                                                    navigate(`/ibento/chat?match=${notif.data.match_id ?? ''}`);
+                                                                } else if (notif.accion === 'ver_perfil') {
+                                                                    navigate(`/ibento/perfil/${notif.data.usuario_id}`);
+                                                                } else if (notif.accion === 'view_event') {
+                                                                    navigate(`/ibento/eventos`);
+                                                                }
+                                                            }}
+                                                            className="text-purple-700 text-sm hover:underline"
+                                                        >
+                                                            Ver más
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </Sidebar>
 
+
                             {/* Botón de búsqueda */}
-                            <Search 
-                                className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer" 
-                                onClick={() => navigate('../busqueda')} 
+                            <Search
+                                className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer"
+                                onClick={() => navigate('../busqueda')}
                             />
 
                             {/* Icono de notificaciones */}
                             <div className="relative">
                                 {unreadCount > 0 ? (
                                     <>
-                                        <BellDot 
+                                        <BellDot
                                             className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer"
-                                            onClick={() => setVisible(true)} 
+                                            onClick={() => setVisible(true)}
                                         />
                                         <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full min-w-[18px] h-[18px]">
                                             {unreadCount > 99 ? '99+' : unreadCount}
                                         </span>
                                     </>
                                 ) : (
-                                    <BellDot 
-                                        className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer"
-                                        onClick={() => setVisible(true)} 
-                                    />
+                                   <BellDot 
+                                   className={`w-6 h-6 text-black cursor-pointer hover:text-purple-700 transition-transform duration-300 ${unreadCount > 0 ? 'animate-ping-fast' : ''}`}
+                                   onClick={handleSidebarOpen} 
+                                   />
+
                                 )}
                             </div>
                         </div>

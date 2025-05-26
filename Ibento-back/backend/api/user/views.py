@@ -2241,3 +2241,24 @@ def get_user_notifications(request):
             {'error': 'Error interno del servidor'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def marcar_notificaciones_leidas(request):
+    try:
+        user = request.user
+
+        # Marca todos los mensajes como leídos
+        mensajes = Mensaje.objects.filter(
+            conversacion__usuario_a=user
+        ) | Mensaje.objects.filter(
+            conversacion__usuario_b=user
+        )
+        mensajes.exclude(remitente=user).update(leido=True)
+
+        return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error marcando notificaciones como leídas: {str(e)}")
+        return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
