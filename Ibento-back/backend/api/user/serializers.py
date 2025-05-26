@@ -38,6 +38,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
         usuario.save()
         return usuario
 
+# ------ Obtener modo de busqueda del usuario
+class UsuarioSerializerModoBusqueda(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = ['modo_busqueda_match']
+        read_only_fields = ['modo_busqueda_match']
+
     
 # -------------------------------------- LOGIN / LOGOUT ----------------------------------------    
 # ------ Login / Inicio de Sesión    
