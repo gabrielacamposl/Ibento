@@ -5,17 +5,19 @@ import { buttonStyle } from "../../styles/styles";
 import "../../assets/css/botones.css";
 import Webcam from 'react-webcam';
 import api from "../../api";
+import { Toast } from 'primereact/toast';
 
 
 const Verificar = () => {
     const navigate = useNavigate();
     const webcamRef = useRef(null);
+    const toast = useRef(null);
     const [user, setUser] = useState({
         pictures: [],
         interest: [],
         ine: [],
         facePhoto: null,
-    });    const [loading, setLoading] = useState(false);
+    });const [loading, setLoading] = useState(false);
     // Estados de carga individuales para cada acción
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
     const [savingPreferences, setSavingPreferences] = useState(false);
@@ -61,10 +63,8 @@ const Verificar = () => {
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith("image/")) {
-            alert("Por favor selecciona una imagen válida.");
+        if (!file) return;        if (!file.type.startsWith("image/")) {
+            showWarn("Por favor selecciona una imagen válida.");
             return;
         }
 
@@ -87,20 +87,17 @@ const Verificar = () => {
                 pictures: newPictures,
             };
         });
-    };    const handleUploadPictures = async () => {
-        if (user.pictures.length < 3 || user.pictures.length > 6) {
-            alert("Debes subir entre 3 y 6 fotos.");
+    };    const handleUploadPictures = async () => {        if (user.pictures.length < 3 || user.pictures.length > 6) {
+            showWarn("Debes subir entre 3 y 6 fotos.");
             return;
-        }
-
-        // Validar cada archivo
+        }        // Validar cada archivo
         for (const picture of user.pictures) {
             if (!["image/jpeg", "image/png", "image/jpg"].includes(picture.type)) {
-                alert("Solo se permiten imágenes JPG o PNG.");
+                showWarn("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
             if (picture.size > 5 * 1024 * 1024) { // 5MB
-                alert("Cada imagen debe pesar menos de 5MB.");
+                showWarn("Cada imagen debe pesar menos de 5MB.");
                 return;
             }
         }
@@ -109,12 +106,10 @@ const Verificar = () => {
         try {            // Guardar las fotos en local para enviar despues
             setSavedPhotos([...user.pictures]);
             setStepsCompleted(prev => ({ ...prev, photos: true }));
-            console.log("Fotos guardadas localmente:", user.pictures);
-
-            // Simular un pequeño delay para mostrar el loading
+            console.log("Fotos guardadas localmente:", user.pictures);            // Simular un pequeño delay para mostrar el loading
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            alert("¡Fotos guardadas correctamente!");
+            showSuccess("¡Fotos guardadas correctamente!");
             setActiveIndex(prev => prev + 1);
         } finally {
             setUploadingPhotos(false);
@@ -200,10 +195,8 @@ const Verificar = () => {
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 const respuestaUsuario = selectedAnswers[item._id] || [];
                 return !item.optional && respuestaUsuario.length === 0;
-            });
-
-            if (obligatoriasNoRespondidas.length > 0) {
-                alert("Por favor responde todas las preguntas obligatorias marcadas con *.");
+            });            if (obligatoriasNoRespondidas.length > 0) {
+                showWarn("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
 
@@ -219,15 +212,13 @@ const Verificar = () => {
             setStepsCompleted(prev => ({ ...prev, preferences: true }));
             console.log("Preferencias guardadas localmente:", { respuestas })
 
-            // Intentar con el endpoint que aparece en el error
-            // const response = await api.post("intereses-respuestas/", { respuestas });
+            // Intentar con el endpoint que aparece en el error            // const response = await api.post("intereses-respuestas/", { respuestas });
             // console.log("Respuesta del servidor:", response.data);
-            alert("Preferencias guardadas correctamente.");
-            setActiveIndex(prev => prev + 1);
-        } catch (err) {
+            showSuccess("Preferencias guardadas correctamente.");
+            setActiveIndex(prev => prev + 1);        } catch (err) {
 
             console.error("Error al procesar preferencias:", err);
-            alert(`Error al guardar preferencias: ${err.message}`);
+            showError(`Error al guardar preferencias: ${err.message}`);
 
             // console.error("Error completo:", err);
             // console.error("Error response:", err.response?.data);
@@ -383,20 +374,18 @@ const uploadAllData = async () => {
                 // Subir automáticamente todos los datos del usuario
                 try {
                     console.log("Subiendo todos los datos del usuario...");
-                    await uploadAllData();
-                    setStepsCompleted(prev => ({ ...prev, ine: true }));
+                    await uploadAllData();                    setStepsCompleted(prev => ({ ...prev, ine: true }));
                     setMessage('¡Validación completada y todos los datos han sido enviados exitosamente!');
-                    alert("¡Proceso completado! Bienvenido a Ibento.");
+                    showContrast("¡Proceso completado! Bienvenido a Ibento.");
                     setActiveIndex(3);
                     
                     // Navegar a la página principal después de un delay
                     setTimeout(() => {
                         navigate("../principal");
-                    }, 2000);
-                } catch (uploadError) {
+                    }, 2000);                } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    alert(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     setActiveIndex(3);
                 }
             } else {
@@ -412,20 +401,17 @@ const uploadAllData = async () => {
             const errorMessage = error.response?.data?.error ||
                 error.response?.data?.message ||
                 error.message ||
-                'Error desconocido';
-
-            setMessage(`Error: ${errorMessage}`);
-            alert(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
+                'Error desconocido';            setMessage(`Error: ${errorMessage}`);
+            showError(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
         } finally {
             setValidatingIne(false);
         }
     };
 
     // ✅ FUNCIÓN CORREGIDA - Esta función tenía errores de lógica
-    const handleNavigate = (index) => {
-        if (index === 1) {
+    const handleNavigate = (index) => {        if (index === 1) {
             if (user.pictures.length < 3) {
-                alert('Debes seleccionar al menos 3 fotos');
+                showWarn('Debes seleccionar al menos 3 fotos');
                 return;
             }
             setActiveIndex(index);
@@ -433,10 +419,8 @@ const uploadAllData = async () => {
             // Validación opcional para las preferencias
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 return !item.optional && !(selectedAnswers[item._id]?.length > 0);
-            });
-
-            if (obligatoriasNoRespondidas.length > 0) {
-                alert('Debes responder todas las preguntas obligatorias');
+            });            if (obligatoriasNoRespondidas.length > 0) {
+                showWarn('Debes responder todas las preguntas obligatorias');
                 return;
             }
             setActiveIndex(index);
@@ -455,6 +439,31 @@ const uploadAllData = async () => {
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
+    };
+
+    // Funciones para mostrar toasts
+    const showSuccess = (message) => {
+        toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+    };
+
+    const showInfo = (message) => {
+        toast.current.show({severity:'info', summary: 'Información', detail: message, life: 4000});
+    };
+
+    const showWarn = (message) => {
+        toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
+    };
+
+    const showError = (message) => {
+        toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
+    };
+
+    const showSecondary = (message) => {
+        toast.current.show({severity:'secondary', summary: 'Información', detail: message, life: 4000});
+    };
+
+    const showContrast = (message) => {
+        toast.current.show({severity:'contrast', summary: 'Completado', detail: message, life: 4000});
     };
 
     return (
@@ -756,9 +765,9 @@ const uploadAllData = async () => {
                                 'Validar identidad'
                             )}
                         </Button>
-                    ) : null}
-                </div>
+                    ) : null}                </div>
             </div>
+            <Toast ref={toast} />
         </div>
     );
 };
