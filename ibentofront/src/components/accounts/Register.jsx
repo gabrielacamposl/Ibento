@@ -176,29 +176,23 @@ export default function Register() {
 
     <div className="h-screen flex justify-center items-center">
       {/* Formulario para la visualización web  */}
-
-      <motion.div
-        className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300 "></div>
-        <div className="absolute inset-0 z-10">
-
-          {/* Luces flotantes */}
-          {[...Array(9)].map((_, i) => {
-            const color = colors[i % colors.length]; // Alterna entre los 3 colores
-
+      <div className= "hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
+        {/* Fondo degradado y luces */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[...Array(7)].map((_, i) => {
+            const color = colors[i % colors.length];
             return (
               <motion.div
                 key={i}
-                className="absolute w-40 h-40 opacity-30 blur-xl rounded-full"
-                style={{ backgroundColor: color }} // Aplica el color dinámicamente
+                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
+                style={{ backgroundColor: color }}
                 initial={{
                   x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight,
+                  y: Math.random() * window.innerHeight / 2,
                 }}
                 animate={{
                   x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
+                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
                 }}
                 transition={{
                   duration: 8 + Math.random() * 4,
@@ -210,115 +204,91 @@ export default function Register() {
             );
           })}
         </div>
-        <Box
-          sx={{
-            height: "100vh",
-            width: "100vw",
 
-            zIndex: 10,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            bgcolor: "background.default",
-            padding: 3,
-          }}
-        >
-          <Container
-            component="main"
-            maxWidth="xs"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              backgroundColor: "white",
-              boxShadow: 3,
-              p: 4,
-              zIndex: 20,
-              borderRadius: 2,
-            }}
-          >
-            <CssBaseline />
-            {step === 1 && (
+        {/* Contenido */}
+        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
+          {/* Logo */}
+          <Box
+            component="img"
+            src={ibentoLogo}
+            alt="Ibento Logo"
+            sx={{ width: 80, height: "auto", mb: 2 }}
+          />
 
-              <>
-                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2 }}>
-                  Crear Cuenta
-                </Typography>
+          {/* Título */}
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                  <div className="relative">
-                    {/* Nombre y Apellido */}
-                    <div className="flex space-x-3">
-                      <div className="w-1/2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:<span className="text-red-500">*</span></label>
-                        <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
-                      </div>
-                      <div className="w-1/2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:<span className="text-red-500">*</span></label>
-                        <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
-                      </div>
+          {/* Formulario */}
+          {step === 1 && (
+            <>
+              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  {/* Nombre y Apellido */}
+                  <div className="flex space-x-3">
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
+                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                    </div>
+                    <div className="w-1/2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
+                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
                     </div>
                   </div>
-                  <div className="relative">
-                    <Grid item xs={12}>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Correo electrónico<span className="text-red-500">*</span>
-                      </label>
-                      <InputText className={inputStyles} name="email" onChange={handleChange} required />
-                    </Grid>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <Grid item xs={12}>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Contraseña<span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <InputText
-                          className={`${inputStyles} pr-10`}
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          onChange={handleChange}
-                          required
-                        />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-2 flex items-center"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                        </button>
-                      </div>
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                        La contraseña debe tener al menos 8 caracteres, una mayúscula  y un número.
-                      </Typography>
-                    </Grid>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+                    <InputText className={inputStyles} name="email" onChange={handleChange} required />
                   </div>
 
+                  {/* Contraseña */}
                   <div className="relative">
-                    <Grid item xs={12}>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Confirmar Contraseña<span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <InputText
-                          className={`${inputStyles} pr-10`}
-                          type={showConfirmPassword ? "text" : "password"}
-                          name="confirmPassword"
-                          onChange={handleChange}
-                          required
-                        />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-2 flex items-center"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
-                        >
-                          {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                        </button>
-                      </div>
-                    </Grid>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
+                    <div className="relative">
+                      <InputText
+                        className={`${inputStyles} pr-10`}
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        onChange={handleChange}
+                        required
+                      />
+
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-2 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                      </button>
+                    </div>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                      La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
+                    </Typography>
                   </div>
 
-                  <Grid item xs={12}>
+                  {/* Confirmar Contraseña */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
+                    <div className="relative">
+                      <InputText
+                        className={`${inputStyles} pr-10`}
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        onChange={handleChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-2 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Checkbox términos */}
+                  <div className="flex items-start">
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -329,13 +299,40 @@ export default function Register() {
                         />
                       }
                       label={
-                        <span style={{ fontSize: "12px" }} className={verifyStyle}>
-                          He leído y acepto el <strong>Aviso de privacidad</strong> y los <strong>Términos y condiciones</strong>.
+                        <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
+                          He leído y acepto el
+                          <span
+                            className="mx-1 text-purple-600 cursor-pointer"
+                          >
+                           <strong>Términos y condiciones</strong>
+                          </span>
+                          {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
+                          y los <strong>Aviso de privacidad</strong>.
                         </span>
                       }
                     />
-                  </Grid>
+                  </div>
 
+                  <div className="card flex justify-content-center">
+                    <Dialog
+                      visible={visible}
+                      style={{ width: "90vw", maxWidth: "1000px" }}
+                      onHide={hideDialog}
+                      footer={dialogFooter}
+                      draggable={false}
+                      resizable={false}
+                      className="p-1"
+                      contentClassName="p-0"
+                      header="Términos y condiciones"
+                      headerClassName="bg-white border-none p-3"
+                      closeIcon={<i className="pi pi-times text-gray-500 hover:text-gray-700" />}
+                    >
+                      <div className="dialog-content">
+                        <Page />
+                      </div>
+                    </Dialog>
+                  </div>
+                  {/* Botón de Siguiente */}
                   {message && (
                     <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
                       {message}
@@ -346,8 +343,6 @@ export default function Register() {
                   <Button
                     type="button"
                     onClick={() => {
-                      // Validar campos
-
                       // Validar que todos los campos estén llenos
                       for (const field of requiredFields) {
                         if (!form[field]) {
@@ -355,6 +350,8 @@ export default function Register() {
                           return;
                         }
                       }
+
+                      // Validar campos
                       if (!name_regex.test(form.nombre)) {
                         setMessage("El nombre debe contener solo letras.");
                         return;
@@ -380,7 +377,6 @@ export default function Register() {
                         return;
                       }
 
-
                       // Si todas las validaciones pasan, avanzar al siguiente paso
                       setMessage(""); // Limpia el mensaje si todo está bien
                       setStep(2);
@@ -390,54 +386,63 @@ export default function Register() {
                   >
                     Siguiente
                   </Button>
-
+                  {/* Botón Google
+                  <button
+                    type="button"
+                    className="flex items-center justify-center w-full border border-gray-300 text-gray-700 rounded-full py-2 mt-4"
+                  >
+                    <img src="/images/Google_G.png" alt="Google" className="w-6 h-6 mr-2" />
+                    Iniciar con Google
+                  </button> */}
                 </form>
-              </>)}
-            {step === 2 && (
-              <>
-                <div className="scroll-x-overflow">
+              </div>
+            </>)}
+          {step === 2 && (
+            <>
+              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
+                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
+                  ¿Qué tipo de eventos te gustan?
+                </Typography>
 
-                  <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
-                    ¿Qué tipo de eventos te gustan?
-                  </Typography>
-
-                  <Grid container spacing={2}>
-                    <div className="intereses-container">
-                      {categorias.map((categoria) => (
-                        <div key={categoria.id} className="categoria mb-5">
-                          <div className={buttonStyle} style={{ cursor: 'default' }}>
-                            {categoria.nombre}
-                          </div>
-                          <ul className="flex flex-wrap">
-                            {categoria.valores.map((valor) => (
-                              <li
-                                key={valor}
-                                className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
-                                  ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                  : 'btn-off'
-                                  }`}
-                                onClick={() => toggleSeleccionado(valor)}
-                              >
-                                {valor}
-                              </li>
-                            ))}
-                          </ul>
+                <Grid container spacing={2}>
+                  <div className="intereses-container">
+                    {categorias.map((categoria) => (
+                      <div key={categoria.id} className="categoria mb-5">
+                        <div className={buttonStyleCategoria} style={{ cursor: 'default' }}>
+                          {categoria.nombre}
                         </div>
-                      ))}
-                    </div>
-                  </Grid>
+                        <ul className="flex flex-wrap">
+                          {categoria.valores.map((valor) => (
+                            <li
+                              key={valor}
+                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                : 'btn-off'
+                                }`}
+                              onClick={() => toggleSeleccionado(valor)}
+                            >
+                              {valor}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </Grid>
 
-                  <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
-                    Crear Cuenta
-                  </Button>
-                </div>
-              </>
-            )}
-          </Container>
-        </Box>
-      </motion.div>
+                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
+                  Crear Cuenta
+                </Button>
+
+              </div>
+            </>
+          )}
 
 
+
+
+        </div>
+      </div>
 
       {/* Formulario para móviles */}
       <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
