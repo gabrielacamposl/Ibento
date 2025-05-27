@@ -5,51 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 const verMatch = () => {
     const navigate = useNavigate();
-   
-    const users = [
-        {
-            name: 'Lee Know',
-            age: 26,
-            pictures: ["/lee2.jpeg", "/lee.jpeg"],
-            asistir: ['EDC', 'FlowFest'],
-            eventosComun: ['Fiesta de disfraces', 'Karaoke'],
-        },
-        {
-            name: 'Felix',
-            age: 22,
-            pictures: ["/lee.jpeg", "/felix2.jpeg"],
-            asistir: ['Lollapalooza', 'Tomorrowland'],
-            eventosComun: ['Concierto de rock', 'Festival de cine'],
-        },
-        {
-            name: 'Hyunjin',
-            age: 23,
-            pictures: ["/jin.jpeg", "/hyunjin2.jpeg"],
-            asistir: ['Ultra Music Festival', 'Coachella'],
-            eventosComun: ['Exposición de arte', 'Torneo de videojuegos'],
-        },
-        {
-            name: 'Harryyyy',
-            age: 28,
-            pictures: ["/harry.jpeg", "/jisoo2.jpeg"],
-            asistir: ['SXSW', 'Burning Man'],
-            eventosComun: ['Concierto de pop', 'Festival de comida'],
-        },
-        {
-            name: 'Chinos',
-            age: 27,
-            pictures: ["/bts.jpeg", "/jennie2.jpeg"],
-            asistir: ['Glastonbury', 'Reading Festival'],
-            eventosComun: ['Desfile de moda', 'Fiesta en la playa'],
-        },
-        {
-            name: 'Jung',
-            age: 26,
-            pictures: ["/jung.webp", "/lisa2.jpeg"],
-            asistir: ['Primavera Sound', 'Rock in Rio'],
-            eventosComun: ['Concierto de hip-hop', 'Competencia de baile'],
-        }
-    ];
 
     const handdleMatch = async(user_id) => {
         console.log('match con ',user_id);
@@ -82,7 +37,28 @@ const verMatch = () => {
     }
     
     const eliminarLike = (user_id) => async () => {
-        console.log(user_id);
+
+        console.log('match con ',user_id);
+         try {
+            const token = localStorage.getItem('access');
+           
+            const response = await api.post('interaccion/', {
+                "usuario_destino": user_id,
+                "tipo_interaccion": "dislike"}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
+            console.log(response.data)
+            console.log('Respuesta de la API:', response);
+        }catch (error) {
+            console.error('Error:', error);
+        }
+
+       // navigate('../itsMatch');
+
+        //console.log(user_id);
     }
 
     //Ver Uusuarios que me han dado like

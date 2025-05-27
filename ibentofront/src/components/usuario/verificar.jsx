@@ -19,7 +19,7 @@ const Verificar = () => {
 
     const [loading, setLoading] = useState(false);
     const [ineImages, setIneImages] = useState([null, null]);
-    const [activeIndex, setActiveIndex] = useState(0);
+    const [activeIndex, setActiveIndex] = useState(0); // ✅ Ya estaba en 0
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [message, setMessage] = useState([]);
@@ -61,6 +61,7 @@ const Verificar = () => {
             };
         });
     };
+    
     const handleImageDelete = (indexToDelete) => {
         setUser((prev) => {
             const newPictures = [...prev.pictures];
@@ -71,6 +72,7 @@ const Verificar = () => {
             };
         });
     };
+    
     const handleUploadPictures = async () => {
         if (user.pictures.length < 3 || user.pictures.length > 6) {
             alert("Debes subir entre 3 y 6 fotos.");
@@ -82,8 +84,8 @@ const Verificar = () => {
                 alert("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
-            if (picture.size > 6 * 1024 * 1024) { // 5MB
-                alert("Cada imagen debe pesar menos de 6MB.");
+            if (picture.size > 5 * 1024 * 1024) { // 5MB
+                alert("Cada imagen debe pesar menos de 5MB.");
                 return;
             }
         }
@@ -100,16 +102,13 @@ const Verificar = () => {
                 },
             });
 
-
             console.log("Fotos subidas:", response.data.pictures);
             alert("¡Fotos subidas con éxito!");
             setActiveIndex(prev => prev + 1);
         } catch (error) {
             console.error("Error al subir fotos:", error.response?.data || error);
             alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
-        } finally {
         }
-
     };
 
     // ---------------------------- Intereses -----------------------------
@@ -126,16 +125,25 @@ const Verificar = () => {
 
         fetchQuestions();
     }, []);
+    
     const handleSavePreferences = async () => {
         try {
-            const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
-                categoria_id,
-                respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
-            }));
+            // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
+            const respuestas = itemsAboutMe.map(item => {
+                const respuesta = selectedAnswers[item._id] || [];
+                
+                // Si es multi_option, enviamos el array completo
+                // Si no es multi_option, enviamos solo el primer elemento (o string vacío si no hay respuesta)
+                return {
+                    categoria_id: item._id,
+                    respuesta: item.multi_option ? respuesta : (respuesta.length > 0 ? respuesta[0] : "")
+                };
+            });
 
             // Validación: asegurarse de que todas las obligatorias estén contestadas
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
-                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
+                const respuestaUsuario = selectedAnswers[item._id] || [];
+                return !item.optional && respuestaUsuario.length === 0;
             });
 
             if (obligatoriasNoRespondidas.length > 0) {
@@ -143,15 +151,26 @@ const Verificar = () => {
                 return;
             }
 
-            await api.post("intereses-respuestas/", { respuestas });
+            console.log("=== DEBUG RESPUESTAS ===");
+            console.log("selectedAnswers:", selectedAnswers);
+            console.log("itemsAboutMe:", itemsAboutMe);
+            console.log("respuestas a enviar:", respuestas);
+            console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
+            
+            // Intentar con el endpoint que aparece en el error
+            const response = await api.post("intereses-respuestas/", { respuestas });
+            console.log("Respuesta del servidor:", response.data);
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
-            console.error("Error al guardar preferencias", err);
-            alert("Hubo un error al guardar tus preferencias.");
+            console.error("Error completo:", err);
+            console.error("Error response:", err.response?.data);
+            console.error("Error status:", err.response?.status);
+            console.error("Error message:", err.message);
+            alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
         }
-
     };
+    
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
 
@@ -179,7 +198,6 @@ const Verificar = () => {
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
 
-
     // Pasar a base 64 la foto
     // Base64 a File
     const base64ToFile = (base64Data, filename) => {
@@ -192,11 +210,13 @@ const Verificar = () => {
         return new File([u8arr], filename, { type: mime });
     };
 
-
-
-    // ------ Conexión con el backend ------
-
+ // ------ Conexión con el backend ------
     const handleIneValidation = async () => {
+        console.log("=== DEBUG VALIDACIÓN INE ===");
+        console.log("user.ine[0]:", user.ine[0]);
+        console.log("user.ine[1]:", user.ine[1]);
+        console.log("user.facePhoto:", user.facePhoto ? "Foto capturada" : "No hay foto");
+        
         if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
             return;
@@ -209,50 +229,81 @@ const Verificar = () => {
         setLoading(true);
         setMessage('');
 
-        const formData = new FormData();
-        formData.append("ine_front", user.ine[0]);
-        formData.append("ine_back", user.ine[1]);
-        formData.append("selfie", base64ToFile(user.facePhoto, "selfie.jpg"));
-
         try {
+            // Verificar que base64ToFile funcione correctamente
+            const selfieFile = base64ToFile(user.facePhoto, "selfie.jpg");
+            console.log("Selfie file creado:", selfieFile);
+            console.log("Selfie file size:", selfieFile.size);
+            console.log("Selfie file type:", selfieFile.type);
+
+            const formData = new FormData();
+            formData.append("ine_front", user.ine[0]);
+            formData.append("ine_back", user.ine[1]);
+            formData.append("selfie", selfieFile);
+
+            console.log("FormData creado:");
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ', pair[1]);
+            }
+
             const response = await api.post("validar-ine/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
             });
 
+            console.log("Respuesta del servidor:", response.data);
             const data = response.data;
 
             if (data.mensaje_ine && data.mensaje_rostro) {
                 setMessage('Tu identidad ha sido validada exitosamente.');
-                setActiveIndex(4);
+                setActiveIndex(3);
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
-            console.error('Error al validar la identidad:', error);
-            setMessage('Hubo un error al validar tu identidad. Intenta de nuevo.');
+            console.error('=== ERROR COMPLETO ===');
+            console.error('Error:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            console.error('Error headers:', error.response?.headers);
+            
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.message || 
+                                error.message || 
+                                'Error desconocido';
+            
+            setMessage(`Error: ${errorMessage}`);
+            alert(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
         } finally {
             setLoading(false);
         }
     };
 
-    const handdleNavigate = (index) => {
-
+    // ✅ FUNCIÓN CORREGIDA - Esta función tenía errores de lógica
+    const handleNavigate = (index) => {
         if (index === 1) {
             if (user.pictures.length < 3) {
-                // alert('Debes seleccionar al menos 3 fotos');
+                alert('Debes seleccionar al menos 3 fotos');
                 return;
             }
             setActiveIndex(index);
-        }
-        if (index === 2) {
-            if (Object.keys(selectedAnswers).length < itemsAboutMe.length) {
-                // alert('Debes responder todas las preguntas');
+        } else if (index === 2) {
+            // Validación opcional para las preferencias
+            const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
+                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
+            });
+            
+            if (obligatoriasNoRespondidas.length > 0) {
+                alert('Debes responder todas las preguntas obligatorias');
+                return;
             }
+            setActiveIndex(index);
+        } else {
             setActiveIndex(index);
         }
     };
+
     //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
     // -------- Capturar imagen con cámara
     const videoConstraints = {
@@ -264,7 +315,7 @@ const Verificar = () => {
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
     };
-
+    
     return (
         <div className="text-black flex justify-center items-center h-full">
             <div className="degradadoPerfil relative flex flex-col items-center p-5 shadow-t max-w-lg w-full">
@@ -278,7 +329,7 @@ const Verificar = () => {
                     </div>
                 </div>
 
-                <div className="w-full  overflow-y-auto gap-2 custom-scrollbar">
+                <div className="w-full overflow-y-auto gap-2 custom-scrollbar">
                     {/*VENTANA PARA INGRESAR IMAGENES */}
                     {activeIndex === 0 && (
                         <div className="">
@@ -322,10 +373,10 @@ const Verificar = () => {
                                             </div>
                                         </div>
                                     ))}
-
                                 </div>
                             </React.Fragment>
-                        </div>)}
+                        </div>
+                    )}
 
                     {/* SELECCIÓN DE INTERESES */}
                     {activeIndex === 1 && (
@@ -449,6 +500,7 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
+                    
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 3 && (
                         <div className='h-180'>
@@ -481,54 +533,37 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
-
                 </div>
 
+                {/* ✅ BOTONES CORREGIDOS */}
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
-                    <Button className={buttonStyle}
-                        onClick={() => setActiveIndex(2)}
+                    <Button 
+                        className={buttonStyle}
+                        onClick={() => setActiveIndex(prev => prev - 1)}
                         disabled={activeIndex === 0}
                     >
                         Anterior
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <>
-                            <Button className={buttonStyle} onClick={handleUploadPictures}>
-                                Siguiente
-                            </Button>
-                            <Button
-                                className={buttonStyle}
-                                onClick={() => setActiveIndex(2)} // New button to skip to step 3 (activeIndex 2)
-                            >
-                                Saltar a Paso 3
-                            </Button>
-                        </>
+                        <Button className={buttonStyle} onClick={handleUploadPictures}>
+                            Subir Fotos
+                        </Button>
                     ) : activeIndex === 1 ? (
                         <Button className={buttonStyle} onClick={handleSavePreferences}>
                             Guardar Preferencias
                         </Button>
                     ) : activeIndex === 2 ? (
-                        <Button className={buttonStyle} onClick={setActiveIndex(3)}>
-
+                        <Button className={buttonStyle} onClick={() => setActiveIndex(3)}>
+                            Siguiente
                         </Button>
                     ) : activeIndex === 3 ? (
                         <Button className={buttonStyle} onClick={handleIneValidation} disabled={loading}>
                             {loading ? "Validando..." : "Validar identidad"}
                         </Button>
-                    ) : (
-                        <Button
-                            className={buttonStyle}
-                            onClick={() => handdleNavigate(activeIndex + 1)}
-                            disabled={activeIndex === items.length - 1}
-                        >
-                            Siguiente
-                        </Button>
-                    )}
+                    ) : null}
                 </div>
-
             </div>
-
         </div>
     );
 };
