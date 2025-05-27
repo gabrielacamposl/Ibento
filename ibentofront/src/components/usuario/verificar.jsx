@@ -767,7 +767,7 @@ const uploadAllData = async () => {
                         </Button>
                     ) : null}                </div>
             </div>
-            <Toast ref={toast} />
+            <Toast ref={toast} position="bottom-center"/>
         </div>
     );
 };
