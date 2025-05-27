@@ -40,7 +40,7 @@ from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
 from api.services.create_users import crearUsuarios
 # Servicio de INES
-from api.services.ine_validation import (process_ine_image_secure, ocr_ine, validate_ine)
+from api.services.ine_validation import (process_ine_image_secure, process_selfie_image_secure, ocr_ine, validate_ine)
 #Servicio para envío y recibo de notificaciones
 from api.services.notification_service import NotificationService
 # Importar modelos 
@@ -687,12 +687,14 @@ def ine_validation_view(request):
         print(f"Usuario: {user.nombre}")
 
         
-        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)
-        print("Procesando imagen frontal...")
+        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)        print("Procesando imagen frontal...")
         front_b64 = process_ine_image_secure(ine_front)
         
         print("Procesando imagen trasera...")
         back_b64 = process_ine_image_secure(ine_back)
+        
+        print("Procesando selfie...")
+        selfie_b64 = process_selfie_image_secure(selfie)
         
         print("Imágenes procesadas exitosamente")
         
@@ -724,8 +726,7 @@ def ine_validation_view(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         print("INE válida en padrón electoral")
-        
-        # GUARDAR DATOS DE INE EN USUARIO
+          # GUARDAR DATOS DE INE EN USUARIO
         user.is_ine_validated = True
         if curp:
             user.curp = curp
@@ -733,10 +734,24 @@ def ine_validation_view(request):
         
         print("=== VALIDANDO ROSTRO CON SELFIE ===")
         
+        # Convertir imágenes procesadas de base64 a archivos para FastAPI
+        import base64
+        from io import BytesIO
+        
+        # Crear archivo temporal para INE frontal procesada
+        ine_front_data = base64.b64decode(front_b64)
+        ine_front_file = BytesIO(ine_front_data)
+        ine_front_file.name = 'ine_front_processed.jpg'
+        
+        # Crear archivo temporal para selfie procesado
+        selfie_data = base64.b64decode(selfie_b64)
+        selfie_file = BytesIO(selfie_data)
+        selfie_file.name = 'selfie_processed.jpg'
+        
         # VALIDAR ROSTRO CON FASTAPI
         files = {
-            "ine_image": ine_front,
-            "camera_image": selfie,
+            "ine_image": ine_front_file,
+            "camera_image": selfie_file,
         }
         
         try:

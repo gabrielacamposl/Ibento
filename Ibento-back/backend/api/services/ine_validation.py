@@ -31,11 +31,10 @@ def validate_ine_image(image_file):
         try:
             image = Image.open(image_file)
             image_file.seek(0)  
-            
-            # Verificar dimensiones
+              # Verificar dimensiones - permitir imágenes más grandes
             width, height = image.size
-            if width > 4000 or height > 4000:
-                return False, "Dimensiones demasiado grandes"
+            if width > 8000 or height > 8000:
+                return False, "Dimensiones demasiado grandes (máximo 8000x8000)"
             
             if width < 200 or height < 150:
                 return False, "Dimensiones demasiado pequeñas para una INE"
@@ -56,12 +55,38 @@ def process_ine_image_secure(image_file):
     try:
         print("=== PROCESANDO IMAGEN DE INE ===")
         
-        # Validar imagen primero
+        # Leer imagen primero para redimensionar si es necesario
+        image_file.seek(0)
+        image = Image.open(image_file)
+        
+        # Redimensionar si es demasiado grande ANTES de validar
+        width, height = image.size
+        if width > 8000 or height > 8000:
+            print(f"Imagen muy grande ({width}x{height}), redimensionando...")
+            # Calcular nuevo tamaño manteniendo proporción
+            max_dimension = 6000
+            if width > height:
+                new_width = max_dimension
+                new_height = int(height * max_dimension / width)
+            else:
+                new_height = max_dimension
+                new_width = int(width * max_dimension / height)
+            
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            print(f"Redimensionada a: {new_width}x{new_height}")
+            
+            # Crear un nuevo stream con la imagen redimensionada
+            temp_buffer = io.BytesIO()
+            image.save(temp_buffer, format='JPEG', quality=95)
+            temp_buffer.seek(0)
+            image_file = temp_buffer
+        
+        # Validar imagen después del redimensionamiento
         is_valid, message = validate_ine_image(image_file)
         if not is_valid:
             raise Exception(f"Imagen no válida: {message}")
         
-        # Leer imagen
+        # Leer imagen nuevamente
         image_file.seek(0)
         image = Image.open(image_file)
         
@@ -254,3 +279,153 @@ def validate_ine(cic, id_ciudadano):
         return True
     else:
        return False
+
+def validate_selfie_image(image_file):
+    """
+    Función específica para validar imágenes de selfie/rostro
+    con dimensiones más flexibles que las imágenes de INE
+    """
+    try:
+        # Verificar tamaño del archivo (máximo 15MB para selfies)
+        image_file.seek(0, 2)  # Ir al final
+        file_size = image_file.tell()
+        image_file.seek(0)  # Volver al inicio
+        
+        if file_size > 15 * 1024 * 1024:  # 15MB
+            return False, "Imagen demasiado grande (máximo 15MB)"
+        
+        if file_size < 1024:  # 1KB
+            return False, "Imagen demasiado pequeña"
+        
+        # Verificar que sea una imagen válida
+        try:
+            image = Image.open(image_file)
+            image_file.seek(0)  
+            
+            # Verificar dimensiones - más permisivo para selfies
+            width, height = image.size
+            if width > 10000 or height > 10000:
+                return False, "Dimensiones demasiado grandes (máximo 10000x10000)"
+            
+            if width < 150 or height < 150:
+                return False, "Dimensiones demasiado pequeñas para un selfie"
+            
+            # Verificar formato
+            if image.format not in ['JPEG', 'PNG', 'JPG']:
+                return False, "Formato no válido (solo JPEG/PNG)"
+                
+            return True, "Imagen válida"
+            
+        except Exception as e:
+            return False, f"Imagen corrupta: {str(e)}"
+            
+    except Exception as e:
+        return False, f"Error de validación: {str(e)}"
+
+def process_selfie_image_secure(image_file):
+    """
+    Función específica para procesar imágenes de selfie/rostro
+    """
+    try:
+        print("=== PROCESANDO IMAGEN DE SELFIE ===")
+        
+        # Leer imagen primero para redimensionar si es necesario
+        image_file.seek(0)
+        image = Image.open(image_file)
+        
+        # Redimensionar si es demasiado grande ANTES de validar
+        width, height = image.size
+        if width > 10000 or height > 10000:
+            print(f"Selfie muy grande ({width}x{height}), redimensionando...")
+            # Calcular nuevo tamaño manteniendo proporción
+            max_dimension = 4000
+            if width > height:
+                new_width = max_dimension
+                new_height = int(height * max_dimension / width)
+            else:
+                new_height = max_dimension
+                new_width = int(width * max_dimension / height)
+            
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            print(f"Selfie redimensionado a: {new_width}x{new_height}")
+            
+            # Crear un nuevo stream con la imagen redimensionada
+            temp_buffer = io.BytesIO()
+            image.save(temp_buffer, format='JPEG', quality=95)
+            temp_buffer.seek(0)
+            image_file = temp_buffer
+        
+        # Validar imagen después del redimensionamiento
+        is_valid, message = validate_selfie_image(image_file)
+        if not is_valid:
+            raise Exception(f"Selfie no válido: {message}")
+        
+        # Leer imagen nuevamente
+        image_file.seek(0)
+        image = Image.open(image_file)
+        
+        # Hash para logging (sin datos sensibles)
+        image_file.seek(0)
+        image_data = image_file.read()
+        image_hash = hashlib.sha256(image_data).hexdigest()[:8]
+        print(f"Procesando selfie: {image_hash}")
+        
+        # Convertir a RGB si es necesario
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        original_size = image.size
+        print(f"Tamaño original del selfie: {original_size[0]}x{original_size[1]}")
+        
+        # Optimizar tamaño para comparación facial
+        width, height = image.size
+        if width > 1000 or height > 1000:
+            # Redimensionar para optimizar el procesamiento facial
+            max_size = 800
+            if width > height:
+                new_width = max_size
+                new_height = int(height * max_size / width)
+            else:
+                new_height = max_size
+                new_width = int(width * max_size / height)
+            
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            print(f"Selfie optimizado a: {new_width}x{new_height}")
+        
+        # Mejoras específicas para selfies
+        print("Aplicando mejoras para comparación facial...")
+        
+        # Mejorar nitidez ligeramente
+        enhancer = ImageEnhance.Sharpness(image)
+        image = enhancer.enhance(1.2)
+        
+        # Mejorar contraste suavemente
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(1.1)
+        
+        # Convertir a base64 con buena calidad
+        buffer = io.BytesIO()
+        image.save(buffer, format='JPEG', quality=90, optimize=True)
+        processed_data = buffer.getvalue()
+        
+        # Limpiar memoria
+        buffer.close()
+        
+        # Convertir a base64
+        base64_result = base64.b64encode(processed_data).decode('utf-8')
+        
+        print(f"Selfie procesado: {len(base64_result)} caracteres")
+        print("=== PROCESAMIENTO DE SELFIE COMPLETADO ===")
+        
+        return base64_result
+        
+    except Exception as e:
+        print(f"Error en procesamiento de selfie: {str(e)}")
+        raise Exception(f"Error al procesar selfie: {str(e)}")
+    
+    finally:
+        # Limpiar variables sensibles
+        if 'image_data' in locals():
+            del image_data
+        if 'processed_data' in locals():
+            del processed_data
