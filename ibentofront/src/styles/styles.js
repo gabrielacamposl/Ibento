@@ -4,6 +4,7 @@ export const inputStyles = clsx(
   "mt-1 w-full rounded-3xl bg-white border border-purple-600",
   "focus:border-purple-500 focus:outline-none p-1 ",
   "w-full flex justify-center items-center",
+  "text-black" 
 );
 
 export const buttonStyle = clsx(
