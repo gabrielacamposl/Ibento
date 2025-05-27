@@ -15,13 +15,18 @@ const Verificar = () => {
         interest: [],
         ine: [],
         facePhoto: null,
-    });
-
-    const [loading, setLoading] = useState(false);
+    });    const [loading, setLoading] = useState(false);
     // Estados de carga individuales para cada acción
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
     const [savingPreferences, setSavingPreferences] = useState(false);
     const [validatingIne, setValidatingIne] = useState(false);
+    
+    // Estados para tracking de pasos completados
+    const [stepsCompleted, setStepsCompleted] = useState({
+        photos: false,
+        preferences: false,
+        ine: false
+    });
     
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0); // ✅ Ya estaba en 0
@@ -101,9 +106,9 @@ const Verificar = () => {
         }
 
         setUploadingPhotos(true);
-        try {
-            // Guardar las fotos en local para enviar despues
+        try {            // Guardar las fotos en local para enviar despues
             setSavedPhotos([...user.pictures]);
+            setStepsCompleted(prev => ({ ...prev, photos: true }));
             console.log("Fotos guardadas localmente:", user.pictures);
 
             // Simular un pequeño delay para mostrar el loading
@@ -209,10 +214,9 @@ const Verificar = () => {
             console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
 
             // Simular delay para mostrar loading
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Guardamos las preferencias en un estado
+            await new Promise(resolve => setTimeout(resolve, 500));            // Guardamos las preferencias en un estado
             setSavedPreferences({ respuestas });
+            setStepsCompleted(prev => ({ ...prev, preferences: true }));
             console.log("Preferencias guardadas localmente:", { respuestas })
 
             // Intentar con el endpoint que aparece en el error
@@ -253,9 +257,7 @@ const Verificar = () => {
         }
     };
 
-    // ---------------------------- ENVIAR TODA LA INFORMACIÓN -----------------------------
-
-    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
+    // ---------------------------- ENVIAR TODA LA INFORMACIÓN -----------------------------    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
 const uploadAllData = async () => {
     try {
         setLoading(true);
@@ -268,15 +270,11 @@ const uploadAllData = async () => {
         console.log("Enviando preferencias...");
         await sendSavedPreferences();
         
-        // 3. Validar INE (código existente)
-        console.log("Validando INE...");
-        // ... resto del código de validación INE ...
-        
-        alert("¡Todos los datos han sido enviados exitosamente!");
+        console.log("¡Todos los datos han sido enviados exitosamente!");
         
     } catch (error) {
         console.error("Error al enviar datos:", error);
-        alert(`Error al enviar datos: ${error.message}`);
+        throw error; // Re-lanzar el error para que lo maneje la función que llama
     } finally {
         setLoading(false);
     }
@@ -320,21 +318,32 @@ const uploadAllData = async () => {
         const u8arr = new Uint8Array(n);
         while (n--) u8arr[n] = bstr.charCodeAt(n);
         return new File([u8arr], filename, { type: mime });
-    };
-
-    // ------ Conexión con el backend ------
+    };    // ------ Conexión con el backend ------
     const handleIneValidation = async () => {
         console.log("=== DEBUG VALIDACIÓN INE ===");
         console.log("user.ine[0]:", user.ine[0]);
         console.log("user.ine[1]:", user.ine[1]);
         console.log("user.facePhoto:", user.facePhoto ? "Foto capturada" : "No hay foto");
 
+        // Validar que el INE esté subido
         if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
             return;
         }
         if (!user.facePhoto) {
             setMessage('Por favor, captura una imagen de tu rostro.');
+            return;
+        }
+
+        // Validar que las fotos estén guardadas
+        if (savedPhotos.length === 0) {
+            setMessage('Por favor, guarda primero tus fotos de perfil en el Paso 1.');
+            return;
+        }
+
+        // Validar que las preferencias estén guardadas
+        if (!savedPreferences) {
+            setMessage('Por favor, guarda primero tus preferencias en el Paso 2.');
             return;
         }
 
@@ -362,14 +371,34 @@ const uploadAllData = async () => {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
-            });
-
+            });            
+            
             console.log("Respuesta del servidor:", response.data);
-            const data = response.data;
-
+            
+            const data = response.data;            
+            
             if (data.mensaje_ine && data.mensaje_rostro) {
-                setMessage('Tu identidad ha sido validada exitosamente.');
-                setActiveIndex(3);
+                setMessage('Tu identidad ha sido validada exitosamente. Subiendo datos...');
+
+                // Subir automáticamente todos los datos del usuario
+                try {
+                    console.log("Subiendo todos los datos del usuario...");
+                    await uploadAllData();
+                    setStepsCompleted(prev => ({ ...prev, ine: true }));
+                    setMessage('¡Validación completada y todos los datos han sido enviados exitosamente!');
+                    alert("¡Proceso completado! Bienvenido a Ibento.");
+                    setActiveIndex(3);
+                    
+                    // Navegar a la página principal después de un delay
+                    setTimeout(() => {
+                        navigate("../principal");
+                    }, 2000);
+                } catch (uploadError) {
+                    console.error("Error al subir datos después de validación:", uploadError);
+                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    alert(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    setActiveIndex(3);
+                }
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
@@ -631,16 +660,30 @@ const uploadAllData = async () => {
                                     ) : (
                                         <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
                                     )}
-                                </div>
-
-                                <button
-                                    onClick={capturarImagen}
-                                    className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
-                                />
-                                <p className="text-center mt-2">Capturar imagen</p>
-
-                                {!capturedPhoto && (
-                                    <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                </div>                                {!capturedPhoto ? (
+                                    <>
+                                        <button
+                                            onClick={capturarImagen}
+                                            className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
+                                        />
+                                        <p className="text-center mt-2">Capturar imagen</p>
+                                        <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center mt-4">
+                                        <div className="flex space-x-4">
+                                            <button
+                                                onClick={() => {
+                                                    setCapturedPhoto(null);
+                                                    setUser(prev => ({ ...prev, facePhoto: null }));
+                                                }}
+                                                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors"
+                                            >
+                                                Retomar foto
+                                            </button>
+                                        </div>
+                                        <p className="text-center text-green-600 mt-2">Imagen capturada correctamente</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
