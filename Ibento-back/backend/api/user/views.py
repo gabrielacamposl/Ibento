@@ -864,9 +864,15 @@ def sugerencia_usuarios(request):
 
     #Datos del json
     gender = request.data.get('gender', None)
-    age_range = request.data.get('ageRange', None)
-    min_age = age_range.get('min')
-    max_age = age_range.get('max')
+    age_range = request.data.get('ageRange', None) or request.data.get('age_range', None)
+
+    if age_range is not None:
+        min_age = age_range.get('min', None)
+        max_age = age_range.get('max', None)
+    else:
+        min_age = None
+        max_age = None
+    
     modo_busqueda = request.data.get('searchMode', None)
 
     # Obtener IDs de usuarios a los que ya se les dio like o dislike
@@ -881,6 +887,9 @@ def sugerencia_usuarios(request):
 
     # Usuarios que ya esta registrados para matches
     candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
+
+    print(f"Gender: {gender}")
+    print(f"Age Range: {age_range}")
 
     #Filtrar por genero y edad si se especifica
     if gender != None and gender != 'Todos':
