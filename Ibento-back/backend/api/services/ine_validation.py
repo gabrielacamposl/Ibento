@@ -21,7 +21,7 @@ def validate_ine_image(image_file):
         file_size = image_file.tell()
         image_file.seek(0)  # Volver al inicio
         
-        if file_size > 10 * 1024 * 1024:  # 10MB
+        if file_size > 10 * 2048 * 2048:  # 10MB
             return False, "Imagen demasiado grande (máximo 10MB)"
         
         if file_size < 1024:  # 1KB

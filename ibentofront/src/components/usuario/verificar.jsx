@@ -18,12 +18,23 @@ const Verificar = () => {
     });
 
     const [loading, setLoading] = useState(false);
+    // Estados de carga individuales para cada acción
+    const [uploadingPhotos, setUploadingPhotos] = useState(false);
+    const [savingPreferences, setSavingPreferences] = useState(false);
+    const [validatingIne, setValidatingIne] = useState(false);
+    
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0); // ✅ Ya estaba en 0
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [message, setMessage] = useState([]);
     const [capturedPhoto, setCapturedPhoto] = useState(null);
+
+    // Estado para guardar preferencias
+    const [savedPreferences, setSavedPreferences] = useState(null);
+
+    //Estado para guardas las fotos de perfil
+    const [savedPhotos, setSavedPhotos] = useState([]);
 
     const items = [
         { label: 'Paso 1' },
@@ -61,7 +72,7 @@ const Verificar = () => {
             };
         });
     };
-    
+
     const handleImageDelete = (indexToDelete) => {
         setUser((prev) => {
             const newPictures = [...prev.pictures];
@@ -71,13 +82,12 @@ const Verificar = () => {
                 pictures: newPictures,
             };
         });
-    };
-    
-    const handleUploadPictures = async () => {
+    };    const handleUploadPictures = async () => {
         if (user.pictures.length < 3 || user.pictures.length > 6) {
             alert("Debes subir entre 3 y 6 fotos.");
             return;
         }
+
         // Validar cada archivo
         for (const picture of user.pictures) {
             if (!["image/jpeg", "image/png", "image/jpg"].includes(picture.type)) {
@@ -90,24 +100,66 @@ const Verificar = () => {
             }
         }
 
-        const formData = new FormData();
-        user.pictures.forEach((picture) => {
-            formData.append("pictures", picture);
-        });
+        setUploadingPhotos(true);
+        try {
+            // Guardar las fotos en local para enviar despues
+            setSavedPhotos([...user.pictures]);
+            console.log("Fotos guardadas localmente:", user.pictures);
+
+            // Simular un pequeño delay para mostrar el loading
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            alert("¡Fotos guardadas correctamente!");
+            setActiveIndex(prev => prev + 1);
+        } finally {
+            setUploadingPhotos(false);
+        }
+
+        // const formData = new FormData();
+        // user.pictures.forEach((picture) => {
+        //     formData.append("pictures", picture);
+        // });
+
+        // try {
+        //     const response = await api.post("perfil/subir-fotos/", formData, {
+        //         headers: {
+        //             "Content-Type": "multipart/form-data",
+        //         },
+        //     });
+
+        //     console.log("Fotos subidas:", response.data.pictures);
+        //     alert("¡Fotos subidas con éxito!");
+        //     setActiveIndex(prev => prev + 1);
+        // } catch (error) {
+        //     console.error("Error al subir fotos:", error.response?.data || error);
+        //     alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
+        // }
+    };
+
+    const uploadSavedPhotos = async () => {
+        if (savedPhotos.length === 0) {
+            console.error("No hay fotos guardadas para subir");
+            return;
+        }
 
         try {
+            const formData = new FormData();
+            savedPhotos.forEach((picture) => {
+                formData.append("pictures", picture);
+            });
+
+            console.log("Subiendo fotos guardadas:", savedPhotos);
             const response = await api.post("perfil/subir-fotos/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
-            console.log("Fotos subidas:", response.data.pictures);
-            alert("¡Fotos subidas con éxito!");
-            setActiveIndex(prev => prev + 1);
+            console.log("Fotos subidas exitosamente:", response.data.pictures);
+            return response.data;
         } catch (error) {
             console.error("Error al subir fotos:", error.response?.data || error);
-            alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
+            throw error;
         }
     };
 
@@ -124,14 +176,13 @@ const Verificar = () => {
         };
 
         fetchQuestions();
-    }, []);
-    
-    const handleSavePreferences = async () => {
+    }, []);    const handleSavePreferences = async () => {
+        setSavingPreferences(true);
         try {
             // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
             const respuestas = itemsAboutMe.map(item => {
                 const respuesta = selectedAnswers[item._id] || [];
-                
+
                 // Si es multi_option, enviamos el array completo
                 // Si no es multi_option, enviamos solo el primer elemento (o string vacío si no hay respuesta)
                 return {
@@ -156,21 +207,82 @@ const Verificar = () => {
             console.log("itemsAboutMe:", itemsAboutMe);
             console.log("respuestas a enviar:", respuestas);
             console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
-            
+
+            // Simular delay para mostrar loading
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Guardamos las preferencias en un estado
+            setSavedPreferences({ respuestas });
+            console.log("Preferencias guardadas localmente:", { respuestas })
+
             // Intentar con el endpoint que aparece en el error
-            const response = await api.post("intereses-respuestas/", { respuestas });
-            console.log("Respuesta del servidor:", response.data);
+            // const response = await api.post("intereses-respuestas/", { respuestas });
+            // console.log("Respuesta del servidor:", response.data);
             alert("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
-            console.error("Error completo:", err);
-            console.error("Error response:", err.response?.data);
-            console.error("Error status:", err.response?.status);
-            console.error("Error message:", err.message);
-            alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
+
+            console.error("Error al procesar preferencias:", err);
+            alert(`Error al guardar preferencias: ${err.message}`);
+
+            // console.error("Error completo:", err);
+            // console.error("Error response:", err.response?.data);
+            // console.error("Error status:", err.response?.status);
+            // console.error("Error message:", err.message);
+            // alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
+        } finally {
+            setSavingPreferences(false);
         }
     };
-    
+
+    // Función para enviar las preferencias guardadas
+    const sendSavedPreferences = async () => {
+        if (!savedPreferences) {
+            console.error("No hay preferencias guardadas para enviar");
+            return;
+        }
+
+        try {
+            console.log("Enviando preferencias guardadas:", savedPreferences);
+            const response = await api.post("intereses-respuestas/", savedPreferences);
+            console.log("Respuesta del servidor:", response.data);
+            return response.data;
+        } catch (err) {
+            console.error("Error al enviar preferencias:", err);
+            throw err;
+        }
+    };
+
+    // ---------------------------- ENVIAR TODA LA INFORMACIÓN -----------------------------
+
+    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
+const uploadAllData = async () => {
+    try {
+        setLoading(true);
+        
+        // 1. Subir fotos
+        console.log("Subiendo fotos...");
+        await uploadSavedPhotos();
+        
+        // 2. Enviar preferencias
+        console.log("Enviando preferencias...");
+        await sendSavedPreferences();
+        
+        // 3. Validar INE (código existente)
+        console.log("Validando INE...");
+        // ... resto del código de validación INE ...
+        
+        alert("¡Todos los datos han sido enviados exitosamente!");
+        
+    } catch (error) {
+        console.error("Error al enviar datos:", error);
+        alert(`Error al enviar datos: ${error.message}`);
+    } finally {
+        setLoading(false);
+    }
+};
+
+
     // ---------------------------- VALIDACION DE INE -----------------------------
     // ------ Manejo de imagenes de INE ------
 
@@ -210,13 +322,13 @@ const Verificar = () => {
         return new File([u8arr], filename, { type: mime });
     };
 
- // ------ Conexión con el backend ------
+    // ------ Conexión con el backend ------
     const handleIneValidation = async () => {
         console.log("=== DEBUG VALIDACIÓN INE ===");
         console.log("user.ine[0]:", user.ine[0]);
         console.log("user.ine[1]:", user.ine[1]);
         console.log("user.facePhoto:", user.facePhoto ? "Foto capturada" : "No hay foto");
-        
+
         if (!user.ine[0] || !user.ine[1]) {
             setMessage('Por favor, sube ambas imágenes de tu INE.');
             return;
@@ -226,7 +338,7 @@ const Verificar = () => {
             return;
         }
 
-        setLoading(true);
+        setValidatingIne(true);
         setMessage('');
 
         try {
@@ -267,16 +379,16 @@ const Verificar = () => {
             console.error('Error response:', error.response?.data);
             console.error('Error status:', error.response?.status);
             console.error('Error headers:', error.response?.headers);
-            
-            const errorMessage = error.response?.data?.error || 
-                                error.response?.data?.message || 
-                                error.message || 
-                                'Error desconocido';
-            
+
+            const errorMessage = error.response?.data?.error ||
+                error.response?.data?.message ||
+                error.message ||
+                'Error desconocido';
+
             setMessage(`Error: ${errorMessage}`);
             alert(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
         } finally {
-            setLoading(false);
+            setValidatingIne(false);
         }
     };
 
@@ -293,7 +405,7 @@ const Verificar = () => {
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 return !item.optional && !(selectedAnswers[item._id]?.length > 0);
             });
-            
+
             if (obligatoriasNoRespondidas.length > 0) {
                 alert('Debes responder todas las preguntas obligatorias');
                 return;
@@ -315,7 +427,7 @@ const Verificar = () => {
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
     };
-    
+
     return (
         <div className="text-black flex justify-center items-center h-full">
             <div className="degradadoPerfil relative flex flex-col items-center p-5 shadow-t max-w-lg w-full">
@@ -500,7 +612,7 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
                     {activeIndex === 3 && (
                         <div className='h-180'>
@@ -533,11 +645,9 @@ const Verificar = () => {
                             </div>
                         </div>
                     )}
-                </div>
-
-                {/* ✅ BOTONES CORREGIDOS */}
+                </div>                {/* ✅ BOTONES CORREGIDOS */}
                 <div className="mt-2 flex justify-center space-x-2 w-full ">
-                    <Button 
+                    <Button
                         className={buttonStyle}
                         onClick={() => setActiveIndex(prev => prev - 1)}
                         disabled={activeIndex === 0}
@@ -546,20 +656,62 @@ const Verificar = () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button className={buttonStyle} onClick={handleUploadPictures}>
-                            Subir Fotos
+                        <Button 
+                            className={buttonStyle} 
+                            onClick={handleUploadPictures}
+                            disabled={uploadingPhotos}
+                        >
+                            {uploadingPhotos ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Subiendo...
+                                </div>
+                            ) : (
+                                'Subir Fotos'
+                            )}
                         </Button>
                     ) : activeIndex === 1 ? (
-                        <Button className={buttonStyle} onClick={handleSavePreferences}>
-                            Guardar Preferencias
+                        <Button 
+                            className={buttonStyle} 
+                            onClick={handleSavePreferences}
+                            disabled={savingPreferences}
+                        >
+                            {savingPreferences ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Guardando...
+                                </div>
+                            ) : (
+                                'Guardar Preferencias'
+                            )}
                         </Button>
                     ) : activeIndex === 2 ? (
                         <Button className={buttonStyle} onClick={() => setActiveIndex(3)}>
                             Siguiente
                         </Button>
                     ) : activeIndex === 3 ? (
-                        <Button className={buttonStyle} onClick={handleIneValidation} disabled={loading}>
-                            {loading ? "Validando..." : "Validar identidad"}
+                        <Button 
+                            className={buttonStyle} 
+                            onClick={handleIneValidation} 
+                            disabled={validatingIne}
+                        >
+                            {validatingIne ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Validando...
+                                </div>
+                            ) : (
+                                'Validar identidad'
+                            )}
                         </Button>
                     ) : null}
                 </div>

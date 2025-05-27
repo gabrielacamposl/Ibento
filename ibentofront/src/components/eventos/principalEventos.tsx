@@ -6,7 +6,9 @@ import Carousel from './components/carousel';
 import Cards from './components/cards';
 import SearchMenu from './components/menu';
 import CircularDemo from './components/carousel2';
-import NotificationSidebar from './components/NotificationsSidebar'; 
+import NotificationSidebar from './components/NotificationsSidebar';
+
+import LoadingSpinner from './../../assets/components/LoadingSpinner';
 
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
 import { useUserNotifications } from '../../hooks/useNotificationSidebar';
@@ -15,13 +17,13 @@ function Page() {
     const navigate = useNavigate();
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);
-    
+
     const token = localStorage.getItem("access") ?? "";
-    const { 
-        notifications, 
-        loading: notifLoading, 
-        error: notifError, 
-        unreadCount, 
+    const {
+        notifications,
+        loading: notifLoading,
+        error: notifError,
+        unreadCount,
         markAsRead,
         fetchNotifications // Función para refrescar notificaciones
     } = useUserNotifications(token);
@@ -81,12 +83,15 @@ function Page() {
             const nombre = userObject.nombre;
             setUsuarioName(nombre);
         }
-    }, []);
-
+    }, []);    
+    
     if (popularLoading || recommendedLoading) {
         return (
-            <div className="flex min-h-screen justify-center items-center">
-                <span className="text-black loading loading-ring loading-xl"></span>
+            <div className="fixed inset-0 bg-white z-50">
+                <LoadingSpinner
+                    logoSrc="/ibento_logo.png"
+                    loadingText="Cargando eventos"
+                />
             </div>
         );
     }
@@ -121,8 +126,8 @@ function Page() {
                                     onClick={handleSidebarOpen}
                                     className={`
                                         relative p-2 rounded-full transition-all duration-200
-                                        ${unreadCount > 0 
-                                            ? 'text-purple-600 hover:text-purple-700 hover:bg-purple-50' 
+                                        ${unreadCount > 0
+                                            ? 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'
                                             : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
                                         }
                                     `}
@@ -132,7 +137,7 @@ function Page() {
                                     ) : (
                                         <Bell className="w-6 h-6" />
                                     )}
-                                    
+
                                     {/* Badge de contador de notificaciones */}
                                     {unreadCount > 0 && (
                                         <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full min-w-[18px] h-[18px] animate-bounce">
