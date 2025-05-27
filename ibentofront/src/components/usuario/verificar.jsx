@@ -646,7 +646,7 @@ const uploadAllData = async () => {
                         </div>
                     )}
                 </div>                {/* ✅ BOTONES CORREGIDOS */}
-                <div className="mt-2 flex justify-center space-x-2 w-full ">
+                <div className="mt-2 flex justify-center space-x-2 w-full mb-10 ">
                     <Button
                         className={buttonStyle}
                         onClick={() => setActiveIndex(prev => prev - 1)}
