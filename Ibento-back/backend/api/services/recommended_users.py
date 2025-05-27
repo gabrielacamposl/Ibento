@@ -699,10 +699,10 @@ def compatibilidad_tipoAcompañante(respuesta_a, respuesta_b):
 def compatibilidad_personalidad(respuesta_a, respuesta_b):
     type1, type2 = respuesta_a.upper(), respuesta_b.upper()
     if type1 not in compatibility_matrix_personality or type2 not in compatibility_matrix_personality:
-        print("Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types))
+        # print("Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types))
         return 0.0
     index = types.index(type2)
-    print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
+    # print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
     return compatibility_matrix_personality[type1][index]
 
 
@@ -834,10 +834,10 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
 
     lista_preguntas = []
 
-    print("Preferencias del usuario: ")
-    print(preferencias_usuario)
-    print("Preferencias del candidato:")
-    print(preferencias_candidato)
+    # print("Preferencias del usuario: ")
+    # print(preferencias_usuario)
+    # print("Preferencias del candidato:")
+    # print(preferencias_candidato)
 
     for respuesta_usuario in preferencias_usuario:
         for respuesta_candidato in preferencias_candidato:
@@ -849,14 +849,14 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
                 break
 
 
-    print("Lista preguntas 1: ")
-    print(lista_preguntas)
+    # print("Lista preguntas 1: ")
+    # print(lista_preguntas)
 
-    print("Usuario 1: ")
-    print(usuario1)
+    # print("Usuario 1: ")
+    # print(usuario1)
 
-    print("Usuario 2: ")
-    print(usuario2)
+    # print("Usuario 2: ")
+    # print(usuario2)
 
     compatibilidad = compatibilidad_total(lista_preguntas, usuario1, usuario2)
 
