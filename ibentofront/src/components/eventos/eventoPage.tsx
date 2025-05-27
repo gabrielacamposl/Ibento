@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
+import { buttonStyle, buttonStyleBuscarMatch } from "../../styles/styles";
+import { useNavigate } from "react-router-dom";
 import {
   ClockIcon,
   MapPinIcon,
@@ -53,7 +55,7 @@ function Page() {
 
   // --- 1. LLAMADAS A HOOKS (SIEMPRE AL PRINCIPIO Y EN EL MISMO ORDEN)
   const { eventId } = useParams<{ eventId: string }>();
-
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [date, setDate] = useState<Date | null>(null);
@@ -334,6 +336,7 @@ function Page() {
   };
 
 
+
   // Lógica para formatear likes y saves (sin cambios)
   let likeString = eventNumLikes >= 1000000 ? (eventNumLikes / 1000000).toFixed(1) + "M" : eventNumLikes >= 1000 ? (eventNumLikes / 1000).toFixed(1) + "k" : eventNumLikes + "";
   let saveString = eventNumSaves >= 1000000 ? (eventNumSaves / 1000000).toFixed(1) + "M" : eventNumSaves >= 1000 ? (eventNumSaves / 1000).toFixed(1) + "k" : eventNumSaves.toString();
@@ -368,10 +371,30 @@ function Page() {
   const cleanedUrl = url ? url.replace(/^\[?'|'\]?$/g, "") : "#";
 
 
+
+   const bucarMatch = async () => {
+    
+        const token = localStorage.getItem('access');
+        try {
+            const response = await api.post(`usuarios/agregar_eventos_match/?idEvent=${_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+           
+              navigate(`../perfil?buscar=ok`); // Redirigir al match creado
+            
+        } catch (error) {
+            console.error("Error al crear el match:", error);
+        }
+      }
+       
+
+
   return (
     <div className="w-full lg:items-center lg:justify-center">
       {/* Mobile View */}
-      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-3/4">
+      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-3/4 mx-auto relative">
         <Link
           to={urls} // O usa una función de navegación si es más complejo
           onClick={e => {
@@ -477,7 +500,7 @@ function Page() {
               <p>{description || "Descripción no disponible."}</p>
             </article>
           </div>
-          <div className="w-full px-6 my-4">
+          <div className="w-full px-4 my-1">
             <p className="mb-1 text-xl font-bold text-black text-left">Ubicación</p>
             <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
             <article className="text-wrap text-black text-justify text-base mt-4">
@@ -485,9 +508,16 @@ function Page() {
             </article>
             <EventMap location={coor} />
           </div>
-          <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xl font-bold w-90 h-auto rounded-full m-4">
+            <button
+            className={buttonStyleBuscarMatch}
+            onClick={async () => {
+              await handleSave();
+              await bucarMatch();
+            }}
+            >
             Buscar acompañante
-          </button>
+            </button>
+
         </div>
       </div>
       

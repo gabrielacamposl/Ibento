@@ -146,8 +146,8 @@ const matches = () => {
 
     return (
         <div className="justify-center text-black flex  max-w-lg w-full min-h-screen relative" >
-            <div className="relative   flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
-                <div className="degradadoPerfil p-5 max-w-lg w-full  flex flex-col mx-auto bg-opacity-80 backdrop-blur-md">
+            <div className="degradadoPerfil relative   flex flex-col items-center  shadow-md  shadow-t max-w-lg w-full">
+                <div className=" p-5 max-w-lg w-full  flex flex-col mx-auto bg-opacity-80 backdrop-blur-md">
                     <div className="flex justify-end items-end font-bold text-2xl w-full">
                         <button className="cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
@@ -213,7 +213,7 @@ const matches = () => {
                             </div>
 
                           
-                    <h1 className="font-bold">Mensajes</h1>
+                    <h1 className="font-bold ">Mensajes</h1>
 
                     <div className="mt-4">
                         {conversaciones.map((user, index) => (
