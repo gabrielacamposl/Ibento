@@ -118,6 +118,22 @@ class UploadProfilePicture(serializers.Serializer):
                 raise serializers.ValidationError("Solo se permiten imágenes JPG, PNG o WebP.")
         return value
 
+class UpdateProfilePicture(serializers.Serializer):
+    pictures = serializers.ListField(
+        child=serializers.ImageField(),
+        allow_empty=False
+    )
+
+    def validate_pictures(self, value):
+        for img in value:
+            if img.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
+                raise serializers.ValidationError("Solo se permiten imágenes JPG, PNG o WebP.")
+        return value
+#---------- Validar el estado de validación
+
+
+
+    
 # ----- Preguntas para el perfil
 class CategoriaPerfilSerializer(serializers.ModelSerializer):
     class Meta:
@@ -383,7 +399,6 @@ class UsuarioSerializerParaEventos(serializers.ModelSerializer):
 class UsuarioSerializerEdit(serializers.ModelSerializer):
 
     preferencias_generales = serializers.SerializerMethodField()
-    
     def get_preferencias_generales(self, obj):
         if hasattr(obj, 'preferencias_generales') and obj.preferencias_generales:
             # Convertir OrderedDict a dict normales
@@ -403,10 +418,10 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        
-        # Lista de campos que deberían ser arrays
+
+        #Lista de campos que deberían ser arrays,
         json_fields = ['save_events', 'favourite_events', 'preferencias_evento', 'profile_pic', 'preferencias_generales']
-        
+
         for field in json_fields:
             if field in data and isinstance(data[field], str):
                 # Si el campo es una string pero debería ser un array, convértelo
@@ -418,7 +433,7 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
                 except (json.JSONDecodeError, AttributeError):
                     # Mantener el valor original si falla la conversión
                     pass
-                    
+
         return data
 
     
