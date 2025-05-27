@@ -660,16 +660,30 @@ const uploadAllData = async () => {
                                     ) : (
                                         <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
                                     )}
-                                </div>
-
-                                <button
-                                    onClick={capturarImagen}
-                                    className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
-                                />
-                                <p className="text-center mt-2">Capturar imagen</p>
-
-                                {!capturedPhoto && (
-                                    <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                </div>                                {!capturedPhoto ? (
+                                    <>
+                                        <button
+                                            onClick={capturarImagen}
+                                            className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
+                                        />
+                                        <p className="text-center mt-2">Capturar imagen</p>
+                                        <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center mt-4">
+                                        <div className="flex space-x-4">
+                                            <button
+                                                onClick={() => {
+                                                    setCapturedPhoto(null);
+                                                    setUser(prev => ({ ...prev, facePhoto: null }));
+                                                }}
+                                                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors"
+                                            >
+                                                Retomar foto
+                                            </button>
+                                        </div>
+                                        <p className="text-center text-green-600 mt-2">Imagen capturada correctamente</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
