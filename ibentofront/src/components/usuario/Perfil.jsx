@@ -1,3 +1,6 @@
+
+import React, { useEffect, useState } from 'react';
+
 import React, { use, useEffect,useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
@@ -142,6 +145,15 @@ useEffect(() => {
         setIndex(newIndex);
     }
     const [index, setIndex] = React.useState(0);
+
+    const productTemplate = (product) => {
+        return (
+            <div className='relative '>
+                <img src={product} alt="Fotos" className="w-full h-72 object-cover " />
+                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent "></div>
+            </div>
+        );
+    };
     
    
 
@@ -156,6 +168,29 @@ useEffect(() => {
             );
         };
 
+    const [loading, setLoading] = useState(true);
+    if (loading) {
+        return (
+            <div className="fixed inset-0 bg-white z-50">
+                <LoadingSpinner
+                    logoSrc="/ibento_logo.png"
+                    loadingText="Cargando eventos"
+                />
+            </div>
+        );
+    }
+
+  //Convertir la fecha de cumpleaños AAAA-MM-DD a edad
+    const calculateAge = (birthday) => {
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
 const [loading, setLoading] = useState(true);
  if (loading) {
     return (

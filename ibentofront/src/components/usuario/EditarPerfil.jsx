@@ -1,28 +1,61 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect, use } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import apiaxios from "../../axiosConfig";
 import api from '../../api';
+import { useNavigate } from 'react-router-dom';
 const EditarPerfil = () => {
-    const [user, setUser] = useState({
-        name: 'Harry Styles',
-        age: 31,
-        cumpleanos: '1 de febrero',
-        genero: 'H',
-        bio: 'Soy un cantante, compositor y actor británico. Me encanta la música y la moda, y disfruto de los desafíos creativos. La moda también es una gran parte de quién soy. Para mí, la ropa es una forma de expresión, de libertad. No hay reglas, solo cómo te sientes en ella. Amo los trajes llamativos, las perlas, los colores y todo lo que me haga sentir auténtico.',
-        pictures: ["/minovio.jpeg", "/juas.webp"],
-        interests: ['Música', 'Moda', 'Actuación', 'Viajes', 'Fotografía', 'Arte', 'Cine', 'Literatura', 'Naturaleza', 'Animales','Deportes'],
-        
-    });
+    const navigate = useNavigate();
     const [userPerfil, setUserPerfil] = useState({ profile_pic: [] })
-    
-    
+    const [categorias, setCategorias] = useState([]);
+    const [selectedEvents, setSelectedEvents] = useState([]);
+
     const [cumpleanos, setCumpleanos] = useState('');
     const [genero, setGenero] = useState('');
     const [nombre, setNombre] = useState('');
     const [apellido, setApellido] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [fotos, setFotos] = useState([] );
+    const [itemsAboutMe, setItemsAboutMe] = useState([]);
+    const [myAwnsers, setMyAwnsers] = useState([]);
+    const [selectedAnswers, setSelectedAnswers] = useState({});
+    
+
+    const [loading, setLoading] = useState(false);
+    // Función para obtener categorías de eventos
+useEffect(() => {
+  const fetchCategorias = async () => {
+    try {
+      const res = await apiaxios.get('eventos/categorias/');
+      const categoriasFormateadas = res.data.map(cat => ({
+        id: cat._id,
+        nombre: cat.nombre,
+        valores: cat.subcategorias.map(sub => sub.nombre_subcategoria),
+      }));
+      setCategorias(categoriasFormateadas);
+      console.log("categorias", categoriasFormateadas);
+    } catch (err) {
+      console.error('Error al obtener categorías:', err);
+    }
+  };
+    fetchCategorias();
+}, []);
+
+// Función para manejar la selección y deselección de eventos
+  const toggleSeleccionado = (valor) => {
+    setSelectedEvents((prevSelected) => {
+      if (prevSelected.includes(valor)) {
+        // Si el valor ya está seleccionado, lo quitamos
+        return prevSelected.filter((item) => item !== valor);
+      } else {
+        // Si no está seleccionado, lo agregamos
+        return [...prevSelected, valor];
+      }
+    });
+  };
+    
     useEffect(() => {
         const Perfil = async () => {
             try {
@@ -30,13 +63,29 @@ const EditarPerfil = () => {
                 const response = await api.get('usuarios/info_to_edit/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
+                        
                     }
                 });
     
                 if (response.status === 200) {
                     setUserPerfil(response.data);
+                   
                     setFotos(response.data.profile_pic);
-                    console.log("Perfil obtenido:", response.data);
+                   
+                    setDescripcion(response.data.description);
+                    setSelectedEvents(response.data.preferencias_evento);
+                    
+
+                    const respuestas = response.data.preferencias_generales || [];
+                    const transformado = respuestas.reduce((acc, curr) => {
+                    acc[curr.categoria_id] = curr.respuesta;
+                    return acc;
+                    }, {});
+                    setSelectedAnswers(transformado);
+
+                    setMyAwnsers(response.data.preferencias_generales);
+                    console.log("Perfil de usuario:", response.data);
+                   
                 } else {
                     console.error("Error al obtener perfil");
                 }
@@ -47,38 +96,48 @@ const EditarPerfil = () => {
         Perfil();
     }, []);
 
+     useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await api.get('categorias-perfil/');
+                
+                setItemsAboutMe(response.data);
+              
+            } catch (error) {
+                console.error("Error al cargar las preguntas", error);
+            }
+        };
+         fetchQuestions();
+    }, []);
    
     const handleImageChange = (e, index) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newPictures = [...user.pictures];
-                newPictures[index] = reader.result;
-                setUser({ ...user, pictures: newPictures });
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+    const file = e.target.files[0];
+    if (file) {
+        const newFotos = [...fotos];
+        newFotos[index] = file;
+        setFotos(newFotos);
+    }
+};
+
 
     const handleImageDelete = (index) => {
         const newFotos = fotos.filter((_, i) => i !== index);
         setFotos(newFotos);
     };
 
-    const handleAddImage = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                // Solo permite máximo 6 imágenes
-                if (fotos.length < 6) {
-                    setFotos([...fotos, reader.result]);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+   const handleAddImage = (e) => {
+    const file = e.target.files[0];
+    if (file && fotos.length < 6) {
+        setFotos([...fotos, file]);
+    }
+};
+
+
+
+
+    
+
+    
 
 //Convertir la fecha de cumpleaños AAAA-MM-DD a edad
     const calculateAge = (birthday) => {
@@ -92,50 +151,109 @@ const EditarPerfil = () => {
         return age;
     };
 
+    
 
     const handleSubmit = async () => {
+       
         const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
         // Construir el objeto de datos antes de enviar
-        const data = {
-            nombre: nombre || userPerfil.nombre,
-            apellido: apellido || userPerfil.apellido,
-            birthday: cumpleanos || userPerfil.birthday,
-            gender: (genero ? (genero === "Hombre" ? "H" : genero === "Mujer" ? "M" : genero) : userPerfil.genero),
-            description: descripcion || userPerfil.descripcion,
-            profile_pic: fotos,
-            preferencias_generales: userPerfil.preferencias_evento,
-            preferencias_eventos: userPerfil.preferencias_evento
-        };
-        console.log("Datos a enviar:", data);
-        try {
-            const response = await api.put('perfil/actualizar/', data, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+       try {
+
+        const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
+                categoria_id,
+                respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
+            }));
+
+            // Validación: asegurarse de que todas las obligatorias estén contestadas
+            const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
+                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
             });
 
+            if (obligatoriasNoRespondidas.length > 0) {
+                alert("Por favor responde todas las preguntas obligatorias marcadas con *.");
+                return;
+            }
+
+            const formData = new FormData();
+            fotos.forEach((picture, index) => {
+            formData.append("pictures", picture); // Puedes usar `pictures[]` si tu backend lo espera como lista
+        });
+            formData.append("nombre", nombre || userPerfil.nombre);
+            formData.append("apellido", apellido || userPerfil.apellido);
+            formData.append("birthday", cumpleanos || userPerfil.birthday);
+            formData.append(
+                "gender",
+                genero
+                ? genero === "H"
+                    ? "H"
+                    : genero === "M"
+                    ? "M"
+                    : genero
+                : userPerfil.gender
+            );
+            formData.append("description", descripcion || userPerfil.descripcion);
+            // Añadir preferencias_evento como JSON string
+            formData.append(
+                "preferencias_evento",
+                JSON.stringify(selectedEvents || userPerfil.preferencias_evento)
+            );
+            formData.append("preferencias_generales", JSON.stringify(respuestas));
+
+        
+            //preferencias_eventos: userPerfil.preferencias_evento
+            console.log("Datos a enviar:", fotos);
+
+
+        
+
+            const response = await api.patch('perfil/actualizar/', formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
             if (response.status === 200) {
+                
                 console.log("Perfil actualizado:", response.data);
+                setLoading(true);
+                setTimeout(() => navigate('../perfil'), 2000); // Redirigir al perfil después de actualizar
             } else {
                 console.error("Error al actualizar perfil");
             }
         } catch (error) {
             console.error("Error al actualizar perfil:", error);
         }
+        
     
-       
-    }
+}
+
+
 
     return (
-        <div className="flex justify-center items-center text-black">
+        <div className="flex shadow-lg justify-center items-center text-black">
             <div className="degradadoPerfil relative flex flex-col items-center p-5 max-w-lg w-full">
                 <div className="flex justify-center items-center m-2 space-x-4">
                     <div className="relative">
-                        <img src={userPerfil.profile_pic[0]} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={userPerfil.nombre} />
+                        <img src={userPerfil.profile_pic[0]? userPerfil.profile_pic[0] : '/profile_empty.webp'} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={userPerfil.nombre} />
                     </div>
                 </div>
 
+
+                 {/* Fade-in overlay */}
+                {loading === true && (
+                    <div
+                        className="fixed inset-0 z-60 flex items-center justify-center bg-gradient-to-b from-blue-600/70 via-purple-600/70 to-pink-600/70 backdrop-blur-md transition-opacity duration-700 opacity-100 animate-fadein"
+                    >
+                        <div className="text-center text-white  p-8 rounded-xl ">
+                            <h1 className="text-3xl font-bold mb-2">¡Perfil Actualizado!</h1>
+                            <p className="mb-4">Redirigiendo a Perfil...</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="text-black w-full -2xl">
+                    
                     <div className='mb-2 items-center'>
                         <div className='flex items-center mr-4 mb-2'>
                             <h1 className="font-semibold mr-2">Nombre: </h1>
@@ -161,7 +279,7 @@ const EditarPerfil = () => {
                         <h1 className="font-semibold mr-2">Sexo:</h1>    
                     <div className='flex space-x-2 mr-2 items-center'>
                         
-                        {genero === 'Hombre' ? (
+                        {userPerfil.gender =='H' ? (
                             <i className="pi pi-mars mt-1 font-semibold " style={{ color: 'slateblue' }}></i>
                         ) : (
                             <i className="pi pi-venus mt-1 font-semibold" style={{ color: 'orange' }}></i>
@@ -171,11 +289,16 @@ const EditarPerfil = () => {
                     <div className="relative">
                             <select
                                 className="appearance-none border border-indigo-400 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-base font-medium text-indigo-700 shadow-sm transition-all"
-                                value={genero || userPerfil.genero || user.genero}
+                               value={
+                                    
+                                     userPerfil.gender
+                                  
+                                }
                                 onChange={(e) => setGenero(e.target.value)}
                             >
-                                <option value="Hombre">Hombre</option>
-                                <option value="Mujer">Mujer</option>
+                                <option value="H">Hombre</option>
+                                <option value="M">Mujer</option>
+                                <option value="O">Otro</option>
                             </select>
                             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-500">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -195,12 +318,11 @@ const EditarPerfil = () => {
                             rows={1}
                             placeholder='AAAA-MM-DD'  
                             onChange={(e) => {
-                                const birthday = e.target.value;
-                                const age = calculateAge(birthday);
+                               
                                 setCumpleanos(e.target.value);
                             }}
                         ></input>
-                        <h1 className="text-lg">{} años</h1>
+                        <h1 className="text-lg">{calculateAge(userPerfil.birthday)} años</h1>
                     </div>
                 </div>
                 
@@ -213,7 +335,12 @@ const EditarPerfil = () => {
                                 <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35 divBorder flex items-center justify-center">
                                     {fotos[index] ? (
                                         <>
-                                            <img src={fotos[index]} className="w-full h-full object-cover m" alt={user.name} />
+                                           
+                                            <img 
+                                                src={fotos[index] instanceof File ? URL.createObjectURL(fotos[index]) : fotos[index]} 
+                                                alt="preview" 
+                                                className="object-cover w-full h-full"
+                                                />
                                             <button onClick={() => handleImageDelete(index)} className="w-7 h-7 sm:w-7 sm:h-7 md:w-7 md:h-7 Morado absolute top-0 right-0 text-white p-2 rounded-full btn-custom">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -247,21 +374,142 @@ const EditarPerfil = () => {
                         <h2 className="mt-5 text-lg font-semibold">Sobre mí</h2>
                         <textarea
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base w-full h-32"
-                            defaultValue={userPerfil.descripcion}
+                            defaultValue={descripcion !== '' ? descripcion : (userPerfil.description || '')}
                             onChange={(e) => setDescripcion(e.target.value)}
                             placeholder="Escribe algo sobre ti..."
                         ></textarea>
                         <div className='mt-5'>
-                            <h2 className="text-lg font-semibold">Mis intereses</h2>
-                            <Link to="/editarIntereses">
-                                <button className="">Editar Intereses</button>
-                            </Link>
-                            <div className="mt-2 flex flex-wrap">
-                                {user.interests.map((interest, index) => (
-                                    <h1 key={index} className="btn-off rounded-full text-center mb-1 px-3 ml-3 mt-2 sm:w-auto negritas">{interest}</h1>
-                                ))}
+                           <Accordion multiple >
+                            <AccordionTab className="text-lg font-semibold mb-3" header="Mis Intereses">
+                                <div className="scroll-x-overflow">
+              
+                               
+                                <h1>¿Qué tipo de eventos te gustan?</h1>
+                                
+
+                                
+                                <div className="intereses-container">
+                                    {categorias.map((categoria) => (
+                                    <div key={categoria.id} className="categoria mb-5">
+                                        <div className={buttonStyle} style={{ cursor: 'default' }}>
+                                        {categoria.nombre}
+                                        </div>
+                                        <ul className="flex flex-wrap">
+                                        {categoria.valores.map((valor) => (
+                                            <li
+                                            key={valor}
+                                            className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
+                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                                : 'btn-off'
+                                                }`}
+                                            onClick={() => toggleSeleccionado(valor)}
+                                            >
+                                            {valor}
+                                            </li>
+                                        ))}
+                                        </ul>
+                                    </div>
+                                    ))}
+                                </div>
+                                
+
+                                
+                                </div>
+                            </AccordionTab>
+
+                           
+                            <AccordionTab className="text-lg font-semibold" header="Intereses Generales">
+                                 <div className='mt-5'>
+                           
+                            
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {itemsAboutMe.map((item, index) => {
+                                  
+                                // 👇 Parseamos "answers" por si vienen mal como string
+                                let answers = [];
+                                try {
+                                    answers = Array.isArray(item.answers)
+                                        ? item.answers
+                                        : JSON.parse(item.answers.replace(/'/g, '"'));
+                                } catch (e) {
+                                    console.error("No se pudo parsear answers para:", item.question);
+                                    answers = [];
+                                }
+                               
+                                return (
+                                    <div key={index} className="flex flex-col">
+                                        {item.question === '¿Cuál es tu personalidad?' ? (
+                                            <div className="flex space-x-1 items-center">
+                                                <p className="text-black font-semibold">
+                                                    {item.question}
+                                                    {!item.optional && <span className="text-red-500"> *</span>}
+                                                </p>
+                                                <a
+                                                    className="botonLink"
+                                                    href="https://www.16personalities.com/es/test-de-personalidad"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    Hacer test de personalidad
+                                                </a>
+                                            </div>
+                                        ) : (
+                                            <p className="font-semibold">
+                                                {item.question}
+                                                {!item.optional && <span className="text-red-500"> *</span>}
+                                            </p>
+                                        )}
+
+                                        <div className="flex flex-wrap">
+                                            {answers.map((answer, i) => {
+                                                const isSelected =  selectedAnswers[item._id]?.includes(answer);
+                                               
+                                                return (
+                                                    <button
+                                                        key={i}
+                                                        className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${isSelected
+                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
+                                                : 'btn-off'
+                                                }`}
+                                                        onClick={() => {
+                                                            setSelectedAnswers((prev) => {
+                                                                const currentAnswers = prev[item._id] || [];
+
+                                                                if (item.multi_option) {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: currentAnswers.includes(answer)
+                                                                            ? currentAnswers.filter((a) => a !== answer)
+                                                                            : [...currentAnswers, answer]
+                                                                    };
+                                                                } else {
+                                                                    return {
+                                                                        ...prev,
+                                                                        [item._id]: [answer]
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        {answer}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                             </div>
+                           
                         </div>
+                            </AccordionTab>
+                        
+    
+                        </Accordion>
+                        </div>
+
+
+                       
                     </React.Fragment>
                 </div>
                 {/* <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2"> */}
@@ -270,6 +518,7 @@ const EditarPerfil = () => {
             </div>
         </div>
     );
-}
+};
+
 
 export default EditarPerfil;

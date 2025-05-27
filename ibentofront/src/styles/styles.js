@@ -4,6 +4,7 @@ export const inputStyles = clsx(
   "mt-1 w-full rounded-3xl bg-white border border-purple-600",
   "focus:border-purple-500 focus:outline-none p-1 ",
   "w-full flex justify-center items-center",
+  "text-black" 
 );
 
 export const buttonStyle = clsx(
@@ -29,7 +30,11 @@ export const buttonStyleSecondary = clsx(
   " text-purple bg-white",
   );
   
-  export const verifyStyle = clsx(
+export const buttonStyleBuscarMatch = clsx(
+" flex justify-center p-3",
+"rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
+"font-bold shadow-lg hover:text-purple hover:bg-white  text-l mx-w-96 mt-0" );
+export const verifyStyle = clsx(
     "text-purple-600",
     "text-sm"
     );
