@@ -165,7 +165,7 @@ const Perfil = () => {
             <div className="fixed inset-0 bg-white z-50">
                 <LoadingSpinner
                     logoSrc="/ibento_logo.png"
-                    loadingText="Cargando eventos"
+                    loadingText="Cargando perfil"
                 />
             </div>
         );

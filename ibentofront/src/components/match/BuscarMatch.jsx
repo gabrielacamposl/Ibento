@@ -224,11 +224,9 @@ const buscarMatchx = () => {
 
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
-    };
-
-    if (currentUserIndex >= UserMatch.length) {
+    };    if (currentUserIndex >= UserMatch.length) {
         return (
-            <div className="text-black flex justify-center items-center min-h-screen">
+            <div className="text-black flex justify-center items-center min-h-screen px-4 lg:px-8">
                 <label className="btn btn-circle swap swap-rotate fixed top-4 right-4 z-[9999]" onClick={() => document.getElementById('my_modal_2').showModal()}>
                     {/* this hidden checkbox controls the state */}
                     <input type="checkbox" />
@@ -379,9 +377,7 @@ const buscarMatchx = () => {
                     <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
                         <button className="cursor-pointer">cerrar</button>
                     </form>
-                </dialog>
-
-                <div className="w-full relative flex flex-col items-center max-w-lg w-full">
+                </dialog>                <div className="w-full relative flex flex-col items-center max-w-lg lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
                     <div className="flex justify-center items-center mt-auto mb-auto font-bold text-2xl">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
@@ -403,10 +399,8 @@ const buscarMatchx = () => {
 
     const handlePrev = () => {
         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.profile_pic.length) % user.profile_pic.length);
-    };
-
-    return (
-        <div className="flex justify-center items-center min-h-screen ">
+    };    return (
+        <div className="flex justify-center items-center min-h-screen px-4 lg:px-8 lg:w-full">
             <label className="btn btn-circle swap swap-rotate fixed top-4 right-4 z-[9999]" onClick={() => document.getElementById('my_modal_2').showModal()}>
                 {/* this hidden checkbox controls the state */}
                 <input type="checkbox" />
@@ -552,14 +546,12 @@ const buscarMatchx = () => {
                             )}
                         </button>
                     </div>
-                </div>
-
-                <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
+                </div>                <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
                     <button className="cursor-pointer">cerrar</button>
                 </form>
             </dialog>
-            <div className="relative flex flex-col items-center shadow-md shadow-t max-w-lg w-full ">
-                <div className="relative w-full min-h-screen overflow-hidden ">
+            <div className="relative flex flex-col items-center shadow-md shadow-t w-full max-w-lg lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
+                <div className="relative w-full min-h-screen overflow-hidden">
                     <div className="absolute inset-0 z-3 flex justify-between items-center ">
                         <button onClick={handlePrev} className="btnTransparente text-white p-2 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
