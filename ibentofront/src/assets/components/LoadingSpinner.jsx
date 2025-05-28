@@ -1,15 +1,13 @@
 import React from 'react';
 
 const LoadingSpinner = ({ logoSrc = '/ibento_logo.png', loadingText = 'Cargando' }) => {
-  return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-8 text-center bg-white z-50">
+  return (    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 text-center bg-white z-50">
       {/* Efectos de resplandor de fondo */}
-      <div className="absolute top-1/2 left-1/2 w-80 h-80 rounded-full opacity-10 -z-10 animate-pulse-glow bg-gradient-to-r from-blue-400/20 via-purple-500/10 to-transparent transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full opacity-10 -z-10 animate-pulse-glow bg-gradient-to-r from-blue-400/20 via-purple-500/10 to-transparent transform -translate-x-1/2 -translate-y-1/2"></div>
 
       {/* Spinner Wrapper */}
-      <div className="relative flex justify-center items-center">
-        {/* Círculo de carga externo con degradado */}
-        <div className="absolute w-40 h-40 rounded-full animate-spin" style={{ top: '-20px', left: '-20px' }}>
+      <div className="relative flex justify-center items-center">        {/* Círculo de carga externo con degradado */}
+        <div className="absolute w-28 h-28 rounded-full animate-spin" style={{ top: '-14px', left: '-14px' }}>
           <svg className="w-full h-full" viewBox="0 0 100 100">
             <defs>
               <linearGradient id="spinnerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -29,10 +27,8 @@ const LoadingSpinner = ({ logoSrc = '/ibento_logo.png', loadingText = 'Cargando'
               className="animate-spin"
             />
           </svg>
-        </div>
-
-        {/* Partículas orbitales */}
-        <div className="absolute w-44 h-44" style={{ top: '-28px', left: '-28px' }}>
+        </div>        {/* Partículas orbitales */}
+        <div className="absolute w-32 h-32" style={{ top: '-16px', left: '-16px' }}>
           {[0, 1, 2, 3].map((index) => {
             const positions = [
               { top: '0', left: '50%', transform: 'translateX(-50%)' },
@@ -52,35 +48,29 @@ const LoadingSpinner = ({ logoSrc = '/ibento_logo.png', loadingText = 'Cargando'
               />
             );
           })}
-        </div>
-
-        {/* Logo central */}
-        <div className="w-30 h-30 relative animate-logo-zoom">
+        </div>        {/* Logo central */}
+        <div className="w-20 h-20 relative animate-logo-zoom">
           <img 
             src={logoSrc} 
             alt="Logo" 
             className="w-full h-full object-contain animate-logo-glow drop-shadow-md"
           />
         </div>
-      </div>
-
-      {/* Texto de carga */}
-      <div className="text-gray-700 text-xl font-light tracking-widest uppercase animate-text-pulse">
+      </div>      {/* Texto de carga */}
+      <div className="text-gray-700 text-sm font-light tracking-widest animate-text-pulse">
         <span>{loadingText}</span>
         <span className="animate-dots">...</span>
-      </div>
-
-      <style jsx>{`
+      </div>      <style jsx>{`
         @keyframes orbit {
           0% {
-            transform: rotate(0deg) translateX(90px) rotate(0deg);
+            transform: rotate(0deg) translateX(64px) rotate(0deg);
             opacity: 1;
           }
           50% {
             opacity: 0.3;
           }
           100% {
-            transform: rotate(360deg) translateX(90px) rotate(-360deg);
+            transform: rotate(360deg) translateX(64px) rotate(-360deg);
             opacity: 1;
           }
         }
