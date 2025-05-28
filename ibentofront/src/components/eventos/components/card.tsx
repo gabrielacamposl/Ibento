@@ -37,8 +37,6 @@ export default function CardWrapper(
 
     const {position, error: geoError, loading: geoLoading} = useGeolocation();
     const [nearestEventsUrl, setNearestEventsUrl] = useState<string | null>(null);
-
-
     useEffect(() => {
         if (position?.coords){
             const {latitude, longitude} = position.coords
@@ -48,11 +46,11 @@ export default function CardWrapper(
                     `eventos/nearest?lat=${latitude}&lon=${longitude}`
                 );
             }
-            else {
-                setNearestEventsUrl(null);
-            }
+        } else if (geoError) {
+            // Si hay error de geolocalización, no establecer URL para eventos cercanos
+            setNearestEventsUrl(null);
         }
-      }, [position]);
+      }, [position, geoError]);
     
 
     const {data : upcomingEvents, loading : upcomingLoading, error : upcomingError} = useFetchEvents('eventos/upcoming_events/');
@@ -66,13 +64,12 @@ export default function CardWrapper(
     
     const isLoading = useMemo(() => {
     return upcomingLoading || musicalLoading || nearestLoading || sportsLoading || geoLoading;
-    }, [upcomingLoading, musicalLoading, nearestLoading, sportsLoading, geoLoading]);
-
-    const errors = useMemo(() => {
-    return [upcomingError, musicalError, nearestError, sportsError, geoError].filter(
+    }, [upcomingLoading, musicalLoading, nearestLoading, sportsLoading, geoLoading]);    const errors = useMemo(() => {
+    // Solo incluir errores críticos, no errores de geolocalización
+    return [upcomingError, musicalError, nearestError, sportsError].filter(
       (e): e is string => e !== null,
     );
-    }, [upcomingError, musicalError, nearestError, sportsError, geoError]);
+    }, [upcomingError, musicalError, nearestError, sportsError]);
 
     
     if (isLoading && errors.length === 0) {
@@ -100,13 +97,28 @@ export default function CardWrapper(
     console.log("Position:" + position)
 
     return (
-        <>
-        <div className=''>
+        <>        <div className=''>
             <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
-                {name === "Cercanos a mí" && nearestEvents.map((event, index) => (
-                    console.log(event.dates),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} distance={event.distance} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
-                ))}
+                {name === "Cercanos a mí" && (
+                    <>
+                        {geoError ? (
+                            <div className="w-full text-center py-8">
+                                <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                                    <p className="font-medium">Ubicación no disponible</p>
+                                    <p className="text-sm">Para ver eventos cercanos, activa la geolocalización en tu navegador.</p>
+                                </div>
+                            </div>
+                        ) : nearestEvents.length === 0 && !nearestLoading ? (
+                            <div className="w-full text-center py-8">
+                                <p className="text-gray-500">No hay eventos cercanos disponibles</p>
+                            </div>
+                        ) : (
+                            nearestEvents.map((event, index) => (
+                                <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} distance={event.distance} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                            ))
+                        )}
+                    </>
+                )}
                 {name === "Próximos eventos" && upcomingEvents.map((event, index) => (
                     console.log(event._id),
                     <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
