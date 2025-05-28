@@ -68,15 +68,12 @@ const useFetchEvent = (url: string) => {
 };
 
 const useFetchNearestEvents = (url: string) => {
-
-    url = 'eventos/nearest  /?lat=undefined&lon=undefined'
-
     const [data, setData] = useState<Event[]>([]);;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (url === url || url == '') {
+        if (!url || url === '') {
             setData([]);
             setLoading(false);
             return;
