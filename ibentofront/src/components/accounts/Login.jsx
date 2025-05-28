@@ -1,6 +1,7 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../apilogin';
@@ -24,22 +25,31 @@ import ibentoLogo from "/images/ibentoLogo.png";
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
 
-const Login = () => {
-  const [email, setEmail] = useState("");
+const Login = () => {  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const toast = useRef(null);
 
-   const handleLogin = async (e) => {
+  // Funciones para mostrar toasts
+  const showSuccess = (message) => {
+    toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+  };
+
+  const showError = (message) => {
+    toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
+  };
+
+  const showWarn = (message) => {
+    toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
+  };   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
 
     // Validaciones básicas
     if (!email || !password) {
-      setMessage("Por favor completa todos los campos");
+      showWarn("Por favor completa todos los campos");
       setLoading(false);
       return;
     }
@@ -65,8 +75,13 @@ const Login = () => {
       // Opcional: Guardar timestamp del login para debugging
       localStorage.setItem("login_time", new Date().toISOString());
 
-      // Redirigir al usuario
-      window.location.href = '/ibento/eventos';
+      // Mostrar mensaje de éxito
+      showSuccess("¡Inicio de sesión exitoso! Redirigiendo...");
+
+      // Redirigir al usuario después de un breve delay para que vea el toast
+      setTimeout(() => {
+        window.location.href = '/ibento/eventos';
+      }, 1500);
       
     } catch (err) {
       setLoading(false);
@@ -98,15 +113,14 @@ const Login = () => {
         mensajeError = "Error de conexión. Verifica tu internet.";
       }
       
-      setMessage(mensajeError);
+      showError(mensajeError);
     }
   };
 
 
   return (
 
-    <div className="h-screen flex justify-center items-center">
-      {/* Formulario para la visualización web  */}
+    <div className="h-screen flex justify-center items-center">      {/* Formulario para la visualización web  */}
       <div className="hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
          {/* Fondo degradado y luces */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -217,10 +231,17 @@ const Login = () => {
                   sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                 />
 
-                <Button className={buttonStyle} type="submit"
-                  fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}>
-                  Iniciar Sesión
+                <Button 
+                  className={buttonStyle} 
+                  type="submit"
+                  fullWidth 
+                  variant="contained" 
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
                 <Grid container justifyContent="center" alignItems="center">
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
@@ -248,8 +269,7 @@ const Login = () => {
         </div>
       </div>
 
-      
-      {/* Formulario para móviles */}
+        {/* Formulario para móviles */}
       <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
         {/* Fondo degradado y luces */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -360,10 +380,17 @@ const Login = () => {
                   sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
                 />
 
-                <Button className={buttonStyle} type="submit"
-                  fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}>
-                  Iniciar Sesión
+                <Button 
+                  className={buttonStyle} 
+                  type="submit"
+                  fullWidth 
+                  variant="contained" 
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
                 <Grid container justifyContent="center" alignItems="center">
                   <Grid item xs={12} container justifyContent="center" alignItems="center">
@@ -387,10 +414,11 @@ const Login = () => {
                 </Grid>
               </Box>
             </Box>
-          </Grid>
-        </div>
+          </Grid>        </div>
       </div>
 
+      {/* Toast component for notifications */}
+      <Toast ref={toast} />
     </div>
 
   );
