@@ -7,38 +7,38 @@ import api from '../../api';
 const matches = () => {
     const navigate = useNavigate();
     const [verificar, setVerificar] = useState();
-   
-    
-        // useEffect(() => {
-        //     const token = localStorage.getItem("access");
-        //     if (!token) {
-        //         // Redirige si no hay token
-        //         navigate("/login");
-        //     }
-        // }, []);
-   
-  
-   
+
+
+    // useEffect(() => {
+    //     const token = localStorage.getItem("access");
+    //     if (!token) {
+    //         // Redirige si no hay token
+    //         navigate("/login");
+    //     }
+    // }, []);
+
+
+
     const handdleFuture = () => {
         navigate("../verMatches");
-        }
+    }
 
-   
+
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
-    } 
+    }
 
 
     const [conversaciones, setConversaciones] = useState([]);
-    const [futureMatches , setFutureMatches] = useState([]);
+    const [futureMatches, setFutureMatches] = useState([]);
 
     const [Likes, setLikes] = useState([]);
 
-   //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
+    //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
     useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchUserData = async () => {
-            try { 
+            try {
                 const response = await api.get("estado-validacion/", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -46,16 +46,16 @@ const matches = () => {
                 });
                 if (response.status === 200) {
                     const userData = response.data;
-                    const estado1 = userData.is_ine_validated 
-                    const estado2 =userData.is_validated_camera;
-                    
+                    const estado1 = userData.is_ine_validated
+                    const estado2 = userData.is_validated_camera;
+
                     console.log(estado1, estado2)
                     if (estado1 == true && estado2 == true) {
                         setVerificar(true);
                     } else {
                         setVerificar(false);
                     }
-                    
+
                 }
             }
             catch (error) {
@@ -66,7 +66,7 @@ const matches = () => {
     }, []);
 
     useEffect(() => {
-        const likes=0;
+        const likes = 0;
         const token = localStorage.getItem('access');
         const fetchUserData = async () => {
             try {
@@ -79,8 +79,8 @@ const matches = () => {
                     const userData = response.data;
                     setLikes(userData);
                     console.log(userData)
-                    
-                   
+
+
                 }
             } catch (error) {
                 console.error("Error al obtener los datos del usuario:", error);
@@ -88,61 +88,64 @@ const matches = () => {
         }
         fetchUserData();
     }
-    , []);
- 
-    
+        , []);
 
-    useEffect(() => async () => {
+
+
+    useEffect(() => {
         const token = localStorage.getItem('access');
-        try {
-            const response = await api.get("mis-conversaciones/", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (response.status === 200) {
-                    
-                console.log(response.data);
-          
-                
-                const mensajes = [];
-                const sinMensajes = [];
-                
-                response.data.forEach(conversacion => {
-                    const formattedConversacion = {
-                        conversacion_id: conversacion.conversacion_id,
-                        usuario: {
-                            nombre: conversacion.usuario.nombre,
-                            apellido: conversacion.usuario.apellido,
-                            profile_pic: conversacion.usuario.profile_pic,
-                            edad : conversacion.usuario.edad
-                        },
-                        ultimo_mensaje: conversacion.ultimo_mensaje || 'Sin mensajes aún',
-                    };
-
-                    if (conversacion.ultimo_mensaje) {
-                        mensajes.push(formattedConversacion);
-                    } else {
-                        sinMensajes.push(formattedConversacion);
-                    }
+        const fetchUserData = async () => {
+            try {
+                const response = await api.get("mis-conversaciones/", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
-                console.log(mensajes)
-                console.log(sinMensajes)
-                setConversaciones(mensajes);
-                setFutureMatches(sinMensajes);
-                
-            }else{
-               console.log("No se pudo obtener la información de los mensajes.");
+                if (response.status === 200) {
+
+                    console.log(response.data);
+
+
+                    const mensajes = [];
+                    const sinMensajes = [];
+
+                    response.data.forEach(conversacion => {
+                        const formattedConversacion = {
+                            conversacion_id: conversacion.conversacion_id,
+                            usuario: {
+                                nombre: conversacion.usuario.nombre,
+                                apellido: conversacion.usuario.apellido,
+                                profile_pic: conversacion.usuario.profile_pic,
+                                edad: conversacion.usuario.edad
+                            },
+                            ultimo_mensaje: conversacion.ultimo_mensaje || 'Sin mensajes aún',
+                        };
+
+                        if (conversacion.ultimo_mensaje) {
+                            mensajes.push(formattedConversacion);
+                        } else {
+                            sinMensajes.push(formattedConversacion);
+                        }
+                    });
+                    console.log(mensajes)
+                    console.log(sinMensajes)
+                    setConversaciones(mensajes);
+                    setFutureMatches(sinMensajes);
+
+                } else {
+                    console.log("No se pudo obtener la información de los mensajes.");
+                }
+            } catch (error) {
+                console.error("Error al obtener los mensajes:", error);
             }
-        }catch (error) {
-            console.error("Error al obtener los mensajes:", error);
         }
-    },[]);
+        fetchUserData();
+    }, []);
 
 
-   
-    
+
+
 
     return (
         <div className="justify-center text-black flex  max-w-lg w-full min-h-screen relative" >
@@ -161,13 +164,13 @@ const matches = () => {
                     </div>
 
                     {verificar == false && (
-                    <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                    <div className="text-center text-white">
-                        <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
-                        <p className="mt-2">¡Créalo ahora!.</p>
-                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
-                    </div>
-                    </div>
+                        <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
+                            <div className="text-center text-white">
+                                <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
+                                <p className="mt-2">¡Créalo ahora!.</p>
+                                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
+                            </div>
+                        </div>
                     )}
 
 
@@ -191,28 +194,28 @@ const matches = () => {
                                 </div>
                             </div>
 
-                          
+
                             {futureMatches.map((user, index) => (
-                                 
+
                                 <div key={index} className="m-1 flex-shrink-0 relative">
-                                   
+
                                     <div className="rounded-full relative">
-                                    <label onClick={()=>navigate(`../chat/?room=${user.conversacion_id}`)} >
-                                        <img src={user.usuario.profile_pic} className="w-30 h-40 object-cover rounded" alt={user.name} />
-                                        <p className="absolute bottom-0 left-0 w-full text-center  text-white py-1">
-                                            {user.usuario.nombre}, {user.usuario.edad}
-                                        </p>
+                                        <label onClick={() => navigate(`../chat/?room=${user.conversacion_id}`)} >
+                                            <img src={user.usuario.profile_pic} className="w-30 h-40 object-cover rounded" alt={user.name} />
+                                            <p className="absolute bottom-0 left-0 w-full text-center  text-white py-1">
+                                                {user.usuario.nombre}, {user.usuario.edad}
+                                            </p>
                                         </label>
                                     </div>
-                                     
-                                     </div>
-                               
-                               
-                            ))}
-                            </React.Fragment>
-                            </div>
 
-                          
+                                </div>
+
+
+                            ))}
+                        </React.Fragment>
+                    </div>
+
+
                     <h1 className="font-bold ">Mensajes</h1>
 
                     <div className="mt-4">
@@ -225,7 +228,7 @@ const matches = () => {
                                         ) : (
                                             <img src={'/profile_empty.webp'} className="w-10 h-10 object-cover rounded-full" alt={user.nombre} />
                                         )}
-                                        <h2 className="font-bold">{user.usuario.nombre } {user.usuario.apellido}</h2>
+                                        <h2 className="font-bold">{user.usuario.nombre} {user.usuario.apellido}</h2>
                                     </div>
                                     <p className="flex justify-start mt-2">{user.ultimo_mensaje}</p>
                                 </button>
