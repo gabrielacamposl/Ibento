@@ -17,7 +17,10 @@ const Verificar = () => {
         interest: [],
         ine: [],
         facePhoto: null,
-    });const [loading, setLoading] = useState(false);
+    });
+    
+    const [loading, setLoading] = useState(false);
+
     // Estados de carga individuales para cada acción
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
     const [savingPreferences, setSavingPreferences] = useState(false);
@@ -31,7 +34,7 @@ const Verificar = () => {
     });
     
     const [ineImages, setIneImages] = useState([null, null]);
-    const [activeIndex, setActiveIndex] = useState(0); // ✅ Ya estaba en 0
+    const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [message, setMessage] = useState([]);
@@ -212,7 +215,8 @@ const Verificar = () => {
             setStepsCompleted(prev => ({ ...prev, preferences: true }));
             console.log("Preferencias guardadas localmente:", { respuestas })
 
-            // Intentar con el endpoint que aparece en el error            // const response = await api.post("intereses-respuestas/", { respuestas });
+            // Intentar con el endpoint que aparece en el error            
+            // const response = await api.post("intereses-respuestas/", { respuestas });
             // console.log("Respuesta del servidor:", response.data);
             showSuccess("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);        } catch (err) {
@@ -248,7 +252,10 @@ const Verificar = () => {
         }
     };
 
-    // ---------------------------- ENVIAR TODA LA INFORMACIÓN -----------------------------    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
+    // ---------------------------- ENVIAR TODA LA INFORMACIÓN ----------------------------- 
+
+    
+    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
 const uploadAllData = async () => {
     try {
         setLoading(true);
@@ -532,6 +539,7 @@ const uploadAllData = async () => {
                     {activeIndex === 1 && (
                         <div className="grid grid-cols-1 gap-4 mt-2">
                             {itemsAboutMe.map((item, index) => {
+
                                 // 👇 Parseamos "answers" por si vienen mal como string
                                 let answers = [];
                                 try {
@@ -697,7 +705,9 @@ const uploadAllData = async () => {
                             </div>
                         </div>
                     )}
-                </div>                {/* ✅ BOTONES CORREGIDOS */}
+                </div>
+
+                {/* ✅ BOTONES CORREGIDOS */}
                 <div className="mt-2 flex justify-center space-x-2 w-full mb-10 ">
                     <Button
                         className={buttonStyle}
