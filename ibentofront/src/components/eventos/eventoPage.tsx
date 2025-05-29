@@ -372,23 +372,23 @@ function Page() {
 
 
 
-   const bucarMatch = async () => {
-    
-        const token = localStorage.getItem('access');
-        try {
-            const response = await api.post(`usuarios/agregar_eventos_match/?idEvent=${_id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-           
-              navigate(`../perfil?buscar=ok`); // Redirigir al match creado
-            
-        } catch (error) {
-            console.error("Error al crear el match:", error);
-        }
-      }
-       
+  const bucarMatch = async () => {
+
+    const token = localStorage.getItem('access');
+    try {
+      const response = await api.post(`usuarios/agregar_eventos_match/?idEvent=${_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      navigate(`../perfil?buscar=ok`); // Redirigir al match creado
+
+    } catch (error) {
+      console.error("Error al crear el match:", error);
+    }
+  }
+
 
 
   return (
@@ -508,19 +508,22 @@ function Page() {
             </article>
             <EventMap location={coor} />
           </div>
+          <div className="mb-18">
             <button
-            className={buttonStyleBuscarMatch}
-            onClick={async () => {
-              await handleSave();
-              await bucarMatch();
-            }}
+              className={buttonStyleBuscarMatch}
+              onClick={async () => {
+                await handleSave();
+                await bucarMatch();
+              }}
             >
-            Buscar acompañante
+              Buscar acompañante
             </button>
+          </div>
+
 
         </div>
       </div>
-      
+
       {/* <div className="hidden md:flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-indigo-500 to-white">
         {/* ... Contenido del Desktop View ...
         <div className="flex flex-col items-center justify-center w-full max-w-6xl h-full bg-white rounded-lg shadow-lg mx-auto px-6">

@@ -113,7 +113,7 @@ function Page() {
                     </h1>
 
                     <div className="flex w-full flex-row gap-4 justify-end mr-4">
-                        <div className="card flex justify-content-center items-center gap-4">
+                        <div className="card flex flex-row justify-content-center items-center gap-4">
                             {/* Botón de búsqueda */}
                             <Search
                                 className="w-6 h-6 text-black hover:text-purple-700 cursor-pointer transition-colors"
@@ -150,7 +150,7 @@ function Page() {
                     </div>
                 </div>
 
-                <CircularDemo />
+                <CircularDemo listEvents= {popularEvents}/>
                 <Cards listEvents={popularEvents} name="Populares" />
                 <Cards listEvents={recommendedEvents} name="Recomendados para ti" />
                 <SearchMenu />

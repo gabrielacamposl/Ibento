@@ -165,7 +165,7 @@ const Perfil = () => {
             <div className="fixed inset-0 bg-white z-50">
                 <LoadingSpinner
                     logoSrc="/ibento_logo.png"
-                    loadingText="Cargando eventos"
+                    loadingText="Cargando perfil"
                 />
             </div>
         );
@@ -192,7 +192,10 @@ const Perfil = () => {
 
 
                     <div className="">
-                        <Carousel value={Array.isArray(userPerfil?.profile_pic) ? userPerfil.profile_pic : [userPerfil?.profile_pic]} numVisible={1} numScroll={1} responsiveOptions={responsiveOptions} className="custom-carousel rounded-lg w-full" circular
+                        <Carousel 
+                        value={Array.isArray(userPerfil?.profile_pic) ? userPerfil.profile_pic : [userPerfil?.profile_pic]} 
+                        numVisible={1} numScroll={1} responsiveOptions={responsiveOptions} 
+                        className="custom-carousel rounded-lg w-full" circular
                             autoplayInterval={3000} itemTemplate={productTemplate} showNavigators={false} />
                     </div>
 

@@ -5,32 +5,35 @@ import "../../assets/css/botones.css";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import api from '../../api';
+import Terminos from '../accounts/Terminos';
 
 export default function PositionDemo() {
     
     const [visibleRight, setVisibleRight] = useState(false);
-   
-
- 
     const [showDialog, setShowDialog] = useState(false);
+    const [showDialogSesion, setShowDialogSesion] = useState(false);
+    const [showTerminosDialog, setShowTerminosDialog] = useState(false);
 
 
     const handleCancel = () => {
         setShowDialog(true);
-    };
-
-    const handleCloseDialog = () => {
+    };    const handleCloseDialog = () => {
         setShowDialog(false);
     };
 
-
-    const [showDialogSesion, setShowDialogSesion] = useState(false);
     const handleCancelSesion = () => {
         setShowDialogSesion(true);
+    };const handleCloseSesion = () => {
+        setShowDialogSesion(false);
     };
 
-    const handleCloseSesion = () => {
-        setShowDialogSesion(false);
+    const handleOpenTerminos = () => {
+        setShowTerminosDialog(true);
+        setVisibleRight(false); // Cerrar el sidebar
+    };
+
+    const handleCloseTerminos = () => {
+        setShowTerminosDialog(false);
     };
 
 
@@ -120,25 +123,7 @@ const logout = async () => {
                             />
                         </svg>
                         <span className='text-black text-bold'>Servicio al Cliente</span>
-                    </Button>
-                    <Button className='space-x-2' onClick={() => setVisibleRight(false)}>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            className="size-6"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"
-                            />
-                        </svg>
-                        <span  className='text-black text-bold'>Aviso de Privacidad</span>
-                    </Button>
-                    <Button className='space-x-2' onClick={() => setVisibleRight(false)}>
+                    </Button>                    <Button className='space-x-2' onClick={handleOpenTerminos}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -153,7 +138,7 @@ const logout = async () => {
                                 d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
                             />
                         </svg>
-                        <span  className='text-black text-bold'>Terminos y condiciones</span>
+                        <span className='text-black text-bold'>Términos y Privacidad</span>
                     </Button>
                     <Button className='space-x-2' onClick={() => { handleCancel();  setVisibleRight(false); }} >
                         <svg
@@ -297,8 +282,52 @@ const logout = async () => {
                                           </div>
                                       </DialogPanel>
                                   </div>
-                              </div>
-                          </Dialog>
+                              </div>                          </Dialog>
+
+            {/* Dialog de Términos y Privacidad */}
+            <Dialog open={showTerminosDialog} onClose={handleCloseTerminos} className="fixed inset-0 flex items-center justify-center z-50">
+                <DialogBackdrop
+                    transition
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                />
+                <div className="relative z-10 w-screen overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-full p-4 text-center sm:p-0">
+                        <DialogPanel
+                            transition
+                            className="relative transform overflow-hidden rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-4xl data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                        >
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">                                <div className="flex justify-between items-center mb-4">
+                                    <DialogTitle as={"h3" as React.ElementType} className="text-lg font-medium leading-6 text-gray-900">
+                                        Términos y Condiciones - Aviso de Privacidad
+                                    </DialogTitle>
+                                    <button
+                                        type="button"
+                                        onClick={handleCloseTerminos}
+                                        className="bg-white rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        <span className="sr-only">Cerrar</span>
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto">
+                                    <Terminos />
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseTerminos}
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </DialogPanel>
+                    </div>
+                </div>
+            </Dialog>
               
             
 

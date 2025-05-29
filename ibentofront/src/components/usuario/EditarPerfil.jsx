@@ -6,6 +6,8 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import apiaxios from "../../axiosConfig";
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './../../assets/components/LoadingSpinner';
+
 const EditarPerfil = () => {
     const navigate = useNavigate();
     const [userPerfil, setUserPerfil] = useState({ profile_pic: [] })
@@ -22,8 +24,7 @@ const EditarPerfil = () => {
     const [myAwnsers, setMyAwnsers] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     
-
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     // Función para obtener categorías de eventos
 useEffect(() => {
   const fetchCategorias = async () => {
@@ -74,7 +75,7 @@ useEffect(() => {
                    
                     setDescripcion(response.data.description);
                     setSelectedEvents(response.data.preferencias_evento);
-                    
+                    setGenero(response.data.gender);
 
                     const respuestas = response.data.preferencias_generales || [];
                     const transformado = respuestas.reduce((acc, curr) => {
@@ -91,6 +92,9 @@ useEffect(() => {
                 }
             } catch (error) {
                 console.error("Error al obtener perfil:", error);
+            }
+            finally{
+                setLoading(false); // Cambiar el estado de loading a false una vez que se haya cargado el perfil
             }
         };
         Perfil();
@@ -110,6 +114,17 @@ useEffect(() => {
          fetchQuestions();
     }, []);
    
+    if (loading){
+        return (
+            <div className="fixed inset-0 bg-white z-50">
+                <LoadingSpinner
+                    logoSrc="/ibento_logo.png"
+                    loadingText="Cargando información de perfil"
+                />
+            </div>
+        )
+    }
+
     const handleImageChange = (e, index) => {
     const file = e.target.files[0];
     if (file) {
@@ -289,11 +304,7 @@ useEffect(() => {
                     <div className="relative">
                             <select
                                 className="appearance-none border border-indigo-400 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-base font-medium text-indigo-700 shadow-sm transition-all"
-                               value={
-                                    
-                                     userPerfil.gender
-                                  
-                                }
+                               value={genero}
                                 onChange={(e) => setGenero(e.target.value)}
                             >
                                 <option value="H">Hombre</option>
@@ -503,17 +514,14 @@ useEffect(() => {
                            
                         </div>
                             </AccordionTab>
-                        
-    
                         </Accordion>
                         </div>
-
-
-                       
                     </React.Fragment>
                 </div>
                 {/* <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2"> */}
+                <div className="flex justify-center items-center mb-16">
                     <button onClick={handleSubmit} className={buttonStyle}>Guardar</button>
+                </div>
                 {/* </Link> */}
             </div>
         </div>
