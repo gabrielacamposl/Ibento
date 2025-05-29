@@ -68,9 +68,11 @@ const Chat = () => {
         fetchUsersChat();
     }, [roomName]);
 
-    useEffect(() => async () => {
+    useEffect(() => {
         const token = localStorage.getItem('access');
       
+        const fetchMessages = async () => {
+
         try {
             const response = await api.get(`mensajes/${roomName}/`, {
                 method: "GET",
@@ -91,6 +93,8 @@ const Chat = () => {
         }catch (error) {
             console.error("Error al obtener los mensajes:", error);
         }
+        };
+        fetchMessages();
     },[]);
     
     const messagesEndRef = useRef(null);
@@ -116,7 +120,7 @@ const idCarolina ="681e5ce72d5dcb8f92ac6f19"
 const socketRef = useRef(null);
 
 useEffect(() => {
-    const socket = new WebSocket(`ws://ibento.onrender.com/ws/mensajes/${roomName}/`);
+    const socket = new WebSocket(`wss://ibento.onrender.com/ws/mensajes/${roomName}/`);
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -229,16 +233,12 @@ useEffect(() => {
                                 <img src={receptor.profile_pic} className="w-10 h-10 object-cover rounded-full mr-2" />
                                 <h1 className="text-xl font-semibold">{receptor.nombre} {receptor.apellido}</h1>
                             </div>
-                            <div><button  className="cursor-pointer" onClick={handdleInfo} >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                                </svg>
-                            </button></div>
+                           
                         </div>
                 </div>
 
           
-                        <div className="max-h-[calc(100vh-14rem)]  h-screen overflow-y-auto  bg-white mt-3 w-full">
+                        <div className="max-h-[calc(100vh-15rem)]  h-screen overflow-y-auto  bg-white mt-3 w-full">
                             <div className="mt-10 mb-8 flex justify-center ">
                                 <div className="relative ">
                                     <img src={receptor.profile_pic} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={receptor.nombre} />
@@ -310,7 +310,7 @@ useEffect(() => {
                 </div>
 
 
-                <div className="w-full flex items-center p-3 mt-5 shadow">
+                <div className="w-full flex items-center ">
                     <input
                         type="text"
                         value={newMessage}
