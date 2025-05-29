@@ -40,7 +40,7 @@ from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
 from api.services.create_users import crearUsuarios
 # Servicio de INES
-from api.services.ine_validation import (process_ine_image_secure, process_selfie_image_secure, ocr_ine, validate_ine)
+from api.services.ine_validation import (safe_process_ine_with_fallback, safe_process_selfie_with_fallback, ocr_ine, validate_ine)
 #Servicio para envío y recibo de notificaciones
 from api.services.notification_service import NotificationService
 # Importar modelos 
@@ -686,15 +686,15 @@ def ine_validation_view(request):
         user: Usuario = request.user
         print(f"Usuario: {user.nombre}")
 
-        
-        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)        print("Procesando imagen frontal...")
-        front_b64 = process_ine_image_secure(ine_front)
+          # PROCESAR IMÁGENES CON FUNCIONES OPTIMIZADAS Y FALLBACK
+        print("Procesando imagen frontal...")
+        front_b64 = safe_process_ine_with_fallback(ine_front)
         
         print("Procesando imagen trasera...")
-        back_b64 = process_ine_image_secure(ine_back)
+        back_b64 = safe_process_ine_with_fallback(ine_back)
         
         print("Procesando selfie...")
-        selfie_b64 = process_selfie_image_secure(selfie)
+        selfie_b64 = safe_process_selfie_with_fallback(selfie)
         
         print("Imágenes procesadas exitosamente")
         
