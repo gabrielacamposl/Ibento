@@ -13,10 +13,7 @@ from backend.api.consumer.routing import wsPatterns  # Ajusta según tu estructu
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-
-    "websocket": AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter(wsPatterns)
-        )
+    "websocket": AuthMiddlewareStack(
+        URLRouter(wsPatterns)
     ),
 })
