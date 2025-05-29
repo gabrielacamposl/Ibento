@@ -449,7 +449,7 @@ const uploadAllData = async () => {
         setSubmittingInfo(true);
 
         try {
-            const response = await api.post('usuario/agregar_info/', formData);
+            const response = await api.post('usuarios/agregar_info/', formData);
             
             if (response.status === 200) {
                 setStepsCompleted(prev => ({ ...prev, info: true }));
