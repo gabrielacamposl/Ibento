@@ -767,8 +767,9 @@ def ine_validation_view(request):
                     "distancia": error_data.get("distancia", "N/A"),
                     "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
                     "codigo": "FACE_NO_MATCH"
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
             
+
             result = response.json()
             rostro_valido = result.get("rostro_valido", False)
             
@@ -778,7 +779,7 @@ def ine_validation_view(request):
                     "error": "La verificación facial no fue exitosa.",
                     "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
                     "codigo": "FACE_VERIFICATION_FAILED"
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
             
             # Guardar validación de rostro
             user.is_validated_camera = True
@@ -792,7 +793,7 @@ def ine_validation_view(request):
                 "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 503
         
         print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
         
