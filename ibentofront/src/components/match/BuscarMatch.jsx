@@ -4,7 +4,7 @@ import { Heart, X, Filter, ArrowLeft, Users, Sparkles, Settings, Globe, Calendar
 import api from '../../api';
 import { Slider } from "primereact/slider";
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
-import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils';
+import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 import '../../assets/css/swipe-animations.css';
 
 const buscarMatchx = () => {

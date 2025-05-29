@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Users, Sparkles, ArrowLeft, Menu, Search, Filter, WifiOff } from 'lucide-react';
 import api from '../../api';
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
-import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils';
+import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 import '../../assets/css/swipe-animations.css';
 
 const Matches = () => {

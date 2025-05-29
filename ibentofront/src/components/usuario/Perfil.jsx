@@ -9,7 +9,7 @@ import Guardados from './Guardados'; // Asegúrate de que la ruta sea correcta
 import SideBar from '../usuario/sidebar'; // Asegúrate de que la ruta sea correcta
 
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
-import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils';
+import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 
 import axios from 'axios';
 import api from '../../api';
