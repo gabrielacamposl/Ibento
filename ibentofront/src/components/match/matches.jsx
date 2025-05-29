@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, MessageCircle, Users, Sparkles, ArrowLeft, Menu, Search, Filter } from 'lucide-react';
+import { Heart, MessageCircle, Users, Sparkles, ArrowLeft, Menu, Search, Filter, WifiOff } from 'lucide-react';
 import api from '../../api';
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
+import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils';
 import '../../assets/css/swipe-animations.css';
 
 const Matches = () => {
     const navigate = useNavigate();
+    const { makeRequest } = useOfflineRequest();
     const [verificar, setVerificar] = useState(undefined);
     const [loading, setLoading] = useState(true);
     const [conversaciones, setConversaciones] = useState([]);
     const [futureMatches, setFutureMatches] = useState([]);
     const [Likes, setLikes] = useState([]); // Kept as Likes based on provided fixed file
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+    // Detectar cambios en conexión
+    useEffect(() => {
+        const handleConnectionChange = (event) => {
+            setIsOffline(!event.detail.isOnline);
+        };
+
+        window.addEventListener('connectionChange', handleConnectionChange);
+        
+        return () => {
+            window.removeEventListener('connectionChange', handleConnectionChange);
+        };
+    }, []);
 
     const handleFuture = () => { // Renamed
         navigate("../verMatches");
@@ -19,17 +35,20 @@ const Matches = () => {
 
     const handleVerificar = () => { // Renamed
         setTimeout(() => navigate("../verificar"), 0);
-    };
-
-    useEffect(() => {
+    };    useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchUserValidationData = async () => {
             try {
-                const response = await api.get("estado-validacion/", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (response.status === 200) {
-                    const userData = response.data;
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}estado-validacion/`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    },
+                    'user-validation'
+                );
+                
+                if (result.data) {
+                    const userData = result.data;
                     setVerificar(userData.is_ine_validated && userData.is_validated_camera);
                 } else {
                     setVerificar(false);
@@ -44,8 +63,6 @@ const Matches = () => {
             fetchUserValidationData();
         } else {
             setVerificar(false);
-            // If this is the only critical fetch for initial view, setLoading(false) here.
-            // But other fetches also contribute to loading state.
         }
     }, []);
 
@@ -53,11 +70,16 @@ const Matches = () => {
         const token = localStorage.getItem('access');
         const fetchLikesData = async () => {
             try {
-                const response = await api.get("likes-recibidos/", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (response.status === 200) {
-                    setLikes(response.data);
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}likes-recibidos/`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    },
+                    'likes-received'
+                );
+                
+                if (result.data) {
+                    setLikes(result.data);
                 }
             } catch (error) {
                 console.error("Error al obtener los likes recibidos:", error);
@@ -67,19 +89,22 @@ const Matches = () => {
             fetchLikesData();
         }
         // setLoading(false) is handled by the main data fetching useEffect
-    }, []);
-
-    useEffect(() => {
+    }, []);    useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchConversationsData = async () => {
             try {
-                const response = await api.get("mis-conversaciones/", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (response.status === 200) {
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}mis-conversaciones/`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    },
+                    'conversations'
+                );
+                
+                if (result.data) {
                     const mensajes = [];
                     const sinMensajes = [];
-                    response.data.forEach(conversacion => {
+                    result.data.forEach(conversacion => {
                         const formattedConversacion = {
                             conversacion_id: conversacion.conversacion_id,
                             usuario: {
@@ -282,11 +307,21 @@ const Matches = () => {
                                         </button>
                                     </div>
                                 ))
-                            )}
-                        </div>
+                            )}                        </div>
                     </div>
                 </div>
             </div>
+            
+            {/* Indicador de estado de conexión */}
+            <ConnectionStatus />
+            
+            {/* Indicador offline en la parte superior derecha si hay datos offline */}
+            {isOffline && (
+                <div className="fixed top-4 right-4 z-40 bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                    <WifiOff className="w-4 h-4" />
+                    <span className="text-sm font-medium">Modo Offline</span>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Heart, X, Filter, ArrowLeft, Users, Sparkles, Settings, Globe, Calendar } from 'lucide-react';
+import { Heart, X, Filter, ArrowLeft, Users, Sparkles, Settings, Globe, Calendar, WifiOff } from 'lucide-react';
 import api from '../../api';
 import { Slider } from "primereact/slider";
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
+import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils';
 import '../../assets/css/swipe-animations.css';
 
 const buscarMatchx = () => {
     const navigate = useNavigate();
     const cardRefs = useRef([]);
     const containerRef = useRef(null);
+    const { makeRequest } = useOfflineRequest();
     
     // Estados para el swipe system premium
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,7 +21,9 @@ const buscarMatchx = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [swipeDirection, setSwipeDirection] = useState(null);
     const [likeAnimation, setLikeAnimation] = useState(null);
-      // Estados para usuarios y filtros
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    
+    // Estados para usuarios y filtros
     const [UserMatch, setUserMatch] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState();
@@ -37,19 +41,45 @@ const buscarMatchx = () => {
         isLoading: false
     });
 
+    // Detectar cambios en conexión
+    useEffect(() => {
+        const handleConnectionChange = (event) => {
+            setIsOffline(!event.detail.isOnline);
+        };
+
+        window.addEventListener('connectionChange', handleConnectionChange);
+        
+        return () => {
+            window.removeEventListener('connectionChange', handleConnectionChange);
+        };
+    }, []);
+
     useEffect(() => {
         async function fetchData() {
             const token = localStorage.getItem('access');
             try {
-                const response = await api.post('matches/sugerencias/', {}, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}matches/sugerencias/`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    },
+                    'matches'
+                );
+
+                if (result.data) {
+                    setUserMatch(result.data);
+                    console.log('Usuarios disponibles:', result.data);
+                    if (result.offline) {
+                        console.log('Datos cargados desde cache offline');
                     }
-                });                if (response.status === 200) {
-                    setUserMatch(response.data);
-                    console.log('Usuarios disponibles:', response.data);
-                } else {
-                    console.error('Error en la respuesta:', response.status);
+                } else if (result.error) {
+                    setError(result.offline ? "Sin conexión - algunos datos pueden estar desactualizados" : "Error al cargar los datos");
+                    setVerificar(false);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -968,10 +998,20 @@ const buscarMatchx = () => {
                         <button 
                             className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105" 
                             onClick={handdleVerificar}
-                        >
-                            Crear Perfil
+                        >                            Crear Perfil
                         </button>
                     </div>
+                </div>
+            )}
+            
+            {/* Indicador de estado de conexión */}
+            <ConnectionStatus />
+            
+            {/* Indicador offline en la parte superior derecha si hay datos offline */}
+            {isOffline && (
+                <div className="fixed top-4 right-4 z-40 bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                    <WifiOff className="w-4 h-4" />
+                    <span className="text-sm font-medium">Modo Offline</span>
                 </div>
             )}
         </div>
