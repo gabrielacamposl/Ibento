@@ -47,9 +47,7 @@ def memory_safe_resize(image, target_width, target_height):
         return image
 
 def validate_ine_image(image_file):
-    """
-    Validación ligera para servidores con poca RAM
-    """
+
     try:
         # Verificar tamaño del archivo (límite más estricto)
         image_file.seek(0, 2)
@@ -442,7 +440,7 @@ def process_selfie_image_secure(image_file):
         
         # Convertir a base64 con calidad reducida
         temp_buffer = io.BytesIO()
-        image.save(temp_buffer, format='JPEG', quality=70, optimize=True)
+        image.save(temp_buffer, format='JPEG', quality=90, optimize=True)
         processed_data = temp_buffer.getvalue()
         
         # Convertir a base64

@@ -762,6 +762,7 @@ def ine_validation_view(request):
                 print(f"Validación de rostro falló: {error_data}")
                 
                 return Response({
+                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "Tu rostro no coincide con la foto de la INE.",
                     "distancia": error_data.get("distancia", "N/A"),
                     "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
@@ -773,6 +774,7 @@ def ine_validation_view(request):
             
             if not rostro_valido:
                 return Response({
+                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "La verificación facial no fue exitosa.",
                     "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
                     "codigo": "FACE_VERIFICATION_FAILED"
@@ -787,6 +789,7 @@ def ine_validation_view(request):
         except requests.RequestException as e:
             print(f"Error en conexión con FastAPI: {str(e)}")
             return Response({
+                "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
