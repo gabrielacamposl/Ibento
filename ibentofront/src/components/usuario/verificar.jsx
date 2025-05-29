@@ -25,12 +25,22 @@ const Verificar = () => {
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
     const [savingPreferences, setSavingPreferences] = useState(false);
     const [validatingIne, setValidatingIne] = useState(false);
+    const [submittingInfo, setSubmittingInfo] = useState(false);
     
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
         photos: false,
         preferences: false,
-        ine: false
+        ine: false,
+        info: false
+    });
+    
+    // Estados para el formulario de información adicional (step 4)
+    const [formData, setFormData] = useState({
+        birthday: '',
+        gender: '',
+        description: '',
+        curp: ''
     });
     
     const [ineImages, setIneImages] = useState([null, null]);
@@ -51,6 +61,7 @@ const Verificar = () => {
         { label: 'Paso 2' },
         { label: 'Paso 3' },
         { label: 'Paso 4' },
+        { label: 'Paso 5' },
     ];
 
 
@@ -306,117 +317,57 @@ const uploadAllData = async () => {
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
 
-    // Pasar a base 64 la foto
-    // Base64 a File
-    const base64ToFile = (base64Data, filename) => {
-        const arr = base64Data.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) u8arr[n] = bstr.charCodeAt(n);
-        return new File([u8arr], filename, { type: mime });
-    };    // ------ Conexión con el backend ------
+    // -------- Validar imagenes de INE
     const handleIneValidation = async () => {
-        console.log("=== DEBUG VALIDACIÓN INE ===");
-        console.log("user.ine[0]:", user.ine[0]);
-        console.log("user.ine[1]:", user.ine[1]);
-        console.log("user.facePhoto:", user.facePhoto ? "Foto capturada" : "No hay foto");
-
-        // Validar que el INE esté subido
-        if (!user.ine[0] || !user.ine[1]) {
-            setMessage('Por favor, sube ambas imágenes de tu INE.');
-            return;
-        }
-        if (!user.facePhoto) {
-            setMessage('Por favor, captura una imagen de tu rostro.');
-            return;
-        }
-
-        // Validar que las fotos estén guardadas
-        if (savedPhotos.length === 0) {
-            setMessage('Por favor, guarda primero tus fotos de perfil en el Paso 1.');
-            return;
-        }
-
-        // Validar que las preferencias estén guardadas
-        if (!savedPreferences) {
-            setMessage('Por favor, guarda primero tus preferencias en el Paso 2.');
+        if (!ineImages[0] || !ineImages[1] || !capturedPhoto) {
+            showWarn('Debes subir ambas imágenes de la INE y capturar tu foto');
             return;
         }
 
         setValidatingIne(true);
-        setMessage('');
 
         try {
-            // Verificar que base64ToFile funcione correctamente
-            const selfieFile = base64ToFile(user.facePhoto, "selfie.jpg");
-            console.log("Selfie file creado:", selfieFile);
-            console.log("Selfie file size:", selfieFile.size);
-            console.log("Selfie file type:", selfieFile.type);
-
             const formData = new FormData();
-            formData.append("ine_front", user.ine[0]);
-            formData.append("ine_back", user.ine[1]);
-            formData.append("selfie", selfieFile);
+            formData.append('ine_front', ineImages[0]);
+            formData.append('ine_back', ineImages[1]);
+            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
 
-            console.log("FormData creado:");
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ', pair[1]);
-            }
-
-            const response = await api.post("validar-ine/", formData, {
+            const response = await api.post('validar-ine/', formData, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
-                }
-            });            
-            
-            console.log("Respuesta del servidor:", response.data);
-            
-            const data = response.data;            
-            
-            if (data.mensaje_ine && data.mensaje_rostro) {
-                setMessage('Tu identidad ha sido validada exitosamente. Subiendo datos...');
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
 
-                // Subir automáticamente todos los datos del usuario
+            const data = response.data;
+
+            if (data.success && data.usuario_validado) {
+                setMessage('¡INE validada exitosamente! Ahora completa tu información personal.');
                 try {
                     console.log("Subiendo todos los datos del usuario...");
                     await uploadAllData();                    
                     setStepsCompleted(prev => ({ ...prev, ine: true }));
-                    setMessage('¡Validación completada y todos los datos han sido enviados exitosamente!');
-                    showContrast("¡Proceso completado! Bienvenido a Ibento.");
-                    setActiveIndex(3);
-                    
-                    // Navegar a la página principal después de un delay
-                    setTimeout(() => {
-                        navigate("../principal");
-                    }, 2000);
+                    showSuccess("¡INE validada exitosamente! Completa tu información personal.");
+                    setActiveIndex(4); // Navigate to step 5 (form)
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(3);
+                    setActiveIndex(4); // Still navigate to step 5 even if upload fails
                 }
-            }
-            else if (data.mensaje_ine) {
+            } else if (data.mensaje_ine) {
                  setMessage('INE validada correctamente. El servicio de validación de rostro no está disponible temporalmente. Por favor, intenta más tarde.');
                  try {
                     console.log("Subiendo todos los datos del usuario...");
                     await uploadAllData();                    
                     setStepsCompleted(prev => ({ ...prev, ine: true }));
                     setMessage('¡INE validada y todos los datos han sido enviados exitosamente!');
-                    showContrast("¡Proceso completado! Bienvenido a Ibento.");
-                    setActiveIndex(3);
-                    
-                    // Navegar a la página principal después de un delay
-                    setTimeout(() => {
-                        navigate("../principal");
-                    }, 2000);
+                    showContrast("¡INE validada! Completa tu información personal.");
+                    setActiveIndex(4); // Navigate to step 5 (form)
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(3);
+                    setActiveIndex(4); // Still navigate to step 5 even if upload fails
                 }
             }
              else {
@@ -439,24 +390,85 @@ const uploadAllData = async () => {
         }
     };
 
-    // ✅ FUNCIÓN CORREGIDA - Esta función tenía errores de lógica
-    const handleNavigate = (index) => {        if (index === 1) {
-            if (user.pictures.length < 3) {
-                showWarn('Debes seleccionar al menos 3 fotos');
-                return;
+    // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
+    
+    // Función para manejar cambios en el formulario
+    const handleFormChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    // Función para validar el formulario
+    const validateForm = () => {
+        const { birthday, gender, description, curp } = formData;
+        
+        if (!birthday.trim()) {
+            showWarn('La fecha de nacimiento es requerida');
+            return false;
+        }
+        
+        if (!gender) {
+            showWarn('El género es requerido');
+            return false;
+        }
+        
+        if (!description.trim()) {
+            showWarn('La descripción es requerida');
+            return false;
+        }
+        
+        if (!curp.trim()) {
+            showWarn('El CURP es requerido');
+            return false;
+        }
+        
+        // Validar formato de fecha (YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(birthday)) {
+            showWarn('El formato de fecha debe ser YYYY-MM-DD');
+            return false;
+        }
+        
+        // Validar CURP (18 caracteres alfanuméricos)
+        if (curp.length !== 18) {
+            showWarn('El CURP debe tener exactamente 18 caracteres');
+            return false;
+        }
+        
+        return true;
+    };
+
+    // Función para enviar la información adicional
+    const handleSubmitInfo = async () => {
+        if (!validateForm()) {
+            return;
+        }
+
+        setSubmittingInfo(true);
+
+        try {
+            const response = await api.post('usuario/agregar_info/', formData);
+            
+            if (response.status === 200) {
+                setStepsCompleted(prev => ({ ...prev, info: true }));
+                showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
+                
+                // Navegar a la página principal después de un delay
+                setTimeout(() => {
+                    navigate("../principal");
+                }, 2000);
             }
-            setActiveIndex(index);
-        } else if (index === 2) {
-            // Validación opcional para las preferencias
-            const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
-                return !item.optional && !(selectedAnswers[item._id]?.length > 0);
-            });            if (obligatoriasNoRespondidas.length > 0) {
-                showWarn('Debes responder todas las preguntas obligatorias');
-                return;
-            }
-            setActiveIndex(index);
-        } else {
-            setActiveIndex(index);
+        } catch (error) {
+            console.error('Error al enviar información:', error);
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.detail || 
+                                error.message || 
+                                'Error al guardar la información';
+            showError(`Error: ${errorMessage}`);
+        } finally {
+            setSubmittingInfo(false);
         }
     };
 
@@ -495,6 +507,19 @@ const uploadAllData = async () => {
 
     const showContrast = (message) => {
         toast.current.show({severity:'contrast', summary: 'Completado', detail: message, life: 4000});
+    };
+
+    // Función auxiliar para convertir dataURL a File
+    const dataURLtoFile = (dataurl, filename) => {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
     };
 
     return (
@@ -728,10 +753,84 @@ const uploadAllData = async () => {
                                 )}
                             </div>
                         </div>
-                    )}
-                </div>
+                    )}                    { activeIndex === 4 && (
+                        <div className='h-180'>
+                            <h1 className="text-2xl font-bold">Tu información</h1>
+                            <p>Tu INE ha sido validada exitosamente.</p>
+                            <p>Agrega los siguientes datos para finalizar tu registro.</p>
+                            
+                            <div className="mt-6 space-y-4">
+                                {/* Fecha de nacimiento */}
+                                <div className="flex flex-col">
+                                    <label className="font-semibold mb-2">
+                                        Fecha de nacimiento <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={formData.birthday}
+                                        onChange={(e) => handleFormChange('birthday', e.target.value)}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+                                        required
+                                    />
+                                </div>
 
-                {/* ✅ BOTONES CORREGIDOS */}
+                                {/* Género */}
+                                <div className="flex flex-col">
+                                    <label className="font-semibold mb-2">
+                                        Género <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={formData.gender}
+                                        onChange={(e) => handleFormChange('gender', e.target.value)}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all bg-white"
+                                        required
+                                    >
+                                        <option value="">Selecciona tu género</option>
+                                        <option value="H">Hombre</option>
+                                        <option value="M">Mujer</option>
+                                        <option value="O">Otro</option>
+                                    </select>
+                                </div>
+
+                                {/* Descripción */}
+                                <div className="flex flex-col">
+                                    <label className="font-semibold mb-2">
+                                        Descripción personal <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        value={formData.description}
+                                        onChange={(e) => handleFormChange('description', e.target.value)}
+                                        placeholder="Cuéntanos un poco sobre ti..."
+                                        rows={4}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all resize-none"
+                                        required
+                                    />
+                                </div>
+
+                                {/* CURP */}
+                                <div className="flex flex-col">
+                                    <label className="font-semibold mb-2">
+                                        CURP <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.curp}
+                                        onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
+                                        placeholder="Ingresa tu CURP (18 caracteres)"
+                                        maxLength={18}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all uppercase"
+                                        required
+                                    />
+                                    <small className="text-gray-600 mt-1">
+                                        El CURP debe tener exactamente 18 caracteres
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    )
+
+                    }
+                </div>                {/* ✅ BOTONES CORREGIDOS */}
                 <div className="mt-2 flex justify-center space-x-2 w-full mb-10 ">
                     <Button
                         className={buttonStyle}
@@ -799,7 +898,25 @@ const uploadAllData = async () => {
                                 'Validar identidad'
                             )}
                         </Button>
-                    ) : null}                </div>
+                    ) : activeIndex === 4 ? (
+                        <Button 
+                            className={buttonStyle} 
+                            onClick={handleSubmitInfo}
+                            disabled={submittingInfo}
+                        >
+                            {submittingInfo ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Enviando...
+                                </div>
+                            ) : (
+                                'Finalizar Registro'
+                            )}
+                        </Button>
+                    ) : null}</div>
             </div>
             <Toast ref={toast} position="bottom-center"/>
         </div>

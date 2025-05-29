@@ -74,7 +74,7 @@ function formatDate(dateString) {
                     const estado2 =userData.is_validated_camera;
                     
                     console.log(estado1, estado2)
-                    if (estado1 == true && estado2 == true) {
+                    if (estado1 == true) {
                         setVerificar(true);
                         navigate('../verificar');
                     } else {
