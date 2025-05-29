@@ -1,0 +1,97 @@
+2025-05-28 05:07:35,233 - INFO - Iniciando scraping de eventos CDMX...
+2025-05-28 05:07:36,054 - INFO - Navegando a la página de CDMX Cartelera...
+2025-05-28 05:07:42,305 - INFO - Procesando página 1...
+2025-05-28 05:07:42,381 - INFO - Encontrados 9 eventos en la página 1
+2025-05-28 05:07:46,525 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:07:51,585 - INFO - Evento 1 procesado exitosamente
+2025-05-28 05:07:57,245 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:02,559 - INFO - Evento 2 procesado exitosamente
+2025-05-28 05:08:07,930 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:14,616 - INFO - Evento 3 procesado exitosamente
+2025-05-28 05:08:19,827 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:27,310 - INFO - Evento 4 procesado exitosamente
+2025-05-28 05:08:32,493 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:37,431 - INFO - Evento 5 procesado exitosamente
+2025-05-28 05:08:42,616 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:48,079 - INFO - Evento 6 procesado exitosamente
+2025-05-28 05:08:53,550 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:08:58,240 - INFO - Evento 7 procesado exitosamente
+2025-05-28 05:09:03,437 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:09:08,745 - INFO - Evento 8 procesado exitosamente
+2025-05-28 05:09:13,842 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:09:18,631 - INFO - Evento 9 procesado exitosamente
+2025-05-28 05:09:21,118 - WARNING - Error al verificar siguiente página: Locator.get_attribute: Error: strict mode violation: locator("[jp-role=\"next\"].page.btn") resolved to 4 elements:
+    1) <li jp-data="2" jp-role="next" class="page btn">></li> aka locator("#cdmx-billboard-event-paginator").get_by_text(">", exact=True)
+    2) <li jp-data="2" jp-role="next" class="page btn btn-paginator-next">></li> aka locator("#cdmx-billboard-event-paginator-mobile").get_by_text(">")
+    3) <li jp-data="2" jp-role="next" class="page btn">></li> aka locator("#cdmx-billboard-venue-paginator").get_by_text(">", exact=True)
+    4) <li jp-data="2" jp-role="next" class="page btn btn-paginator-next">></li> aka locator("#cdmx-billboard-venue-paginator-mobile").get_by_text(">")
+
+Call log:
+  - waiting for locator("[jp-role=\"next\"].page.btn")
+
+2025-05-28 05:09:21,119 - INFO - No hay más páginas disponibles
+2025-05-28 05:09:21,206 - INFO - Se han guardado 9 eventos en el archivo 'eventos_cdmx_20250528_050921.json'
+2025-05-28 05:09:21,206 - INFO - Scraping completado en 0:01:45.972102
+2025-05-28 05:09:21,206 - INFO - Total de eventos obtenidos: 9
+2025-05-28 05:13:22,344 - INFO - Iniciando scraping de eventos CDMX...
+2025-05-28 05:13:22,959 - INFO - Navegando a la página de CDMX Cartelera...
+2025-05-28 05:13:27,058 - INFO - Procesando página 1...
+2025-05-28 05:13:27,120 - INFO - Encontrados 9 eventos en la página 1
+2025-05-28 05:13:30,948 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:13:37,919 - INFO - Evento 1 procesado exitosamente
+2025-05-28 05:13:43,632 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:13:48,735 - INFO - Evento 2 procesado exitosamente
+2025-05-28 05:13:54,064 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:13:59,154 - INFO - Evento 3 procesado exitosamente
+2025-05-28 05:14:04,388 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:14:09,082 - INFO - Evento 4 procesado exitosamente
+2025-05-28 05:14:14,218 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:14:19,274 - INFO - Evento 5 procesado exitosamente
+2025-05-28 05:14:24,773 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:14:32,026 - INFO - Evento 6 procesado exitosamente
+2025-05-28 05:14:37,651 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:14:43,631 - INFO - Evento 7 procesado exitosamente
+2025-05-28 05:14:48,889 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:14:53,709 - INFO - Evento 8 procesado exitosamente
+2025-05-28 05:14:58,788 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:15:06,016 - INFO - Evento 9 procesado exitosamente
+2025-05-28 05:15:08,493 - WARNING - Error al verificar siguiente página: Locator.get_attribute: Error: strict mode violation: locator("[jp-role=\"next\"].page.btn") resolved to 4 elements:
+    1) <li jp-data="2" jp-role="next" class="page btn">></li> aka locator("#cdmx-billboard-event-paginator").get_by_text(">", exact=True)
+    2) <li jp-data="2" jp-role="next" class="page btn btn-paginator-next">></li> aka locator("#cdmx-billboard-event-paginator-mobile").get_by_text(">")
+    3) <li jp-data="2" jp-role="next" class="page btn">></li> aka locator("#cdmx-billboard-venue-paginator").get_by_text(">", exact=True)
+    4) <li jp-data="2" jp-role="next" class="page btn btn-paginator-next">></li> aka locator("#cdmx-billboard-venue-paginator-mobile").get_by_text(">")
+
+Call log:
+  - waiting for locator("[jp-role=\"next\"].page.btn")
+
+2025-05-28 05:15:08,493 - INFO - No hay más páginas disponibles
+2025-05-28 05:15:08,548 - INFO - Se han guardado 9 eventos en el archivo 'eventos_cdmx_20250528_051508.json'
+2025-05-28 05:15:08,549 - INFO - Scraping completado en 0:01:46.203883
+2025-05-28 05:15:08,549 - INFO - Total de eventos obtenidos: 9
+2025-05-28 05:16:43,228 - INFO - Iniciando scraping de eventos CDMX...
+2025-05-28 05:16:43,794 - INFO - Navegando a la página de CDMX Cartelera...
+2025-05-28 05:16:47,769 - INFO - Procesando página 1...
+2025-05-28 05:16:47,825 - INFO - Encontrados 9 eventos en la página 1
+2025-05-28 05:16:51,663 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:16:59,770 - INFO - Evento 1 procesado exitosamente
+2025-05-28 05:17:05,441 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:17:10,354 - INFO - Evento 2 procesado exitosamente
+2025-05-28 05:17:15,598 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:17:20,639 - INFO - Evento 3 procesado exitosamente
+2025-05-28 05:17:26,347 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:17:31,220 - INFO - Evento 4 procesado exitosamente
+2025-05-28 05:17:36,564 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:17:42,507 - INFO - Evento 5 procesado exitosamente
+2025-05-28 05:17:47,488 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:17:52,369 - INFO - Evento 6 procesado exitosamente
+2025-05-28 05:17:57,434 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:18:01,968 - INFO - Evento 7 procesado exitosamente
+2025-05-28 05:18:07,086 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:18:11,832 - INFO - Evento 8 procesado exitosamente
+2025-05-28 05:18:17,321 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2025-05-28 05:18:24,282 - INFO - Evento 9 procesado exitosamente
+2025-05-28 05:18:26,619 - WARNING - Error al verificar siguiente página: 'Locator' object is not callable
+2025-05-28 05:18:26,619 - INFO - No hay más páginas disponibles
+2025-05-28 05:18:26,676 - INFO - Se han guardado 9 eventos en el archivo 'eventos_cdmx_20250528_051826.json'
+2025-05-28 05:18:26,676 - INFO - Scraping completado en 0:01:43.446916
+2025-05-28 05:18:26,676 - INFO - Total de eventos obtenidos: 9

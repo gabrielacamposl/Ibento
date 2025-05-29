@@ -317,6 +317,7 @@ questions = [
     }
 ]
 
+
 compatibilidad = {
     "¿Fumas con frecuencia?": {
         ("Sí, fumo con frecuencia", "Sí, fumo con frecuencia"): 1.0,

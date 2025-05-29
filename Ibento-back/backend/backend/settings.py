@@ -21,6 +21,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['ibento.onrender.com',
                  'localhost',
                  'ibento.com.mx',
+                 'ibento-gamma.vercel.app'
                  '127.0.0.1']
 
 
@@ -45,20 +46,37 @@ INSTALLED_APPS = [
     
 ]
 
-# PUSH_NOTIFICATION_SETTINGS = {
-#     "FCM_API_KEY" : os.getenv("FCM_API"),
-#     "FCM_ERROR_TIMEOUT": 5,
-#     "UPDATE_ON_DUPLICATE_REG_ID": True,
-# }
+# PUSH_NOTIFICATION_SETTINGS 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+    # ver los logs
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Token válido 
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),     # Refresh token 
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "TOKEN_BLACKLIST_ENABLED": True,
-    'USER_ID_FIELD': '_id', 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token de acceso dura 1 hora
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh token dura 7 días
+    'ROTATE_REFRESH_TOKENS': True,                   # Rota refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,               # Blacklist tokens antiguos
+    # "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    # "TOKEN_BLACKLIST_ENABLED": True,
+     'USER_ID_FIELD': '_id', 
 }
 
 REST_FRAMEWORK = {
@@ -140,6 +158,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://ibento.onrender.com",
     "https://ibento-hazel.vercel.app",
     "https://ibento.com.mx",
+    'https://ibento-gamma.vercel.app'
 
 ]
 

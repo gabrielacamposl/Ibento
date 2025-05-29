@@ -3,9 +3,14 @@ import numpy as np
 from pprint import pprint
 from sklearn.metrics.pairwise import cosine_similarity
 
+import pdb;
+
+from collections import OrderedDict
+
 questions = [
     {   #1   Optional
         "question": "¿En qué momento del día sueles ser más activo?",
+        "categoria_id":"6817cc11a05c79868a61b640",
         "options": [
             "En las mañanas",
             "En las tardes",
@@ -15,6 +20,7 @@ questions = [
     },
     {   #2   Optional #Multi
         "question": "¿Qué medio de transporte sueles usar?",
+        "categoria_id": "6817cc5ea05c79868a61b641",
         "options": [
             "Metro",
             "Cablebus",
@@ -31,6 +37,7 @@ questions = [
     },
     {   #3   Optional
         "question": "¿Qué tan activo eres en redes?",
+        "categoria_id": "6817cdb3a05c79868a61b642",
         "options": [
             "Estoy al pendiente siempre",
             "Normalmente estoy activo",
@@ -41,6 +48,7 @@ questions = [
     },
     {   #4  Multi
         "question": "¿En qué zonas de CDMX te mueves más seguido?",
+        "categoria_id": "6817cdf6a05c79868a61b643",
         "options" : ['Centro (Cuauhtémoc, Doctores, Juárez, Roma, Condesa)',
                      'Sur (Coyoacán, Tlalpan, Xochimilco)', 
                      'Poniente (Santa Fe, Álvaro Obregón, San Ángel)',
@@ -51,6 +59,7 @@ questions = [
     },
     {   #5
         "question": "¿Qué días prefieres para asistir a eventos?",
+        "categoria_id": "6817cf49a05c79868a61b644",
         "options": ['Entre semana (Lunes a Jueves)', 
                     'Fines de semana (Viernes a Domingo)', 
                     'Cualquier día', 
@@ -58,6 +67,7 @@ questions = [
     },
     {   #6
         "question": "¿Qué tan dispuesto estás a desplazarte para un evento?",
+        "categoria_id": "6817cf85a05c79868a61b645",
         "options": ['Estoy dispuesto a ir a cualquier parte de la ciudad', 
                     'Prefiero eventos cerca de mi zona', 
                     'Depende de la hora y tipo de evento', 
@@ -66,6 +76,7 @@ questions = [
     },
     {   #7  Optional
         "question": "¿Fumas con frecuencia?",
+        "categoria_id": "6817cfb1a05c79868a61b646",
         "options": [
             "Sí, fumo con frecuencia",
             "No me gusta fumar",
@@ -76,6 +87,7 @@ questions = [
     },
     {   #8  Optional
         "question": "¿Bebes alcohol con frecuencia?",
+        "categoria_id": "6817d024a05c79868a61b647",
         "options": [
             "Sí, bebo con frecuencia",
             "Lo hago para socializar o en reuniones",
@@ -85,6 +97,7 @@ questions = [
     },
     {   #9
         "question": "¿Cómo te sientes respecto a planes espontáneos?",
+        "categoria_id": "6817d046a05c79868a61b648",
         "options": [
             "Me encantan, siempre estoy listo/a",
             "Los disfruto si son interesantes",
@@ -94,6 +107,7 @@ questions = [
     },
     {   #10
         "question": "¿Qué tipo de interacción esperas durante un evento?",
+        "categoria_id": "6817d061a05c79868a61b649",
         "options": [
             "Muchas risas y diversión",
             "Compartir intereses mutuos",
@@ -103,6 +117,7 @@ questions = [
     },
     {   #11  Optional   #Multi
         "question": "¿Tienes mascotas?",
+        "categoria_id": "6817d128a05c79868a61b64a",
         "options": [
             "Perro(s)",
             "Gato(s)",
@@ -119,6 +134,7 @@ questions = [
     },
     {   #12 Multi
         "question": "¿Cuáles son tus intereses?",
+        "categoria_id": "6817d1cfa05c79868a61b64b",
         "options": [
             "Naturaleza",
             "Tours a pie",
@@ -213,8 +229,8 @@ questions = [
         ]
     },
     {   #13 Multi
-        "_id": "6817d200a05c79868a61b64c",
         "question": "¿Qué tipo de eventos te interesan más en CDMX?",
+        "categoria_id": "6817d200a05c79868a61b64c",
         "options": ['Conciertos y festivales',
                     'Cultura y exposiciones', 
                     'Ferias y bazares', 
@@ -226,6 +242,7 @@ questions = [
     },
     {   #14
         "question": "¿Qué valoras más en una compañía?",
+        "categoria_id": "6817d224a05c79868a61b64d",
         "options": [
             "Buen sentido del humor",
             "Amabilidad y cortesía",
@@ -236,6 +253,7 @@ questions = [
     },
     {   #15
         "question": "¿Qué tipo de acompañante te gustaría para un evento?",
+        "categoria_id": "6817d473a05c79868a61b64e",
         "options": ['Alguien divertido para pasarla bien', 
                     'Alguien con intereses similares', 
                     'Alguien para conocer mejor con el tiempo', 
@@ -244,6 +262,7 @@ questions = [
     },
     {   #16 Optional
         "question": "¿Cuál es tu personalidad?",
+        "categoria_id": "6817d5fea05c79868a61b650",
         "options": [
             "INTJ", "INTP", "ENTJ", "ENTP",
             "INFJ", "INFP", "ENFJ", "ENFP",
@@ -347,10 +366,10 @@ def compatibilidad_actividad(respuesta_a, respuesta_b):
 #2 Optional     Multi
 def compatibilidad_transporte(respuesta_a, respuesta_b):
 
-    if not isinstance[respuesta_a, list]:
+    if not isinstance(respuesta_a, list):
         respuesta_a = [respuesta_a]
 
-    if not isinstance[respuesta_b, list]:
+    if not isinstance(respuesta_b, list):
         respuesta_b = [respuesta_b]
 
     # Definir la lógica de compatibilidad para transporte
@@ -420,10 +439,10 @@ def compatibilidad_redes(respuesta_a, respuesta_b):
 #4 Multi
 def compatibilidad_zonas(respuesta_a, respuesta_b):
     
-    if not isinstance[respuesta_a, list]:
+    if not isinstance(respuesta_a, list):
         respuesta_a = [respuesta_a]
 
-    if not isinstance[respuesta_b, list]:
+    if not isinstance(respuesta_b, list):
         respuesta_b = [respuesta_b]
 
     resp = "Me muevo por toda la ciudad"
@@ -438,7 +457,7 @@ def compatibilidad_zonas(respuesta_a, respuesta_b):
     if resp2 in (respuesta_a or respuesta_b):
         return 0.5
     
-    elementos_comunes = respuesta_a & respuesta_b
+    elementos_comunes = set(respuesta_a) & set(respuesta_b)
 
     total_elementos = len(respuesta_a) + len(respuesta_b)
 
@@ -599,18 +618,21 @@ def compatibilidad_interaccion(respuesta_a, respuesta_b):
 #11 Optional    Multi
 def compatibilidad_mascotas(respuesta_a, respuesta_b):
 
-    if not isinstance[respuesta_a, list]:
-        respuesta_a = [respuesta_a]
+    if not isinstance(respuesta_a, list):
+        respuesta_a = set(respuesta_a)
 
-    if not isinstance[respuesta_b, list]:
-        respuesta_b = [respuesta_b]
+    if not isinstance(respuesta_b, list):
+        respuesta_b = set(respuesta_b)
+
+    respuesta_a = set(respuesta_a)
+    respuesta_b = set(respuesta_b)
 
     # Definir la lógica de compatibilidad para mascotas
     if respuesta_a == respuesta_b:
         return 1.0
     
-    if len(respuesta_a & respuesta_b & ["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"]) > 0:
-        if len(respuesta_a & respuesta_b & ["Soy alérgico", "No me gustan"]) == 0:
+    if len(respuesta_a & respuesta_b & set(["No tengo mascotas pero quisiera una", "Me gustan pero no tengo"])) > 0:
+        if len(respuesta_a & respuesta_b & set(["Soy alérgico", "No me gustan"])) == 0:
             return 0.8
         else:
             return -0.2
@@ -627,10 +649,10 @@ def compatibilidad_mascotas(respuesta_a, respuesta_b):
 #12 Multi
 def compatibilidad_intereses(respuesta_a, respuesta_b):
 
-    if not isinstance[respuesta_a, list]:
+    if not isinstance(respuesta_a, list):
         respuesta_a = [respuesta_a]
 
-    if not isinstance[respuesta_b, list]:
+    if not isinstance(respuesta_b, list):
         respuesta_b = [respuesta_b]
 
     intereses = questions[11]["options"]
@@ -644,10 +666,11 @@ def compatibilidad_intereses(respuesta_a, respuesta_b):
 
 #13 Multi
 def compatibilidad_tipoEventos(respuesta_a, respuesta_b):
-    if not isinstance[respuesta_a, list]:
+    
+    if not isinstance(respuesta_a, list):
         respuesta_a = [respuesta_a]
 
-    if not isinstance[respuesta_b, list]:
+    if not isinstance(respuesta_b, list):
         respuesta_b = [respuesta_b]
     
     tipoEventos = questions[12]["options"]
@@ -676,9 +699,10 @@ def compatibilidad_tipoAcompañante(respuesta_a, respuesta_b):
 def compatibilidad_personalidad(respuesta_a, respuesta_b):
     type1, type2 = respuesta_a.upper(), respuesta_b.upper()
     if type1 not in compatibility_matrix_personality or type2 not in compatibility_matrix_personality:
-        return "Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types)
+        # print("Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types))
+        return 0.0
     index = types.index(type2)
-    print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
+    # print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
     return compatibility_matrix_personality[type1][index]
 
 
@@ -686,118 +710,121 @@ def compatibilidad_total(lista_preguntas ,respuestas_usuario1, respuestas_usuari
     total_compatibilidad = 0.0
     preguntas_consideradas = 0
 
-    if questions[0]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[0]["question"]]
-        respuesta_B = respuestas_usuario2[questions[0]["question"]]
+    if questions[0]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[0]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[0]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_actividad(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
 
-    if questions[1]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[1]["question"]]
-        respuesta_B = respuestas_usuario2[questions[1]["question"]]
+    if questions[1]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[1]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[1]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_transporte(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[2]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[2]["question"]]
-        respuesta_B = respuestas_usuario2[questions[2]["question"]]
+    if questions[2]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[2]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[2]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_redes(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[3]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[3]["question"]]
-        respuesta_B = respuestas_usuario2[questions[3]["question"]]
+    if questions[3]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[3]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[3]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_zonas(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[4]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[4]["question"]]
-        respuesta_B = respuestas_usuario2[questions[4]["question"]]
+    if questions[4]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[4]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[4]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_dias(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[5]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[5]["question"]]
-        respuesta_B = respuestas_usuario2[questions[5]["question"]]
+    if questions[5]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[5]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[5]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_desplazarte(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[6]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[6]["question"]]
-        respuesta_B = respuestas_usuario2[questions[6]["question"]]
+    if questions[6]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[6]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[6]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_fumar(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[7]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[7]["question"]]
-        respuesta_B = respuestas_usuario2[questions[7]["question"]]
+    if questions[7]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[7]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[7]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_alcohol(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[8]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[8]["question"]]
-        respuesta_B = respuestas_usuario2[questions[8]["question"]]
+    if questions[8]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[8]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[8]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_planes(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[9]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[9]["question"]]
-        respuesta_B = respuestas_usuario2[questions[9]["question"]]
+    if questions[9]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[9]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[9]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_interaccion(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[10]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[10]["question"]]
-        respuesta_B = respuestas_usuario2[questions[10]["question"]]
+    if questions[10]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[10]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[10]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_mascotas(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[11]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[11]["question"]]
-        respuesta_B = respuestas_usuario2[questions[11]["question"]]
+    if questions[11]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[11]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[11]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_intereses(respuesta_A, respuesta_B)*2.0
         preguntas_consideradas += 1
     
-    if questions[12]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[12]["question"]]
-        respuesta_B = respuestas_usuario2[questions[12]["question"]]
+    if questions[12]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[12]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[12]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_tipoEventos(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[13]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[13]["question"]]
-        respuesta_B = respuestas_usuario2[questions[13]["question"]]
+    if questions[13]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[13]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[13]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_valores(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[14]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[14]["question"]]
-        respuesta_B = respuestas_usuario2[questions[14]["question"]]
+    if questions[14]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[14]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[14]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_tipoAcompañante(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
     
-    if questions[15]["question"] in lista_preguntas:
-        respuesta_A = respuestas_usuario1[questions[15]["question"]]
-        respuesta_B = respuestas_usuario2[questions[15]["question"]]
+    if questions[15]["categoria_id"] in lista_preguntas:
+        respuesta_A = respuestas_usuario1[questions[15]["categoria_id"]]
+        respuesta_B = respuestas_usuario2[questions[15]["categoria_id"]]
 
         total_compatibilidad += compatibilidad_personalidad(respuesta_A, respuesta_B)
         preguntas_consideradas += 1
 
+    if preguntas_consideradas == 0:
+        return 0.0
+    
     return total_compatibilidad/preguntas_consideradas
 
 def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
@@ -806,19 +833,34 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
     usuario2 = {}
 
     lista_preguntas = []
-    lista_preguntas2 = []
 
-    for respuesta, respuesta2 in preferencias_usuario, preferencias_candidato:
-        usuario1[respuesta[1]] = respuesta[2]
-        usuario2[respuesta2[1]] = respuesta2[2]
-        lista_preguntas.append(respuesta[1])
-        lista_preguntas2.append(respuesta2[1])
-    
-    lista_preguntas_final = lista_preguntas & lista_preguntas2
+    # print("Preferencias del usuario: ")
+    # print(preferencias_usuario)
+    # print("Preferencias del candidato:")
+    # print(preferencias_candidato)
 
-    compatibilidad = compatibilidad_total(lista_preguntas_final, usuario1, usuario2)
+    for respuesta_usuario in preferencias_usuario:
+        for respuesta_candidato in preferencias_candidato:
+
+            if respuesta_usuario['categoria_id'] == respuesta_candidato['categoria_id']:
+                usuario1[respuesta_usuario['categoria_id']] = respuesta_usuario['respuesta']
+                usuario2[respuesta_candidato['categoria_id']] = respuesta_candidato['respuesta']
+                lista_preguntas.append(respuesta_usuario['categoria_id'])
+                break
+
+
+    # print("Lista preguntas 1: ")
+    # print(lista_preguntas)
+
+    # print("Usuario 1: ")
+    # print(usuario1)
+
+    # print("Usuario 2: ")
+    # print(usuario2)
+
+    compatibilidad = compatibilidad_total(lista_preguntas, usuario1, usuario2)
+
+    print("Compatibilidad de : ")
+    print(compatibilidad)
 
     return compatibilidad
-
-
-    

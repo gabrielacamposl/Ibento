@@ -19,16 +19,142 @@ API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 def analizar_genero(titulo, descripcion):
     prompt = f"""
-    Analiza el siguiente título y descripción, y determina a qué géneros pertenece.
-    Responde **solo** con una lista de géneros relevantes separados por comas.
-    Los generos pueden ser los siguientes y pueden ser varios:
-    Música, Deportes, Artes y Teatro, Familia, Misceláneo, Alternativa, Indie Rock, Metal Alternativo, 
-    Blues, Blues Acústico, Blues Rock, Clásica, Cámara. Coral, Country, Country Alternativo, Country Pop, 
-    Electrónica, Casa, Techno, Folk, Folk Alternativo, Celta, Hip-Hop/Rap, Consciente, Este, Jazz, Avant-Garde Jazz, 
-    Bebop, Latina, Bachata, Banda, Pop, Pop Alternativo, Pop Dance, R&B, R&B Alternativo, Contemporáneo adulto, Rock, Rock and Roll, Rock alternativo, Mundial, 
-    Afro-Beat, Árabe, Deportes de aventura, Béisbol, Baloncesto, Boxeo, Críquet, Fútbol, Fútbol americano, Golf, Hockey, Lacrosse, Artes marciales, Deportes de motor, 
-    Olimpiadas, Carreras de caballos, Rodeo, Tenis, Voleibol, Ballet, Musicales, Ópera, Actuaciones, Teatro, Para niños, Disney en Hielo, Monstruo Jam, Sesame Street Live
-    Circo, Comedia, Ferias, Festivales, Películas, Museos, Parques, Espectáculos
+    Analiza el siguiente título y descripción, y determina a qué categorias y subcategorias pertenece.
+    Responde **solo** con una lista de su categoria y maximo 2 subcategorias separados por comas.
+    Tienes que elegir una categoria y debes elegir subcategorias que pertenezcan a esa categoria.
+    Categorias:
+    Música, Deportes, Artes y Teatro, Cine, Diverso, 
+    Subcategorias:
+
+    #Diverso
+    "Casino/Juegos",
+    "Comedia",
+    "Comunidad/Cívico",
+    "Comunidad/Cultural",
+    "Ferias y Festivales",
+    "Familia",
+    "Comida y Bebida",
+    "Salud/Bienestar",
+    "Exposiciones de Pasatiempos/Intereses Especiales",
+    "Festividades",
+    "Shows de Hielo",
+    "Conferencia/Seminario",
+    "Multimedia",
+    "Psíquicos/Médiums/Hipnotistas",
+    "Interés Especial/Pasatiempos",
+    "No Definido",
+    #Deportes
+    "Acuáticos",
+    "Carreras Atléticas",
+    "Bádminton",
+    "Bandy",
+    "Béisbol",
+    "Baloncesto",
+    "Biatlón",
+    "Fisicoculturismo",
+    "Boxeo",
+    "Cricket",
+    "Curling",
+    "Ciclismo",
+    "Ecuestre",
+    "eSports",
+    "Extremo",
+    "Hockey sobre Césped",
+    "Fitness",
+    "Floorball",
+    "Fútbol Americano",
+    "Golf",
+    "Gimnasia",
+    "Balonmano",
+    "Hockey",
+    "Patinaje sobre Hielo",
+    "Fútbol Sala",
+    "Lacrosse",
+    "Artes Marciales",
+    "Diverso",
+    "Motores/Carreras",
+    "Netball",
+    "Rodeo",
+    "Roller Derby",
+    "Roller Hockey",
+    "Rugby",
+    "Salto de Esquí",
+    "Esquí",
+    "Fútbol",
+    "Softbol",
+    "Squash",
+    "Surf",
+    "Natación",
+    "Tenis de Mesa",
+    "Tenis",
+    "Toros",
+    "Atletismo",
+    "Voleibol",
+    "Waterpolo",
+    "Lucha Libre",
+    "Ringuette",
+    "Pádel",
+    #Música
+    "Alternativa",
+    "Baladas/Romántica",
+    "Blues",
+    "Canción Francesa",
+    "Música Infantil",
+    "Clásica",
+    "Country",
+    "Dance/Electrónica",
+    "Folk",
+    "Hip-Hop/Rap",
+    "Festiva",
+    "Jazz",
+    "Latina",
+    "Medieval/Renacimiento",
+    "Metal",
+    "New Age",
+    "Otro",
+    "Pop",
+    "R&B",
+    "Reggae",
+    "Religiosa",
+    "Rock",
+    "No Definido",
+    "Mundial",
+    #Artes y Teatro
+    "Teatro Infantil",
+    "Circo y Actos Especiales",
+    "Clásico",
+    "Comedia",
+    "Cultural",
+    "Danza",
+    "Espectáculo",
+    "Moda",
+    "Bellas Artes",
+    "Magia e Ilusión",
+    "Diverso",
+    "Teatro diverso",
+    "Multimedia",
+    "Música",
+    "Ópera",
+    "Arte Performático",
+    "Títeres",
+    "Espectacular",
+    "Teatro",
+    "Variedades",
+    "No Definido",
+    #Cine
+    "Acción/Aventura",
+    "Animación",
+    "Cine de Autor",
+    "Comedia",
+    "Documental",
+    "Drama",
+    "Familiar",
+    "Extranjero",
+    "Terror",
+    "Diverso",
+    "Música",
+    "Ciencia Ficción",
+    "Urbano"
 
     **Título**: {titulo}  
     **Descripción**: {descripcion}
@@ -136,16 +262,17 @@ def obtener_detalles_evento_con_blockquote(page):
         coordenadas = obtener_coordenadas(ubicacion, API_KEY_GOOGLE)
 
     return {
-        "nombre": nombre,
-        "lugar": lugar,
-        "costo": costo,
-        "ubicacion": ubicacion,
-        "descripcion": desc,
-        "fechas": fechas,
-        "coordenadas": coordenadas,
-        "img_url": img,
+        "title": nombre,
+        "place": lugar,
+        "price": costo,
+        "location": ubicacion,
+        "description": desc,
+        "dates": fechas,
+        "coordinates": coordenadas,
+        "img_urls": img,
         "url": url,
-        "clasificaciones": generos
+        "classification": generos,
+        "source": "CDMX Cartelera"
     }
 
 def obtener_detalles_evento_sin_blockquote(page):
@@ -183,7 +310,7 @@ def obtener_detalles_evento_sin_blockquote(page):
         fecha = next((clase for clase in clases.split() if clase.startswith('calendar-day-')), None)
         
         if fecha:
-            fechas.append(fecha.split('-')[-1]+"/"+fecha.split('-')[-2]+"/"+fecha.split('-')[-3])
+            fechas.append(fecha.split('-')[-3]+"-"+fecha.split('-')[-2]+"-"+fecha.split('-')[-1])
 
     #Normalización de la descripción
     desc = ""
@@ -197,16 +324,17 @@ def obtener_detalles_evento_sin_blockquote(page):
         coordenadas = obtener_coordenadas(ubicacion, API_KEY_GOOGLE)
 
     return {
-        "nombre": nombre,
-        "lugar": lugar,
-        "costo": costo,
-        "ubicacion": ubicacion,
-        "descripcion": desc,
-        "fechas": fechas,
-        "coordenadas": coordenadas,
-        "img_url": img,
+        "title": nombre,
+        "place": lugar,
+        "price": costo,
+        "location": ubicacion,
+        "description": desc,
+        "dates": fechas,
+        "coordinates": coordenadas,
+        "img_urls": img,
         "url": url,
-        "clasificaciones": generos
+        "classification": generos,
+        "source": "CDMX Cartelera"
     }
 
 def imprimir_detalles_evento(detalles, n):
@@ -214,15 +342,15 @@ def imprimir_detalles_evento(detalles, n):
     Imprime los detalles del evento.
     """
     print(f"------------------------Evento {n+1}------------------------")
-    print(f"Evento: {detalles['nombre']}")
-    print(f"Lugar: {detalles['lugar']}")
-    print(f"Costo: {detalles['costo']}")
-    print(f"Ubicación: {detalles['ubicacion']}")
-    print(f"Descripción: {detalles['descripcion']}")
-    print(f"Generos: {detalles['clasificaciones']}")
-    print(f"Fechas: {detalles['fechas']}")
-    print(f"Coordenadas: {detalles['coordenadas']}")
-    print(f"Imagen_URL: {detalles['img_url']}")
+    print(f"Evento: {detalles['title']}")
+    print(f"Lugar: {detalles['place']}")
+    print(f"Costo: {detalles['price']}")
+    print(f"Ubicación: {detalles['location']}")
+    print(f"Descripción: {detalles['description']}")
+    print(f"Generos: {detalles['classification']}")
+    print(f"Fechas: {detalles['dates']}")
+    print(f"Coordenadas: {detalles['coordinates']}")
+    print(f"Imagen_URL: {detalles['img_urls']}")
     print(f"URL: {detalles['url']}")
     print("------------------------------------------------------------")
 
@@ -232,7 +360,7 @@ def scrape_eventos():
     
     with sync_playwright() as p:
         # Iniciar el navegador
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         
         # Navegar a la página
@@ -245,7 +373,7 @@ def scrape_eventos():
             time.sleep(1)
 
             try:
-                if page.get_by_role("heading", name="No encontramos resultados que coincidan con tu búsqueda").is_visible() or p1 == 3:
+                if page.get_by_role("heading", name="No encontramos resultados que coincidan con tu búsqueda").is_visible():
                     break
             except:
                 pass 

@@ -38,6 +38,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
         usuario.save()
         return usuario
 
+# ------ Obtener modo de busqueda del usuario
+class UsuarioSerializerModoBusqueda(serializers.ModelSerializer):
+    class Meta:
+        model = Evento
+        fields = ['modo_busqueda_match']
+        read_only_fields = ['modo_busqueda_match']
+
     
 # -------------------------------------- LOGIN / LOGOUT ----------------------------------------    
 # ------ Login / Inicio de Sesión    
@@ -149,7 +156,7 @@ class SugerenciaSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Lista de campos que deberían ser arrays
-        json_fields = ['profile_pic']
+        json_fields = ['profile_pic', 'preferencias_evento', 'preferencias_generales', 'save_events']
 
         for field in json_fields:
             if field in data and isinstance(data[field], str):
@@ -392,7 +399,6 @@ class UsuarioSerializerParaEventos(serializers.ModelSerializer):
 class UsuarioSerializerEdit(serializers.ModelSerializer):
 
     preferencias_generales = serializers.SerializerMethodField()
-
     def get_preferencias_generales(self, obj):
         if hasattr(obj, 'preferencias_generales') and obj.preferencias_generales:
             # Convertir OrderedDict a dict normales
@@ -429,6 +435,8 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
                     pass
 
         return data
+
+    
 
 class UsuarioSerializerEventosBuscarMatch(serializers.ModelSerializer):
     class Meta:

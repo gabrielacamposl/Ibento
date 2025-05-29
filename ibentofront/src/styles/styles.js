@@ -4,6 +4,7 @@ export const inputStyles = clsx(
   "mt-1 w-full rounded-3xl bg-white border border-purple-600",
   "focus:border-purple-500 focus:outline-none p-1 ",
   "w-full flex justify-center items-center",
+  "text-black" 
 );
 
 export const buttonStyle = clsx(
@@ -12,9 +13,15 @@ export const buttonStyle = clsx(
 "font-bold shadow-lg hover:text-purple hover:bg-white px-12 py-1 text-l"
 );
 
+export const buttonAccept = clsx(
+  "w-20 flex justify-center items-center",
+  "rounded-full bg-gradient-to-r from-purple-800 via-purple-600 to-purple-400 text-white",
+  "font-bold shadow-lg hover:text-purple hover:bg-white px-12 py-3 text-sm font-light"
+)
+
 export const buttonStyleCategoria = clsx(
-  "w-fit  justify-start items-center",
-  "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
+  "w-full  justify-start items-center",
+  "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white font-bold",
   "font-bold shadow-lg hover:text-purple hover:bg-white px-8 py-1 text-l"
   );
 
