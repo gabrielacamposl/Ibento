@@ -68,9 +68,11 @@ const Chat = () => {
         fetchUsersChat();
     }, [roomName]);
 
-    useEffect(() => async () => {
+    useEffect(() => {
         const token = localStorage.getItem('access');
       
+        const fetchMessages = async () => {
+
         try {
             const response = await api.get(`mensajes/${roomName}/`, {
                 method: "GET",
@@ -91,6 +93,8 @@ const Chat = () => {
         }catch (error) {
             console.error("Error al obtener los mensajes:", error);
         }
+        };
+        fetchMessages();
     },[]);
     
     const messagesEndRef = useRef(null);
