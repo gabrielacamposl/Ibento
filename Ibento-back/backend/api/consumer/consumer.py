@@ -66,18 +66,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     # @database_sync_to_async
-    # def save_message(self, conversacion_id, remitente_id, receptor_id, mensaje):
-    #     from backend.api.models import Mensaje, Conversacion, Usuario
+    def save_message(self, conversacion_id, remitente_id, receptor_id, mensaje):
+        from backend.api.models import Mensaje, Conversacion, Usuario
 
-    #     # Obtener instancias para las relaciones
-    #     conversacion = Conversacion.objects.get(_id=conversacion_id)
-    #     remitente = Usuario.objects.get(_id=remitente_id)
-    #     receptor = Usuario.objects.get(_id=receptor_id)
+        # Obtener instancias para las relaciones
+        conversacion = Conversacion.objects.get(_id=conversacion_id)
+        remitente = Usuario.objects.get(_id=remitente_id)
+        receptor = Usuario.objects.get(_id=receptor_id)
 
-    #     # Crear y guardar el mensaje
-    #     Mensaje.objects.create(
-    #         conversacion=conversacion,
-    #         remitente=remitente,
-    #         receptor=receptor,
-    #         mensaje=mensaje
-    #     )
+        # Crear y guardar el mensaje
+        Mensaje.objects.create(
+            conversacion=conversacion,
+            remitente=remitente,
+            receptor=receptor,
+            mensaje=mensaje
+        )
