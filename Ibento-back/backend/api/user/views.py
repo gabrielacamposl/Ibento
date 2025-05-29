@@ -2258,6 +2258,26 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def agregar_info(self, request):
+
+        usuario = request.user
+        
+        birthday = request.data.get('birthday')
+        gender = request.data.get('gender')
+        description = request.data.get('description')
+        curp = request.data.get('curp')
+
+        # Actualizar los campos del usuario
+        usuario.birthday = birthday
+        usuario.description = description
+        usuario.gender = gender
+        usuario.curp = curp
+
+        usuario.save(update_fields=['birthday', 'description', 'gender', 'curp'])
+
+        return Response({"detail": "Información actualizada correctamente."}, status=status.HTTP_200_OK)
 
 # ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
 
