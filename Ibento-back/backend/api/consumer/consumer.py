@@ -1,11 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-
+from backend.api.models import Mensaje, Conversacion
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Importa aquí para evitar errores de carga prematura
-        from backend.api.models import Mensaje, Conversacion
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f'chat_{self.room_name}'
@@ -27,7 +26,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        from backend.api.models import Mensaje, Conversacion
+        #from backend.api.models import Mensaje, Conversacion
 
         data = json.loads(text_data)
         print("Received data:", data)
@@ -66,19 +65,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message": response,
         }))
 
-    @database_sync_to_async
-    def save_message(self, conversacion_id, remitente_id, receptor_id, mensaje):
-        from backend.api.models import Mensaje, Conversacion, Usuario
+    # @database_sync_to_async
+    # def save_message(self, conversacion_id, remitente_id, receptor_id, mensaje):
+    #     from backend.api.models import Mensaje, Conversacion, Usuario
 
-        # Obtener instancias para las relaciones
-        conversacion = Conversacion.objects.get(_id=conversacion_id)
-        remitente = Usuario.objects.get(_id=remitente_id)
-        receptor = Usuario.objects.get(_id=receptor_id)
+    #     # Obtener instancias para las relaciones
+    #     conversacion = Conversacion.objects.get(_id=conversacion_id)
+    #     remitente = Usuario.objects.get(_id=remitente_id)
+    #     receptor = Usuario.objects.get(_id=receptor_id)
 
-        # Crear y guardar el mensaje
-        Mensaje.objects.create(
-            conversacion=conversacion,
-            remitente=remitente,
-            receptor=receptor,
-            mensaje=mensaje
-        )
+    #     # Crear y guardar el mensaje
+    #     Mensaje.objects.create(
+    #         conversacion=conversacion,
+    #         remitente=remitente,
+    #         receptor=receptor,
+    #         mensaje=mensaje
+    #     )
