@@ -20,8 +20,8 @@ export const buttonAccept = clsx(
 )
 
 export const buttonStyleCategoria = clsx(
-  "w-fit  justify-start items-center",
-  "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
+  "w-full  justify-start items-center",
+  "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white font-bold",
   "font-bold shadow-lg hover:text-purple hover:bg-white px-8 py-1 text-l"
   );
 
