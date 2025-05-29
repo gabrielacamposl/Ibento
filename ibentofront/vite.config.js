@@ -9,24 +9,27 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024, // 6 MB
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
          // o excluye la carpeta entera
         globIgnores: ['images_for_preview/**'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/ibento\.onrender\.com\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 horas
-              },
-            },
-          },
-        ],
+        // runtimeCaching: [
+        //   {
+        //     urlPattern: /^https:\/\/ibento\.onrender\.com\/api\//,
+        //     handler: 'NetworkFirst',
+        //     options: {
+        //       cacheName: 'evento-api-cache',
+        //       expiration: {
+        //         maxEntries: 100,
+        //         maxAgeSeconds: 60 * 60 * 24, // 24 horas
+        //       },
+        //     },
+        //   },
+        // ],
       },
       includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {

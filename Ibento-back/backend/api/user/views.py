@@ -40,7 +40,7 @@ from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
 from api.services.create_users import crearUsuarios
 # Servicio de INES
-from api.services.ine_validation import (process_ine_image_secure, ocr_ine, validate_ine)
+from api.services.ine_validation import (safe_process_ine_with_fallback, safe_process_selfie_with_fallback, ocr_ine, validate_ine)
 #Servicio para envío y recibo de notificaciones
 from api.services.notification_service import NotificationService
 # Importar modelos 
@@ -686,13 +686,15 @@ def ine_validation_view(request):
         user: Usuario = request.user
         print(f"Usuario: {user.nombre}")
 
-        
-        # PROCESAR IMÁGENES DIRECTAMENTE (MÁS SEGURO)
+          # PROCESAR IMÁGENES CON FUNCIONES OPTIMIZADAS Y FALLBACK
         print("Procesando imagen frontal...")
-        front_b64 = process_ine_image_secure(ine_front)
+        front_b64 = safe_process_ine_with_fallback(ine_front)
         
         print("Procesando imagen trasera...")
-        back_b64 = process_ine_image_secure(ine_back)
+        back_b64 = safe_process_ine_with_fallback(ine_back)
+        
+        print("Procesando selfie...")
+        selfie_b64 = safe_process_selfie_with_fallback(selfie)
         
         print("Imágenes procesadas exitosamente")
         
@@ -724,8 +726,7 @@ def ine_validation_view(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         print("INE válida en padrón electoral")
-        
-        # GUARDAR DATOS DE INE EN USUARIO
+          # GUARDAR DATOS DE INE EN USUARIO
         user.is_ine_validated = True
         if curp:
             user.curp = curp
@@ -733,10 +734,24 @@ def ine_validation_view(request):
         
         print("=== VALIDANDO ROSTRO CON SELFIE ===")
         
+        # Convertir imágenes procesadas de base64 a archivos para FastAPI
+        import base64
+        from io import BytesIO
+        
+        # Crear archivo temporal para INE frontal procesada
+        ine_front_data = base64.b64decode(front_b64)
+        ine_front_file = BytesIO(ine_front_data)
+        ine_front_file.name = 'ine_front_processed.jpg'
+        
+        # Crear archivo temporal para selfie procesado
+        selfie_data = base64.b64decode(selfie_b64)
+        selfie_file = BytesIO(selfie_data)
+        selfie_file.name = 'selfie_processed.jpg'
+        
         # VALIDAR ROSTRO CON FASTAPI
         files = {
-            "ine_image": ine_front,
-            "camera_image": selfie,
+            "ine_image": ine_front_file,
+            "camera_image": selfie_file,
         }
         
         try:
@@ -864,9 +879,15 @@ def sugerencia_usuarios(request):
 
     #Datos del json
     gender = request.data.get('gender', None)
-    age_range = request.data.get('ageRange', None)
-    min_age = age_range.get('min')
-    max_age = age_range.get('max')
+    age_range = request.data.get('ageRange', None) or request.data.get('age_range', None)
+
+    if age_range is not None:
+        min_age = age_range.get('min', None)
+        max_age = age_range.get('max', None)
+    else:
+        min_age = None
+        max_age = None
+    
     modo_busqueda = request.data.get('searchMode', None)
 
     # Obtener IDs de usuarios a los que ya se les dio like o dislike
@@ -881,6 +902,9 @@ def sugerencia_usuarios(request):
 
     # Usuarios que ya esta registrados para matches
     candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
+
+    print(f"Gender: {gender}")
+    print(f"Age Range: {age_range}")
 
     #Filtrar por genero y edad si se especifica
     if gender != None and gender != 'Todos':

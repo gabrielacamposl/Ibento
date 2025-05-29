@@ -37,10 +37,8 @@ const useGeolocation = (): GeolocationState => {
         error: null,
         loading: false,
       });
-    };
-
-    const errorHandler = (error: GeolocationPositionError) => {
-      console.error('Error al obtener la ubicación:', error);
+    };    const errorHandler = (error: GeolocationPositionError) => {
+      console.log('Geolocalización no disponible:', error.message);
       setState((prevState) => ({
         ...prevState,
         error,
@@ -48,7 +46,13 @@ const useGeolocation = (): GeolocationState => {
       }));
     };
 
-    navigator.geolocation.getCurrentPosition(successHandler, errorHandler);
+    const options = {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 300000 // 5 minutes
+    };
+
+    navigator.geolocation.getCurrentPosition(successHandler, errorHandler, options);
 
   }, []);
 

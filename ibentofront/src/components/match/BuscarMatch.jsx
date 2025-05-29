@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from '../../api';
 import { Divider } from 'primereact/divider';
 import { Slider } from "primereact/slider";
+import LoadingSpinner from './../../assets/components/LoadingSpinner';
 import axios from 'axios';
 
 const buscarMatchx = () => {
@@ -17,8 +18,8 @@ const buscarMatchx = () => {
     const [value, setValue] = useState([18, 60]);
 
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState()
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState();
 
     const [filters, setFilters] = useState({
         searchMode: 'global', // 'evento' o 'global'
@@ -31,7 +32,7 @@ const buscarMatchx = () => {
         async function fetchData() {
             const token = localStorage.getItem('access');
             try {
-                const response = await api.post('matches/sugerencias/', {
+                const response = await api.post('matches/sugerencias/', {}, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -56,15 +57,59 @@ const buscarMatchx = () => {
         fetchData();
     }, []);
 
+    // Obtener el modo de búsqueda inicial
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchMode = async () => {
+            try {
+                const response = await api.get("match/modo/buscar/", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const modo = response.data.modo;
+                    if (modo === 'global') {
+                        setIsChecked(true);
+                    } else {
+                        setIsChecked(false);
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener el modo de búsqueda:", error);
+            }
+        };
+        fetchMode();
+    }, []);
+
+    // Función para cambiar el modo de búsqueda
+    const changeSearchMode = async (newMode) => {
+        const token = localStorage.getItem('access');
+        try {
+            const body = { modo: newMode };
+            const response = await api.post("match/modo/", body, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                console.log("Modo cambiado a:", newMode);
+            }
+        } catch (error) {
+            console.error("Error al cambiar el modo:", error);
+        }
+    };
+
     if (loading) {
         return (
-            <div className="flex min-h-screen justify-center items-center">
-                <span className="text-black loading loading-ring loading-xl"></span>
+            <div className="fixed inset-0 bg-white z-50">
+                <LoadingSpinner
+                    logoSrc="/ibento_logo.png"
+                    loadingText="Cargando usuarios"
+                />
             </div>
         )
-    }
-
-    // Handle para aplicar los filtros
+    }    // Handle para aplicar los filtros
     const handleApplyFilters = async () => {
         try {
 
@@ -72,9 +117,15 @@ const buscarMatchx = () => {
             // Activar estado de carga
             setFilters(prev => ({ ...prev, isLoading: true }));
 
+            // Determinar el modo de búsqueda
+            const searchMode = isChecked ? 'global' : 'evento';
+
+            // Guardar el modo de búsqueda
+            await changeSearchMode(searchMode);
+
             // Recopilar todos los datos del filtro
             const filterData = {
-                searchMode: isChecked ? 'global' : 'evento',
+                searchMode: searchMode,
                 gender: document.querySelector('select').value,
                 ageRange: {
                     min: value[0],
@@ -84,13 +135,11 @@ const buscarMatchx = () => {
             };
 
             console.log('Filtros aplicados:', filterData);
-
-            const response = await api.post('matches/sugerencias/', {
+            const response = await api.post('matches/sugerencias/', filterData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(filterData)
+                }
             });
 
             if (response.status === 200) {
@@ -175,11 +224,9 @@ const buscarMatchx = () => {
 
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
-    };
-
-    if (currentUserIndex >= UserMatch.length) {
+    };    if (currentUserIndex >= UserMatch.length) {
         return (
-            <div className="text-black flex justify-center items-center min-h-screen">
+            <div className="text-black flex justify-center items-center min-h-screen px-4 lg:px-8">
                 <label className="btn btn-circle swap swap-rotate fixed top-4 right-4 z-[9999]" onClick={() => document.getElementById('my_modal_2').showModal()}>
                     {/* this hidden checkbox controls the state */}
                     <input type="checkbox" />
@@ -330,9 +377,7 @@ const buscarMatchx = () => {
                     <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
                         <button className="cursor-pointer">cerrar</button>
                     </form>
-                </dialog>
-
-                <div className="w-full relative flex flex-col items-center max-w-lg w-full">
+                </dialog>                <div className="w-full relative flex flex-col items-center max-w-lg lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
                     <div className="flex justify-center items-center mt-auto mb-auto font-bold text-2xl">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
@@ -354,10 +399,8 @@ const buscarMatchx = () => {
 
     const handlePrev = () => {
         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.profile_pic.length) % user.profile_pic.length);
-    };
-
-    return (
-        <div className="flex justify-center items-center min-h-screen ">
+    };    return (
+        <div className="flex justify-center items-center min-h-screen px-4 lg:px-8 lg:w-full">
             <label className="btn btn-circle swap swap-rotate fixed top-4 right-4 z-[9999]" onClick={() => document.getElementById('my_modal_2').showModal()}>
                 {/* this hidden checkbox controls the state */}
                 <input type="checkbox" />
@@ -384,58 +427,131 @@ const buscarMatchx = () => {
                 </svg>
             </label>
             <dialog id="my_modal_2" className="modal">
-                <div className="modal-box">
-                    <h2 className="font-bold text-lg">Ajustes</h2>
-                    <Divider />
-                    <br />
-                    <div className='flex flex-col'>
-                        <div className='flex flex-row space-x-4 justify-center mb-5'>
-                            <h3>Modo de busqueda</h3>
-                            <h2
-                                className={`text-xl transition-colors ${isChecked
-                                    ? "text-gray-400 font-normal"
-                                    : "text-blue-600 font-bold"
-                                    }`}
-                            >
-                                Evento
-                            </h2>
-                            <input
-                                type="checkbox"
-                                checked={isChecked}
-                                className="toggle"
-                                onChange={() => setIsChecked(!isChecked)}
-                            />
-                            <h2
-                                className={`text-xl transition-colors ${isChecked
-                                    ? "text-blue-600 font-bold"
-                                    : "text-gray-400 font-normal"
-                                    }`}
-                            >
-                                Global
-                            </h2>
+                <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-6 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
                         </div>
-                        <div className='flex flex-row'>
-                            <h3>Genero</h3>
-                            <select defaultValue="Pick a color" className="select">
-                                <option disabled={true}>Busqueda de acompañante</option>
-                                <option>Hombre</option>
-                                <option>Mujer</option>
-                                <option>Otro</option>
-                                <option>Todos</option>
-                            </select>
-                        </div>
-                        <div className='flex flex-col gap-4'>
-                            <h3>Rango de edad</h3>
-                            <Slider value={value} onChange={(e) => setValue(e.value)} className="w-14rem" range />
-                        </div>
+                        <form method="dialog">
+                            <button className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </form>
                     </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button>close</button>
+
+                    {/* Content */}
+                    <div className="px-6 pb-6 space-y-6">
+                        {/* Modo de búsqueda */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                Modo de búsqueda
+                            </h3>
+                            <div className="flex items-center justify-between bg-gray-100 rounded-xl p-1">
+                                <button
+                                    className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${!isChecked
+                                        ? "bg-white text-gray-800 shadow-sm"
+                                        : "text-gray-500"
+                                        }`}
+                                    onClick={() => setIsChecked(false)}
+                                >
+                                    Evento
+                                </button>
+                                <button
+                                    className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${isChecked
+                                        ? "bg-white text-gray-800 shadow-sm"
+                                        : "text-gray-500"
+                                        }`}
+                                    onClick={() => setIsChecked(true)}
+                                >
+                                    Global
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Género */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Género</h3>
+                            <div className="relative">
+                                <select className="w-full bg-gray-100 border-0 rounded-xl py-3 px-4 text-gray-800 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Búsqueda de acompañante</option>
+                                    <option>Hombre</option>
+                                    <option>Mujer</option>
+                                    <option>Otro</option>
+                                    <option>Todos</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rango de edad */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                Rango de edad
+                            </h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 mb-1">Mínimo</p>
+                                    <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                        <span className="text-lg font-bold text-gray-800">{value[0]}</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 mx-4">
+                                    <div className="h-px bg-gray-200"></div>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 mb-1">Máximo</p>
+                                    <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                        <span className="text-lg font-bold text-gray-800">{value[1]}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="px-2">
+                                <Slider
+                                    value={value}
+                                    onChange={(e) => setValue(e.value)}
+                                    className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
+                                    range
+                                />
+                            </div>
+                        </div>
+
+                        {/* Botón de aplicar */}
+                        <button
+                            onClick={handleApplyFilters}
+                            disabled={filters.isLoading}
+                            className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            {filters.isLoading ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Aplicando...
+                                </div>
+                            ) : (
+                                'Aplicar filtros'
+                            )}
+                        </button>
+                    </div>
+                </div>                <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
+                    <button className="cursor-pointer">cerrar</button>
                 </form>
             </dialog>
-            <div className="relative flex flex-col items-center shadow-md shadow-t max-w-lg w-full ">
-                <div className="relative w-full min-h-screen overflow-hidden ">
+            <div className="relative flex flex-col items-center shadow-md shadow-t w-full max-w-lg lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
+                <div className="relative w-full min-h-screen overflow-hidden">
                     <div className="absolute inset-0 z-3 flex justify-between items-center ">
                         <button onClick={handlePrev} className="btnTransparente text-white p-2 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -443,7 +559,7 @@ const buscarMatchx = () => {
                             </svg>
                         </button>
                         <button onClick={handleNext} className="btnTransparente text-white p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                             </svg>
                         </button>

@@ -1,29 +1,14 @@
-// IMPORTANTE: Cambiar la ver cada vez que se haga updates
-const CACHE_VERSION = 'v2.3.4.2'; // <- INCREMENTAR ESTO CON CADA DEPLOY
-const CACHE_NAME = `ibento-${CACHE_VERSION}`;
-const CACHE_EVENTOS = `ibento-eventos-${CACHE_VERSION}`;
+// public/sw.js - Service Worker con Workbox y Firebase
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
 
-const PRECACHE_URLS = [
-  '/index.html',
-  '/icons/ibento.png',
-  '/icons/ibentoba.png',
-  '/manifest.webmanifest',
-  '/offline.html',
-];
-
-const EVENT_API_URLS = [
-  'https://ibento.onrender.com/api/eventos/most_liked/',
-  'https://ibento.onrender.com/api/eventos/recommended_events',
-  'https://ibento.onrender.com/api/eventos/upcoming_events/',
-  'https://ibento.onrender.com/api/eventos/by_category?category=Música',
-  'https://ibento.onrender.com/api/eventos/by_category?category=Deportes'
-];
-
-// Importar Firebase Messaging (solo una vez)
+// 🔥 Importar Firebase para notificaciones
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-// Configurar Firebase
+// ================== CONFIGURACIÓN FIREBASE ==================
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyC9cLzJYYBPB1ERFyjUrnbVeB-gewCIkbM",
@@ -37,10 +22,11 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 
   const messaging = firebase.messaging();
 
+  // Manejar notificaciones en background
   messaging.onBackgroundMessage(function(payload) {
     console.log('[SW] Received background message:', payload);
     
-    const notificationTitle = payload.notification?.title || 'Nueva notificación';
+    const notificationTitle = payload.notification?.title || 'Nueva notificación de Ibento';
     const notificationOptions = {
       body: payload.notification?.body || '',
       icon: payload.notification?.icon || '/icons/ibento192x192.png',
@@ -48,9 +34,9 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
       vibrate: [200, 100, 200],
       data: {
         click_action: payload.data?.click_action || 'https://ibento.com.mx/',
-        url: payload.data?.url || 'https://ibento.com.mx/',
         type: payload.data?.type || 'general',
-        timestamp: payload.data?.timestamp || Date.now()
+        timestamp: Date.now(),
+        ...payload.data
       },
       actions: [
         {
@@ -73,191 +59,102 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
   });
 }
 
-// --------------------------- Función para limpiar caches viejos más agresiva ------------------
-async function limpiarCachesViejos() {
-  const cacheNames = await caches.keys();
+// ================== WORKBOX CONFIGURATION ==================
 
-  const cachesToDelete = cacheNames.filter(name => 
-    // Elimina si no es uno de los actuales
-    (name.startsWith('ibento-') && name !== CACHE_NAME && name !== CACHE_EVENTOS) ||
-    // Elimina específicamente estos dos caches antiguos
-    name === 'ibento-v2.3.4.1' || name === 'ibento-eventos-v2.3.4.1'
-  );
+// Limpiar caches antiguos automáticamente
+cleanupOutdatedCaches();
 
-  await Promise.all(
-    cachesToDelete.map(name => {
-      console.log(`🧹 Borrando cache: ${name}`);
-      return caches.delete(name);
-    })
-  );
-}
-// Cachear eventos con timestamp para invalidar cache viejo
-async function cacheEventosDinamicos() {
-  const cache = await caches.open(CACHE_EVENTOS);
-  
-  for (const url of EVENT_API_URLS) {
-    try {
-      // Agregar timestamp para evitar cache del navegador
-      const urlWithTimestamp = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
-      const response = await fetch(urlWithTimestamp);
-      
-      if (response.ok) {
-        // Guardar con la URL original (sin timestamp)
-        await cache.put(url, response.clone());
-        console.log('[SW] Cacheado:', url);
-      }
-    } catch (err) {
-      console.warn('[SW] Falló al cachear:', url, err);
-    }
-  }
-}
+// Precargar archivos esenciales (VitePWA inyecta esto automáticamente)
+precacheAndRoute(self.__WB_MANIFEST);
 
-// INSTALL - Cachear recursos estáticos
-self.addEventListener('install', event => {
-  console.log('[SW] Install - Nueva versión:', CACHE_VERSION);
-  
-  // Forzar activación inmediata del nuevo SW
-  self.skipWaiting();
-  
-  event.waitUntil(
-    (async () => {
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        
-        // Cachear recursos con timestamp para evitar cache del navegador
-        const urlsWithTimestamp = PRECACHE_URLS.map(url => {
-          const separator = url.includes('?') ? '&' : '?';
-          return `${url}${separator}_v=${CACHE_VERSION}&_t=${Date.now()}`;
-        });
-        
-        // Hacer fetch manual para tener más control
-        const responses = await Promise.allSettled(
-          urlsWithTimestamp.map(urlWithTimestamp => fetch(urlWithTimestamp))
-        );
-        
-        // Cachear las respuestas exitosas con la URL original
-        for (let i = 0; i < PRECACHE_URLS.length; i++) {
-          const result = responses[i];
-          if (result.status === 'fulfilled' && result.value.ok) {
-            await cache.put(PRECACHE_URLS[i], result.value);
-            console.log('[SW] Cacheado:', PRECACHE_URLS[i]);
-          } else {
-            console.warn('[SW] Falló al cachear:', PRECACHE_URLS[i]);
-          }
-        }
-        
-        console.log('[SW] Precache completado');
-      } catch (error) {
-        console.error('[SW] Error en install:', error);
-      }
-    })()
-  );
-});
+// ================== ESTRATEGIAS DE CACHE ==================
 
-// ACTIVATE - Limpiar caches viejos y activar
+// API Endpoints - Network First (siempre intentar red primero)
+registerRoute(
+  ({ url }) => url.origin === 'https://ibento.onrender.com' && url.pathname.startsWith('/api/'),
+  new NetworkFirst({
+    cacheName: 'api-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 60 * 60 * 24, // 24 horas
+        purgeOnQuotaError: true
+      })
+    ]
+  })
+);
+
+// Eventos populares - Stale While Revalidate (mostrar cache mientras actualiza)
+registerRoute(
+  ({ url }) => url.pathname.includes('/eventos/most_liked/') || 
+              url.pathname.includes('/eventos/recommended_events') ||
+              url.pathname.includes('/eventos/upcoming_events/'),
+  new StaleWhileRevalidate({
+    cacheName: 'eventos-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 30, // 30 minutos
+        purgeOnQuotaError: true
+      })
+    ]
+  })
+);
+
+// Imágenes - Cache First (usar cache primero, red solo si no existe)
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'images-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 60 * 60 * 24 * 7, // 7 días
+        purgeOnQuotaError: true
+      })
+    ]
+  })
+);
+
+// Assets estáticos - Cache First
+registerRoute(
+  ({ request }) => ['style', 'script', 'font'].includes(request.destination),
+  new CacheFirst({
+    cacheName: 'static-resources',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+        purgeOnQuotaError: true
+      })
+    ]
+  })
+);
+
+// ================== EVENTOS DEL SERVICE WORKER ==================
+
+// Activación
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating SW - Versión:', CACHE_VERSION);
+  console.log('[SW] Service Worker activado');
   
   event.waitUntil(
     (async () => {
-      try {
-        // Limpiar caches viejos primero
-        await limpiarCachesViejos();
-        
-        // Cachear eventos dinámicos
-        await cacheEventosDinamicos();
-        
-        // Tomar control de todos los clientes inmediatamente
-        await self.clients.claim();
-        
-        // Notificar a todos los clientes que hay una nueva versión
-        const clients = await self.clients.matchAll();
-        clients.forEach(client => {
-          client.postMessage({
-            type: 'SW_UPDATED',
-            version: CACHE_VERSION
-          });
+      // Tomar control de todos los clientes inmediatamente
+      await self.clients.claim();
+      
+      // Notificar a todos los clientes sobre la actualización
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: 'workbox-managed'
         });
-        
-        console.log('[SW] Activación completada - Versión:', CACHE_VERSION);
-      } catch (error) {
-        console.error('[SW] Error en activate:', error);
-      }
+      });
     })()
   );
 });
 
-// FETCH - Estrategia de cache mejorada
-self.addEventListener('fetch', event => {
-  const { request } = event;
-  
-  // Solo manejar requests GET
-  if (request.method !== 'GET') return;
-  
-  // Para APIs de eventos - Network First con Stale While Revalidate
-  if (EVENT_API_URLS.some(apiUrl => request.url.startsWith(apiUrl))) {
-    event.respondWith(
-      (async () => {
-        const cache = await caches.open(CACHE_EVENTOS);
-        
-        try {
-          // Intentar network primero
-          const networkResponse = await fetch(request);
-          if (networkResponse.ok) {
-            // Actualizar cache en background
-            cache.put(request, networkResponse.clone());
-            return networkResponse;
-          }
-        } catch (error) {
-          console.log('[SW] Network failed, usando cache:', request.url);
-        }
-        
-        // Si falla network, usar cache
-        const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        // Si no hay cache, devolver error
-        return new Response('Sin conexión', { status: 503 });
-      })()
-    );
-    return;
-  }
-  
-  // Para recursos estáticos - Cache First
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(request);
-      
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      
-      try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
-          // Cachear recursos estáticos nuevos
-          cache.put(request, networkResponse.clone());
-          return networkResponse;
-        }
-      } catch (error) {
-        console.log('[SW] Network failed:', request.url);
-        
-        // Para documentos HTML, devolver página offline
-        if (request.destination === 'document') {
-          const offlinePage = await cache.match('/offline.html');
-          if (offlinePage) return offlinePage;
-        }
-      }
-      
-      return new Response('Recurso no disponible', { status: 404 });
-    })()
-  );
-});
-
-// Manejar clics en notificaciones
+// Click en notificaciones
 self.addEventListener('notificationclick', function(event) {
   console.log('[SW] Notification click received:', event);
   
@@ -265,28 +162,32 @@ self.addEventListener('notificationclick', function(event) {
   
   const notificationData = event.notification.data || {};
   const notificationType = notificationData.type || 'general';
-  const clickAction = notificationData.click_action;
   
   let targetUrl = 'https://ibento.com.mx/';
   
+  // Determinar URL según tipo de notificación
   switch(notificationType) {
     case 'like':
-      targetUrl = 'ibento/verLike';
+      targetUrl = '/ibento/verLike';
       break;
     case 'match':
-      targetUrl = 'ibento/match';
+      targetUrl = '/ibento/match';
       break;
     case 'message':
-      targetUrl = 'ibento/chat';
+      targetUrl = '/ibento/chat';
+      break;
+    case 'event':
+      targetUrl = '/ibento/eventos';
       break;
     default:
-      targetUrl = clickAction;
+      targetUrl = notificationData.click_action || '/ibento/eventos';
   }
   
   if (event.action === 'close') {
     return;
   }
   
+  // Buscar ventana existente o abrir una nueva
   event.waitUntil(
     clients.matchAll({
       type: 'window',
@@ -295,6 +196,7 @@ self.addEventListener('notificationclick', function(event) {
       const baseUrl = self.location.origin;
       const fullUrl = new URL(targetUrl, baseUrl).href;
       
+      // Buscar ventana existente
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
         if (client.url.startsWith(baseUrl) && 'focus' in client) {
@@ -307,6 +209,7 @@ self.addEventListener('notificationclick', function(event) {
         }
       }
       
+      // Abrir nueva ventana si no existe una
       if (clients.openWindow) {
         return clients.openWindow(fullUrl);
       }
@@ -314,16 +217,30 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-// Manejar mensajes del cliente
+// Mensajes del cliente
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
   
-  // Responder con la versión actual
+  // Responder con información del SW
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({
-      version: CACHE_VERSION
+      version: 'workbox-managed',
+      ready: true
     });
   }
 });
+
+// Manejo de errores
+self.addEventListener('error', event => {
+  console.error('[SW] Error:', event.error);
+});
+
+// Manejo de quota exceeded
+self.addEventListener('quotaexceeded', event => {
+  console.warn('[SW] Quota exceeded, cleaning up caches');
+  // Workbox maneja esto automáticamente con purgeOnQuotaError
+});
+
+console.log('[SW] Service Worker loaded with Workbox + Firebase');

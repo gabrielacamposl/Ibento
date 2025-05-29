@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
 @import 'primeicons/primeicons.css';
+@import './assets/css/spinner-animations.css';
 
 @font-face {
   font-family: 'Poppins';
