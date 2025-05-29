@@ -455,9 +455,9 @@ const uploadAllData = async () => {
                 setStepsCompleted(prev => ({ ...prev, info: true }));
                 showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
                 
-                // Navegar a la página principal después de un delay
+                // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
-                    navigate("../principal");
+                    navigate("../eventos");
                 }, 2000);
             }
         } catch (error) {
