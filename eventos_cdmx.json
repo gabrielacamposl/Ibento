@@ -1,176 +1,54 @@
 [
     {
-        "nombre": "Mujeres en el Ejército",
-        "lugar": "Galería Abierta Gandhi de las rejas de Chapultepec",
-        "costo": [
-            "General: Gratuito"
+        "title": "SOEM Summit",
+        "place": "Expo Santa Fe",
+        "price": [
+            "General: $ 16,688"
         ],
-        "ubicacion": "Paseo de la Reforma s/n s/n, Juárez, Cuauhtémoc, C.P. 06600, Ciudad de México",
-        "descripcion": "Galería Abierta Gandhi de las rejas del bosque de Chapultepec.\nInauguración 6 de marzo a las 12:00. La exposición permanecerá en exhibición hasta el 20 de abril. Retratos de mujeres que están en el Ejército Mexicano.  CarteleraCdMx\n\nTiempo de Mujeres 2025 ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025"
+        "location": "Av. Santa Fe 270 , Santa Fe, Álvaro Obregón, C.P. 01210, Ciudad de México",
+        "description": " Primer evento en México creado para Líderes de Seguridad y Organizadores de Eventos Masivos, que buscan establecer las mejores prácticas para el desarrollo de una logística sólida que contribuya a una experiencia única de los asistentes, así como establecer criterios integrales con el objetivo de reducir incidentes que pudieran poner en riesgo la operación de los eventos que producen y operan\n \n  ",
+        "dates": [
+            "2025-05-28"
         ],
-        "coordenadas": {
-            "lat": 19.4294617,
-            "lng": -99.1633646,
-            "formatted_address": "Av. P.º de la Reforma, Juárez, 06600 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.3632049,
+            "lng": -99.2629078,
+            "formatted_address": "Av. Santa Fe 270, Santa Fe, Zedec Sta Fé, Álvaro Obregón, 01376 Álvaro Obregón, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af96cde5772-mujeres.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29061/15-04-2025/mujeres-en-el-ejrcito?return_to=%2Fbusqueda%3F%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f6a82a7bb68-SOEM-Summit.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30078/28-05-2025/soem-summit?return_to=%2Fbusqueda%3F%26pagina%3D1",
+        "classification": "Conferencia/Seminario, Comunidad/Cívico",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Homenaje a Elena Poniatowska",
-        "lugar": "Galería Abierta del IPN",
-        "costo": [
+        "title": "Parteras Urbanas, entre Patrimonio y Colonialidad. | Día de las Madres",
+        "place": "Grutas de las rejas del Bosque de Chapultepec.",
+        "price": [
             "General: Gratuito"
         ],
-        "ubicacion": "Av. Wilfrido Massieu s/n, esquina con Av. Instituto Politécnico Nacional, , Nueva Industrial Vallejo, Gustavo A. Madero, C.P. 07700, Ciudad de México",
-        "descripcion": "Jueves 6 de marzo, 2025\nExposición\n\nDel 6 de marzo al 30 de abril | 24 horas abierto| Galería Abierta del Instituto Politécnico Nacional\n ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "21/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "28/04/2025",
-            "29/04/2025",
-            "30/04/2025"
+        "location": "Paseo de la Reforma , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
+        "description": "Lunes 5 de mayo a 8 de junio de 2025.\nInauguración: 12 horas\nAbierto las 24 horas Galería Abierta Grutas de las rejas del Bosque de Chapultepec. Uno de los sesgos y prejuicios que todavía persisten respecto al ejercicio de la Partería tiene su origen en la intención de imponer el régimen discursivo del cientificismo médico, que pretendió erigir el discurso biomédico como una verdad absoluta, en Europa los obstetras lanzaron su ataque contra las Parteras en nombre de la ciencia y de las reformas. Se ridiculizó a las Parteras como personas «incurablemente sucias, ignorantes e incompetentes». Particularmente, se las hizo responsables de la amplia difusión de septicemias puerperales (infecciones uterinas posparto) y de las oftalmias neonatales (ceguera provocada por una gonorrea) (Ehrenreich, 2006, p.61). Argumentos que todavía se utilizan para descalificar y condenar la Partería desde las narrativas de las políticas de salud pública. Mientras que, en el mundo mesoamericano, particularmente en la cosmogonía y el orden social mexica, “el quehacer de la partera era concebido como un don que los dioses han dado a algunas mujeres, no se encuentra ninguna referencia de que éste haya sido ejercido por los hombres; asimismo su oficio se encuentra precedido por una Diosa específica: Yoalticutli” (Martínez, 1998, p.44). Estas tensiones prevalecen todavía en el contexto cultural y en el imaginario popular; por una parte, la Partería mantiene un halo sagrado, por otra, es vista como charlatanería y riesgo permanente. Un sincretismo patriarcal sobre el cual se desplazan política e idiosincráticamente las Parteras autónomas y urbanas cotidianamente. CarteleraCdMx ",
+        "dates": [
+            "28/05/2025",
+            "29/05/2025",
+            "30/05/2025",
+            "31/05/2025",
+            "01/06/2025"
         ],
-        "coordenadas": {
-            "lat": 19.4997237,
-            "lng": -99.1319661,
-            "formatted_address": "Av Instituto Politécnico Nacional, Nueva Industrial Vallejo, Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67b76aa1a7a3a-elena.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29171/15-04-2025/homenaje-a-elena-poniatowska?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
-    },
-    {
-        "nombre": "Es Mujer",
-        "lugar": "Grutas de las rejas del Bosque de Chapultepec.",
-        "costo": [
-            "General: Gratuito"
-        ],
-        "ubicacion": "Paseo de la Reforma , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
-        "descripcion": "Del 7 de marzo al 27 de abril de 2025. Inauguración 7 de marzo 12 horas\nGalería abierta Grutas de las rejas del Bosque de Chapultepec Esta exposición busca inspirar. Es una invitación para que cada mujer que se detenga frente a estas imágenes se reconozca en ellas. Para que entienda que no hay sueño demasiado ambicioso, no hay oficio, arte ni ciencia que quede fuera de su alcance. Que no hay nada que limite nuestra capacidad de crear, liderar y transformar. CarteleraCdMx\n Tiempo de Mujeres 2025 ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "21/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025"
-        ],
-        "coordenadas": {
+        "coordinates": {
             "lat": 19.4251704,
             "lng": -99.1883692,
             "formatted_address": "Av. P.º de la Reforma, 11580 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67af9ca80d892-gab.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29065/15-04-2025/es-mujer?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/6815322d1e858-grutas.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30442/28-05-2025/parteras-urbanas-entre-patrimonio-y-colonialidad---da-de-las-madres?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Cultural, Bellas Artes",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Estudio propio",
-        "lugar": "Alcaldía Iztapalapa",
-        "costo": [
-            "General: Gratuito"
-        ],
-        "ubicacion": "Aldama 63 , San Lucas, Iztapalapa, C.P. 09000, Ciudad de México",
-        "descripcion": "Del 1 de marzo al 15 de abril de 2025\n24 horas | Galería Abierta de la Alcaldía Iztapalapa \n La lucha de las mujeres por tener una aceptación y presencia en el espacio público ha sido una lucha que hasta ahora no se ha superado. El grave problema social de la ausencia de mujeres artistas en los museos, la exclusión de las mujeres en el medio artístico hizo que este grupo de mujeres, en 1994, se organizaran en esta Comunidad de Mujeres en el Arte y el Colectivo de Mujeres en la Música, A.C. Para la Secretaría de Cultura de la Ciudad de México es una prioridad la lucha por la igualdad de géneros, a que las mujeres vivan una vida libre de violencia y que ambos, mujeres y hombres, tengamos los mismos derechos y obligaciones.\n CarteleraCdMx ",
-        "fechas": [
-            "15/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.3584292,
-            "lng": -99.09248749999999,
-            "formatted_address": "Unnamed Road, San Lucas, Iztapalapa, 09000 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67bf5d4e29da2-galeria_abierta_de_las_rejas_de_la_delegacion_iztapalapa.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29347/15-04-2025/estudio-propio?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
-    },
-    {
-        "nombre": "Feria Nacional de la Nieve",
-        "lugar": "Santiago Tulyehualco. Xochimilco",
-        "costo": [
-            ": Gratuito"
-        ],
-        "ubicacion": "División del Norte s/n , Quirino Mendoza, Xochimilco, C.P. 16710, Ciudad de México",
-        "descripcion": " Refréscate y sorpréndete con la variedad de sabores que distinguen a la Feria de la Nieve, un tradicional evento de Santiago Tulyehualco en Xochimilco.  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "21/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.254049,
-            "lng": -99.0099632,
-            "formatted_address": "División del Nte., Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ec1a0648f8f-Feria-Nacional-de-la-Nieve.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/22452/15-04-2025/feria-nacional-de-la-nieve?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Ferias, Festivales"
-    },
-    {
-        "nombre": "Vacaciones en el PEX",
-        "lugar": "Museo Chinampaxóchitl",
-        "costo": [
-            "General: Gratuito"
-        ],
-        "ubicacion": "Periferico Oriente , Mercado de Flores Plantas y Hortalizas, Xochimilco, C.P. 16036, Ciudad de México",
-        "descripcion": " Del martes 15 al viernes 25 de abril, 2025 12 horas | Museo Chinampaxóchitl Actividad realizada en colaboración con el Parque Ecológico de Xochimilco que depende de la Secretaría del Medio Ambiente. Talleres para difundir la riqueza natural, cultural y biocultural que posee la zona lacustre de la Ciudad de México por parte del museo Chinampaxóchitl, y Rally de combatientes en el que se realizan actividades de destreza y juegos por parte del parque. CarteleraCdMx  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "21/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.31761,
-            "lng": -99.07450999999999,
-            "formatted_address": "Periférico Oriente, Av. Tlahuac 1553, Año de Juárez, Iztapalapa, 09780 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f86425d2f32-486462017_122127653162613000_5744429224800030891_n.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/30111/15-04-2025/vacaciones-en-el-pex?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Museos, Parques, Familia"
-    },
-    {
-        "nombre": "Cerámica, voces del barro antiguo",
-        "lugar": "Museo Nacional de Antropología",
-        "costo": [
+        "title": "Cerámica, voces del barro antiguo",
+        "place": "Museo Nacional de Antropología",
+        "price": [
             "General: $ 100",
             "Mayores de 60 años (credencial INAPAM): Gratuito",
             "Menores de 13 años: Gratuito",
@@ -178,425 +56,420 @@
             "Profesores y estudiantes (credencial vigente): Gratuito",
             "Domingo: Gratuito"
         ],
-        "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
-        "descripcion": " Una muestra selecta dedicada a la cerámica arqueológica, que destaca la importancia de los objetos de barro como fuente de información clave para comprender a las sociedades del pasado, desde su descubrimiento en excavaciones hasta su restauración y tratamiento museográfico.\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
+        "description": " Una muestra selecta dedicada a la cerámica arqueológica, que destaca la importancia de los objetos de barro como fuente de información clave para comprender a las sociedades del pasado, desde su descubrimiento en excavaciones hasta su restauración y tratamiento museográfico.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
+        "coordinates": {
             "lat": 19.4255456,
             "lng": -99.1899987,
             "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9d69da81fb-Cerámica,-voces-del-barro-antiguo.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29539/15-04-2025/cermica-voces-del-barro-antiguo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9d69da81fb-Cerámica,-voces-del-barro-antiguo.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29539/28-05-2025/cermica-voces-del-barro-antiguo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Amazônia",
-        "lugar": "Museo Nacional de Antropología",
-        "costo": [
-            "General: $ 100",
-            "Mayores de 60 años (credencial INAPAM): Gratuito",
-            "Menores de 13 años: Gratuito",
-            "Personas con discapacidad: Gratuito",
-            "Profesores y estudiantes (credencial vigente).: Gratuito",
-            "Domingos: Gratuito"
+        "title": "Congreso Nacional de Mercadotecnia",
+        "place": "Expo Santa Fe",
+        "price": [
+            "Desde: $ 1,593",
+            "Hasta: $ 5,000"
         ],
-        "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
-        "descripcion": " \"Amazônia documenta la vida cotidiana en esta región que se extiende por nueve países de América del Sur y alberga a 188 grupos indígenas, 114 de los cuales no han tenido contacto con el exterior. Concebida por el fotógrafo Sebastião Salgado, a través de 230 fotografías en blanco y negro, establece un diálogo entre la naturaleza y el ser humano, reflejando la majestuosidad de la selva, los ríos y las montañas. La exposición incluye dos salas con proyecciones: una de paisajes musicalizados con el poema sinfónico Erosión de Heitor Villa-Lobos, y otra con retratos indígenas acompañados de una composición de Rodolfo Stroeter.\"\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "Av. Santa Fe 270 , Santa Fe, Álvaro Obregón, C.P. 01210, Ciudad de México",
+        "description": "El Congreso Nacional Mercadotecnia es el encuentro de los mercadólogos, en donde descubrirás nuevas plataformas, ideas, tendencias, herramientas y tácticas que fortalecerán tus estrategias de marketing, tu desarrollo profesional y ampliarán tus oportunidades de generar nuevos negocios con colegas de Latinoamérica. ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29"
         ],
-        "coordenadas": {
-            "lat": 19.4255456,
-            "lng": -99.1899987,
-            "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.3632049,
+            "lng": -99.2629078,
+            "formatted_address": "Av. Santa Fe 270, Santa Fe, Zedec Sta Fé, Álvaro Obregón, 01376 Álvaro Obregón, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e4fc8dea7-Amazônia.-Sebastião-Salgado.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29545/15-04-2025/amaznia?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f588e0ced2d-Congreso-Nacional-de-Mercadotecnia.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/13299/28-05-2025/congreso-nacional-de-mercadotecnia?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Diverso, Conferencia/Seminario",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "El fascinante mundo de los billetes",
-        "lugar": "Museo Casa Del Risco",
-        "costo": [
-            ": Gratuito"
-        ],
-        "ubicacion": "Pl. San Jacinto 5 , San Ángel, Álvaro Obregón, C.P. 01000, Ciudad de México",
-        "descripcion": " La muestra representa una oportunidad para adentrarse en el complejo universo de la creación y fabricación de los billetes, sobre los que, por su circulación masiva y uso cotidiano, pocas veces se reflexiona, al tiempo de conocer el potencial expresivo de los materiales en las manos y el talento de extraordinarios creadores mexicanos.\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.3451364,
-            "lng": -99.1919638,
-            "formatted_address": "Pl. San Jacinto 5, San Ángel TNT, San Ángel, Álvaro Obregón, 01000 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae39b228d13-El-fascinante-mundo-de-los-billetes.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29013/15-04-2025/el-fascinante-mundo-de-los-billetes?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Museos, Artes"
-    },
-    {
-        "nombre": "Bordar el fuego. Marta Moreno",
-        "lugar": "Museo Franz Mayer",
-        "costo": [
-            "General: $ 120",
-            "Estudiantes, Profesores e INAPAM: $ 60",
-            "Niños menores de 12 años: Gratuito",
-            "Martes: Gratuito"
-        ],
-        "ubicacion": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
-        "descripcion": " La artista contemporánea Marta Moreno fusiona arte e historia a través del punch needle. En sus obras, reinterpreta los primeros registros ilustrados de fuegos artificiales, como el Catálogo ilustrado de explosivos de día y noche, publicado por The Hirayama Fireworks Company, en Japón alrededor de 1877. La exposición, realizada en colaboración con la galería Proyecto H, en el marco de la feria de arte ZONAMACO, interactúa con obras de la Colección Permanente del Museo e invita a los visitantes a explorar la conexión entre la pirotecnia ancestral y sus infinitas posibilidades artísticas.\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.4368359,
-            "lng": -99.1434319,
-            "formatted_address": "Av. Hidalgo 45, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae3ff254e50-Bordar-el-fuego.-Marta-Moreno.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29014/15-04-2025/bordar-el-fuego-marta-moreno?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
-        "clasificaciones": "Artes y Teatro, Museos"
-    },
-    {
-        "nombre": "Germán List Arzubide",
-        "lugar": "Museo Nacional De Arte (MUNAL)",
-        "costo": [
+        "title": "Germán List Arzubide",
+        "place": "Museo Nacional De Arte (MUNAL)",
+        "price": [
             "General: $ 95",
             "Menores de 13 años: Gratuito",
             "Personas con discapacidad estudiantes, maestros y adultos mayores presentando credencial vigente: Gratuito"
         ],
-        "ubicacion": "CALLE TACUBA 8 , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
-        "descripcion": " \"La muestra busca reconocer la gran influencia de Germán List Arzubide, quien estuvo vinculado con el desarrollo cultural, ideológico, social y pedagógico en nuestro país. Con cerca de 300 piezas, el público podrá admirar obra artística, fotografías, marionetas, bibliografía, documentos manuscritos y correspondencia, que rinden homenaje al literato nacido en Puebla. La exhibición se enriquece con piezas de Diego Rivera, Aurora Reyes, Ezequiel Negrete Lira, Juan Leonardo Cordero, Francisco Arturo Marín, Luis Arenal, Isaías Cervantes, Enrique Gottdiener y Ramón Alva de la Canal, entre otros.\"\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "CALLE TACUBA 8 , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
+        "description": " \"La muestra busca reconocer la gran influencia de Germán List Arzubide, quien estuvo vinculado con el desarrollo cultural, ideológico, social y pedagógico en nuestro país. Con cerca de 300 piezas, el público podrá admirar obra artística, fotografías, marionetas, bibliografía, documentos manuscritos y correspondencia, que rinden homenaje al literato nacido en Puebla. La exhibición se enriquece con piezas de Diego Rivera, Aurora Reyes, Ezequiel Negrete Lira, Juan Leonardo Cordero, Francisco Arturo Marín, Luis Arenal, Isaías Cervantes, Enrique Gottdiener y Ramón Alva de la Canal, entre otros.\"\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
+        "coordinates": {
             "lat": 19.4360698,
             "lng": -99.1394686,
             "formatted_address": "National Art Museum, C. de Tacuba 8, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06010 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e7cf50963-Germán-List-Arzubide.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29546/15-04-2025/germn-list-arzubide?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e7cf50963-Germán-List-Arzubide.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29546/28-05-2025/germn-list-arzubide?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Cultural, Bellas Artes",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Estampas de la Revolución Mexicana. Un Trabajo Gráfico de Activismo Colectivo",
-        "lugar": "Museo de Arte Carrillo Gil",
-        "costo": [
-            "General: $ 70",
-            "Estudiantes y profesores con credencial vigente: Gratuito",
-            "menores de 12 años y personas afiliadas al INAPAM: Gratuito",
-            "Domingo: Gratuito"
-        ],
-        "ubicacion": "Av. Revolución 1608 , San Ángel, Álvaro Obregón, C.P. 01000, Ciudad de México",
-        "descripcion": " \"La presente muestra –concebida en el marco del 50 aniversario del MACG– despliega, a manera de libro abierto, los 85 grabados en linóleo que integran la Carpeta de Estampas de la Revolución Mexicana producida por el Taller de Gráfica Popular en 1947; un trabajo de carácter colectivo de indiscutible valor tanto estético como histórico y social que forma parte del acervo permanente de este recinto. \"\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.34931,
-            "lng": -99.19031129999999,
-            "formatted_address": "Av. Revolución 1608, San Ángel, Álvaro Obregón, 01000 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9eb3f0d30c-Estampas-de-la-Revolución-Mexicana.-Un-trabajo-gráfico-de-activismo-colectivo.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29550/15-04-2025/estampas-de-la-revolucin-mexicana-un-trabajo-grfico-de-activismo-colectivo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
-        "clasificaciones": "Artes y Teatro, Museos"
-    },
-    {
-        "nombre": "Antonio. Moda Indomable",
-        "lugar": "Museo Franz Mayer",
-        "costo": [
+        "title": "Antonio. Moda Indomable",
+        "place": "Museo Franz Mayer",
+        "price": [
             "General: $ 150",
             "INAPAM: $ 75",
             "Profesor: $ 75",
             "Estudiante: $ 75"
         ],
-        "ubicacion": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
-        "descripcion": " \"Bocetos, fotografías, atuendos, películas y revistas del emblemático ilustrador de moda Antonio Lopez, que influyó con su estilo los años setenta y ochenta. \" \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
+        "description": " \"Bocetos, fotografías, atuendos, películas y revistas del emblemático ilustrador de moda Antonio Lopez, que influyó con su estilo los años setenta y ochenta. \" \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
+        "coordinates": {
             "lat": 19.4368359,
             "lng": -99.1434319,
             "formatted_address": "Av. Hidalgo 45, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9ee0f7fa3f-Antonio.-Moda-indomable.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29551/15-04-2025/antonio-moda-indomable?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9ee0f7fa3f-Antonio.-Moda-indomable.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29551/28-05-2025/antonio-moda-indomable?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Moda, Bellas Artes",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "La Casa, La Enagua. Un tejido sonoro para habitar",
-        "lugar": "Ex Teresa Arte Actual",
-        "costo": [
-            ": Gratuito"
+        "title": "Las Reglas del Juego",
+        "place": "MODO Museo del Objeto***",
+        "price": [
+            "General: $ 60",
+            "INAPAM, estudiantes y maestros : $ 30",
+            "Vecinos de la Roma con INE: $ 30",
+            "Menores de 12 an?os: Gratuito"
         ],
-        "ubicacion": "Lic. Verdad 8 , Centro (Área 6), Cuauhtémoc, C.P. 06060, Ciudad de México",
-        "descripcion": " \n Ex Teresa Arte Actual se complace en anunciar la #apertura, de “La Casa, La Enagua. Un tejido sonoro para habitar” de la artista salvadoreña, Alexia Miranda.\n La obra se inspira en el miriñaque, accesorio en forma de armazón que utilizaban las mujeres en el siglo XIX.\n  Al apropiarse de esta prenda, Alexia Miranda resignifica la experiencia de opresión de los cuerpos femeninos, transformando al miriñaque en un espacio íntimo que cobija la equidad y la inclusión.  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025"
+        "location": "Colima 145 , Roma Norte, Cuauhtémoc, C.P. 06700, Ciudad de México",
+        "description": " \"El tiempo significa y transcurre de forma diferente para cada uno de nosotros. El tiempo, sabemos entonces, es relativo. Para una persona privada de su libertad, el tiempo es materia cuantificable ya que define el futuro y la permanencia en un sitio. Detrás de los muros, los días se convierten en travesías que deben ser planeadas por medio de inagotables prácticas repetitivas, utilizando estrategias de supervivencia para combatir el hastío y la espera. El juego y la creación artística quedan unidos por acuerdos que nacen entre individuos y grupos y que no pueden imponerse. Es así cómo el acto lúdico y el artístico quedan anclados a una necesidad de emancipación y de autonomía; una regla elemental que merece atención.\"\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
-            "lat": 19.433891,
-            "lng": -99.1305175,
-            "formatted_address": "Lic. Verdad 8, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06060 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.4202415,
+            "lng": -99.1590997,
+            "formatted_address": "Colima 145, Roma Nte., Cuauhtémoc, 06700 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c6176cbf3c9-La-Casa,-La-Enagua.-Un-tejido-sonoro-para-habitar.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29459/15-04-2025/la-casa-la-enagua-un-tejido-sonoro-para-habitar?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Teatro"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67dd95a647b14-Las-Reglas-del-Juego.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29727/28-05-2025/las-reglas-del-juego?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Teatro, Cultural",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Vacaciones en el PEX",
-        "lugar": "Museo Chinampaxóchitl",
-        "costo": [
-            "General: Gratuito"
-        ],
-        "ubicacion": "Periferico Oriente , Mercado de Flores Plantas y Hortalizas, Xochimilco, C.P. 16036, Ciudad de México",
-        "descripcion": " Del martes 15 al viernes 25 de abril, 2025 12 horas | Museo Chinampaxóchitl Actividad realizada en colaboración con el Parque Ecológico de Xochimilco que depende de la Secretaría del Medio Ambiente. Talleres para difundir la riqueza natural, cultural y biocultural que posee la zona lacustre de la Ciudad de México por parte del museo Chinampaxóchitl, y Rally de combatientes en el que se realizan actividades de destreza y juegos por parte del parque. CarteleraCdMx  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "21/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025"
-        ],
-        "coordenadas": {
-            "lat": 19.31761,
-            "lng": -99.07450999999999,
-            "formatted_address": "Periférico Oriente, Av. Tlahuac 1553, Año de Juárez, Iztapalapa, 09780 Ciudad de México, CDMX, Mexico"
-        },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f86425d2f32-486462017_122127653162613000_5744429224800030891_n.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/30111/15-04-2025/vacaciones-en-el-pex?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Museos, Parques, Familia, Para niños"
-    },
-    {
-        "nombre": "Cerámica, voces del barro antiguo",
-        "lugar": "Museo Nacional de Antropología",
-        "costo": [
-            "General: $ 100",
-            "Mayores de 60 años (credencial INAPAM): Gratuito",
-            "Menores de 13 años: Gratuito",
-            "Personas con discapacidad: Gratuito",
-            "Profesores y estudiantes (credencial vigente): Gratuito",
+        "title": "El horizonte siempre se aleja",
+        "place": "Museo Tamayo",
+        "price": [
+            "General: $ 95",
+            "Menor de 12 años : Gratuito",
+            "Estudiantes, docentes y adultos mayores con credencial vigente: Gratuito",
             "Domingo: Gratuito"
         ],
-        "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
-        "descripcion": " Una muestra selecta dedicada a la cerámica arqueológica, que destaca la importancia de los objetos de barro como fuente de información clave para comprender a las sociedades del pasado, desde su descubrimiento en excavaciones hasta su restauración y tratamiento museográfico.\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "Paseo de la Reforma 51 , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
+        "description": " El horizonte siempre se aleja reúne una selección de obras que reflexionan sobre la extensión y las implicaciones que puede tener el término de lo contemporáneo. Como sugiere el filósofo Giorgio Agamben, la contemporaneidad se puede entender como un término que supera las demarcaciones temporales y que trasciende la simultaneidad y la coexistencia. En este sentido, esta exposición funge como una muestra sintomática de las preocupaciones de los artistas actuales y sus relaciones inmediatas con el entorno geopolítico y social.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
-            "lat": 19.4255456,
-            "lng": -99.1899987,
-            "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.4257931,
+            "lng": -99.1816714,
+            "formatted_address": "Bosque de Chapultepec, Av. P.º de la Reforma 51, Polanco, Bosque de Chapultepec I Secc, Miguel Hidalgo, 11580 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9d69da81fb-Cerámica,-voces-del-barro-antiguo.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29539/15-04-2025/cermica-voces-del-barro-antiguo?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67dd9ca759d80-El-horizonte-siempre-se-aleja.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29729/28-05-2025/el-horizonte-siempre-se-aleja?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "Amazônia",
-        "lugar": "Museo Nacional de Antropología",
-        "costo": [
-            "General: $ 100",
-            "Mayores de 60 años (credencial INAPAM): Gratuito",
-            "Menores de 13 años: Gratuito",
+        "title": "La revolución impresionista: de Monet a Matisse del Museo de Arte de Dallas",
+        "place": "Museo del Palacio de Bellas Artes",
+        "price": [
+            "General: $ 95",
+            "Docentes y estudiantes con credencial vigente física o digital.: Gratuito",
+            "Personas adultas mayores con credencial.: Gratuito",
             "Personas con discapacidad: Gratuito",
-            "Profesores y estudiantes (credencial vigente).: Gratuito",
-            "Domingos: Gratuito"
+            "Menores de 13 años: Gratuito",
+            "Domingo: Gratuito"
         ],
-        "ubicacion": "Av. Paseo de la Reforma s/n , Polanco V Sección, Miguel Hidalgo, C.P. 11560, Ciudad de México",
-        "descripcion": " \"Amazônia documenta la vida cotidiana en esta región que se extiende por nueve países de América del Sur y alberga a 188 grupos indígenas, 114 de los cuales no han tenido contacto con el exterior. Concebida por el fotógrafo Sebastião Salgado, a través de 230 fotografías en blanco y negro, establece un diálogo entre la naturaleza y el ser humano, reflejando la majestuosidad de la selva, los ríos y las montañas. La exposición incluye dos salas con proyecciones: una de paisajes musicalizados con el poema sinfónico Erosión de Heitor Villa-Lobos, y otra con retratos indígenas acompañados de una composición de Rodolfo Stroeter.\"\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025",
-            "29/04/2025",
-            "30/04/2025",
-            "01/05/2025",
-            "02/05/2025",
-            "03/05/2025",
-            "04/05/2025"
+        "location": "Av. Juárez S/N , Centro (Área 5), Cuauhtémoc, C.P. 06050, Ciudad de México",
+        "description": " \"La revolución impresionista: de Monet a Matisse del Museo de Arte de Dallas (DMA) explora la fascinante historia del impresionismo, desde su nacimiento en 1874 hasta el legado que alcanzó en los primeros años del siglo XX. Contada completamente a través de las excepcionales colecciones del DMA, esta exposición revela los orígenes rebeldes del colectivo de artistas independientes conocido como “los impresionistas” y la revolución que crearon en el arte moderno. Los impresionistas rompieron con la tradición. Cambiaron las técnicas, los temas y la forma de exhibir sus obras. Así, redefinieron el arte contemporáneo de vanguardia. Las innovaciones únicas de figuras centrales del movimiento, como Claude Monet, Edgar Degas y Berthe Morisot, sentaron las bases a las que respondieron los artistas vanguardistas de generaciones posteriores, desde Paul Gauguin y Vincent van Gogh hasta Piet Mondrian y Henri Matisse. \"\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
-            "lat": 19.4255456,
-            "lng": -99.1899987,
-            "formatted_address": "Av. P.º de la Reforma, Polanco III Secc, 11560 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.434227,
+            "lng": -99.1456424,
+            "formatted_address": "Revillagigedo 18, Colonia Centro, Centro, Cuauhtémoc, 06050 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67c9e4fc8dea7-Amazônia.-Sebastião-Salgado.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29545/15-04-2025/amaznia?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Artes y Teatro, Museos"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67e4265ac6b8b-La-revolución-impresionista-de-Monet-a-Matisse-del-Museo-de-Arte-de-Dallas.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/29754/28-05-2025/la-revolucin-impresionista-de-monet-a-matisse-del-museo-de-arte-de-dallas?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
     },
     {
-        "nombre": "El fascinante mundo de los billetes",
-        "lugar": "Museo Casa Del Risco",
-        "costo": [
+        "title": "La vuelta al mundo en 150 juguetes. Desdibujando fronteras conceptuales",
+        "place": "Museo Nacional de las Culturas del Mundo",
+        "price": [
             ": Gratuito"
         ],
-        "ubicacion": "Pl. San Jacinto 5 , San Ángel, Álvaro Obregón, C.P. 01000, Ciudad de México",
-        "descripcion": " La muestra representa una oportunidad para adentrarse en el complejo universo de la creación y fabricación de los billetes, sobre los que, por su circulación masiva y uso cotidiano, pocas veces se reflexiona, al tiempo de conocer el potencial expresivo de los materiales en las manos y el talento de extraordinarios creadores mexicanos.\n \n  ",
-        "fechas": [
-            "15/04/2025",
-            "16/04/2025",
-            "17/04/2025",
-            "18/04/2025",
-            "19/04/2025",
-            "20/04/2025",
-            "22/04/2025",
-            "23/04/2025",
-            "24/04/2025",
-            "25/04/2025",
-            "26/04/2025",
-            "27/04/2025"
+        "location": "Moneda 13 , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
+        "description": "  Conocerás diversos usos y formas del juguete\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
         ],
-        "coordenadas": {
-            "lat": 19.3451364,
-            "lng": -99.1919638,
-            "formatted_address": "Pl. San Jacinto 5, San Ángel TNT, San Ángel, Álvaro Obregón, 01000 Ciudad de México, CDMX, Mexico"
+        "coordinates": {
+            "lat": 19.4328707,
+            "lng": -99.1313473,
+            "formatted_address": "Palacio Nacional, Moneda 13, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06060 Ciudad de México, CDMX, Mexico"
         },
-        "img_url": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67ae39b228d13-El-fascinante-mundo-de-los-billetes.jpg",
-        "url": "https://cartelera.cdmx.gob.mx/29013/15-04-2025/el-fascinante-mundo-de-los-billetes?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D1",
-        "clasificaciones": "Museos, Artes y Teatro"
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f01da52d454-La-vuelta-al-mundo-en-150-juguetes.-Desdibujando-fronteras-conceptuales.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30015/28-05-2025/la-vuelta-al-mundo-en-150-juguetes-desdibujando-fronteras-conceptuales?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Cultural, Bellas Artes",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Territorios alterados. Ioulia Akhmadeeva",
+        "place": "Museo Nacional de la Estampa",
+        "price": [
+            "General: $ 70",
+            "Maestros y estudiantes presentando credencial vigente: Gratuito",
+            "INAPAM: Gratuito",
+            "Personas con discapacida: Gratuito",
+            "Menores de 12 año: Gratuito",
+            "Domingo: Gratuito"
+        ],
+        "location": "Av. Hidalgo 39 , Centro (Área 5), Cuauhtémoc, C.P. 06050, Ciudad de México",
+        "description": " Es una muestra que aborda temas como la memoria, la familia, la migración y los conflictos bélicos desde su perspectiva personal, utilizando archivos familiares como objetos, fotografías, documentos y cartas.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.437039,
+            "lng": -99.14271819999999,
+            "formatted_address": "Av. Hidalgo 39, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06050 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f424cfd7ecb-Territorios-alterados.-Ioulia-Akhmadeeva.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30059/28-05-2025/territorios-alterados-ioulia-akhmadeeva?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "No tengo preguntas, solo respuestas",
+        "place": "Museo Tamayo",
+        "price": [
+            "General: $ 95",
+            "menor de 12 años: Gratuito",
+            "estudiantes, docentes y adultos mayores con credencial vigente: Gratuito",
+            "Domingo: Gratuito"
+        ],
+        "location": "Paseo de la Reforma 51 , Bosque de Chapultepec I Sección, Miguel Hidalgo, C.P. 11580, Ciudad de México",
+        "description": " El título de la muestra No tengo preguntas, solo respuestas se presenta como una provocación que busca conciliar las problemáticas éticas y estéticas implícitas en la producción artística, y plantea interrogantes sobre cómo la obra debe relacionarse tanto con los materiales y la infraestructura que utiliza, así como con el contexto en el que se inserta.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.4257931,
+            "lng": -99.1816714,
+            "formatted_address": "Bosque de Chapultepec, Av. P.º de la Reforma 51, Polanco, Bosque de Chapultepec I Secc, Miguel Hidalgo, 11580 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f6d2c208977-No-tengo-preguntas,-solo-respuestas.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30081/28-05-2025/no-tengo-preguntas-solo-respuestas?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Bellas Artes, Arte Performático",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Casa Ofrenda Día de Muertos Mexskeletons",
+        "place": "Bosques del Sur Xochimilco",
+        "price": [
+            "General: $ 200"
+        ],
+        "location": "Rincón Pozo 42 , Paseos del Sur, Xochimilco, C.P. 16010, Ciudad de México",
+        "description": " \"El proyecto Casa Ofrenda de Día de Muertos Mexskeletons es una experiencia cultural en donde el arte popular mexicano y ésta hermosa celebración mexicana se combinan para crear un espacio vivo, lleno de color y tradición; una experiencia inolvidable para el visitante al incorporar aspectos históricos y elementos anecdóticos de la cultura mexicana en relación a la celebración de los muertos entre otras explicaciones interesantes sobre símbolos actuales como la catrina. Todo esto se realiza mientras recorre el taller de artesanías donde se observa el trabajo que realizan los artesanos y artesanas del equipo de Mexskeletons Características del tour:   Ofrenda disponible todo el año  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.2813095,
+            "lng": -99.1303296,
+            "formatted_address": "Rincón Pozo 42, Bosque del Sur, Xochimilco, 16010 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/67f96aceb6731-Casa-Ofrenda-Día-de-Muertos-Mexskeletons.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30075/28-05-2025/casa-ofrenda-da-de-muertos-mexskeletons?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Cultural, Festividades",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "70 aniversario de Jardín del Arte",
+        "place": "Centro Cultural El Rule",
+        "price": [
+            "General: Gratuito"
+        ],
+        "location": "eje central lázaro cárdenas 6 , primer piso , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
+        "description": " Centro Cultural El Rule Del viernes 2 de mayo al viernes 6 de julio del 2025. 10 a 17 horas Exposición de artistas del Jardín del arte A.C., en conmemoración de los 70 años de trabajo de gestión y difusión de las artes plásticas. CarteleraCdMx  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.4303197,
+            "lng": -99.1408316,
+            "formatted_address": "Eje Central Lázaro Cárdenas 6, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06000 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/680bd5cf1571d-jardin-delarte.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30330/28-05-2025/70-aniversario-de-jardn-del-arte?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Batería",
+        "place": "Museo Panteón de San Fernando",
+        "price": [
+            "General: Gratuito"
+        ],
+        "location": "Plaza de San Fernando 17 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
+        "description": " Museo Panteón de San Fernando Todos los Miércoles y Juevas  Inicio: Miércoles 7 de mayo, 2025 Inscripciones disponibles para el Segundo trimestre del Jueves 1 al 15 de Mayo para no afectar la logística de los talleres.  De 10 a 12 horas Se podrá tener un conocimiento básico de solfeo, el alumno podrá tener una base estable, podrá hacer Fills básicos, tendrá conocimiento y las herramientas para poder una leer y entender una partitura y trabaja una independencia básica de las extremidades. CarteleraCdMx  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29"
+        ],
+        "coordinates": {
+            "lat": 19.4391052,
+            "lng": -99.1480692,
+            "formatted_address": "C. San Fernando 17, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Hervidero y Plancha, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/68153d52ebdfc-panteon.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30449/28-05-2025/batera?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Música, Clásica, Jazz",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Diálogo entre ciudades. Raúl Bucio",
+        "place": "Museo de la Ciudad de México",
+        "price": [
+            "General: Gratuito"
+        ],
+        "location": "Pino Suárez 30 , Centro (Área 6), Cuauhtémoc, C.P. 06060, Ciudad de México",
+        "description": "Del sábado 17 de mayo al 17 de agosto 2025\n13 horas | Museo de la Ciudad de México \n Inauguración de exposición Diálogo entre ciudades. Raúl Bucio \n Si la arquitectura de diferentes ciudades del mundo hablara entre sí, ¿qué se dirían? En la exposición Diálogo entre Ciudades encontrarás la interpretación a esta pregunta por el lente de Raúl Bucio; una propuesta de conversación sobre culturas, territorios y experiencias personales en una narrativa visual.\n CarteleraCdMx ",
+        "dates": [
+            "28/05/2025",
+            "29/05/2025",
+            "30/05/2025",
+            "31/05/2025",
+            "01/06/2025"
+        ],
+        "coordinates": {
+            "lat": 19.4293827,
+            "lng": -99.1319267,
+            "formatted_address": "José María Pino Suárez 30, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06060 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/681d2f5a9e8a2-Museo_de_la_Ciudad_de_México_fachada._Fotografía_Viviana_Martínez_2017.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30598/28-05-2025/dilogo-entre-ciudades-ral-bucio?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Ellas diseñan, 1965 – 2025",
+        "place": "Museo Franz Mayer",
+        "price": [
+            "General: $ 120",
+            "INAPAM, estudiante y profesor: $ 60",
+            "Menores de 12 años: Gratuito",
+            "Martes: Gratuito"
+        ],
+        "location": "Av. Hidalgo 45 , Guerrero, Cuauhtémoc, C.P. 06300, Ciudad de México",
+        "description": " Una exposición que reúne el trabajo de 27 mujeres fundamentales en la historia del diseño editorial en México. A través de publicaciones, portadas, proyectos independientes y libros de artista, la muestra traza un recorrido por más de seis décadas de creatividad, innovación y mirada femenina en este campo.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.4368359,
+            "lng": -99.1434319,
+            "formatted_address": "Av. Hidalgo 45, Centro Histórico de la Cdad. de México, Guerrero, Cuauhtémoc, 06300 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/681e2fdcde070-Ellas-diseñan,-1965-–-2025.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30621/28-05-2025/ellas-disean-1965--2025?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Bellas Artes, Cultural",
+        "source": "CDMX Cartelera"
+    },
+    {
+        "title": "Huellas de la Memoria",
+        "place": "Palacio de Minería",
+        "price": [
+            ": Gratuito"
+        ],
+        "location": "Calle de Tacuba 5 , Centro (Área 1), Cuauhtémoc, C.P. 06000, Ciudad de México",
+        "description": " Más de 300 pares de zapatos usados por familias en búsqueda de personas ausentes, acompañados de grabados, fotografías y una línea de tiempo que documenta casos de desaparición en México desde 1969 hasta 2024. Este espacio ofrece un homenaje a quienes buscan a sus seres queridos y expone una problemática humanitaria vigente.\n \n  ",
+        "dates": [
+            "2025-05-28",
+            "2025-05-29",
+            "2025-05-30",
+            "2025-05-31",
+            "2025-06-01"
+        ],
+        "coordinates": {
+            "lat": 19.4355826,
+            "lng": -99.1396484,
+            "formatted_address": "C. de Tacuba 5, Centro Histórico de la Cdad. de México, Centro, Cuauhtémoc, 06000 Ciudad de México, CDMX, Mexico"
+        },
+        "img_urls": "https://cartelera.cdmx.gob.mx/wp-content/uploads/ae_usercontent/usercontent/681e34deb78af-huellas-de-la-memoria.jpg",
+        "url": "https://cartelera.cdmx.gob.mx/30622/28-05-2025/huellas-de-la-memoria?return_to=%2Fbusqueda%3Ftipo%3DALL%26pagina%3D2",
+        "classification": "Artes y Teatro, Cultural, Bellas Artes",
+        "source": "CDMX Cartelera"
     }
 ]
