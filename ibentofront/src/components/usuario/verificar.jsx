@@ -381,7 +381,8 @@ const uploadAllData = async () => {
                 // Subir automáticamente todos los datos del usuario
                 try {
                     console.log("Subiendo todos los datos del usuario...");
-                    await uploadAllData();                    setStepsCompleted(prev => ({ ...prev, ine: true }));
+                    await uploadAllData();                    
+                    setStepsCompleted(prev => ({ ...prev, ine: true }));
                     setMessage('¡Validación completada y todos los datos han sido enviados exitosamente!');
                     showContrast("¡Proceso completado! Bienvenido a Ibento.");
                     setActiveIndex(3);
@@ -389,13 +390,36 @@ const uploadAllData = async () => {
                     // Navegar a la página principal después de un delay
                     setTimeout(() => {
                         navigate("../principal");
-                    }, 2000);                } catch (uploadError) {
+                    }, 2000);
+                } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     setActiveIndex(3);
                 }
-            } else {
+            }
+            else if (data.mensaje_ine) {
+                 setMessage('INE validada correctamente. El servicio de validación de rostro no está disponible temporalmente. Por favor, intenta más tarde.');
+                 try {
+                    console.log("Subiendo todos los datos del usuario...");
+                    await uploadAllData();                    
+                    setStepsCompleted(prev => ({ ...prev, ine: true }));
+                    setMessage('¡INE validada y todos los datos han sido enviados exitosamente!');
+                    showContrast("¡Proceso completado! Bienvenido a Ibento.");
+                    setActiveIndex(3);
+                    
+                    // Navegar a la página principal después de un delay
+                    setTimeout(() => {
+                        navigate("../principal");
+                    }, 2000);
+                } catch (uploadError) {
+                    console.error("Error al subir datos después de validación:", uploadError);
+                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    setActiveIndex(3);
+                }
+            }
+             else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
