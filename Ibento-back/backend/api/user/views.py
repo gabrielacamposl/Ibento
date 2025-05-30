@@ -762,21 +762,24 @@ def ine_validation_view(request):
                 print(f"Validación de rostro falló: {error_data}")
                 
                 return Response({
+                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "Tu rostro no coincide con la foto de la INE.",
                     "distancia": error_data.get("distancia", "N/A"),
                     "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
                     "codigo": "FACE_NO_MATCH"
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
             
+
             result = response.json()
             rostro_valido = result.get("rostro_valido", False)
             
             if not rostro_valido:
                 return Response({
+                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "La verificación facial no fue exitosa.",
                     "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
                     "codigo": "FACE_VERIFICATION_FAILED"
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
             
             # Guardar validación de rostro
             user.is_validated_camera = True
@@ -787,9 +790,10 @@ def ine_validation_view(request):
         except requests.RequestException as e:
             print(f"Error en conexión con FastAPI: {str(e)}")
             return Response({
+                "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 503
         
         print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
         
@@ -2254,6 +2258,26 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Evento eliminado de guardados."}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['post'])
+    @permission_classes([IsAuthenticated])
+    def agregar_info(self, request):
+
+        usuario = request.user
+        
+        birthday = request.data.get('birthday')
+        gender = request.data.get('gender')
+        description = request.data.get('description')
+        curp = request.data.get('curp')
+
+        # Actualizar los campos del usuario
+        usuario.birthday = birthday
+        usuario.description = description
+        usuario.gender = gender
+        usuario.curp = curp
+
+        usuario.save(update_fields=['birthday', 'description', 'gender', 'curp'])
+
+        return Response({"detail": "Información actualizada correctamente."}, status=status.HTTP_200_OK)
 
 # ----------------------------------- VISTAS PARA NOTIFICACIONES --------------------------
 
