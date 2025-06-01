@@ -59,6 +59,23 @@ const logout = async () => {
     }
   };
 
+const handleDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem('access');
+      await api.delete('eliminar_cuenta/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      alert('Cuenta eliminada exitosamente');
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Error al eliminar la cuenta:', err);
+      alert('Error al eliminar la cuenta. Por favor, inténtelo de nuevo más tarde.');
+    }
+  };
 
   
 
@@ -210,7 +227,7 @@ const logout = async () => {
                                           <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 items-center justify-center">
                                               <button
                                                   type="button"
-                                                  onClick={handleCloseDialog}
+                                                  onClick={()=> handleDeleteAccount()}
                                                   className="inline-flex w-full btn-custom justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs  sm:ml-3 sm:w-auto"
                                               >
                                                   Eliminar Cuenta

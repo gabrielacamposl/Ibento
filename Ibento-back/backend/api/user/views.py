@@ -2632,3 +2632,19 @@ def marcar_notificaciones_leidas(request):
     except Exception as e:
         logger.error(f"Error marcando notificaciones como leídas: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def eliminar_cuenta(request):
+    try:
+        user = request.user
+        
+        # Eliminar el usuario
+        user.delete()
+        
+        return Response({'status': 'Cuenta eliminada correctamente'}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        logger.error(f"Error eliminando cuenta: {str(e)}")
+        return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
