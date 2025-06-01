@@ -409,12 +409,12 @@ const verMatch = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                         <div className="flex items-center space-x-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2 rounded-xl shadow-lg">
                             <Star className="w-4 h-4 text-white" />
                             <span className="text-white font-bold text-sm">{superLikeCount}</span>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
@@ -490,14 +490,14 @@ const verMatch = () => {
                                                 <div className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
                                                     <span className="text-white text-sm font-medium">Online</span>
                                                 </div>
-                                                <div className="bg-gradient-to-r from-pink-500 to-purple-500 px-3 py-1 rounded-full">
+                                                {/* <div className="bg-gradient-to-r from-pink-500 to-purple-500 px-3 py-1 rounded-full">
                                                     <span className="text-white text-sm font-bold">Premium</span>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
 
                                         {/* Información del usuario */}
-                                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                                        <div className="absolute bottom-0 left-0 right-0 p-6 text-black">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div>
                                                     <h2 className="text-2xl font-bold">
@@ -517,7 +517,7 @@ const verMatch = () => {
                                             </div>
                                             
                                             {/* Intereses */}
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-2 text-black">
                                                 {['🎵 Música', '🎭 Teatro', '🏃‍♂️ Deportes'].map((interest, idx) => (
                                                     <span key={idx} className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
                                                         {interest}
@@ -580,7 +580,7 @@ const verMatch = () => {
                         </button>
 
                         {/* Botón Super Like */}
-                        <button
+                        {/* <button
                             onClick={handleSuperLikeButton}
                             disabled={isAnimating || superLikeCount <= 0}
                             className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative"
@@ -591,7 +591,7 @@ const verMatch = () => {
                                     <span className="text-xs font-bold text-orange-500">{superLikeCount}</span>
                                 </div>
                             )}
-                        </button>
+                        </button> */}
 
                         {/* Botón Like */}
                         <button
