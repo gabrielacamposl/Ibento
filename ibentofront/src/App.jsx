@@ -5,6 +5,7 @@ import InstallPrompt from './components/pwa/InstallPrompt';
 //import { useNotifications } from './hooks/useNotifications';
 //import NotificationManager from './notificationManager';
 import api from './apilogin'
+import AuthGuard from './components/auth/AuthGuard';
 
 // -------------------------- RUTAS -----------------------------------------
 // Auth & Register
@@ -212,51 +213,50 @@ export default function App() {
             Activar Notificaciones
           </button>
         </div>
-      )} */}
+      )} */}      <Router>
+        <AuthGuard>
+          <Routes>
+            {/* Rutas de autenticación */}
+            <Route path="/" element={<Login />} />
+            <Route path="/crear-cuenta" element={<Register />} />
+            <Route path="/verificar-correo" element={<VerificarCorreo />} />
+            <Route path="/confirmar/:token" element={<Confirm />} />
+            <Route path="/logout" element={<Logout />} />
 
+            {/* Rutas de recuperación de contraseña */}
+            <Route path="/recuperar-cuenta" element={<RecuperarContrasena />} />
+            <Route path="/recuperar-cuenta-codigo" element={<IngresarCodigo />} />
+            <Route path="/recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
 
-      <Router>
-        <Routes>
-          {/* Rutas de autenticación */}
-          <Route path="/" element={<Login />} />
-          <Route path="/crear-cuenta" element={<Register />} />
-          <Route path="/verificar-correo" element={<VerificarCorreo />} />
-          <Route path="/confirmar/:token" element={<Confirm />} />
-          <Route path="/logout" element={<Logout />} />
+            {/* Rutas principales de la aplicación */}
+            <Route path="/ibento" element={<MainLayout />}>
+              {/* Eventos */}
+              <Route path="eventos" element={<PrincipalEventos />} />
+              <Route path="eventos/:eventId" element={<EventoPage />} />
+              <Route path="busqueda" element={<Busqueda />} />
+              <Route path="busqueda/:query" element={<BusquedaCategoria />} />
 
-          {/* Rutas de recuperación de contraseña */}
-          <Route path="/recuperar-cuenta" element={<RecuperarContrasena />} />
-          <Route path="/recuperar-cuenta-codigo" element={<IngresarCodigo />} />
-          <Route path="/recuperar-cuenta-nueva-contrasena" element={<NuevaContrasena />} />
+              {/* Perfil y usuario */}
+              <Route path="perfil" element={<Perfil />} />
+              <Route path="editarPerfil" element={<EditarPerfil />} />
+              <Route path="editarIntereses" element={<EditarIntereses />} />
+              <Route path="favoritos" element={<Favoritos />} />
+              <Route path="guardados" element={<Guardados />} />
+              <Route path="verificar" element={<VerificarPerfil />} />
+              <Route path="profileVerify" element={<PerfilCheck />} />
+              <Route path="profileRepeat" element={<PerfilRepetido />} />
 
-          {/* Rutas principales de la aplicación */}
-          <Route path="/ibento" element={<MainLayout />}>
-            {/* Eventos */}
-            <Route path="eventos" element={<PrincipalEventos />} />
-            <Route path="eventos/:eventId" element={<EventoPage />} />
-            <Route path="busqueda" element={<Busqueda />} />
-            <Route path="busqueda/:query" element={<BusquedaCategoria />} />
-
-            {/* Perfil y usuario */}
-            <Route path="perfil" element={<Perfil />} />
-            <Route path="editarPerfil" element={<EditarPerfil />} />
-            <Route path="editarIntereses" element={<EditarIntereses />} />
-            <Route path="favoritos" element={<Favoritos />} />
-            <Route path="guardados" element={<Guardados />} />
-            <Route path="verificar" element={<VerificarPerfil />} />
-            <Route path="profileVerify" element={<PerfilCheck />} />
-            <Route path="profileRepeat" element={<PerfilRepetido />} />
-
-            {/* Matches y chat */}
-            <Route path="matches" element={<BuscarMatches />} />
-            <Route path="verPerfil" element={<Perfiles />} />
-            <Route path="verMatches" element={<VerMatch />} />
-            <Route path="itsMatch" element={<Matches />} />
-            <Route path="match" element={<MisMatches />} />
-            <Route path="verLike" element={<Like />} />
-            <Route path="chat" element={<Chat />} />
-          </Route>
-        </Routes>
+              {/* Matches y chat */}
+              <Route path="matches" element={<BuscarMatches />} />
+              <Route path="verPerfil" element={<Perfiles />} />
+              <Route path="verMatches" element={<VerMatch />} />
+              <Route path="itsMatch" element={<Matches />} />
+              <Route path="match" element={<MisMatches />} />
+              <Route path="verLike" element={<Like />} />
+              <Route path="chat" element={<Chat />} />
+            </Route>
+          </Routes>
+        </AuthGuard>
       </Router>
 
       {/* Componentes adicionales */}

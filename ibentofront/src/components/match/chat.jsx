@@ -1,8 +1,8 @@
-import React, { use, useState,useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import api from '../../api';
+
 const Chat = () => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([
@@ -205,112 +205,71 @@ useEffect(() => {
     };
 
     return (
-        <div className="text-black   w-full ">
-            <div className="   justify-between w-full h-screen">
-                <div className="flex-grow  shadow-t">
-                    <div className="w-full">
-
-                        <div className='shadow p-3 '>
-                        <div className="  justify-between font-bold text-2xl w-full">
-                            <div className=" flex justify-between m-2 w-full">
-                            <button className="cursor-pointer" onClick={handleBack}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+        <div className="relative min-h-screen w-full flex items-center justify-center bg-white">
+            {/* Contenedor principal glass */}
+            <div className="relative z-10 w-full max-w-md mx-auto min-h-[80vh] flex flex-col rounded-3xl bg-white border border-blue-100 shadow-xl overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-blue-100">
+                    <button className="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition" onClick={handleBack}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 text-purple-500">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-
-                            </button>
-                            <button  className="cursor-pointer" onClick={handdleInfo} >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                                </svg>
-                            </button>
-                            </div>
+                        </svg>
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <img src={receptor.profile_pic} className="w-10 h-10 object-cover rounded-full border-2 border-blue-200 shadow" alt={receptor.nombre} />
+                        <div className="text-left">
+                            <h1 className="text-lg font-semibold text-purple-700">{receptor.nombre} {receptor.apellido}</h1>
                         </div>
-
-
-                        <div className="mt-5 flex justify-between">
-                            <div className="flex">
-                                <img src={receptor.profile_pic} className="w-10 h-10 object-cover rounded-full mr-2" />
-                                <h1 className="text-xl font-semibold">{receptor.nombre} {receptor.apellido}</h1>
-                            </div>
-                           
-                        </div>
+                    </div>
+                    <button className="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition" onClick={handdleInfo}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 text-purple-500">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </button>
                 </div>
 
-          
-                        <div className="max-h-[calc(100vh-15rem)]  h-screen overflow-y-auto  bg-white mt-3 w-full">
-                            <div className="mt-10 mb-8 flex justify-center ">
-                                <div className="relative ">
-                                    <img src={receptor.profile_pic} className="sombraMatch1 w-20 h-20 object-cover rounded-full" alt={receptor.nombre} />
-                                    <div className="absolute bottom-1 right-0 w-full flex justify-center ">
-                                        <svg width="100" height="100">
-                                            <defs>
-                                                <path id="curve1" d="M 10,25 Q 50,-10 100,20" />
-                                            </defs>
-                                            <text fontSize="10" fontWeight="bold" fill="black">
-                                                <textPath href="#curve1" startOffset="30%" textAnchor="middle">
-                                                    ¡NUEVO
-                                                </textPath>
-                                            </text>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="relative min-w-[100px] ml-2">
-                                    <img src={Me.profile_pic} className="sombraMatch2 w-20 h-20 object-cover rounded-full" alt={messages[1].sender} />
-                                    <div className="absolute top-9 right-2 w-full flex justify-center items-center">
-                                        <svg width="100" height="100">
-                                            <defs>
-                                                <path id="curve2" d="M -10,20 Q 10,100 100,40" fill="transparent" />
-                                            </defs>
-                                            <text fontSize="10" fontWeight="bold" fill="black">
-                                                <textPath href="#curve2" startOffset="50%" textAnchor="middle">
-                                                    ACOMPAÑANTE!
-                                                </textPath>
-                                            </text>
-                                        </svg>
-                                    </div>
-                                </div>
+                {/* Mensajes */}
+                <div className="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
+                    <div className="flex flex-col gap-4">
+                        {mensajes.map((message, index) => (
+                            <div key={index} className={`flex ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
+                                {message.receptor == myId && (
+                                    <img src={receptor.profile_pic} className="w-8 h-8 object-cover rounded-full mr-2 shadow" />
+                                )}
+                                <span
+                                    className={`px-4 py-2 rounded-2xl max-w-xs break-words text-base shadow border ${
+                                        message.receptor == myId
+                                            ? 'bg-blue-50 text-purple-700 border-blue-100'
+                                            : 'bg-gradient-to-br from-purple-100 via-blue-100 to-white text-blue-900 border-blue-100'
+                                    }`}
+                                >
+                                    {message.mensaje}
+                                </span>
+                                {message.receptor != myId && (
+                                    <img src={Me.profile_pic} className="w-8 h-8 object-cover rounded-full ml-2 shadow" />
+                                )}
                             </div>
-
-
-                             {/*AQUÍ COMIENZA EL CHAT */}
-                            <div className=" flex-grow m-3 max-h-[calc(100vh-4rem)]"> 
-                                {mensajes.map((message, index) => (
-                                    <div key={index}>
-                                  
-                                    <div  className={`flex mb-4 ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
-                                       {/*IMAGEN */}
-                                        {message.receptor == myId && (
-                                            
-                                            <img src={receptor.profile_pic} className="w-8 h-8 object-cover rounded-full mr-2" />
-                                        )}
-
-                                      
-                                        {/*MENSAJE */}
-                                        <span
-                                            className={`p- rounded  p-2 rounded max-w-xs break-words ${
-                                                message.receptor == myId ?  'bg-gray-200' : 'bg-blue-400 text-white text-justify'
-                                            }`}
-                                        >
-                                            {message.mensaje}
-                                        </span>
-                                        {/*IMAGEN */}
-                                        {message.receptor != myId && (
-                                            <img src={Me.profile_pic} className=" w-8 h-8 object-cover rounded-full ml-2" />
-                                        )}
-                                      
-                                    </div>
-                                    
-                                    </div>
-                                ))}
-                                  <div ref={messagesEndRef} /> {/* <- esto es lo importante */}
-                            </div>
-                        </div>
+                        ))}
+                        <div ref={messagesEndRef} />
                     </div>
                 </div>
 
-
-                <div className="w-full flex items-center ">
+                {/* Barra de emojis */}
+                <div className="w-full flex items-center gap-2 px-4 py-2 bg-blue-50 border-t border-b border-blue-100 z-20" style={{minHeight:'48px'}}>
+                    {['😀','😍','😂','🥰','😎','😭','🔥','👍','🎉','💜','💙','✨'].map((emoji) => (
+                        <button
+                            key={emoji}
+                            className="text-2xl hover:scale-110 transition transform focus:outline-none text-purple-500"
+                            style={{filter:'drop-shadow(0 1px 4px #a5b4fc33)'}}
+                            onClick={() => setNewMessage(newMessage + emoji)}
+                            type="button"
+                        >
+                            {emoji}
+                        </button>
+                    ))}
+                </div>
+                {/* Input de mensaje */}
+                <div className="w-full flex items-center gap-2 px-4 py-4 bg-white border-t border-blue-100 sticky bottom-0 z-30">
                     <input
                         type="text"
                         value={newMessage}
@@ -320,11 +279,11 @@ useEffect(() => {
                                 handleSendMessage();
                             }
                         }}
-                        className="flex-grow p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-grow px-4 py-2 rounded-full border border-blue-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 text-purple-700 placeholder-blue-400 shadow-sm"
                         placeholder="Escribe un mensaje..."
                     />
-                    <button onClick={ handleSendMessage} className="p-2 bg-blue-500 text-white rounded-full ml-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                    <button onClick={handleSendMessage} className="p-2 bg-gradient-to-br from-purple-400 via-blue-400 to-blue-300 text-white rounded-full shadow-lg hover:scale-105 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                         </svg>
                     </button>

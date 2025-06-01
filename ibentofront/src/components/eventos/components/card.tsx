@@ -94,22 +94,22 @@ export default function CardWrapper(
         );
     }
 
-    console.log("Position:" + position)
+    console.log("Position:" + position);
 
     return (
         <>        <div className=''>
-            <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4 ">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 py-2 px-2">
                 {name === "Cercanos a mí" && (
                     <>
                         {geoError ? (
-                            <div className="w-full text-center py-8">
+                            <div className="col-span-full text-center py-8">
                                 <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
                                     <p className="font-medium">Ubicación no disponible</p>
                                     <p className="text-sm">Para ver eventos cercanos, activa la geolocalización en tu navegador.</p>
                                 </div>
                             </div>
                         ) : nearestEvents.length === 0 && !nearestLoading ? (
-                            <div className="w-full text-center py-8">
+                            <div className="col-span-full text-center py-8">
                                 <p className="text-gray-500">No hay eventos cercanos disponibles</p>
                             </div>
                         ) : (
@@ -212,34 +212,30 @@ export function Card({
     }
     if (dias <= 0){
         fechaString = "HOY"
-    }
-
-    const url = "../eventos/" + id;
+    }    const url = "../eventos/" + id;
     return (
-        <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-76 w-48 drop-shadow-xl ">
+        <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-auto w-full drop-shadow-xl">
             <img
             src={`${imgs[0]}`}
-            className="rounded-lg object-cover w-full h-48" 
+            className="rounded-lg object-cover w-full h-32 sm:h-40" 
             alt={title}/>
-            <div className="h-8">
-                <h2 className="text-base font-medium text-black text-left my-2 truncate">{title}</h2>
+            <div className="h-auto min-h-[2rem] p-2">
+                <h2 className="text-sm sm:text-base font-medium text-black text-left my-1 line-clamp-2">{title}</h2>
             </div>
-            
-
-            <div className='flex flex-row items-center justify-center gap-4 my-4'>
+                <div className='flex flex-row items-center justify-center gap-2 my-2 px-2'>
                 <div className='flex w-full space-x-1 items-center justify-center'>
                     <AvatarGroup>
                         <Avatar image={avatars[1]} size="normal" shape="circle" />
                         <Avatar image={avatars[1]} size="normal" shape="circle" />
                         <Avatar image={avatars[1]} size="normal" shape="circle" />
                     </AvatarGroup>
-                    <HeartIcon className='h-6 w-6 text-black' />
-                    <p className='text-black'>{likeString}</p>
+                    <HeartIcon className='h-4 w-4 text-black' />
+                    <p className='text-xs text-black'>{likeString}</p>
                     {distance == undefined && (
                         <>
                         <div className="flex flex-row items-center justify-center">
-                            <ClockIcon className='h-4 w-4 text-black' />
-                            <p className='text-black'>{fechaString}</p>
+                            <ClockIcon className='h-3 w-3 text-black' />
+                            <p className='text-xs text-black'>{fechaString}</p>
                         </div>
                             
                         </>
@@ -247,13 +243,13 @@ export function Card({
                     {distance !== undefined && (
                         <>
                         <div className="flex flex-row items-center justify-center">
-                            <MapPinIcon className='h-4 w-4 text-black' />
-                            <p className='text-black'>{distanceString}</p>
+                            <MapPinIcon className='h-3 w-3 text-black' />
+                            <p className='text-xs text-black'>{distanceString}</p>
                         </div>
                         </>
                     )}
                 </div>
-            </div>   
+            </div>
         </Link>
         
     );

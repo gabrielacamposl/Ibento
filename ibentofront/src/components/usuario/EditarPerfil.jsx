@@ -3,6 +3,7 @@ import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
 import { Accordion, AccordionTab } from 'primereact/accordion';
+import { ArrowLeft, Upload, X, User, Calendar, Camera } from 'lucide-react';
 import apiaxios from "../../axiosConfig";
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
@@ -243,287 +244,326 @@ useEffect(() => {
     
 }
 
-
-
     return (
-        <div className="flex shadow-lg justify-center items-center text-black">
-            <div className="degradadoPerfil relative flex flex-col items-center p-5 max-w-lg w-full">
-                <div className="flex justify-center items-center m-2 space-x-4">
-                    <div className="relative">
-                        <img src={userPerfil.profile_pic[0]? userPerfil.profile_pic[0] : '/profile_empty.webp'} className="w-45 h-45 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover" alt={userPerfil.nombre} />
-                    </div>
-                </div>
-
-
-                 {/* Fade-in overlay */}
-                {loading === true && (
-                    <div
-                        className="fixed inset-0 z-60 flex items-center justify-center bg-gradient-to-b from-blue-600/70 via-purple-600/70 to-pink-600/70 backdrop-blur-md transition-opacity duration-700 opacity-100 animate-fadein"
+        <div className="min-h-screen bg-white">
+            {/* Header con navegación */}
+            <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-6 pb-8">
+                <div className="flex items-center justify-between">
+                    <Link 
+                        to="../perfil" 
+                        className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-300"
                     >
-                        <div className="text-center text-white  p-8 rounded-xl ">
-                            <h1 className="text-3xl font-bold mb-2">¡Perfil Actualizado!</h1>
-                            <p className="mb-4">Redirigiendo a Perfil...</p>
-                        </div>
-                    </div>
-                )}
+                        <ArrowLeft className="w-6 h-6 text-white" />
+                    </Link>
+                    <h1 className="text-xl font-bold text-white">Editar Perfil</h1>
+                    <div className="w-10"></div>
+                </div>
+            </div>
 
-                <div className="text-black w-full -2xl">
+            <div className="relative px-6 -mt-4">
+                {/* Perfil photo section */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+                    <div className="flex flex-col items-center">
+                        <div className="relative mb-4">
+                            <img 
+                                src={userPerfil.profile_pic[0] ? userPerfil.profile_pic[0] : '/profile_empty.webp'} 
+                                className="w-28 h-28 rounded-full object-cover border-4 border-gradient-to-r from-purple-400 to-blue-400 shadow-lg" 
+                                alt={userPerfil.nombre} 
+                            />
+                            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-full shadow-lg">
+                                <Camera className="w-4 h-4 text-white" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Información básica */}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                    <User className="w-4 h-4 mr-2 text-purple-500" />
+                                    Nombre
+                                </label>
+                                <input 
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
+                                    defaultValue={userPerfil.nombre}
+                                    onChange={(e) => setNombre(e.target.value)}
+                                    placeholder="Tu nombre"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                    <User className="w-4 h-4 mr-2 text-purple-500" />
+                                    Apellido
+                                </label>
+                                <input 
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
+                                    defaultValue={userPerfil.apellido}
+                                    onChange={(e) => setApellido(e.target.value)}
+                                    placeholder="Tu apellido"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                    Sexo
+                                </label>
+                                <div className="flex items-center space-x-2 mb-2">
+                                    {userPerfil.gender === 'H' ? (
+                                        <i className="pi pi-mars text-blue-500 text-lg"></i>
+                                    ) : (
+                                        <i className="pi pi-venus text-pink-500 text-lg"></i>
+                                    )}
+                                    <select
+                                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
+                                        value={genero}
+                                        onChange={(e) => setGenero(e.target.value)}
+                                    >
+                                        <option value="H">Hombre</option>
+                                        <option value="M">Mujer</option>
+                                        <option value="O">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                    <Calendar className="w-4 h-4 mr-2 text-purple-500" />
+                                    Fecha
+                                </label>
+                                <input 
+                                    type="text"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
+                                    defaultValue={userPerfil.birthday}
+                                    placeholder='AAAA-MM-DD'  
+                                    onChange={(e) => setCumpleanos(e.target.value)}
+                                />
+                                <span className="text-sm text-gray-500 mt-1 block">
+                                    {calculateAge(userPerfil.birthday)} años
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>                {/* Fotos section */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                            <Camera className="w-5 h-5 mr-2 text-purple-500" />
+                            Mis fotografías
+                        </h2>
+                        <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                            {fotos.length}/6
+                        </span>
+                    </div>
                     
-                    <div className='mb-2 items-center'>
-                        <div className='flex items-center mr-4 mb-2'>
-                            <h1 className="font-semibold mr-2">Nombre: </h1>
-                            <input type="text"
-                                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
-                                defaultValue={userPerfil.nombre}
-                                rows={1}
-                                onChange={(e) => setNombre(e.target.value)}
-                            ></input>
-                        </div>
-                        <div className='flex items-center'>
-                            <h1 className="font-semibold mr-2">Apellido:</h1>
-                            <input type="text"
-                                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
-                                defaultValue={userPerfil.apellido}
-                                rows={1}
-                                onChange={(e) => setApellido(e.target.value)}
-                                
-                            ></input>
-                        </div>
-                    </div>
-                    <div className='flex items-center'>
-                        <h1 className="font-semibold mr-2">Sexo:</h1>    
-                    <div className='flex space-x-2 mr-2 items-center'>
-                        
-                        {userPerfil.gender =='H' ? (
-                            <i className="pi pi-mars mt-1 font-semibold " style={{ color: 'slateblue' }}></i>
-                        ) : (
-                            <i className="pi pi-venus mt-1 font-semibold" style={{ color: 'orange' }}></i>
-                        )}
-                     
-                    </div>
-                    <div className="relative">
-                            <select
-                                className="appearance-none border border-indigo-400 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-base font-medium text-indigo-700 shadow-sm transition-all"
-                               value={genero}
-                                onChange={(e) => setGenero(e.target.value)}
-                            >
-                                <option value="H">Hombre</option>
-                                <option value="M">Mujer</option>
-                                <option value="O">Otro</option>
-                            </select>
-                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-500">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                    <div className='flex space-x-2 mt-2 items-center'>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0L3 16.5m15-3.379a48.474 48.474 0 0 0-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 0 1 6 13.12M12.265 3.11a.375.375 0 1 1-.53 0L12 2.845l.265.265Zm-3 0a.375.375 0 1 1-.53 0L9 2.845l.265.265Zm6 0a.375.375 0 1 1-.53 0L15 2.845l.265.265Z" />
-                        </svg>
-                        
-                        <input type="text"
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base"
-                            defaultValue={userPerfil.birthday}
-                            rows={1}
-                            placeholder='AAAA-MM-DD'  
-                            onChange={(e) => {
-                               
-                                setCumpleanos(e.target.value);
-                            }}
-                        ></input>
-                        <h1 className="text-lg">{calculateAge(userPerfil.birthday)} años</h1>
+                    <div className="grid grid-cols-3 gap-3">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <div key={index} className="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-400 transition-all duration-300 flex items-center justify-center relative group">
+                                {fotos[index] ? (
+                                    <>
+                                        <img 
+                                            src={fotos[index] instanceof File ? URL.createObjectURL(fotos[index]) : fotos[index]}
+                                            alt="preview" 
+                                            className="object-cover w-full h-full rounded-xl"
+                                        />
+                                        <button 
+                                            onClick={() => handleImageDelete(index)} 
+                                            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                        <label 
+                                            htmlFor={`fileInput-${index}`} 
+                                            className="absolute bottom-2 left-2 right-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                        >
+                                            <div className='flex items-center justify-center'>
+                                                <Camera className="w-3 h-3 mr-1" />
+                                                Cambiar
+                                            </div>
+                                        </label>
+                                        <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <label htmlFor={`fileInput-${index}`} className="cursor-pointer text-purple-400 hover:text-purple-600 transition-colors flex flex-col items-center justify-center h-full w-full">
+                                            <Upload className="w-8 h-8 mb-2" />
+                                            <span className="text-xs font-medium">Agregar</span>
+                                        </label>
+                                        <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleAddImage(e)} />
+                                    </>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </div>
-                
-                <div className="p-4 w-full overflow-x-auto min-h-screen">
-                    <React.Fragment>
-                        <h2 className="">Fotos {fotos.length}/6</h2>
-                        <h2 className="mb-2 text-lg font-semibold">Mis fotografías</h2>
-                        <div className="flex justify-center items-center gap-2 flex-wrap">
-                            {Array.from({ length: 6 }).map((_, index) => (
-                                <div key={index} className="relative w-30 h-35 sm:w-30 sm:h-35 md:w-30 md:h-35 divBorder flex items-center justify-center">
-                                    {fotos[index] ? (
-                                        <>
-                                           
-                                            <img 
-                                                src={fotos[index] instanceof File ? URL.createObjectURL(fotos[index]) : fotos[index]} 
-                                                alt="preview" 
-                                                className="object-cover w-full h-full"
-                                                />
-                                            <button onClick={() => handleImageDelete(index)} className="w-7 h-7 sm:w-7 sm:h-7 md:w-7 md:h-7 Morado absolute top-0 right-0 text-white p-2 rounded-full btn-custom">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-3">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                            <label htmlFor={`fileInput-${index}`} className="absolute bottom-0 text-center w-full Transparencia cursor-pointer">
-                                                <div className='flex justify-center items-center'>
-                                                    <svg className='' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" class="size-5">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                                                    </svg>
-                                                    <span className='ml-2'>Cambiar</span>
-                                                </div>
-                                            </label>
-                                            <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                </svg>
-                                                <span className="block mt-1">Agregar</span>
-                                            </label>
-                                            <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleAddImage(e)} />
-                                        </>
-                                    )}
-                                </div>
-                            ))}
+
+                {/* Descripción section */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <User className="w-5 h-5 mr-2 text-purple-500" />
+                        Sobre mí
+                    </h2>
+                    <textarea
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800 h-32 resize-none"
+                        defaultValue={descripcion !== '' ? descripcion : (userPerfil.description || '')}
+                        onChange={(e) => setDescripcion(e.target.value)}
+                        placeholder="Cuéntanos sobre ti..."
+                    />
+                </div>                {/* Intereses sections */}
+                <div className="space-y-6">
+                    {/* Intereses de Eventos */}
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-4">
+                            <h2 className="text-lg font-bold text-white flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 mr-2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
+                                </svg>
+                                Mis Intereses
+                            </h2>
                         </div>
-                        <h2 className="mt-5 text-lg font-semibold">Sobre mí</h2>
-                        <textarea
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all resize-none bg-gray-50 text-base w-full h-32"
-                            defaultValue={descripcion !== '' ? descripcion : (userPerfil.description || '')}
-                            onChange={(e) => setDescripcion(e.target.value)}
-                            placeholder="Escribe algo sobre ti..."
-                        ></textarea>
-                        <div className='mt-5'>
-                           <Accordion multiple >
-                            <AccordionTab className="text-lg font-semibold mb-3" header="Mis Intereses">
-                                <div className="scroll-x-overflow">
-              
-                               
-                                <h1>¿Qué tipo de eventos te gustan?</h1>
-                                
-
-                                
-                                <div className="intereses-container">
-                                    {categorias.map((categoria) => (
-                                    <div key={categoria.id} className="categoria mb-5">
-                                        <div className={buttonStyle} style={{ cursor: 'default' }}>
-                                        {categoria.nombre}
+                        <div className="p-6">
+                            <p className="text-gray-600 mb-4">¿Qué tipo de eventos te gustan?</p>
+                            <div className="space-y-6">
+                                {categorias.map((categoria) => (
+                                    <div key={categoria.id} className="space-y-3">
+                                        <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
+                                            <h3 className="font-semibold text-purple-700">{categoria.nombre}</h3>
                                         </div>
-                                        <ul className="flex flex-wrap">
-                                        {categoria.valores.map((valor) => (
-                                            <li
-                                            key={valor}
-                                            className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
-                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                                : 'btn-off'
-                                                }`}
-                                            onClick={() => toggleSeleccionado(valor)}
-                                            >
-                                            {valor}
-                                            </li>
-                                        ))}
-                                        </ul>
+                                        <div className="flex flex-wrap gap-2">
+                                            {categoria.valores.map((valor) => (
+                                                <button
+                                                    key={valor}
+                                                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${
+                                                        selectedEvents.includes(valor)
+                                                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105' 
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                                                    }`}
+                                                    onClick={() => toggleSeleccionado(valor)}
+                                                >
+                                                    {valor}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                    ))}
-                                </div>
-                                
+                                ))}
+                            </div>
+                        </div>
+                    </div>
 
-                                
-                                </div>
-                            </AccordionTab>
-
-                           
-                            <AccordionTab className="text-lg font-semibold" header="Intereses Generales">
-                                 <div className='mt-5'>
-                           
-                            
-                            <div className="flex flex-wrap gap-2 mt-2">
+                    {/* Intereses Generales */}
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
+                            <h2 className="text-lg font-bold text-white flex items-center">
+                                <User className="w-5 h-5 mr-2" />
+                                Intereses Generales
+                            </h2>
+                        </div>
+                        <div className="p-6">
+                            <div className="space-y-6">
                                 {itemsAboutMe.map((item, index) => {
-                                  
-                                // 👇 Parseamos "answers" por si vienen mal como string
-                                let answers = [];
-                                try {
-                                    answers = Array.isArray(item.answers)
-                                        ? item.answers
-                                        : JSON.parse(item.answers.replace(/'/g, '"'));
-                                } catch (e) {
-                                    console.error("No se pudo parsear answers para:", item.question);
-                                    answers = [];
-                                }
-                               
-                                return (
-                                    <div key={index} className="flex flex-col">
-                                        {item.question === '¿Cuál es tu personalidad?' ? (
-                                            <div className="flex space-x-1 items-center">
-                                                <p className="text-black font-semibold">
+                                    let answers = [];
+                                    try {
+                                        answers = Array.isArray(item.answers)
+                                            ? item.answers
+                                            : JSON.parse(item.answers.replace(/'/g, '"'));
+                                    } catch (e) {
+                                        console.error("No se pudo parsear answers para:", item.question);
+                                        answers = [];
+                                    }
+                                   
+                                    return (
+                                        <div key={index} className="space-y-3">
+                                            {item.question === '¿Cuál es tu personalidad?' ? (
+                                                <div className="space-y-2">
+                                                    <p className="font-semibold text-gray-800">
+                                                        {item.question}
+                                                        {!item.optional && <span className="text-red-500"> *</span>}
+                                                    </p>
+                                                    <a
+                                                        className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm underline"
+                                                        href="https://www.16personalities.com/es/test-de-personalidad"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        Hacer test de personalidad →
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                <p className="font-semibold text-gray-800">
                                                     {item.question}
                                                     {!item.optional && <span className="text-red-500"> *</span>}
                                                 </p>
-                                                <a
-                                                    className="botonLink"
-                                                    href="https://www.16personalities.com/es/test-de-personalidad"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    Hacer test de personalidad
-                                                </a>
+                                            )}
+
+                                            <div className="flex flex-wrap gap-2">
+                                                {answers.map((answer, i) => {
+                                                    const isSelected = selectedAnswers[item._id]?.includes(answer);
+                                                   
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${
+                                                                isSelected
+                                                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105' 
+                                                                    : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200'
+                                                            }`}
+                                                            onClick={() => {
+                                                                setSelectedAnswers((prev) => {
+                                                                    const currentAnswers = prev[item._id] || [];
+
+                                                                    if (item.multi_option) {
+                                                                        return {
+                                                                            ...prev,
+                                                                            [item._id]: currentAnswers.includes(answer)
+                                                                                ? currentAnswers.filter((a) => a !== answer)
+                                                                                : [...currentAnswers, answer]
+                                                                        };
+                                                                    } else {
+                                                                        return {
+                                                                            ...prev,
+                                                                            [item._id]: [answer]
+                                                                        };
+                                                                    }
+                                                                });
+                                                            }}
+                                                        >
+                                                            {answer}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
-                                        ) : (
-                                            <p className="font-semibold">
-                                                {item.question}
-                                                {!item.optional && <span className="text-red-500"> *</span>}
-                                            </p>
-                                        )}
-
-                                        <div className="flex flex-wrap">
-                                            {answers.map((answer, i) => {
-                                                const isSelected =  selectedAnswers[item._id]?.includes(answer);
-                                               
-                                                return (
-                                                    <button
-                                                        key={i}
-                                                        className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${isSelected
-                                                ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                                : 'btn-off'
-                                                }`}
-                                                        onClick={() => {
-                                                            setSelectedAnswers((prev) => {
-                                                                const currentAnswers = prev[item._id] || [];
-
-                                                                if (item.multi_option) {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item._id]: currentAnswers.includes(answer)
-                                                                            ? currentAnswers.filter((a) => a !== answer)
-                                                                            : [...currentAnswers, answer]
-                                                                    };
-                                                                } else {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item._id]: [answer]
-                                                                    };
-                                                                }
-                                                            });
-                                                        }}
-                                                    >
-                                                        {answer}
-                                                    </button>
-                                                );
-                                            })}
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                             </div>
-                           
                         </div>
-                            </AccordionTab>
-                        </Accordion>
-                        </div>
-                    </React.Fragment>
+                    </div>
+                </div>                {/* Botón de guardar */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
+                    <button 
+                        onClick={handleSubmit} 
+                        className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                        Guardar Cambios
+                    </button>
                 </div>
-                {/* <Link to="../perfil" className="w-full text-white flex items-center justify-center p-2"> */}
-                <div className="flex justify-center items-center mb-16">
-                    <button onClick={handleSubmit} className={buttonStyle}>Guardar</button>
-                </div>
-                {/* </Link> */}
             </div>
+
+            {/* Loading overlay */}
+            {loading === true && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-blue-600/70 via-purple-600/70 to-pink-600/70 backdrop-blur-md transition-opacity duration-700 opacity-100">
+                    <div className="text-center text-white p-8 rounded-xl">
+                        <h1 className="text-3xl font-bold mb-2">¡Perfil Actualizado!</h1>
+                        <p className="mb-4">Redirigiendo a Perfil...</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
