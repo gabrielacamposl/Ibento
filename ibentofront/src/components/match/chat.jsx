@@ -229,7 +229,7 @@ useEffect(() => {
                 </div>
 
                 {/* Mensajes */}
-                <div className="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
+                <div className="max-h-[calc(100vh-15rem)]  flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
                     <div className="flex flex-col gap-4">
                         {mensajes.map((message, index) => (
                             <div key={index} className={`flex ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>

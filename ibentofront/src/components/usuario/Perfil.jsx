@@ -1,7 +1,7 @@
 import React, { use, useEffect, useState } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
-
+import { Toast } from "primereact/toast";
 import { Carousel } from 'primereact/carousel';
 import { Button } from 'primereact/button';
 import Favoritos from './Favoritos'; // Asegúrate de que la ruta sea correcta
@@ -16,6 +16,7 @@ import api from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { WifiOff } from 'lucide-react';
 const Perfil = () => {
+    const toast = useRef(null);
     const navigate = useNavigate();
     const { makeRequest } = useOfflineRequest();
     const [favoritos, setFavoritos] = useState([]);
@@ -24,6 +25,7 @@ const Perfil = () => {
     const [verificar, setVerificar] = useState(false);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
+    
     // Detectar cambios en conexión
     useEffect(() => {
         const handleConnectionChange = (event) => {
@@ -67,6 +69,7 @@ const Perfil = () => {
 
 
 
+
     useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchVerify = async () => {
@@ -87,16 +90,28 @@ const Perfil = () => {
         }
         fetchVerify();
     }, []);
+
+
+
+    //Manejo del toast al momento de agregar un evento 
+    const showSuccess = (message) => {
+    toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+  };
+
+  const showError = (message) => {
+    toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
+  };
+
     useEffect(() => {
         //Obtener el queryParameter "verificar" de la URL
         const queryParams = new URLSearchParams(window.location.search);
         const verificarParam = queryParams.get('buscar');
         if (verificarParam === 'ok') {
             setIndex(1);
-
+            showSuccess("¡Ahora puedes buscar matches de este evento!");
 
         }
-        // eslint-disable-next-line
+        
     }, []);
 
 
@@ -345,7 +360,8 @@ const Perfil = () => {
                         </div>                    </div>
                 </div>
             </div>
-            
+            {/* Toast component for notifications */}
+            <Toast ref={toast} />
             {/* Indicador de estado de conexión */}
             <ConnectionStatus />
             
@@ -357,6 +373,7 @@ const Perfil = () => {
                 </div>
             )}
         </div>
+        
     );
 };
 export default Perfil;

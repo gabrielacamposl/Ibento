@@ -409,12 +409,12 @@ const verMatch = () => {
                         </div>
                     </div>
 
-                    {/* <div className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2 rounded-xl shadow-lg">
+                    <div className="flex items-center space-x-2">
+                        {/* <div className="flex items-center space-x-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2 rounded-xl shadow-lg">
                             <Star className="w-4 h-4 text-white" />
                             <span className="text-white font-bold text-sm">{superLikeCount}</span>
-                        </div>
-                    </div> */}
+                        </div> */}
+                    </div>
                 </div>
             </div>
 
