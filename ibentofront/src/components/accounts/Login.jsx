@@ -225,12 +225,7 @@ const Login = () => {  const [email, setEmail] = useState("");
                 </Grid>
 
 
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Recordar cuenta"
-                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
-                />
-
+               
                 <Button 
                   className={buttonStyle} 
                   type="submit"
