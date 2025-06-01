@@ -207,7 +207,7 @@ useEffect(() => {
     return (
         <div className="relative min-h-screen w-full flex items-center justify-center bg-white">
             {/* Contenedor principal glass */}
-            <div className="relative z-10 w-full max-w-md mx-auto  flex flex-col rounded-3xl bg-white border border-blue-100 shadow-xl overflow-hidden">
+            <div className="relative z-10 w-full max-w-md mx-auto min-h-screen flex flex-col rounded-3xl bg-white border border-blue-100 shadow-xl overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-blue-100">
                     <button className="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition" onClick={handleBack}>
@@ -229,7 +229,7 @@ useEffect(() => {
                 </div>
 
                 {/* Mensajes */}
-                <div className="max-h-[calc(100vh-18rem)] h-screen flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
+                <div className="max-h-[calc(100vh-17rem)] h-screen flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
                     <div className="flex flex-col gap-4">
                         {mensajes.map((message, index) => (
                             <div key={index} className={`flex ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>
