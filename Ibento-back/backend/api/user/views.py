@@ -16,7 +16,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from bson import ObjectId
-
+import base64
+from io import BytesIO
 import re
 
 # Libraries
@@ -660,25 +661,17 @@ def delete_profile_picture(request, photo_url):
 
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
 # --------- Subir INE para Validar el Perfil 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def ine_validation_view(request):
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
-    selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
         return Response({
             "error": "Ambas imágenes de la INE son requeridas.",
             "codigo": "MISSING_IMAGES"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    if not selfie:
-        return Response({
-            "error": "La foto de selfie es requerida.",
-            "codigo": "MISSING_SELFIE"
         }, status=status.HTTP_400_BAD_REQUEST)
     
     try: 
@@ -732,12 +725,45 @@ def ine_validation_view(request):
             user.curp = curp
         user.save()
         
-        print("=== VALIDANDO ROSTRO CON SELFIE ===")
+    
+    finally:
+        if 'front_b64' in locals():
+            del front_b64
+        if 'back_b64' in locals():
+            del back_b64
         
-        # Convertir imágenes procesadas de base64 a archivos para FastAPI
-        import base64
-        from io import BytesIO
+        print("Limpieza completada")
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
+def face_validation_view(request):
+    ine_front = request.FILES.get('ine_front')
+    selfie = request.FILES.get('selfie')
+    
+    if not ine_front:
+        return Response({
+            "error": "La imagen frontal de la ine es requerida.",
+            "codigo": "MISSING_IMAGES"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not selfie:
+        return Response({
+            "error": "La foto de selfie es requerida.",
+            "codigo": "MISSING_SELFIE"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try: 
+        user: Usuario = request.user
+        print("Procesando imagen frontal...")
+        front_b64 = safe_process_ine_with_fallback(ine_front)
+        print("Procesando selfie...")
+        selfie_b64 = safe_process_selfie_with_fallback(selfie)
         
+        print("Imágenes procesadas exitosamente")
+          
         # Crear archivo temporal para INE frontal procesada
         ine_front_data = base64.b64decode(front_b64)
         ine_front_file = BytesIO(ine_front_data)
@@ -764,28 +790,13 @@ def ine_validation_view(request):
                 return Response({
                     "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "Tu rostro no coincide con la foto de la INE.",
-                    "distancia": error_data.get("distancia", "N/A"),
                     "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
                     "codigo": "FACE_NO_MATCH"
-                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
-            
-
-            result = response.json()
-            rostro_valido = result.get("rostro_valido", False)
-            
-            if not rostro_valido:
-                return Response({
-                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
-                    "error": "La verificación facial no fue exitosa.",
-                    "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
-                    "codigo": "FACE_VERIFICATION_FAILED"
-                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             # Guardar validación de rostro
             user.is_validated_camera = True
             user.save()
-            
-            print("Rostro validado exitosamente")
             
         except requests.RequestException as e:
             print(f"Error en conexión con FastAPI: {str(e)}")
@@ -793,10 +804,8 @@ def ine_validation_view(request):
                 "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
-            }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 503
-        
-        print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
-        
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE) 
+              
         # RESPUESTA EXITOSA
         return Response({
             "success": True,
@@ -811,9 +820,6 @@ def ine_validation_view(request):
         print(f"=== ERROR EN VALIDACIÓN ===")
         print(f"Error: {str(e)}")
         print(f"Tipo: {type(e).__name__}")
-        
-        # Log más detallado para debugging
-        import traceback
         print(f"Stack trace: {traceback.format_exc()}")
         
         return Response({
@@ -824,16 +830,8 @@ def ine_validation_view(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     finally:
-        print("=== LIMPIEZA DE MEMORIA ===")
-        
-        # Limpiar variables sensibles de la memoria
         if 'front_b64' in locals():
             del front_b64
-        if 'back_b64' in locals():
-            del back_b64
-        
-        print("Limpieza completada")
-
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
 
