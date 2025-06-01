@@ -94,13 +94,17 @@ const Perfil = () => {
 
 
     //Manejo del toast al momento de agregar un evento 
-    const showSuccess = (message) => {
-    toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+    const showSuccess = () => {
+    if (toast.current) {
+      toast.current.show({ 
+        severity: 'success', 
+        summary: 'Éxito', 
+        detail: 'Operación realizada correctamente' 
+      });
+    }
   };
 
-  const showError = (message) => {
-    toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
-  };
+
 
     useEffect(() => {
         //Obtener el queryParameter "verificar" de la URL
