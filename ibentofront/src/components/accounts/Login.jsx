@@ -361,7 +361,7 @@ const Login = () => {  const [email, setEmail] = useState("");
                   </div>
                 </Grid>
 
-                <Grid item xs={12} container justifyContent="left" alignItems="left">
+                <Grid item xs={12} className='mt-2 mb-2' container justifyContent="left" alignItems="left">
 
                   <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
                     ¿Olvidaste tu contraseña?
