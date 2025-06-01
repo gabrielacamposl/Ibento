@@ -686,11 +686,6 @@ def ine_validation_view(request):
         print("Procesando imagen trasera...")
         back_b64 = safe_process_ine_with_fallback(ine_back)
         
-        print("Procesando selfie...")
-        selfie_b64 = safe_process_selfie_with_fallback(selfie)
-        
-        print("Imágenes procesadas exitosamente")
-        
         # EXTRAER DATOS CON OCR
         print("=== EXTRAYENDO DATOS DE LA INE ===")
         cic, id_ciudadano, curp = ocr_ine(front_b64, back_b64)
@@ -706,8 +701,6 @@ def ine_validation_view(request):
         
         print(f"Datos extraídos - CIC: {cic}, ID: {id_ciudadano}")
         
-        # VALIDAR INE EN PADRÓN ELECTORAL
-        print("=== VALIDANDO INE EN PADRÓN ===")
         is_valid = validate_ine(cic, id_ciudadano)
         
         if not is_valid:
@@ -718,21 +711,16 @@ def ine_validation_view(request):
                 "codigo": "INE_INVALID"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        print("INE válida en padrón electoral")
-          # GUARDAR DATOS DE INE EN USUARIO
         user.is_ine_validated = True
         if curp:
             user.curp = curp
         user.save()
-        
     
     finally:
         if 'front_b64' in locals():
             del front_b64
         if 'back_b64' in locals():
             del back_b64
-        
-        print("Limpieza completada")
 
 
 
