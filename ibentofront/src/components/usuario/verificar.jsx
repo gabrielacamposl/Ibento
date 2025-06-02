@@ -6,7 +6,7 @@ import "../../assets/css/botones.css";
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
-
+import { curp_regex } from "../../utils/regex";
 
 const Verificar = () => {
     const navigate = useNavigate();
@@ -423,6 +423,8 @@ const uploadAllData = async () => {
             showWarn('El CURP es requerido');
             return false;
         }
+
+      
         
         // Validar formato de fecha (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -432,10 +434,14 @@ const uploadAllData = async () => {
         }
         
         // Validar CURP (18 caracteres alfanuméricos)
-        if (curp.length !== 18) {
-            showWarn('El CURP debe tener exactamente 18 caracteres');
-            return false;
-        }
+        // if (curp.length !== 18) {
+        //     showWarn('El CURP debe tener exactamente 18 caracteres');
+        //     return false;
+        // }
+        if (!curp_regex.test(curp.trim())) {
+                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
+                return false;
+         }
         
         return true;
     };
@@ -753,7 +759,9 @@ const uploadAllData = async () => {
                                 )}
                             </div>
                         </div>
-                    )}                    { activeIndex === 4 && (
+                    )}                 
+                    
+                    { activeIndex === 4 && (
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Tu información</h1>
                             <p>Tu INE ha sido validada exitosamente.</p>
