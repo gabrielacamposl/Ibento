@@ -18,7 +18,7 @@ const Verificar = () => {
         ine: [],
         facePhoto: null,
     });
-    
+
     const [loading, setLoading] = useState(false);
 
     // Estados de carga individuales para cada acción
@@ -26,15 +26,17 @@ const Verificar = () => {
     const [savingPreferences, setSavingPreferences] = useState(false);
     const [validatingIne, setValidatingIne] = useState(false);
     const [submittingInfo, setSubmittingInfo] = useState(false);
-    
+    const [validatingFace, setValidatingFace] = useState(false);
+
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
         photos: false,
         preferences: false,
         ine: false,
+        face: false,
         info: false
     });
-    
+
     // Estados para el formulario de información adicional (step 4)
     const [formData, setFormData] = useState({
         birthday: '',
@@ -42,7 +44,7 @@ const Verificar = () => {
         description: '',
         curp: ''
     });
-    
+
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
@@ -77,7 +79,7 @@ const Verificar = () => {
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
-        if (!file) return;        if (!file.type.startsWith("image/")) {
+        if (!file) return; if (!file.type.startsWith("image/")) {
             showWarn("Por favor selecciona una imagen válida.");
             return;
         }
@@ -101,7 +103,8 @@ const Verificar = () => {
                 pictures: newPictures,
             };
         });
-    };    const handleUploadPictures = async () => {        if (user.pictures.length < 3 || user.pictures.length > 6) {
+    }; const handleUploadPictures = async () => {
+        if (user.pictures.length < 3 || user.pictures.length > 6) {
             showWarn("Debes subir entre 3 y 6 fotos.");
             return;
         }        // Validar cada archivo
@@ -190,7 +193,9 @@ const Verificar = () => {
         };
 
         fetchQuestions();
-    }, []);    const handleSavePreferences = async () => {
+    }, []);
+
+    const handleSavePreferences = async () => {
         setSavingPreferences(true);
         try {
             // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
@@ -209,7 +214,7 @@ const Verificar = () => {
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 const respuestaUsuario = selectedAnswers[item._id] || [];
                 return !item.optional && respuestaUsuario.length === 0;
-            });            if (obligatoriasNoRespondidas.length > 0) {
+            }); if (obligatoriasNoRespondidas.length > 0) {
                 showWarn("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
@@ -230,7 +235,8 @@ const Verificar = () => {
             // const response = await api.post("intereses-respuestas/", { respuestas });
             // console.log("Respuesta del servidor:", response.data);
             showSuccess("Preferencias guardadas correctamente.");
-            setActiveIndex(prev => prev + 1);        } catch (err) {
+            setActiveIndex(prev => prev + 1);
+        } catch (err) {
 
             console.error("Error al procesar preferencias:", err);
             showError(`Error al guardar preferencias: ${err.message}`);
@@ -265,29 +271,29 @@ const Verificar = () => {
 
     // ---------------------------- ENVIAR TODA LA INFORMACIÓN ----------------------------- 
 
-    
+
     // 🔥 FUNCIÓN COMBINADA para enviar todo al final
-const uploadAllData = async () => {
-    try {
-        setLoading(true);
-        
-        // 1. Subir fotos
-        console.log("Subiendo fotos...");
-        await uploadSavedPhotos();
-        
-        // 2. Enviar preferencias
-        console.log("Enviando preferencias...");
-        await sendSavedPreferences();
-        
-        console.log("¡Todos los datos han sido enviados exitosamente!");
-        
-    } catch (error) {
-        console.error("Error al enviar datos:", error);
-        throw error; // Re-lanzar el error para que lo maneje la función que llama
-    } finally {
-        setLoading(false);
-    }
-};
+    const uploadAllData = async () => {
+        try {
+            setLoading(true);
+
+            // 1. Subir fotos
+            console.log("Subiendo fotos...");
+            await uploadSavedPhotos();
+
+            // 2. Enviar preferencias
+            console.log("Enviando preferencias...");
+            await sendSavedPreferences();
+
+            console.log("¡Todos los datos han sido enviados exitosamente!");
+
+        } catch (error) {
+            console.error("Error al enviar datos:", error);
+            throw error; // Re-lanzar el error para que lo maneje la función que llama
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     // ---------------------------- VALIDACION DE INE -----------------------------
@@ -317,9 +323,12 @@ const uploadAllData = async () => {
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
 
+
+    // Modificar: Unicamente que valide las imagenes del INE
+
     // -------- Validar imagenes de INE
     const handleIneValidation = async () => {
-        if (!ineImages[0] || !ineImages[1] || !capturedPhoto) {
+        if (!ineImages[0] || !ineImages[1]) {
             showWarn('Debes subir ambas imágenes de la INE y capturar tu foto');
             return;
         }
@@ -330,7 +339,6 @@ const uploadAllData = async () => {
             const formData = new FormData();
             formData.append('ine_front', ineImages[0]);
             formData.append('ine_back', ineImages[1]);
-            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
 
             const response = await api.post('validar-ine/', formData, {
                 headers: {
@@ -340,37 +348,20 @@ const uploadAllData = async () => {
 
             const data = response.data;
 
-            if (data.success && data.usuario_validado) {
+            if (data.success && data.ine_validada) {
                 setMessage('¡INE validada exitosamente! Ahora completa tu información personal.');
                 try {
-                    console.log("Subiendo todos los datos del usuario...");
-                    await uploadAllData();                    
-                    setStepsCompleted(prev => ({ ...prev, ine: true }));
-                    showSuccess("¡INE validada exitosamente! Completa tu información personal.");
-                    setActiveIndex(4); // Navigate to step 5 (form)
+                    //await uploadAllData(); Modificar: Esta función va en validar rostro
+                    setStepsCompleted(prev => ({ ...prev, ine: true })); //Entender este paso
+                    showSuccess("¡INE validada exitosamente! Ahora valida tu identidad.");
+                    setActiveIndex(3); // Navigate to step 4 (Validación del rostro)
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     setActiveIndex(4); // Still navigate to step 5 even if upload fails
                 }
-            } else if (data.mensaje_ine) {
-                 setMessage('INE validada correctamente. El servicio de validación de rostro no está disponible temporalmente. Por favor, intenta más tarde.');
-                 try {
-                    console.log("Subiendo todos los datos del usuario...");
-                    await uploadAllData();                    
-                    setStepsCompleted(prev => ({ ...prev, ine: true }));
-                    setMessage('¡INE validada y todos los datos han sido enviados exitosamente!');
-                    showContrast("¡INE validada! Completa tu información personal.");
-                    setActiveIndex(4); // Navigate to step 5 (form)
-                } catch (uploadError) {
-                    console.error("Error al subir datos después de validación:", uploadError);
-                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(4); // Still navigate to step 5 even if upload fails
-                }
-            }
-             else {
+            } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
@@ -383,15 +374,63 @@ const uploadAllData = async () => {
             const errorMessage = error.response?.data?.error ||
                 error.response?.data?.message ||
                 error.message ||
-                'Error desconocido';            setMessage(`Error: ${errorMessage}`);
+                'Error desconocido'; setMessage(`Error: ${errorMessage}`);
             showError(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
         } finally {
             setValidatingIne(false);
         }
     };
 
+    const handleValidacionRostro = async () => {
+        if (!capturedPhoto) {
+            showWarn('Debes capturar una imagen de tu rostro');
+            return;
+        }
+
+        setValidatingFace(true)
+
+        try {
+            const formData = new FormData();
+            formData.append('ine_front', ineImages[0]);
+            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
+
+            const response = await api.post('validar-rostro/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+            const data = response.data;
+
+            if (data.success && data.rostro_validado) {
+                setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
+                try {
+                    await uploadAllData(); // Subir todas las fotos y preferencias
+                    setStepsCompleted(prev => ({ ...prev, face: true }));
+                    showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
+                    setActiveIndex(4); // Navegar al paso 5 (Información adicional)
+                } catch (uploadError) {
+                    console.error("Error al subir datos después de validación:", uploadError);
+                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    setActiveIndex(4); // Navegar al paso 5 (Información adicional)
+                }
+            } else {
+                setMessage(data.error || 'La validación falló. Revisa las imágenes.');
+                showError(data.error || 'La validación falló. Revisa las imágenes.');
+            }
+
+
+        }
+        catch (error) {
+            console.error('Error al capturar imagen:', error);
+            showError('Error al capturar imagen. Por favor, intenta de nuevo.');
+            setValidatingFace(false);
+            return;
+        }
+    }
+
     // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
-    
+
     // Función para manejar cambios en el formulario
     const handleFormChange = (field, value) => {
         setFormData(prev => ({
@@ -403,40 +442,40 @@ const uploadAllData = async () => {
     // Función para validar el formulario
     const validateForm = () => {
         const { birthday, gender, description, curp } = formData;
-        
+
         if (!birthday.trim()) {
             showWarn('La fecha de nacimiento es requerida');
             return false;
         }
-        
+
         if (!gender) {
             showWarn('El género es requerido');
             return false;
         }
-        
+
         if (!description.trim()) {
             showWarn('La descripción es requerida');
             return false;
         }
-        
+
         if (!curp.trim()) {
             showWarn('El CURP es requerido');
             return false;
         }
-        
+
         // Validar formato de fecha (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(birthday)) {
             showWarn('El formato de fecha debe ser YYYY-MM-DD');
             return false;
         }
-        
+
         // Validar CURP (18 caracteres alfanuméricos)
         if (curp.length !== 18) {
             showWarn('El CURP debe tener exactamente 18 caracteres');
             return false;
         }
-        
+
         return true;
     };
 
@@ -450,11 +489,11 @@ const uploadAllData = async () => {
 
         try {
             const response = await api.post('usuarios/agregar_info/', formData);
-            
+
             if (response.status === 200) {
                 setStepsCompleted(prev => ({ ...prev, info: true }));
                 showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
-                
+
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
                     navigate("../eventos");
@@ -462,10 +501,10 @@ const uploadAllData = async () => {
             }
         } catch (error) {
             console.error('Error al enviar información:', error);
-            const errorMessage = error.response?.data?.error || 
-                                error.response?.data?.detail || 
-                                error.message || 
-                                'Error al guardar la información';
+            const errorMessage = error.response?.data?.error ||
+                error.response?.data?.detail ||
+                error.message ||
+                'Error al guardar la información';
             showError(`Error: ${errorMessage}`);
         } finally {
             setSubmittingInfo(false);
@@ -486,27 +525,27 @@ const uploadAllData = async () => {
 
     // Funciones para mostrar toasts
     const showSuccess = (message) => {
-        toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+        toast.current.show({ severity: 'success', summary: 'Éxito', detail: message, life: 4000 });
     };
 
     const showInfo = (message) => {
-        toast.current.show({severity:'info', summary: 'Información', detail: message, life: 4000});
+        toast.current.show({ severity: 'info', summary: 'Información', detail: message, life: 4000 });
     };
 
     const showWarn = (message) => {
-        toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
+        toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: message, life: 4000 });
     };
 
     const showError = (message) => {
-        toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
+        toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
     };
 
     const showSecondary = (message) => {
-        toast.current.show({severity:'secondary', summary: 'Información', detail: message, life: 4000});
+        toast.current.show({ severity: 'secondary', summary: 'Información', detail: message, life: 4000 });
     };
 
     const showContrast = (message) => {
-        toast.current.show({severity:'contrast', summary: 'Completado', detail: message, life: 4000});
+        toast.current.show({ severity: 'contrast', summary: 'Completado', detail: message, life: 4000 });
     };
 
     // Función auxiliar para convertir dataURL a File
@@ -753,12 +792,13 @@ const uploadAllData = async () => {
                                 )}
                             </div>
                         </div>
-                    )}                    { activeIndex === 4 && (
+                    )}                    
+                    {activeIndex === 4 && (
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Tu información</h1>
                             <p>Tu INE ha sido validada exitosamente.</p>
                             <p>Agrega los siguientes datos para finalizar tu registro.</p>
-                            
+
                             <div className="mt-6 space-y-4">
                                 {/* Fecha de nacimiento */}
                                 <div className="flex flex-col">
@@ -841,8 +881,8 @@ const uploadAllData = async () => {
                     </Button>
 
                     {activeIndex === 0 ? (
-                        <Button 
-                            className={buttonStyle} 
+                        <Button
+                            className={buttonStyle}
                             onClick={handleUploadPictures}
                             disabled={uploadingPhotos}
                         >
@@ -859,8 +899,8 @@ const uploadAllData = async () => {
                             )}
                         </Button>
                     ) : activeIndex === 1 ? (
-                        <Button 
-                            className={buttonStyle} 
+                        <Button
+                            className={buttonStyle}
                             onClick={handleSavePreferences}
                             disabled={savingPreferences}
                         >
@@ -877,13 +917,9 @@ const uploadAllData = async () => {
                             )}
                         </Button>
                     ) : activeIndex === 2 ? (
-                        <Button className={buttonStyle} onClick={() => setActiveIndex(3)}>
-                            Siguiente
-                        </Button>
-                    ) : activeIndex === 3 ? (
-                        <Button 
-                            className={buttonStyle} 
-                            onClick={handleIneValidation} 
+                        <Button
+                            className={buttonStyle}
+                            onClick={handleIneValidation}
                             disabled={validatingIne}
                         >
                             {validatingIne ? (
@@ -895,12 +931,31 @@ const uploadAllData = async () => {
                                     Validando...
                                 </div>
                             ) : (
-                                'Validar identidad'
+                                'Validando INE'
                             )}
                         </Button>
+                    ) : activeIndex === 3 ? (
+                        <Button
+                            className={buttonStyle}
+                            onClick={handleValidacionRostro}
+                            disabled={validatingFace}
+                        >
+                            {validatingFace ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Validando...
+                                </div>
+                            ) : (
+                                'Validando identidad'
+                            )}
+                        </Button>
+                        
                     ) : activeIndex === 4 ? (
-                        <Button 
-                            className={buttonStyle} 
+                        <Button
+                            className={buttonStyle}
                             onClick={handleSubmitInfo}
                             disabled={submittingInfo}
                         >
@@ -918,7 +973,7 @@ const uploadAllData = async () => {
                         </Button>
                     ) : null}</div>
             </div>
-            <Toast ref={toast} position="bottom-center"/>
+            <Toast ref={toast} position="bottom-center" />
         </div>
     );
 };

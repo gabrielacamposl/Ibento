@@ -722,8 +722,17 @@ def ine_validation_view(request):
             del front_b64
         if 'back_b64' in locals():
             del back_b64
+        
+    return Response({
+            "success": True,
+            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
+            "ine_validada": True,
+            "rostro_validado": True
+        }, status=status.HTTP_200_OK)
 
 
+# ine_front + selfie
+# -------------------------------------- VALIDACIÓN DE ROSTRO CON SELFIE ----------------------------------------
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -798,10 +807,8 @@ def face_validation_view(request):
         # RESPUESTA EXITOSA
         return Response({
             "success": True,
-            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
             "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
             "usuario_validado": True,
-            "ine_validada": True,
             "rostro_validado": True
         }, status=status.HTTP_200_OK)
     

@@ -8,7 +8,7 @@ from api.user.views import matches, sugerencia_usuarios,personas_que_me_dieron_l
 # Views para chats
 from api.user.views import obtener_mensajes, mis_conversaciones, enviar_mensaje
 # views para validar user
-from api.user.views import estado_validacion_view, ine_validation_view
+from api.user.views import estado_validacion_view, ine_validation_view, face_validation_view
 # Views par el FCM
 from api.user.views import save_fcm_token,notification_status, test_notification,remove_fcm_token, get_user_notifications, marcar_notificaciones_leidas
 
@@ -72,6 +72,7 @@ urlpatterns = [
     path('api/intereses-respuestas/', guardar_respuestas_perfil, name='guardar_respuestas_perfil'),
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
+    path('api/validar-rostro/', face_validation_view, name='validar_face'),
 
     # Matches
     # ---- Dar like o dislike
