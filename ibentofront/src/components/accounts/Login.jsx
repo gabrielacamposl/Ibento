@@ -5,6 +5,8 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../apilogin';
+
+import InstallPrompt from "../../components/pwa/InstallPrompt";
 import {
   FormControlLabel,
   Checkbox,
@@ -414,6 +416,7 @@ const Login = () => {  const [email, setEmail] = useState("");
 
       {/* Toast component for notifications */}
       <Toast ref={toast} />
+        <InstallPrompt />
     </div>
 
   );
