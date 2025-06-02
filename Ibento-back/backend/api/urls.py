@@ -34,7 +34,8 @@ from api.user.views import (crear_usuario,
                             obtener_match_id,
                             obtener_modo_busqueda,
                             actualizar_perfil,
-                            eliminar_evento_favorito
+                            eliminar_evento_favorito,
+                            eliminar_cuenta
                             )
 
 
@@ -111,6 +112,7 @@ urlpatterns = [
     path('api/perfil/favoritos/', obtener_eventos_favoritos, name='obtener_eventos_favoritos'),
     path('api/eventos/<str:pk>/dislike/', eliminar_evento_favorito, name='QuitarLikeEvento'),
     path('api/eventos/<str:evento_id>/es-favorito/', es_favorito, name='es_favorito'),
+    path('api/eliminar_cuenta/', eliminar_cuenta, name='eliminar_cuenta'),
     
     # Obtener notificaciones
     path('api/notificaciones/', get_user_notifications, name='get_user_notifications'),
@@ -121,5 +123,7 @@ urlpatterns = [
     path('api/notification-status/', notification_status, name='notification_status'),
     path('api/test-notification/', test_notification, name='test_notification'),  # Solo para desarrollo
     
+
+
   
 ]

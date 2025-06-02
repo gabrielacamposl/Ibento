@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useContext } from 'react';
+import '../../assets/css/botones.css';
 const itsMatch = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({
@@ -76,63 +77,97 @@ fetchData();
 
 
 
+    // Agrega los estilos de animación directamente en el componente
     return (
-        <div className="text-black flashOnce flex justify-center items-center min-h-screen ">
-            <div className="  p-5 max-w-lg " style={{ backgroundImage: `url('/public/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
-                <div className="flex justify-end items-end font-bold text-2xl w-full">
-                    <button className="">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                    </button>
-                </div>
+        <>
+            <style>
+                {`
+                @-webkit-keyframes bounce-slow {
+                  0%, 100% { -webkit-transform: translateY(0);}
+                  50% { -webkit-transform: translateY(-30px);}
+                }
+                @keyframes bounce-slow {
+                  0%, 100% { transform: translateY(0);}
+                  50% { transform: translateY(-30px);}
+                }
+                @-webkit-keyframes bounce-slow-reverse {
+                  0%, 100% { -webkit-transform: translateY(0);}
+                  50% { -webkit-transform: translateY(30px);}
+                }
+                @keyframes bounce-slow-reverse {
+                  0%, 100% { transform: translateY(0);}
+                  50% { transform: translateY(30px);}
+                }
+                .animate-bounce-slow {
+                  -webkit-animation: bounce-slow 2s infinite;
+                  animation: bounce-slow 2s infinite;
+                }
+                .animate-bounce-slow-reverse {
+                  -webkit-animation: bounce-slow-reverse 2s infinite;
+                  animation: bounce-slow-reverse 2s infinite;
+                }
+                `}
+            </style>
+            <div className="text-black flashOnce flex justify-center items-center min-h-screen ">
+                <div className="  p-5 max-w-lg " style={{ backgroundImage: `url('/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
+                    <div className="flex justify-end items-end font-bold text-2xl w-full">
+                        <button className="">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                    </div>
 
-                <div className="min-h-screen p-4 w-full flex flex-col justify-center items-center">
+                    <div className="min-h-screen p-4 w-full flex flex-col justify-center items-center">
 
-                    <React.Fragment>
-                        <div className="animateDiv flex justify-center items-center ">
-                            <div className="relative ">
-                                <img src={usersMatch?.match?.imagen_usuario_a?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_a_nombre || 'Default Name'} />
-                                <div className="absolute bottom-12 right-10 w-full flex justify-center items-center mb-10">
-                                    <svg width="280" height="150">
-                                        <defs>
-                                            <path id="curve1" d="M 50,70 Q 130,-20 200,50"  />
-                                        </defs>
-                                        <text fontSize="27" fontWeight="bold" fill="black">
-                                            <textPath href="#curve1" startOffset="30%" textAnchor="middle">
-                                                ¡NUEVO
-                                            </textPath>
-                                        </text>
-                                    </svg>
+                        <React.Fragment>
+                            <div className="animateDiv flex justify-center items-center ">
+                                <div className="relative animate-bounce-slow">
+                                    <img src={usersMatch?.match?.imagen_usuario_a?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50  h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_a_nombre || 'Default Name'} />
+                                    <div className="absolute bottom-12 right-10 w-full flex justify-center items-center mb-10">
+                                        <svg width="280" height="150">
+                                            <defs>
+                                                <path id="curve1" d="M 50,70 Q 130,-20 200,50"  />
+                                            </defs>
+                                            <text fontSize="27" fontWeight="bold" fill="black">
+                                                <textPath href="#curve1" startOffset="30%" textAnchor="middle">
+                                                    ¡NUEVO
+                                                </textPath>
+                                            </text>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div className="relative animate-bounce-slow-reverse">
+                                    <img src={usersMatch?.match?.imagen_usuario_b?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_b_nombre || 'Default Name'} />
+                                    <div className="absolute top-13 right-1 w-full flex justify-center items-center">
+                                        <svg width="300" height="300">
+                                            <defs>
+                                                <path id="curve2" d="M -60,60 Q 30,300 296 100" fill="transparent" />
+                                            </defs>
+                                            <text fontSize="27" fontWeight="bold" fill="black">
+                                                <textPath href="#curve2" startOffset="50%" textAnchor="middle">
+                                                    ACOMPAÑANTE!
+                                                </textPath>
+                                            </text>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="relative">
-                            <img src={usersMatch?.match?.imagen_usuario_b?.[0] || '/profile_empty.webp'} className="sombraMatch1 w-50 h-50 object-cover rounded-full" alt={usersMatch?.match?.usuario_b_nombre || 'Default Name'} />
-                                <div className="absolute top-13 right-1 w-full flex justify-center items-center">
-                                    <svg width="300" height="300">
-                                        <defs>
-                                            <path id="curve2" d="M -60,60 Q 30,300 296 100" fill="transparent" />
-                                        </defs>
-                                        <text fontSize="27" fontWeight="bold" fill="black">
-                                            <textPath href="#curve2" startOffset="50%" textAnchor="middle">
-                                                ACOMPAÑANTE!
-                                            </textPath>
-                                        </text>
-                                    </svg>
-                                </div>
-                            </div>
+                            
+                        </React.Fragment>
+                        <div className="mt-40 w-full">
+                            <button onClick={() => navigate(`../chat/?room=${usersMatch?.conversacion_id}`)} className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
+                            <button onClick={handdleContinuar} className='btn-custom2 rounded h-10 w-full font-bold text-lg'>Continuar</button>
                         </div>
-                        
-                    </React.Fragment>
-                    <div className="mt-40 w-full">
-                        <button onClick={() => navigate(`../chat/?room=${usersMatch?.conversacion_id}`)} className="btn-custom rounded-full h-10 w-full font-bold text-lg mb-4">Iniciar chat</button>
-                        <button onClick={handdleContinuar} className='btn-custom2 rounded h-10 w-full font-bold text-lg'>Continuar</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
+
+    
+    
 }
 
 export default itsMatch;
