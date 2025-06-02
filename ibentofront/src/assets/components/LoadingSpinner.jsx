@@ -4,7 +4,7 @@ const LoadingSpinner = ({ loadingText = 'Cargando' }) => {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-8 text-center z-50 overflow-hidden">
       {/* Fondo con gradiente animado */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-pink-400 to-purple-500 animate-gradient">
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
       </div>
 

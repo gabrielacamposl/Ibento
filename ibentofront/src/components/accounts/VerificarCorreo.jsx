@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { motion } from "framer-motion";
-
+import ibentoLogo from "/images/ibentoLogo.png";
 
 
 export default function VerificarCorreo() {
@@ -136,6 +136,12 @@ export default function VerificarCorreo() {
           
         <Grid container component="main" maxWidth="xs" className="w-full h-full">
           <CssBaseline />
+          <Box
+                component="img"
+                src={ibentoLogo}
+                alt="Ibento Logo"
+                sx={{ width: 80, height: "auto", mb: 2 }}
+              />
           <Typography className="font-bold text-purple-800 text-center" variant="h6" component="h1" sx={{ mb: 2 }}>
             Revisa tu correo electrónico
           </Typography>
