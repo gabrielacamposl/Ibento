@@ -238,3 +238,21 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(22px);
 }
+
+
+
+/* Cambiar el color, tamaño y borde del handle */
+.p-slider .p-slider-handle {
+  background-color: #ffffff;  /* Color de fondo */
+  border: 1px solid #d7d7d7;  /* Borde */
+  width: 20px;                /* Tamaño horizontal */
+  height: 20px;               /* Tamaño vertical */
+  margin-top: -10px;           /* Alinear verticalmente */
+  border-radius: 50%;         /* Hacerlo circular */
+  transition: transform 0.2s;
+}
+
+.p-slider .p-slider-handle:hover {
+  transform: scale(1.2);      /* Efecto al pasar el mouse */
+  cursor: pointer;
+}
