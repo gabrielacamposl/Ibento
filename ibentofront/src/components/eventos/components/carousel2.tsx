@@ -56,10 +56,10 @@ export default function CircularDemo({ listEvents }: CircularDemoProps) {
 
         return (
             <div 
-                className='relative rounded-lg cursor-pointer hover:scale-105 transition-transform duration-200'
+                className='relative rounded-lg lg:h-120 cursor-pointer hover:scale-105 transition-transform duration-200'
                 onClick={handleEventClick}
             >
-                <img src={product.imgs[0]} alt={product.title} className="w-full h-72 object-cover rounded-lg" />
+                <img src={product.imgs[0]} alt={product.title} className="w-full h-120 object-cover rounded-lg" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent rounded-lg"></div>
                 
                 {/* Información del evento superpuesta */}
@@ -76,7 +76,7 @@ export default function CircularDemo({ listEvents }: CircularDemoProps) {
                 numVisible={1} 
                 numScroll={5} 
                 responsiveOptions={responsiveOptions} 
-                className="custom-carousel rounded-lg w-full" 
+                className="custom-carousel rounded-lg w-full lg:h-128" 
                 circular
                 autoplayInterval={3000} 
                 itemTemplate={productTemplate} 

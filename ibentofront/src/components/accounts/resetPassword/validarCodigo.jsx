@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { buttonStyle, inputStyles } from "../../../styles/styles";
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
+import api from "../../../api";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
@@ -33,7 +34,7 @@ export default function PasswordResetValidate() {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/password-reset/validate/", {
+      const response = await api.post("password-reset/validate/", {
         email: email,
         codigo: codigo,
       });

@@ -35,7 +35,8 @@ from api.services.recommended_events import obtener_eventos_recomendados
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
-from api.services.ticketmaster import guardar_eventos_desde_json
+#from api.services.ticketmaster import guardar_eventos_desde_json
+from api.services.tasks import guardar_eventos_desde_json, prueba
 #Servicio de recomendación de usuarios
 from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
@@ -1294,15 +1295,32 @@ def bloquear_usuario(request):
 @permission_classes([IsAuthenticated])
 def mis_conversaciones(request):
     usuario = request.user
+    id_usuario = usuario._id
 
     conversaciones = Conversacion.objects.filter(
         Q(usuario_a=usuario) | Q(usuario_b=usuario)
-    ).select_related("usuario_a", "usuario_b", "match")
+    )
 
+    print("Conversaciones encontradas: ", len(conversaciones))
+    
     data = []
 
     for conv in conversaciones:
-        otro_usuario = conv.usuario_b if conv.usuario_a == usuario else conv.usuario_a
+
+        print("Conversación: ", conv)
+
+        print("Conv.usuario_a._id: ", conv.usuario_a)
+        print("Conv.usuario_b._id: ", conv.usuario_b)
+        print("id_usuario: ", id_usuario)
+
+        if conv.usuario_a._id == id_usuario:
+            otro_usuario = conv.usuario_b
+        else:
+            otro_usuario = conv.usuario_a
+
+        #otro_usuario = conv.usuario_b if conv.usuario_a._id == id_usuario else conv.usuario_a
+
+        print("Otro usuario: ", otro_usuario._id)
 
         # Buscar último mensaje (si existe)
         ultimo_mensaje = Mensaje.objects.filter(conversacion=conv).order_by("-fecha_envio").first()
@@ -1469,9 +1487,13 @@ def obtener_match_id(request, match_id):
 def importar_ticketmaster(request):
     with open("api/user/ticketmaster_events_max.json", "r", encoding="utf-8") as f:
         eventos_json = json.load(f)
-    guardar_eventos_desde_json(eventos_json)
+    guardar_eventos_desde_json.delay(eventos_json)
     return Response({'mensaje': 'Eventos importados correctamente'})
 
+@api_view(['POST'])
+def prueba(request):
+    stat = prueba.delay("681d9e134f3b2936f471436a")
+    return Response({'task_id': stat})
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radio promedio de la Tierra en km

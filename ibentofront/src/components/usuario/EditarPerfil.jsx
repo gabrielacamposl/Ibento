@@ -439,7 +439,7 @@ useEffect(() => {
                                             {categoria.valores.map((valor) => (
                                                 <button
                                                     key={valor}
-                                                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${
+                                                    className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
                                                         selectedEvents.includes(valor)
                                                             ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105' 
                                                             : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
@@ -481,7 +481,7 @@ useEffect(() => {
                                         <div key={index} className="space-y-3">
                                             {item.question === '¿Cuál es tu personalidad?' ? (
                                                 <div className="space-y-2">
-                                                    <p className="font-semibold text-gray-800">
+                                                    <p className="font-bold text-gray-800">
                                                         {item.question}
                                                         {!item.optional && <span className="text-red-500"> *</span>}
                                                     </p>
