@@ -4,60 +4,32 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../apilogin';
+
+import InstallPrompt from "../../components/pwa/InstallPrompt";
+import {
+  FormControlLabel,
+  Checkbox,
+  Paper,
+  Box,
+  Grid,
+  Typography,
+  CssBaseline,
+} from "@mui/material";
 import { Button } from "primereact/button";
-import { buttonStyle, inputStylesGlass, buttonStyleSecondary } from "../../styles/styles";
-import { Eye, EyeOff, Heart, Sparkles, Star } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { buttonStyle, inputStyles } from "../../styles/styles";
+import { Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
 
-const colors = ["#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe", "#00f2fe"];
 
-// Componente de partículas flotantes
-const FloatingParticle = ({ delay = 0, duration = 3, className = "" }) => (
-  <motion.div
-    className={`absolute opacity-60 ${className}`}
-    initial={{ y: 100, opacity: 0 }}
-    animate={{ 
-      y: -20, 
-      opacity: [0, 1, 0],
-      x: [0, 30, -30, 0],
-      rotate: [0, 180, 360]
-    }}
-    transition={{
-      duration,
-      delay,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }}
-  >
-    <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-sm" />
-  </motion.div>
-);
 
-// Componente para círculos de click interactivos
-const ClickCircle = ({ x, y, onComplete }) => (
-  <motion.div
-    className="absolute pointer-events-none rounded-full"
-    style={{
-      left: x - 25,
-      top: y - 25,
-      width: 50,
-      height: 50,
-      background: `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}40, transparent)`
-    }}
-    initial={{ scale: 0, opacity: 0.8 }}
-    animate={{ scale: 4, opacity: 0 }}
-    transition={{ duration: 1, ease: "easeOut" }}
-    onAnimationComplete={onComplete}
-  />
-);
+const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
-const LoginImproved = () => {
-  const [email, setEmail] = useState("");
+
+const Login = () => {  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [clickCircles, setClickCircles] = useState([]);
   const navigate = useNavigate();
   const toast = useRef(null);
 
@@ -69,32 +41,10 @@ const LoginImproved = () => {
   const showError = (message) => {
     toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
   };
-  
+
   const showWarn = (message) => {
     toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
-  };
-
-  // Función para manejar clicks en el fondo
-  const handleBackgroundClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const newCircle = {
-      id: Date.now(),
-      x,
-      y
-    };
-    
-    setClickCircles(prev => [...prev, newCircle]);
-  };
-
-  // Función para remover círculos completados
-  const removeCircle = (id) => {
-    setClickCircles(prev => prev.filter(circle => circle.id !== id));
-  };
-
-  const handleLogin = async (e) => {
+  };   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -168,263 +118,307 @@ const LoginImproved = () => {
     }
   };
 
+
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center relative overflow-hidden cursor-pointer"
-      onClick={handleBackgroundClick}
-    >
-      {/* Fondo animado con colores más intensos */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-        <div className="absolute inset-0 opacity-60">
-          {[...Array(15)].map((_, i) => {
+
+    <div className="h-screen flex justify-center items-center">      {/* Formulario para la visualización web  */}
+      <div className="hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
+         {/* Fondo degradado y luces */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[...Array(7)].map((_, i) => {
             const color = colors[i % colors.length];
             return (
               <motion.div
                 key={i}
-                className="absolute rounded-full blur-2xl"
-                style={{ 
-                  backgroundColor: color,
-                  width: Math.random() * 500 + 300,
-                  height: Math.random() * 500 + 300,
-                }}
+                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
+                style={{ backgroundColor: color }}
                 initial={{
                   x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight,
+                  y: Math.random() * window.innerHeight / 2,
                 }}
                 animate={{
-                  x: [
-                    Math.random() * window.innerWidth, 
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerWidth
-                  ],
-                  y: [
-                    Math.random() * window.innerHeight, 
-                    Math.random() * window.innerHeight,
-                    Math.random() * window.innerHeight
-                  ],
+                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
                 }}
                 transition={{
-                  duration: 20 + Math.random() * 10,
+                  duration: 8 + Math.random() * 4,
                   repeat: Infinity,
-                  repeatType: "reverse",
+                  repeatType: "mirror",
                   ease: "easeInOut",
                 }}
               />
             );
           })}
         </div>
-        
-        {/* Capa adicional de color para mayor intensidad */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-purple-300/40 via-blue-300/40 to-pink-300/40"></div>
+
+        {/* Contenido */}
+        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
+          {/* Logo */}
+          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+            <Box
+              sx={{
+                my: 8,
+                mx: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={ibentoLogo}
+                alt="Ibento Logo"
+                sx={{ width: 80, height: "auto", mb: 2 }}
+              />
+              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
+                Inicia Sesión
+              </Typography>
+              <Box component="form" sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Correo electrónico<span className="text-red-500">*</span>
+                  </label>
+                  <InputText
+                    className={`${inputStyles} pr-10`}
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Contraseña<span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <InputText
+                      className={`${inputStyles} pr-10`}
+                      required
+                      fullWidth
+                      name="password"
+                      label="Contraseña"
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-2 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                    </button>
+                  </div>
+                </Grid>
+
+                <Grid item xs={12} container justifyContent="left" alignItems="left">
+
+                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </Grid>
+
+
+               
+                <Button 
+                  className={buttonStyle} 
+                  type="submit"
+                  fullWidth 
+                  variant="contained" 
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                </Button>
+                <Grid container justifyContent="center" alignItems="center">
+                  <Grid item xs={12} container justifyContent="center" alignItems="center">
+
+                    <Link
+                      to="/crear-cuenta"
+                      component="button"
+                      variant="body2" sx={{
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        color: "rgb(129, 45, 177)",
+                        textDecoration: "none",
+                        "&:hover": {
+                          textDecoration: "underline",
+                          color: "rgb(164, 96, 203)",
+                        },
+                      }}>
+                      Crear cuenta
+                    </Link>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Grid>
+        </div>
       </div>
 
-      {/* Círculos de click interactivos */}
-      {clickCircles.map(circle => (
-        <ClickCircle
-          key={circle.id}
-          x={circle.x}
-          y={circle.y}
-          onComplete={() => removeCircle(circle.id)}
-        />
-      ))}
-
-      {/* Partículas flotantes decorativas */}
-      {[...Array(8)].map((_, i) => (
-        <FloatingParticle key={i} delay={i * 0.5} duration={3 + i * 0.3} />
-      ))}
-
-      {/* Contenedor principal */}
-      <motion.div 
-        className="relative z-10 w-full max-w-md mx-4 pointer-events-auto"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Card principal con glassmorphism y mayor opacidad */}
-        <div className="glass-premium bg-white/90 rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/30">
-          {/* Logo con animación */}
-          <motion.div 
-            className="text-center mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <div className="relative inline-block">
+        {/* Formulario para móviles */}
+      <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
+        {/* Fondo degradado y luces */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[...Array(7)].map((_, i) => {
+            const color = colors[i % colors.length];
+            return (
               <motion.div
-                className="absolute -top-2 -right-2"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-6 h-6 text-purple-400" />
-              </motion.div>
-            </div>
-            <h1 className="title-section text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold">
-              Bienvenido a Ibento
-            </h1>
-            <p className="body-text text-gray-600 mt-2">Inicia sesión para descubrir eventos increíbles</p>
-          </motion.div>
-
-          {/* Formulario */}
-          <motion.form 
-            className="space-y-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            onSubmit={handleLogin}
-          >
-            {/* Campo Email */}
-            <div className="space-y-2">
-              <label className="block caption font-semibold text-gray-700">
-                Correo electrónico
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="relative group">
-                <InputText
-                  className={`${inputStylesGlass} transition-all duration-300 hover:shadow-lg focus:shadow-xl`}
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Campo Contraseña */}
-            <div className="space-y-2">
-              <label className="block caption font-semibold text-gray-700">
-                Contraseña
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="relative group">
-                <InputText
-                  className={`${inputStylesGlass} pr-12 transition-all duration-300 hover:shadow-lg focus:shadow-xl`}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <motion.button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-lg hover:bg-white/20 transition-colors duration-200"
-                  onClick={() => setShowPassword(!showPassword)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {showPassword ? 
-                    <EyeOff className="w-5 h-5 text-gray-500" /> : 
-                    <Eye className="w-5 h-5 text-gray-500" />
-                  }
-                </motion.button>
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Recordar cuenta y olvidé contraseña */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded border-2 border-purple-400 text-purple-600 focus:ring-purple-500 focus:ring-2"
-                />
-                <span className="small-text text-gray-600 group-hover:text-purple-600 transition-colors duration-200">
-                  Recordar cuenta
-                </span>
-              </label>
-              
-              <Link 
-                to="/recuperar-cuenta" 
-                className="small-text text-purple-600 hover:text-purple-800 transition-colors duration-200 hover:underline font-medium"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
-
-            {/* Botón de inicio de sesión */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button 
-                className={`${buttonStyle} btn-premium relative overflow-hidden font-semibold py-3 text-base`}
-                type="submit"
-                loading={loading}
-                disabled={loading}
-              >
-                <motion.div 
-                  className="flex items-center justify-center space-x-2"
-                  initial={false}
-                  animate={loading ? { opacity: 0.7 } : { opacity: 1 }}
-                >
-                  {loading ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                      />
-                      <span>Iniciando sesión...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Heart className="w-5 h-5" />
-                      <span>Iniciar Sesión</span>
-                    </>
-                  )}
-                </motion.div>
-              </Button>
-            </motion.div>
-
-            {/* Separador */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300/50" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white/50 text-gray-500 small-text">o</span>
-              </div>
-            </div>
-
-            {/* Crear cuenta */}
-            <div className="text-center space-y-4">
-              <p className="body-text text-gray-600">
-                ¿No tienes una cuenta?
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Link
-                  to="/crear-cuenta"
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-white/70 hover:bg-white/90 text-purple-700 font-semibold rounded-full border-2 border-purple-200 hover:border-purple-400 transition-all duration-300 hover:shadow-lg"
-                >
-                  <Star className="w-5 h-5" />
-                  <span>Crear cuenta</span>
-                </Link>
-              </motion.div>
-            </div>
-          </motion.form>
+                key={i}
+                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
+                style={{ backgroundColor: color }}
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight / 2,
+                }}
+                animate={{
+                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
+                }}
+                transition={{
+                  duration: 8 + Math.random() * 4,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                  ease: "easeInOut",
+                }}
+              />
+            );
+          })}
         </div>
 
-        {/* Texto decorativo inferior */}
-        <motion.div 
-          className="text-center mt-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-        >
-          <p className="small-text text-gray-500">
-            Conecta con personas que comparten tus pasiones
-          </p>
-        </motion.div>
-      </motion.div>
+        {/* Contenido */}
+        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
+          {/* Logo */}
+          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+            <Box
+              sx={{
+                my: 8,
+                mx: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={ibentoLogo}
+                alt="Ibento Logo"
+                sx={{ width: 80, height: "auto", mb: 2 }}
+              />
+              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
+                Inicia Sesión
+              </Typography>
+              <Box component="form" sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Correo electrónico<span className="text-red-500">*</span>
+                  </label>
+                  <InputText
+                    className={`${inputStyles} pr-10`}
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Contraseña<span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <InputText
+                      className={`${inputStyles} pr-10`}
+                      required
+                      fullWidth
+                      name="password"
+                      label="Contraseña"
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-2 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                    </button>
+                  </div>
+                </Grid>
+
+                <Grid item xs={12} className='mt-2 mb-2' container justifyContent="left" alignItems="left">
+
+                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </Grid>
+
+
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Recordar cuenta"
+                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+                />
+
+                <Button 
+                  className={buttonStyle} 
+                  type="submit"
+                  fullWidth 
+                  variant="contained" 
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                </Button>
+                <Grid container justifyContent="center" alignItems="center">
+                  <Grid item xs={12} container justifyContent="center" alignItems="center">
+
+                    <Link
+                      to="/crear-cuenta"
+                      component="button"
+                      variant="body2" sx={{
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        color: "rgb(129, 45, 177)",
+                        textDecoration: "none",
+                        "&:hover": {
+                          textDecoration: "underline",
+                          color: "rgb(164, 96, 203)",
+                        },
+                      }}>
+                      Crear cuenta
+                    </Link>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Grid>        </div>
+      </div>
 
       {/* Toast component for notifications */}
       <Toast ref={toast} />
+        <InstallPrompt />
     </div>
+
   );
 };
 
-export default LoginImproved;
+export default Login;
