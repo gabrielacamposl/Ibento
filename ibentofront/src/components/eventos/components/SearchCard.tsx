@@ -74,38 +74,39 @@ export function EventCard({ id, imageUrl, title, date, location, price, url, Cat
 
     const urls = "../eventos/" + id;
     return (
-        <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
-            <div className="bg-white w-full rounded-lg flex flex-row items-center">
+        <div className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl overflow-hidden">
+            <div className="bg-white w-full rounded-lg flex flex-row items-center flex-wrap md:flex-nowrap">
 
-                <img
-                    src={`${imageUrl}`}
-                    className="rounded-lg object-cover w-40 h-40"
-                    alt={title} />
-
-                <div className='flex flex-col justify-center px-4 gap-2'>
-                    <p className="text-base font-bold text-black text-left">{title}</p>
-                    <div className='flex flex-row space-x-2'>
-                        <CalendarIcon className='text-black h-4 w-4' />
-                        <p className='text-sm font-light text-black text-left'>{DateFormat(date[0])}</p>
-                    </div>
-
-                    <div className='flex flex-row space-x-2'>
-                        <MapPinIcon className='text-black h-4 w-4' />
-                        <p className='text-sm font-bold text-black text-left'>{AddressFormat(location)}</p>
-                    </div>
-                    <div className='flex flex-row space-x-1'>
-                        <button className='bg-purple-300 text-black mb-1 rounded-full w-22'>
-                            {CategoryFormat(Category)}
-                        </button>
-                        <button className='bg-purple-300 text-black mb-1 rounded-full w-22 truncate'>
-                            {CategoryFormat2(Category)}
-                        </button>
-                    </div>
+                <Link to={urls} className="flex flex-row items-center w-full">
+                    <img
+                        src={`${imageUrl}`}
+                        className="rounded-lg object-cover w-40 h-40 min-w-[8rem] min-h-[8rem] max-w-full"
+                        alt={title} />
+                
+                    <div className='flex flex-col justify-center px-4 gap-2 w-full'>
+                        <p className="text-base font-bold text-black text-left">{title}</p>
+                        <div className='flex flex-row space-x-2'>
+                            <CalendarIcon className='text-black h-4 w-4' />
+                            <p className='text-sm font-light text-black text-left'>{DateFormat(date[0])}</p>
+                        </div>
                     
-                </div>
+                        <div className='flex flex-row space-x-2'>
+                            <MapPinIcon className='text-black h-4 w-4' />
+                            <p className='text-sm font-bold text-black text-left'>{AddressFormat(location)}</p>
+                        </div>
+                        <div className='flex flex-row space-x-1'>
+                            <button className='bg-purple-300 text-black mb-1 rounded-full w-22'>
+                                {CategoryFormat(Category)}
+                            </button>
+                            <button className='bg-purple-300 text-black mb-1 rounded-full w-22 truncate'>
+                                {CategoryFormat2(Category)}
+                            </button>
+                        </div>
+                        
+                    </div>
+                </Link>
             </div>
-
-        </Link>
+        </div>
 
     );
 }
