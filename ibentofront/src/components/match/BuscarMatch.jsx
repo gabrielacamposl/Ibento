@@ -6,7 +6,7 @@ import { Slider } from "primereact/slider";
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
 import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 import '../../assets/css/swipe-animations.css';
-
+import '../../assets/css/botones.css';
 const buscarMatchx = () => {
     const navigate = useNavigate();
     const cardRefs = useRef([]);
@@ -575,6 +575,7 @@ const buscarMatchx = () => {
                                 </h3>
                                 <div className="px-2">
                                     <Slider
+                                        min={18}
                                         value={value}
                                         onChange={(e) => setValue(e.value)}
                                         className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
@@ -757,9 +758,10 @@ const buscarMatchx = () => {
                             </div>
                             <div className="px-2">
                                 <Slider
+                                    min={18}
                                     value={value}
                                     onChange={(e) => setValue(e.value)}
-                                    className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
+                                    className="w-full p-1 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
                                     range
                                 />
                             </div>
