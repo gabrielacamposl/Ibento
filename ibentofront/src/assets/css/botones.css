@@ -256,3 +256,28 @@ input:checked + .slider:before {
   transform: scale(1.2);      /* Efecto al pasar el mouse */
   cursor: pointer;
 }
+
+@-webkit-keyframes bounce-slow {
+  0%, 100% { -webkit-transform: translateY(0);}
+  50% { -webkit-transform: translateY(-30px);}
+}
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0);}
+  50% { transform: translateY(-30px);}
+}
+@-webkit-keyframes bounce-slow-reverse {
+  0%, 100% { -webkit-transform: translateY(0);}
+  50% { -webkit-transform: translateY(30px);}
+}
+@keyframes bounce-slow-reverse {
+  0%, 100% { transform: translateY(0);}
+  50% { transform: translateY(30px);}
+}
+.animate-bounce-slow {
+  -webkit-animation: bounce-slow 2s infinite;
+  animation: bounce-slow 2s infinite;
+}
+.animate-bounce-slow-reverse {
+  -webkit-animation: bounce-slow-reverse 2s infinite;
+  animation: bounce-slow-reverse 2s infinite;
+}
