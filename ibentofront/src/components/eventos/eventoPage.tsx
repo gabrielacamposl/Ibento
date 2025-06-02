@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { buttonStyle, buttonStyleBuscarMatch } from "../../styles/styles";
 import { useNavigate } from "react-router-dom";
 import {
   ClockIcon,
@@ -127,29 +126,48 @@ function Page() {
       cargarEstadoInicial();
     }
   }, [eventId]);
-
   // --- 2. MANEJO DE ESTADOS DE CARGA Y ERROR (DESPUÉS DE TODOS LOS HOOKS) ---
   if (loading) {
     return (
-      <div className="flex min-h-screen justify-center items-center">
-        <span className="text-black loading loading-ring loading-xl"></span>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex justify-center items-center">
+        <div className="glass-premium rounded-3xl p-8 text-center animate-pulse-glow">
+          <div className="animate-spin-slow w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-700 font-medium">Cargando evento...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen justify-center items-center text-red-600">
-        <p>Error al cargar evento: {error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex justify-center items-center">
+        <div className="glass-premium rounded-3xl p-8 text-center max-w-md mx-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-600 text-2xl">⚠️</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Error al cargar</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:scale-105 transition-transform"
+          >
+            Reintentar
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!eventoDataFromHook) {
-    // Esto podría ocurrir si eventId es null inicialmente o si la API no devuelve datos
     return (
-      <div className="flex min-h-screen justify-center items-center">
-        <p>No se encontró el evento o el ID no es válido.</p>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex justify-center items-center">
+        <div className="glass-premium rounded-3xl p-8 text-center max-w-md mx-4">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-gray-600 text-2xl">📅</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Evento no encontrado</h3>
+          <p className="text-gray-600">No se encontró el evento o el ID no es válido.</p>
+        </div>
       </div>
     );
   }
@@ -390,30 +408,33 @@ function Page() {
   }
 
 
-
   return (
-    <div className="w-full lg:items-center lg:justify-center">
-      {/* Mobile View */}
-      <div className="flex items-center justify-center w-screen h-auto bg-gradient-to-b from-indigo-500 to-white lg:max-w-3/4 mx-auto relative">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+      {/* Back Button */}
+      <div className="sticky top-0 z-50 p-4">
         <Link
-          to={urls} // O usa una función de navegación si es más complejo
+          to={urls}
           onClick={e => {
             e.preventDefault();
-            window.history.back(); // Considera useNavigate().back() de react-router-dom v6+
+            window.history.back();
           }}
-          className="absolute top-4 left-4 z-20 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100 transition"
+          className="inline-flex items-center justify-center w-12 h-12 glass-premium rounded-2xl hover:scale-110 transition-all duration-300 group"
           aria-label="Regresar"
         >
-          <ArrowLeftIcon className="h-6 w-6 text-black" />
+          <ArrowLeftIcon className="h-6 w-6 text-gray-700 group-hover:text-purple-600 transition-colors" />
         </Link>
-        <div className="flex flex-col items-center w-full h-full bg-white rounded-lg shadow-lg">
-          <div className="relative w-full h-80">
+      </div>      {/* Main Content Container */}
+      <div className="max-w-4xl mx-auto px-4 pb-8">
+        {/* Hero Image Section */}
+        <div className="relative mb-8 animate-scale-in">
+          <div className="relative w-full h-80 md:h-96 rounded-3xl overflow-hidden glass-premium">
             <img
-              src={imgs.length > 0 ? `${imgs[0]}` : "placeholder.jpg"} // Placeholder si no hay imagen
+              src={imgs.length > 0 ? `${imgs[0]}` : "placeholder.jpg"}
               alt={title || "Evento"}
-              className="w-full h-80 object-cover rounded-lg4"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            {/* Action Buttons */}
             <div className="absolute bottom-2 right-2 flex flex-col items-end space-y-4">
               <div className="flex flex-col items-center">
                 <button onClick={handleLike} className="focus:outline-none">
@@ -423,7 +444,7 @@ function Page() {
                     <HeartOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{eventNumLikes}</p>
+                <p className="text-white font-bold">{likeString}</p>
               </div>
               <div className="flex flex-col items-center">
                 <button onClick={handleSave} className="focus:outline-none">
@@ -433,145 +454,128 @@ function Page() {
                     <BookmarkOutline className="h-8 w-8 text-white" />
                   )}
                 </button>
-                <p className="text-white font-bold">{eventNumSaves}</p>
+                <p className="text-white font-bold">{saveString}</p>
               </div>
             </div>
           </div>
-          <div className="flex flex-row w-full">
-            <p
-              id="titulo"
-              className="text-black text-4xl antialiased font-bold px-4 mt-2"
-            >
-              {title || "Título no disponible"}
-            </p>
-          </div>
-          <div className="flex flex-row flex-wrap gap-2 items-center justify-center w-full h-auto">
+        </div>        {/* Event Title Section */}
+        <div className="glass-premium rounded-3xl p-6 mb-6 animate-slide-up">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
+            {title || "Título no disponible"}
+          </h1>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
             {classifications && classifications.map((tag, index) => (
-              <button
+              <span
                 key={index}
-                className="bg-gray-100 text-black px-4 py-2 rounded-full mt-4"
+                className="px-4 py-2 glass-premium rounded-2xl text-sm font-medium text-purple-700 hover:scale-105 transition-transform duration-200"
               >
                 {tag}
-              </button>
+              </span>
             ))}
-          </div>
-          <div className="flex flex-row my-4 flex-wrap gap-4 items-center justify-center w-full h-auto">
-            <div className="flex flex-row space-x-1 items-center justify-center">
-              <CalendarIcon className="h-8 w-8 text-black" />
-              <p className="text-black font-bold">{dateString}</p>
+          </div>          {/* Event Details */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center space-x-3 p-3 glass rounded-2xl">
+              <CalendarIcon className="h-6 w-6 text-purple-600" />
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Fecha</p>
+                <p className="text-gray-800 font-semibold">{dateString}</p>
+              </div>
             </div>
-            <div className="flex flex-row space-x-1 items-center justify-center">
-              <ClockIcon className="h-6 w-6 text-black" />
-              <p className="text-black font-bold">{timeString}</p>
+
+            <div className="flex items-center space-x-3 p-3 glass rounded-2xl">
+              <ClockIcon className="h-6 w-6 text-orange-500" />
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Hora</p>
+                <p className="text-gray-800 font-semibold">{timeString}</p>
+              </div>
             </div>
-            <div className="flex flex-row space-x-1 items-center justify-center">
-              <MapPinIcon className="h-6 w-6 text-black" />
-              <p className="text-black font-bold">{place || "Lugar no disponible"}</p>
+
+            <div className="flex items-center space-x-3 p-3 glass rounded-2xl">
+              <MapPinIcon className="h-6 w-6 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Lugar</p>
+                <p className="text-gray-800 font-semibold line-clamp-1">{place || "Lugar no disponible"}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-row space-x-3">
-            <LinkIcon className="h-6 w-6 text-black" />
-            <a
-              href={cleanedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 text-bold hover:underline font-base"
-            >
-              Página del evento
-            </a>
-          </div>
-          <div className="w-full px-6 my-4">
-            <p className="mb-1 text-xl font-bold text-black text-left">Fechas</p>
-            <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
-            <div className="my-5 card flex justify-content-center">
-              <Calendar
-                className="text-black"
-                value={date}
-                onChange={(e) => setDate(e.value || null)}
-                inline
-                dateTemplate={dateTemplate}
-              />
+          </div>          {/* Event Link */}
+          <div className="mt-6 p-4 glass rounded-2xl">
+            <div className="flex items-center space-x-3">
+              <LinkIcon className="h-5 w-5 text-blue-600" />
+              <a
+                href={cleanedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 hover:text-purple-800 font-medium hover:underline transition-colors"
+              >
+                Página oficial del evento
+              </a>
             </div>
           </div>
-          <div className="w-full px-6">
-            <p className="mb-1 text-xl font-bold text-black text-left">Acerca de</p>
-            <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
-            <article className="text-wrap text-black text-justify text-base mt-4">
-              <p>{description || "Descripción no disponible."}</p>
-            </article>
+        </div>        {/* Calendar Section */}
+        <div className="glass-premium rounded-3xl p-6 mb-6 animate-slide-up">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800">Fechas disponibles</h2>
           </div>
-          <div className="w-full px-4 my-1">
-            <p className="mb-1 text-xl font-bold text-black text-left">Ubicación</p>
-            <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
-            <article className="text-wrap text-black text-justify text-base mt-4">
-              <p>{location || "Ubicación no disponible."}</p>
-            </article>
+
+          <div className="glass rounded-2xl p-4 overflow-hidden">
+            <Calendar
+              className="w-full"
+              value={date}
+              onChange={(e) => setDate(e.value || null)}
+              inline
+              dateTemplate={dateTemplate}
+            />
+          </div>
+        </div>
+
+        {/* Description Section */}
+        <div className="glass-premium rounded-3xl p-6 mb-6 animate-slide-up">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800">Acerca del evento</h2>
+          </div>
+
+          <div className="glass rounded-2xl p-6">
+            <p className="text-gray-700 leading-relaxed text-justify">
+              {description || "Descripción no disponible."}
+            </p>
+          </div>
+        </div>        {/* Location Section */}
+        <div className="glass-premium rounded-3xl p-6 mb-6 animate-slide-up">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800">Ubicación</h2>
+          </div>
+
+          <div className="glass rounded-2xl p-6 mb-4">
+            <p className="text-gray-700 leading-relaxed mb-4">
+              {location || "Ubicación no disponible."}
+            </p>
+          </div>
+
+          <div className="glass rounded-2xl overflow-hidden">
             <EventMap location={coor} />
           </div>
-          <div className="mb-18">
-            <button
-              className={buttonStyleBuscarMatch}
-              onClick={async () => {
-                await handleSave();
-                await bucarMatch();
-              }}
-            >
-              Buscar acompañante
-            </button>
-          </div>
+        </div>
 
-
+        {/* Action Button */}
+        <div className="glass-premium rounded-3xl p-6 text-center animate-slide-up mb-15">
+          <button
+            onClick={async () => {
+              await handleSave();
+              await bucarMatch();
+            }}
+            className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center justify-center space-x-3">
+              <span>Buscar acompañante</span>
+            </div>
+          </button>
         </div>
       </div>
-
-      {/* <div className="hidden md:flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-indigo-500 to-white">
-        {/* ... Contenido del Desktop View ...
-        <div className="flex flex-col items-center justify-center w-full max-w-6xl h-full bg-white rounded-lg shadow-lg mx-auto px-6">
-          <div className="flex flex-col lg:flex-row w-full">
-            <div className="flex flex-col space-y-6 items-center justify-center p-4 lg:w-2/3">
-              <p className="text-black text-4xl antialiased font-bold px-4 mt-2">
-                {title || "Título no disponible"}
-              </p>
-              <div className="flex flex-row my-4 flex-wrap gap-4 items-center justify-center w-full h-auto">
-                <div className="flex flex-row space-x-1 items-center justify-center">
-                  <CalendarIcon className="h-8 w-8 text-black" />
-                  <p className="text-black font-bold">{dateString}</p>
-                </div>
-                <div className="flex flex-row space-x-1 items-center justify-center">
-                  <ClockIcon className="h-6 w-6 text-black" />
-                  <p className="text-black font-bold">{timeString}</p>
-                </div>
-                <div className="flex flex-row space-x-1 items-center justify-center">
-                  <MapPinIcon className="h-6 w-8 text-black" />
-                  <p className="text-black font-bold">{place || "Lugar no disponible"}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col space-y-4 items-center justify-center p-4 lg:w-1/3">
-              <div className="w-full px-6 my-4">
-                <p className="mb-1 text-2xl font-bold text-black text-left">
-                  Tags
-                </p>
-                <div className="h-1 bg-purple-700 rounded-sm w-full"></div>
-                <div className="flex flex-row flex-wrap gap-2 items-center justify-start w-full h-auto">
-                  {classifications && classifications.map((tag, index) => (
-                    <button
-                      key={index}
-                      className="bg-gray-50 text-black px-4 py-2 rounded-full mt-4"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                  <div className="w-full hidden md:block">
-                    <EventMap location={coor} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 }

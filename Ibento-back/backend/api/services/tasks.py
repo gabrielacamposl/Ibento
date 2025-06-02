@@ -1,7 +1,7 @@
 from api.models import Evento
 import uuid
-
-
+import time
+from celery import shared_task
 
 def guardar_eventos_desde_json(eventos_json):
 
@@ -29,3 +29,14 @@ def guardar_eventos_desde_json(eventos_json):
                 imgs=evento.get("img_urls") if evento.get("img_urls") else [],
                 url=evento.get("url", "") if evento.get("url") else None
             )
+
+@shared_task
+def prueba(id_Evento):
+    
+    time.sleep(10)
+    evento = Evento.objects.get(id=id_Evento)
+    evento.assistants += 1
+    evento.save()
+    print(f"Evento {evento.title} actualizado con éxito. Asistentes: {evento.assistants}")
+    print(f"Prueba de tarea Celery con ID: {id_Evento} completada.")
+    return True

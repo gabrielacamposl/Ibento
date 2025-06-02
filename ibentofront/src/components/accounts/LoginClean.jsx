@@ -34,30 +34,12 @@ const FloatingParticle = ({ delay = 0, duration = 3, className = "" }) => (
   </motion.div>
 );
 
-// Componente para círculos de click interactivos
-const ClickCircle = ({ x, y, onComplete }) => (
-  <motion.div
-    className="absolute pointer-events-none rounded-full"
-    style={{
-      left: x - 25,
-      top: y - 25,
-      width: 50,
-      height: 50,
-      background: `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}40, transparent)`
-    }}
-    initial={{ scale: 0, opacity: 0.8 }}
-    animate={{ scale: 4, opacity: 0 }}
-    transition={{ duration: 1, ease: "easeOut" }}
-    onAnimationComplete={onComplete}
-  />
-);
-
-const LoginImproved = () => {
+const LoginClean = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [clickCircles, setClickCircles] = useState([]);
+  const [backgroundCircles, setBackgroundCircles] = useState([]);
   const navigate = useNavigate();
   const toast = useRef(null);
 
@@ -69,13 +51,13 @@ const LoginImproved = () => {
   const showError = (message) => {
     toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
   };
-  
+
   const showWarn = (message) => {
     toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
   };
 
-  // Función para manejar clicks en el fondo
-  const handleBackgroundClick = (e) => {
+  // Función para crear círculos interactivos en el fondo
+  const createBackgroundCircle = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -83,15 +65,16 @@ const LoginImproved = () => {
     const newCircle = {
       id: Date.now(),
       x,
-      y
+      y,
+      color: colors[Math.floor(Math.random() * colors.length)]
     };
     
-    setClickCircles(prev => [...prev, newCircle]);
-  };
-
-  // Función para remover círculos completados
-  const removeCircle = (id) => {
-    setClickCircles(prev => prev.filter(circle => circle.id !== id));
+    setBackgroundCircles(prev => [...prev, newCircle]);
+    
+    // Remover el círculo después de la animación
+    setTimeout(() => {
+      setBackgroundCircles(prev => prev.filter(circle => circle.id !== newCircle.id));
+    }, 2000);
   };
 
   const handleLogin = async (e) => {
@@ -171,7 +154,7 @@ const LoginImproved = () => {
   return (
     <div 
       className="min-h-screen flex items-center justify-center relative overflow-hidden cursor-pointer"
-      onClick={handleBackgroundClick}
+      onClick={createBackgroundCircle}
     >
       {/* Fondo animado con colores más intensos */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
@@ -188,19 +171,19 @@ const LoginImproved = () => {
                   height: Math.random() * 500 + 300,
                 }}
                 initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight,
+                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
                 }}
                 animate={{
                   x: [
-                    Math.random() * window.innerWidth, 
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerWidth
+                    Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920), 
+                    Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+                    Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920)
                   ],
                   y: [
-                    Math.random() * window.innerHeight, 
-                    Math.random() * window.innerHeight,
-                    Math.random() * window.innerHeight
+                    Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080), 
+                    Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
+                    Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080)
                   ],
                 }}
                 transition={{
@@ -214,19 +197,32 @@ const LoginImproved = () => {
           })}
         </div>
         
+        {/* Círculos interactivos */}
+        <AnimatePresence>
+          {backgroundCircles.map((circle) => (
+            <motion.div
+              key={circle.id}
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                backgroundColor: circle.color,
+                left: circle.x - 50,
+                top: circle.y - 50,
+              }}
+              initial={{ width: 0, height: 0, opacity: 0.8 }}
+              animate={{ 
+                width: 200, 
+                height: 200, 
+                opacity: 0 
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
+            />
+          ))}
+        </AnimatePresence>
+        
         {/* Capa adicional de color para mayor intensidad */}
         <div className="absolute inset-0 bg-gradient-to-tr from-purple-300/40 via-blue-300/40 to-pink-300/40"></div>
       </div>
-
-      {/* Círculos de click interactivos */}
-      {clickCircles.map(circle => (
-        <ClickCircle
-          key={circle.id}
-          x={circle.x}
-          y={circle.y}
-          onComplete={() => removeCircle(circle.id)}
-        />
-      ))}
 
       {/* Partículas flotantes decorativas */}
       {[...Array(8)].map((_, i) => (
@@ -241,7 +237,7 @@ const LoginImproved = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Card principal con glassmorphism y mayor opacidad */}
+        {/* Card principal con glassmorphism */}
         <div className="glass-premium bg-white/90 rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/30">
           {/* Logo con animación */}
           <motion.div 
@@ -258,6 +254,11 @@ const LoginImproved = () => {
               >
                 <Sparkles className="w-6 h-6 text-purple-400" />
               </motion.div>
+              <img 
+                src={ibentoLogo} 
+                alt="Ibento Logo" 
+                className="w-16 h-16 mx-auto mb-4 rounded-2xl shadow-lg"
+              />
             </div>
             <h1 className="title-section text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold">
               Bienvenido a Ibento
@@ -268,10 +269,10 @@ const LoginImproved = () => {
           {/* Formulario */}
           <motion.form 
             className="space-y-6"
+            onSubmit={handleLogin}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            onSubmit={handleLogin}
           >
             {/* Campo Email */}
             <div className="space-y-2">
@@ -427,4 +428,4 @@ const LoginImproved = () => {
   );
 };
 
-export default LoginImproved;
+export default LoginClean;

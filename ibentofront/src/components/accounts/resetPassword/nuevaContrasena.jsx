@@ -8,6 +8,7 @@ import { buttonStyle, inputStyles } from "../../../styles/styles";
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import api from "../../../api";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
@@ -41,7 +42,7 @@ export default function PasswordResetChange() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/password-reset/change/", {
+      const response = await api.post("password-reset/change/", {
         email: email,
         new_password: password,
       });

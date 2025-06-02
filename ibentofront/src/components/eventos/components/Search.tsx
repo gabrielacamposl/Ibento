@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
+import { Search as SearchIcon } from 'lucide-react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
-import { inputStyles } from '../../../styles/styles';
-import { InputText } from "primereact/inputtext";
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log(searchParams)
+  const [isFocused, setIsFocused] = useState(false);
   const location = useLocation();
-  console.log(location)
   const navigate = useNavigate();
 
   const handleSearch = useDebouncedCallback((term) => {
-    console.log(`Searching... ${term}`);
-
-    // Crear una nueva instancia de URLSearchParams basada en los parámetros actuales
     const params = new URLSearchParams(searchParams);
 
     if (term) {
@@ -24,22 +18,23 @@ export default function Search({ placeholder }: { placeholder: string }) {
       params.delete('query');
     }
 
-    // Actualizar la URL con los nuevos parámetros de búsqueda
     navigate(`${location.pathname}?${params.toString()}`);
   }, 300);
 
   return (
-
-      <div className='relative'>
-        <InputText
-          className={`${inputStyles} text-black`}
+    <div className="relative w-full">
+      <div className="relative flex items-center">
+        <SearchIcon className="absolute left-3 h-4 w-4 text-gray-500" />
+        <input
+          type="text"
+          className="w-full h-10 pl-10 pr-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 outline-none placeholder-gray-500 text-gray-900 transition-all duration-300 focus:bg-white/60 hover:bg-white/50"
           placeholder={placeholder}
-          onChange={(e) => {
-            handleSearch(e.target.value);
-          }}
           defaultValue={searchParams.get('query') || ''}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onChange={(e) => handleSearch(e.target.value)}
         />
-        <MagnifyingGlassIcon className="absolute right-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
       </div>
+    </div>
   );
 }

@@ -7,6 +7,16 @@ export const inputStyles = clsx(
   "text-black" 
 );
 
+// Modern glassmorphism input style
+export const inputStylesGlass = clsx(
+  "w-full h-12 px-4 bg-transparent border-0 outline-none",
+  "glass-premium rounded-2xl",
+  "placeholder-gray-500 text-gray-900 font-medium",
+  "transition-all duration-300",
+  "focus:ring-2 focus:ring-purple-400/50 focus:shadow-xl",
+  "hover:shadow-lg"
+);
+
 export const buttonStyle = clsx(
 "w-full flex justify-center items-center",
 "rounded-full bg-gradient-to-r from-blue-400 to-purple-500 text-white",
