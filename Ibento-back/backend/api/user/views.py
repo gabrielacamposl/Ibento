@@ -16,7 +16,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from bson import ObjectId
-
+import base64
+from io import BytesIO
 import re
 
 # Libraries
@@ -661,25 +662,17 @@ def delete_profile_picture(request, photo_url):
 
 # ------------------------------------------------ VALIDACIÓN DE PERFIL ---------------------------------------------
 # --------- Subir INE para Validar el Perfil 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def ine_validation_view(request):
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
-    selfie = request.FILES.get('selfie')
     
     if not ine_front or not ine_back:
         return Response({
             "error": "Ambas imágenes de la INE son requeridas.",
             "codigo": "MISSING_IMAGES"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    if not selfie:
-        return Response({
-            "error": "La foto de selfie es requerida.",
-            "codigo": "MISSING_SELFIE"
         }, status=status.HTTP_400_BAD_REQUEST)
     
     try: 
@@ -693,11 +686,6 @@ def ine_validation_view(request):
         
         print("Procesando imagen trasera...")
         back_b64 = safe_process_ine_with_fallback(ine_back)
-        
-        print("Procesando selfie...")
-        selfie_b64 = safe_process_selfie_with_fallback(selfie)
-        
-        print("Imágenes procesadas exitosamente")
         
         # EXTRAER DATOS CON OCR
         print("=== EXTRAYENDO DATOS DE LA INE ===")
@@ -714,8 +702,6 @@ def ine_validation_view(request):
         
         print(f"Datos extraídos - CIC: {cic}, ID: {id_ciudadano}")
         
-        # VALIDAR INE EN PADRÓN ELECTORAL
-        print("=== VALIDANDO INE EN PADRÓN ===")
         is_valid = validate_ine(cic, id_ciudadano)
         
         if not is_valid:
@@ -726,19 +712,47 @@ def ine_validation_view(request):
                 "codigo": "INE_INVALID"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        print("INE válida en padrón electoral")
-          # GUARDAR DATOS DE INE EN USUARIO
         user.is_ine_validated = True
         if curp:
             user.curp = curp
         user.save()
+    
+    finally:
+        if 'front_b64' in locals():
+            del front_b64
+        if 'back_b64' in locals():
+            del back_b64
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
+def face_validation_view(request):
+    ine_front = request.FILES.get('ine_front')
+    selfie = request.FILES.get('selfie')
+    
+    if not ine_front:
+        return Response({
+            "error": "La imagen frontal de la ine es requerida.",
+            "codigo": "MISSING_IMAGES"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not selfie:
+        return Response({
+            "error": "La foto de selfie es requerida.",
+            "codigo": "MISSING_SELFIE"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try: 
+        user: Usuario = request.user
+        print("Procesando imagen frontal...")
+        front_b64 = safe_process_ine_with_fallback(ine_front)
+        print("Procesando selfie...")
+        selfie_b64 = safe_process_selfie_with_fallback(selfie)
         
-        print("=== VALIDANDO ROSTRO CON SELFIE ===")
-        
-        # Convertir imágenes procesadas de base64 a archivos para FastAPI
-        import base64
-        from io import BytesIO
-        
+        print("Imágenes procesadas exitosamente")
+          
         # Crear archivo temporal para INE frontal procesada
         ine_front_data = base64.b64decode(front_b64)
         ine_front_file = BytesIO(ine_front_data)
@@ -765,28 +779,13 @@ def ine_validation_view(request):
                 return Response({
                     "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                     "error": "Tu rostro no coincide con la foto de la INE.",
-                    "distancia": error_data.get("distancia", "N/A"),
                     "sugerencia": "Asegúrate de que tu rostro esté bien iluminado y centrado en la cámara. Intenta en un lugar con mejor iluminación.",
                     "codigo": "FACE_NO_MATCH"
-                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
-            
-
-            result = response.json()
-            rostro_valido = result.get("rostro_valido", False)
-            
-            if not rostro_valido:
-                return Response({
-                    "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
-                    "error": "La verificación facial no fue exitosa.",
-                    "sugerencia": "Intenta nuevamente con mejor iluminación y asegúrate de que tu rostro esté claramente visible.",
-                    "codigo": "FACE_VERIFICATION_FAILED"
-                }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 400_BAD_REQUEST
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             # Guardar validación de rostro
             user.is_validated_camera = True
             user.save()
-            
-            print("Rostro validado exitosamente")
             
         except requests.RequestException as e:
             print(f"Error en conexión con FastAPI: {str(e)}")
@@ -794,10 +793,8 @@ def ine_validation_view(request):
                 "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
-            }, status=status.HTTP_200_OK) #Cambiar en su debido momento a 503
-        
-        print("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
-        
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE) 
+              
         # RESPUESTA EXITOSA
         return Response({
             "success": True,
@@ -812,9 +809,6 @@ def ine_validation_view(request):
         print(f"=== ERROR EN VALIDACIÓN ===")
         print(f"Error: {str(e)}")
         print(f"Tipo: {type(e).__name__}")
-        
-        # Log más detallado para debugging
-        import traceback
         print(f"Stack trace: {traceback.format_exc()}")
         
         return Response({
@@ -825,16 +819,8 @@ def ine_validation_view(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     finally:
-        print("=== LIMPIEZA DE MEMORIA ===")
-        
-        # Limpiar variables sensibles de la memoria
         if 'front_b64' in locals():
             del front_b64
-        if 'back_b64' in locals():
-            del back_b64
-        
-        print("Limpieza completada")
-
 
 # -------------------------------------- PERFIL MATCH - USER ----------------------------------------
 
@@ -1021,57 +1007,6 @@ def sugerencia_usuarios(request):
     return Response(serializer.data)
 
 
-# -------------------------------------- CREACIÓN DE MATCHES -------------------------------------------
-# ------- Crear Match
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def matches(request):
-#     usuario_origen = request.user
-#     usuario_destino = request.data.get("usuario_destino")
-#     tipo_interaccion = request.data.get("tipo_interaccion")
-
-#     if tipo_interaccion not in ["like", "dislike"]:
-#         return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     try:
-#         usuario_destino = Usuario.objects.get(_id=usuario_destino)
-#     except Usuario.DoesNotExist:
-#         return Response({"error": "Usuario destino no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-#     if usuario_destino == usuario_origen:
-#         return Response({"error": "No puedes interactuar contigo mismo."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Crear la interacción
-#     interaccion, created = Interaccion.objects.get_or_create(
-#         usuario_origen=usuario_origen,
-#         usuario_destino=usuario_destino,
-#         defaults={"tipo_interaccion": tipo_interaccion}
-#     )
-
-#     # Si la interacción es un like y hay like mutuo se genera el match
-#     if tipo_interaccion == "like":
-#         interaccion_mutua = Interaccion.objects.filter(
-#             usuario_origen=usuario_destino,
-#             usuario_destino=usuario_origen,
-#             tipo_interaccion="like"
-#         ).first()
-
-#         if interaccion_mutua:
-#             match, created = Matches.objects.get_or_create(
-#                 usuario_a=min(usuario_origen, usuario_destino, key=lambda x: x._id),
-#                 usuario_b=max(usuario_origen, usuario_destino, key=lambda x: x._id)
-#             )
-#             conversacion, created = Conversacion.objects.get_or_create(
-#                 match=match,
-#                 defaults={"usuario_a": usuario_origen, "usuario_b": usuario_destino}
-#             )
-#             return Response({"message": "¡Es un match!", "match_id": match._id}, status=201)
-
-
-#     return Response({"message": "Interacción registrada correctamente."}, status=200)
-
-
-# Vista actualizada para crear matches (con notificaciones)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def matches(request):
@@ -1420,48 +1355,6 @@ def mis_conversaciones(request):
         data.append(data_conv)
 
     return Response(data)
-
-
-
-#--------- Enviar mensaje
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def enviar_mensaje(request):
-#     remitente = request.user  # El usuario que envía el mensaje
-
-#     # Obtenemos los datos de la solicitud
-#     conversacion_id = request.data.get('conversacion')
-#     receptor_id = request.data.get('receptor')
-#     mensaje = request.data.get('mensaje')
-
-#     # Verificar si la conversación existe
-#     try:
-#         conversacion = Conversacion.objects.get(_id=conversacion_id)
-#     except Conversacion.DoesNotExist:
-#         return Response({'error': 'Conversación no encontrada'}, status=404)
-
-#     # Verificar que el remitente esté en la conversación
-#     if remitente._id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
-#         return Response({'error': 'No puedes enviar mensajes en esta conversación'}, status=403)
-
-#     # Verificar que el receptor sea parte de la conversación
-#     if receptor_id not in [conversacion.usuario_a._id, conversacion.usuario_b._id]:
-#         return Response({'error': 'El receptor no pertenece a esta conversación'}, status=403)
-
-#     # Crear el mensaje
-#     mensaje_data = {
-#         'conversacion': conversacion_id,
-#         'receptor': receptor_id,
-#         'mensaje': mensaje,
-#     }
-
-#     serializer = MensajesSerializer(data=mensaje_data)
-#     if serializer.is_valid():
-#         serializer.save()  # Guardamos el mensaje
-#         return Response(serializer.data, status=201)  # Devolvemos el mensaje guardado
-#     return Response(serializer.errors, status=400)
-
-
 
 # Vista actualizada para enviar mensajes (con notificaciones)
 @api_view(['POST'])
