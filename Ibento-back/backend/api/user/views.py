@@ -36,7 +36,6 @@ from api.services.recommended_events import obtener_eventos_recomendados
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 #from api.services.ticketmaster import guardar_eventos_desde_json
-from api.services.tasks import guardar_eventos_desde_json, prueba
 #Servicio de recomendación de usuarios
 from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
@@ -1497,10 +1496,6 @@ def importar_ticketmaster(request):
     guardar_eventos_desde_json.delay(eventos_json)
     return Response({'mensaje': 'Eventos importados correctamente'})
 
-@api_view(['POST'])
-def prueba(request):
-    stat = prueba.delay("681d9e134f3b2936f471436a")
-    return Response({'task_id': stat})
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radio promedio de la Tierra en km

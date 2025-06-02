@@ -878,7 +878,7 @@ const Verificar = () => {
 
                     }
                 </div>                {/* ✅ BOTONES CORREGIDOS */}
-                <div className="mt-2 flex justify-center space-x-2 w-full mb-10 ">
+                <div className="mt-2 flex justify-center space-x-2 w-full mb-20 ">
                     <Button
                         className={buttonStyle}
                         onClick={() => setActiveIndex(prev => prev - 1)}
