@@ -42,7 +42,7 @@ export default function PasswordResetValidate() {
 
       // Código válido, redirige a cambiar contraseña
       setTimeout(() => {
-        navigate("/ibento/recuperar-cuenta-nueva-contrasena"); 
+        navigate("/recuperar-cuenta-nueva-contrasena"); 
       }, 1500);
     } catch (err) {
       setError(err.response?.data?.error || "Error al validar el código.");
