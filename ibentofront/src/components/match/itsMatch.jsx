@@ -78,7 +78,7 @@ fetchData();
 
     return (
         <div className="text-black flashOnce flex justify-center items-center min-h-screen ">
-            <div className="  p-5 max-w-lg " style={{ backgroundImage: `url('/public/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
+            <div className="  p-5 max-w-lg " style={{ backgroundImage: `url('/fondoMatch.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backdropFilter: 'blur(50px)' }}>
                 <div className="flex justify-end items-end font-bold text-2xl w-full">
                     <button className="">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
