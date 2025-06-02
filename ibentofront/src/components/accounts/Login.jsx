@@ -220,7 +220,7 @@ const Login = () => {  const [email, setEmail] = useState("");
 
                 <Grid item xs={12} container justifyContent="left" alignItems="left">
 
-                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </Grid>
@@ -364,7 +364,7 @@ const Login = () => {  const [email, setEmail] = useState("");
 
                 <Grid item xs={12} className='mt-2 mb-2' container justifyContent="left" alignItems="left">
 
-                  <Link to="/ibento/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
+                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </Grid>

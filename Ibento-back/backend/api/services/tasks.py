@@ -1,7 +1,7 @@
 from api.models import Evento
 import uuid
 import time
-from celery import shared_task
+# from celery import shared_task
 
 def guardar_eventos_desde_json(eventos_json):
 
@@ -30,7 +30,7 @@ def guardar_eventos_desde_json(eventos_json):
                 url=evento.get("url", "") if evento.get("url") else None
             )
 
-@shared_task
+            
 def prueba(id_Evento):
     
     time.sleep(10)

@@ -25,7 +25,7 @@ export default function PasswordResetChange() {
   useEffect(() => {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
-      navigate("/ibento/recuperar-cuenta"); // si no hay email, redirige al inicio
+      navigate("/recuperar-cuenta"); // si no hay email, redirige al inicio
     } else {
       setEmail(emailGuardado);
     }
