@@ -174,9 +174,9 @@ export default function Register() {
 
   return (
 
-    <div className="h-screen flex justify-center items-center">
+    <div className="flex justify-center items-center">
       {/* Formulario para la visualización web  */}
-      <div className= "hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
+      <div className= " w-full  flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
         {/* Fondo degradado y luces */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           {[...Array(7)].map((_, i) => {
@@ -399,7 +399,7 @@ export default function Register() {
             </>)}
           {step === 2 && (
             <>
-              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
+              {/* <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
                 <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold", color: "black" }}>
                   ¿Qué tipo de eventos te gustan?
                 </Typography>
@@ -430,11 +430,48 @@ export default function Register() {
                   </div>
                 </Grid>
 
-                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
-                  Crear Cuenta
-                </Button>
+               
 
-              </div>
+              </div> */}
+
+                <div className="p-6 bg-white rounded-2xl">
+                            <p className="text-gray-600 mb-4">¿Qué tipo de eventos te gustan?</p>
+                            <div className="space-y-6">
+                                {categorias.map((categoria) => (
+                                    <div key={categoria.id} className="space-y-3">
+                                        <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
+                                            <h3 className="font-semibold text-purple-700">{categoria.nombre}</h3>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {categoria.valores.map((valor) => (
+                                                <button
+                                                    key={valor}
+                                                    className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
+                                                        selectedEvents.includes(valor)
+                                                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105' 
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                                                    }`}
+                                                    onClick={() => toggleSeleccionado(valor)}
+                                                >
+                                                    {valor}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                             {/* <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
+                  Crear Cuenta
+                </Button> */}
+                 <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
+                    <button 
+                        onClick={handleSubmit} 
+                        className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                        Guardar Cambios
+                    </button>
+                </div>
+                        </div>
             </>
           )}
 
@@ -444,9 +481,9 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Formulario para móviles */}
+      {/* Formulario para móviles
       <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
-        {/* Fondo degradado y luces */}
+      
         <div className="absolute inset-0 z-0 overflow-hidden">
           {[...Array(7)].map((_, i) => {
             const color = colors[i % colors.length];
@@ -474,9 +511,9 @@ export default function Register() {
           })}
         </div>
 
-        {/* Contenido */}
+       
         <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
+        
           <Box
             component="img"
             src={ibentoLogo}
@@ -484,15 +521,15 @@ export default function Register() {
             sx={{ width: 80, height: "auto", mb: 2 }}
           />
 
-          {/* Título */}
+          
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
 
-          {/* Formulario */}
+          
           {step === 1 && (
             <>
               <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
                 <form className="space-y-5" onSubmit={handleSubmit}>
-                  {/* Nombre y Apellido */}
+          
                   <div className="flex space-x-3">
                     <div className="w-1/2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
@@ -504,13 +541,13 @@ export default function Register() {
                     </div>
                   </div>
 
-                  {/* Email */}
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
                     <InputText className={inputStyles} name="email" onChange={handleChange} required />
                   </div>
 
-                  {/* Contraseña */}
+                 
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
                     <div className="relative">
@@ -535,7 +572,7 @@ export default function Register() {
                     </Typography>
                   </div>
 
-                  {/* Confirmar Contraseña */}
+                 
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
                     <div className="relative">
@@ -556,7 +593,7 @@ export default function Register() {
                     </div>
                   </div>
 
-                  {/* Checkbox términos */}
+                
                   <div className="flex items-start">
                     <FormControlLabel
                       control={
@@ -575,7 +612,7 @@ export default function Register() {
                           >
                            <strong>Términos y condiciones</strong>
                           </span>
-                          {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
+                         
                           y los <strong>Aviso de privacidad</strong>.
                         </span>
                       }
@@ -601,7 +638,7 @@ export default function Register() {
                       </div>
                     </Dialog>
                   </div>
-                  {/* Botón de Siguiente */}
+                
                   {message && (
                     <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
                       {message}
@@ -662,7 +699,7 @@ export default function Register() {
                   >
                     <img src="/images/Google_G.png" alt="Google" className="w-6 h-6 mr-2" />
                     Iniciar con Google
-                  </button> */}
+                  
                 </form>
               </div>
             </>)}
@@ -711,7 +748,8 @@ export default function Register() {
 
 
         </div>
-      </div>
+      </div> 
+      */}
 
 
 
