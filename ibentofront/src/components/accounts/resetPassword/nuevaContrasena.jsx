@@ -45,7 +45,6 @@ export default function PasswordResetChange() {
 
     try {
       const response = await api.post("password-reset/change/", {
-      const response = await api.post("password-reset/change/", {
         email: email,
         new_password: password,
       });
