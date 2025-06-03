@@ -8,6 +8,8 @@ import { buttonStyle, inputStyles } from "../../../styles/styles";
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import api from "../../../api";
+import {password_regex } from "../../../utils/regex";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
@@ -24,7 +26,7 @@ export default function PasswordResetChange() {
   useEffect(() => {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
-      navigate("/ibento/recuperar-cuenta"); // si no hay email, redirige al inicio
+      navigate("/recuperar-cuenta"); // si no hay email, redirige al inicio
     } else {
       setEmail(emailGuardado);
     }
@@ -41,7 +43,7 @@ export default function PasswordResetChange() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/password-reset/change/", {
+      const response = await api.post("password-reset/change/", {
         email: email,
         new_password: password,
       });
@@ -191,7 +193,14 @@ export default function PasswordResetChange() {
                 </Typography>
               )}
 
-              <Button type="submit" variant="contained" className={buttonStyle} style={{ marginTop: 16 }}>
+              <Button type="submit" variant="contained" className={buttonStyle} style={{ marginTop: 16 }} onClick={()=>{
+                if (!password_regex.test(form.password)) {
+                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+                        return;
+                      }
+                    }
+                    
+                      }>
                 Cambiar contraseña
               </Button>
             </form>
@@ -301,7 +310,11 @@ export default function PasswordResetChange() {
                 </Typography>
               )}
 
-              <Button type="submit" variant="contained" className={buttonStyle} style={{ marginTop: 16 }}>
+              <Button type="submit" variant="contained" className={buttonStyle} style={{ marginTop: 16 }} onClick={()=>{
+                if (!password_regex.test(form.password)) {
+                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+                        return;
+                      }}}>
                 Cambiar contraseña
               </Button>
             </form>

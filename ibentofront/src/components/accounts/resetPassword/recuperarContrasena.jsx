@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { buttonStyle, inputStyles} from "../../../styles/styles";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../../../api";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
@@ -21,12 +22,12 @@ export default function PasswordResetRequest() {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/password-reset/request/", {email});
+      const response = await api.post("password-reset/request/", {email});
       setMessage(response.data.message);
       // Espera 1 segundo antes de redirigir
       localStorage.setItem("emailReset", email);
       setTimeout(() => {
-       navigate("/ibento/recuperar-cuenta-codigo");
+       navigate("/recuperar-cuenta-codigo");
     }, 1000); 
     } catch (err) {
       setError(err.response?.data?.error || "Error al enviar la solicitud.");

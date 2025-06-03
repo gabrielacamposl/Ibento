@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { buttonStyle, inputStyles } from "../../../styles/styles";
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
+import api from "../../../api";
 
 const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
@@ -21,7 +22,7 @@ export default function PasswordResetValidate() {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
       // Si no hay email, regresamos al inicio del flujo
-      navigate("/ibento/recuperar-cuenta");
+      navigate("/recuperar-cuenta");
     } else {
       setEmail(emailGuardado);
     }
@@ -33,7 +34,7 @@ export default function PasswordResetValidate() {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/password-reset/validate/", {
+      const response = await api.post("password-reset/validate/", {
         email: email,
         codigo: codigo,
       });
@@ -41,7 +42,7 @@ export default function PasswordResetValidate() {
 
       // Código válido, redirige a cambiar contraseña
       setTimeout(() => {
-        navigate("/ibento/recuperar-cuenta-nueva-contrasena"); 
+        navigate("/recuperar-cuenta-nueva-contrasena"); 
       }, 1500);
     } catch (err) {
       setError(err.response?.data?.error || "Error al validar el código.");
