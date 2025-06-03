@@ -50,24 +50,30 @@ export default function Confirm() {
 
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-white">
-      <div className="w-full min-h-screen bg-gradient-to-b from-blue-100 via-purple-100 to-white relative">
-        {/* Fondo degradado y luces animadas */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
+    <div className="h-screen flex justify-center items-center">
+      {/* Formulario para la visualización web  */}
+      <motion.div
+        className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300 "></div>
+        <div className="absolute inset-0 z-10">
+
+          {/* Luces flotantes */}
+          {[...Array(9)].map((_, i) => {
+            const color = colors[i % colors.length]; // Alterna entre los 3 colores
+
             return (
               <motion.div
                 key={i}
-                className="absolute w-32 h-32 opacity-30 blur-3xl rounded-full"
-                style={{ backgroundColor: color }}
+                className="absolute w-40 h-40 opacity-30 blur-xl rounded-full"
+                style={{ backgroundColor: color }} // Aplica el color dinámicamente
                 initial={{
                   x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
+                  y: Math.random() * window.innerHeight,
                 }}
                 animate={{
                   x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
+                  y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
                 }}
                 transition={{
                   duration: 8 + Math.random() * 4,
@@ -79,58 +85,142 @@ export default function Confirm() {
             );
           })}
         </div>
+        <Box
+          sx={{
+            height: "100vh",
+            width: "100vw",
 
-        {/* Contenido principal */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <img
-            src={ibentoLogo}
-            alt="Ibento Logo"
-            className="w-24 h-24 object-contain mx-auto mb-4 drop-shadow-lg"
-          />
-
-          {/* Card principal */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md p-8 border border-white/30 mt-4">
-            {/* Estado: verificando */}
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            bgcolor: "background.default",
+            padding: 2,
+          }}
+        >
+          <Container
+            component="main"
+            maxWidth="xs"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              backgroundColor: "white",
+              boxShadow: 3,
+              p: 4,
+              zIndex: 20,
+              borderRadius: 2,
+            }}
+          >
+            <CssBaseline />
             {estado === "verificando" && (
-              <div className="flex flex-col items-center">
-                <svg className="animate-spin h-10 w-10 text-purple-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#a78bfa" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="#a78bfa" d="M4 12a8 8 0 018-8v8z"></path>
-                </svg>
-                <h2 className="text-lg font-semibold text-purple-700 mb-2">Verificando cuenta...</h2>
-              </div>
+              <>
+                <CircularProgress />
+                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
+              </>
             )}
-            {/* Estado: éxito */}
             {estado === "exito" && (
-              <div className="flex flex-col items-center">
-                <h2 className="text-xl font-bold text-green-700 mb-2 text-center">
-                  ¡Tu cuenta ha sido verificada con éxito!
-                </h2>
-                <img src="/Chimmy.webp" alt="nutria feliz" className="w-20 h-20 mb-2" />
-                {mensaje && (
-                  <p className="text-center text-gray-700">{mensaje}</p>
-                )}
-              </div>
-            )}
-            {/* Estado: error */}
-            {estado === "error" && (
-              <div className="flex flex-col items-center">
-                <h2 className="text-xl font-bold text-red-600 mb-2 text-center">
-                  Algo salió mal. {mensaje}
-                </h2>
+               <div>
+               <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="black">
+               ¡Tu cuenta ha sido verificada con éxito!
                
+               </Typography>
+               <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
+               </div>
+            )}
+            {/* Mensaje de error o éxito */}
+            {estado === "error" && (
+             
+              <div>
+              <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="error">
+                 Algo salió mal. {mensaje}
+              </Typography>
+              <img src="/nutriaTiste.png" alt="nutria jsjs" className="nutria2" />
               </div>
             )}
-            {/* Botón de regreso */}
-            <button
-              onClick={() => navigate("/")}
-              className="mt-6 w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold py-2 rounded-xl shadow-md hover:scale-105 transition-all duration-300"
-            >
-              Inicia Sesión
-            </button>
+
+            <Button className={buttonStyle} type="submit" 
+                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                onClick={() => navigate("/")}> Inicia Sesión </Button>
+          </Container>
+        </Box>
+      </motion.div>
+
+      {/* Formulario para móviles */}
+      <div className="block md:hidden">
+        <div className="block md:hidden w-full h-screen flex flex-col items-center justify-center relative overflow-hidden ">
+          <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-300 via-purple-300 to-transparent z-10"></div>
+          <div className="absolute inset-0 z-10">
+            {[...Array(9)].map((_, i) => {
+              const color = colors[i % colors.length]; // Alterna entre colores
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute w-30 h-30 opacity-30 blur-xl rounded-full"
+                  style={{ backgroundColor: color }}
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight / 2, // Solo en la parte superior
+                  }}
+                  animate={{
+                    x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+                    y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
+                  }}
+                  transition={{
+                    duration: 8 + Math.random() * 4,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                    ease: "easeInOut",
+                  }}
+                />
+              );
+            })}
           </div>
+     
+       
+
         </div>
+
+        {/* Contenedor del formulario */}
+        <Box
+          className="bg-white rounded-t-3xl shadow-lg flex justify-center items-start p-6"
+          sx={{
+            width: "100%",
+            zIndex: 10,
+          }}
+        >
+          <Grid container component="main" maxWidth="xs" className="w-full h-full">
+            <CssBaseline />
+            {estado === "verificando" && (
+              <>
+                <CircularProgress />
+                <Typography variant="h6" sx={{ mt: 2 }}>Verificando cuenta...</Typography>
+              </>
+            )}
+            {estado === "exito" && (
+               <div>
+               <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="black">
+               ¡Tu cuenta ha sido verificada con éxito!
+               
+               </Typography>
+               <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
+               </div>
+            )}
+            {/* Mensaje de error o éxito */}
+            {estado === "error" && (
+             
+              <div>
+              <Typography className="text-center text-bold w-full flex justify-center items-center" variant="h5" color="error">
+                 Algo salió mal. {mensaje}
+              </Typography>
+              <img src="/nutriaTiste.png" alt="nutria jsjs" className="nutria2" />
+              </div>
+            )}
+            <Button className={buttonStyle} type="submit" 
+                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                onClick={() => navigate("/")}> Inicia Sesión </Button>
+          </Grid>
+        </Box>
       </div>
     </div>
   );
