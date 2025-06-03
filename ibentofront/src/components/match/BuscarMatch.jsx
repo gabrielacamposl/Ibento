@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Heart, X, Filter, ArrowLeft, Users, Sparkles, Settings, Globe, Calendar, WifiOff } from 'lucide-react';
+import { Heart, X, Filter, ArrowLeft, Users, Sparkles, Settings, Globe, Calendar, WifiOff, CircleUserIcon } from 'lucide-react';
 import api from '../../api';
 import { Slider } from "primereact/slider";
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
 import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 import '../../assets/css/swipe-animations.css';
-
+import '../../assets/css/botones.css';
 const buscarMatchx = () => {
     const navigate = useNavigate();
     const cardRefs = useRef([]);
     const containerRef = useRef(null);
     const { makeRequest } = useOfflineRequest();
-    
+
     // Estados para el swipe system premium
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -22,7 +22,7 @@ const buscarMatchx = () => {
     const [swipeDirection, setSwipeDirection] = useState(null);
     const [likeAnimation, setLikeAnimation] = useState(null);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
-    
+
     // Estados para usuarios y filtros
     const [UserMatch, setUserMatch] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ const buscarMatchx = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [removedUsers, setRemovedUsers] = useState(new Set());
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [verificar, setVerificar] = useState(true);
+    const [verificar, setVerificar] = useState(undefined);
 
     const [filters, setFilters] = useState({
         searchMode: 'global',
@@ -48,10 +48,47 @@ const buscarMatchx = () => {
         };
 
         window.addEventListener('connectionChange', handleConnectionChange);
-        
+
         return () => {
             window.removeEventListener('connectionChange', handleConnectionChange);
         };
+    }, []);
+
+
+    const handleVerificar = () => { // Renamed
+        setTimeout(() => navigate("../verificar"), 0);
+    };
+
+    // Verificar si el usuario está verificado
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const fetchUserValidationData = async () => {
+            try {
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}estado-validacion/`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    },
+                    'user-validation'
+                );
+
+                if (result.data) {
+                    const userData = result.data;
+                    setVerificar(userData.is_ine_validated);
+                } else {
+                    setVerificar(false);
+                }
+            }
+            catch (error) {
+                console.error("Error al obtener datos de validación del usuario:", error);
+                setVerificar(false);
+            }
+        };
+        if (token) {
+            fetchUserValidationData();
+        } else {
+            setVerificar(false);
+        }
     }, []);
 
     useEffect(() => {
@@ -117,6 +154,8 @@ const buscarMatchx = () => {
         fetchMode();
     }, []);
 
+
+
     // Función para cambiar el modo de búsqueda
     const changeSearchMode = async (newMode) => {
         const token = localStorage.getItem('access');
@@ -130,10 +169,11 @@ const buscarMatchx = () => {
             if (response.status === 200) {
                 console.log("Modo cambiado a:", newMode);
             }
-        } catch (error) {            console.error("Error al cambiar el modo:", error);
+        } catch (error) {
+            console.error("Error al cambiar el modo:", error);
         }
     };
-    
+
     // Haptic feedback para dispositivos móviles
     const triggerHaptic = (intensity = 'light') => {
         if ('vibrate' in navigator) {
@@ -150,30 +190,30 @@ const buscarMatchx = () => {
     // Funciones premium para swipe
     const performSwipe = async (isLike) => {
         if (isAnimating || currentIndex >= UserMatch.length) return;
-        
+
         setIsAnimating(true);
         setLikeAnimation(isLike ? 'like' : 'dislike');
-        
+
         const card = cardRefs.current[currentIndex];
         const user = UserMatch[currentIndex];
-        
+
         if (card) {
             const exitX = isLike ? window.innerWidth + 100 : -window.innerWidth - 100;
             const exitRotation = isLike ? 30 : -30;
-            
+
             card.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             card.style.transform = `translateX(${exitX}px) rotate(${exitRotation}deg) scale(0.8)`;
             card.style.opacity = '0';
-            
+
             triggerHaptic(isLike ? 'success' : 'medium');
-            
+
             // Ejecutar la acción correspondiente
             if (isLike) {
                 await handleMatch(user._id);
             } else {
                 await handleNextUser(user._id);
             }
-            
+
             setTimeout(() => {
                 setCurrentIndex(prev => prev + 1);
                 setIsAnimating(false);
@@ -207,27 +247,27 @@ const buscarMatchx = () => {
     // Utilidades
     const hasMoreUsers = () => {
         return currentIndex < UserMatch.length;
-    };    const calculateAge = (birthDate) => {
+    }; const calculateAge = (birthDate) => {
         const today = new Date();
         const birth = new Date(birthDate);
         let age = today.getFullYear() - birth.getFullYear();
         const monthDiff = today.getMonth() - birth.getMonth();
-        
+
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
             age--;
         }
-        
+
         return `, ${age}`;
     };
 
     // Sistema de swipe premium - Touch handlers
     const handleTouchStart = useCallback((e) => {
         if (isAnimating) return;
-        
+
         const touch = e.touches[0];
         setTouchStart({ x: touch.clientX, y: touch.clientY });
         setIsDragging(true);
-        
+
         const card = cardRefs.current[currentIndex];
         if (card) {
             card.style.transition = 'none';
@@ -236,21 +276,21 @@ const buscarMatchx = () => {
 
     const handleTouchMove = useCallback((e) => {
         if (!isDragging || isAnimating) return;
-        
+
         const touch = e.touches[0];
         const deltaX = touch.clientX - touchStart.x;
         const deltaY = touch.clientY - touchStart.y;
-        
+
         setTouchCurrent({ x: deltaX, y: deltaY });
-        
+
         const card = cardRefs.current[currentIndex];
         if (card) {
             const rotation = deltaX * 0.1;
             const scale = Math.max(0.95, 1 - Math.abs(deltaX) * 0.0005);
-            
+
             card.style.transform = `translateX(${deltaX}px) translateY(${deltaY * 0.3}px) rotate(${rotation}deg) scale(${scale})`;
             card.style.opacity = Math.max(0.7, 1 - Math.abs(deltaX) * 0.002);
-            
+
             // Mostrar indicadores de like/dislike (sin super like)
             if (Math.abs(deltaX) > 50) {
                 setSwipeDirection(deltaX > 0 ? 'like' : 'dislike');
@@ -263,15 +303,15 @@ const buscarMatchx = () => {
 
     const handleTouchEnd = useCallback(() => {
         if (!isDragging || isAnimating) return;
-        
+
         setIsDragging(false);
         const deltaX = touchCurrent.x;
-        
+
         const card = cardRefs.current[currentIndex];
         if (!card) return;
-        
+
         const threshold = 120;
-        
+
         if (Math.abs(deltaX) > threshold) {
             // Solo like o dislike, sin super like
             const isLike = deltaX > 0;
@@ -280,7 +320,7 @@ const buscarMatchx = () => {
             // Regresar a posición original
             resetCard(card);
         }
-        
+
         setSwipeDirection(null);
         setTouchCurrent({ x: 0, y: 0 });
     }, [isDragging, touchCurrent, currentIndex, isAnimating]);
@@ -288,11 +328,11 @@ const buscarMatchx = () => {
     // Soporte para mouse en desktop
     const handleMouseDown = useCallback((e) => {
         if (isAnimating) return;
-        
+
         e.preventDefault();
         setTouchStart({ x: e.clientX, y: e.clientY });
         setIsDragging(true);
-        
+
         const card = cardRefs.current[currentIndex];
         if (card) {
             card.style.transition = 'none';
@@ -302,20 +342,20 @@ const buscarMatchx = () => {
 
     const handleMouseMove = useCallback((e) => {
         if (!isDragging || isAnimating) return;
-        
+
         const deltaX = e.clientX - touchStart.x;
         const deltaY = e.clientY - touchStart.y;
-        
+
         setTouchCurrent({ x: deltaX, y: deltaY });
-        
+
         const card = cardRefs.current[currentIndex];
         if (card) {
             const rotation = deltaX * 0.1;
             const scale = Math.max(0.95, 1 - Math.abs(deltaX) * 0.0005);
-            
+
             card.style.transform = `translateX(${deltaX}px) translateY(${deltaY * 0.3}px) rotate(${rotation}deg) scale(${scale})`;
             card.style.opacity = Math.max(0.7, 1 - Math.abs(deltaX) * 0.002);
-            
+
             // Indicadores de swipe
             if (Math.abs(deltaX) > 50) {
                 setSwipeDirection(deltaX > 0 ? 'like' : 'dislike');
@@ -327,26 +367,27 @@ const buscarMatchx = () => {
 
     const handleMouseUp = useCallback(() => {
         if (!isDragging || isAnimating) return;
-        
+
         setIsDragging(false);
         const deltaX = touchCurrent.x;
-        
+
         const card = cardRefs.current[currentIndex];
         if (!card) return;
-        
+
         card.style.cursor = 'grab';
-        
+
         const threshold = 120;
-        
+
         if (Math.abs(deltaX) > threshold) {
             const isLike = deltaX > 0;
             performSwipe(isLike);
         } else {
             resetCard(card);
         }
-        
+
         setSwipeDirection(null);
-        setTouchCurrent({ x: 0, y: 0 });    }, [isDragging, touchCurrent, currentIndex, isAnimating]);
+        setTouchCurrent({ x: 0, y: 0 });
+    }, [isDragging, touchCurrent, currentIndex, isAnimating]);
 
     // useEffect para eventos globales de mouse
     useEffect(() => {
@@ -452,8 +493,10 @@ const buscarMatchx = () => {
         } catch (error) {
             console.error('Error:', error);
         }
-    };    const handdleVerificar = () => {
-        setTimeout(() => navigate("../verificar"), 0);    };
+    };
+    const handdleVerificar = () => {
+        setTimeout(() => navigate("../verificar"), 0);
+    };
 
     const user = UserMatch[currentIndex];
 
@@ -463,7 +506,7 @@ const buscarMatchx = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % user.profile_pic.length);
         }
-    };    const handlePrev = () => {
+    }; const handlePrev = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.profile_pic.length) % user.profile_pic.length);
         }
@@ -484,13 +527,13 @@ const buscarMatchx = () => {
                 {/* Header premium con filtros */}
                 <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                     <div className="flex items-center justify-between p-6">
-                        <button 
+                        <button
                             onClick={() => navigate(-1)}
                             className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
                         >
                             <ArrowLeft className="w-5 h-5 text-gray-700" />
                         </button>
-                        
+
                         <div className="flex items-center space-x-3">
                             <div className="p-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl">
                                 <Users className="w-5 h-5 text-white" />
@@ -503,7 +546,7 @@ const buscarMatchx = () => {
                             </div>
                         </div>
 
-                        <button 
+                        <button
                             onClick={() => document.getElementById('my_modal_2').showModal()}
                             className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
                         >
@@ -511,6 +554,16 @@ const buscarMatchx = () => {
                         </button>
                     </div>
                 </div>
+
+                {verificar == false && (
+                        <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
+                            <div className="text-center text-white">
+                                <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
+                                <p className="mt-2">¡Créalo ahora!.</p>
+                                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
+                            </div>
+                        </div>
+                    )}
 
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box max-w-sm mx-auto glass-premium rounded-3xl shadow-2xl border border-white/30 p-0 overflow-hidden">
@@ -575,6 +628,7 @@ const buscarMatchx = () => {
                                 </h3>
                                 <div className="px-2">
                                     <Slider
+                                        min={18}
                                         value={value}
                                         onChange={(e) => setValue(e.value)}
                                         className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
@@ -637,13 +691,13 @@ const buscarMatchx = () => {
             {/* Header premium */}
             <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
-                    <button 
+                    <button
                         onClick={() => navigate(-1)}
                         className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
                     >
                         <ArrowLeft className="w-5 h-5 text-gray-700" />
                     </button>
-                    
+
                     <div className="flex items-center space-x-3">
                         <div className="p-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl">
                             <Users className="w-5 h-5 text-white" />
@@ -656,7 +710,7 @@ const buscarMatchx = () => {
                         </div>
                     </div>
 
-                    <button 
+                    <button
                         onClick={() => document.getElementById('my_modal_2').showModal()}
                         className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
                     >
@@ -757,9 +811,10 @@ const buscarMatchx = () => {
                             </div>
                             <div className="px-2">
                                 <Slider
+                                    min={18}
                                     value={value}
                                     onChange={(e) => setValue(e.value)}
-                                    className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
+                                    className="w-full p-1 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
                                     range
                                 />
                             </div>
@@ -789,7 +844,7 @@ const buscarMatchx = () => {
                 </form>
             </dialog>            {/* Card Stack Container */}
             <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-32 pb-32">
-                <div 
+                <div
                     ref={containerRef}
                     className="relative w-full max-w-sm mx-auto"
                     style={{ height: '600px' }}
@@ -802,14 +857,13 @@ const buscarMatchx = () => {
                                 const zIndex = 3 - stackIndex;
                                 const scale = 1 - stackIndex * 0.05;
                                 const translateY = stackIndex * 8;
-                                
+
                                 return (
                                     <div
                                         key={user._id || actualIndex}
                                         ref={el => cardRefs.current[actualIndex] = el}
-                                        className={`absolute inset-0 glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/30 ${
-                                            stackIndex === 0 ? 'cursor-grab active:cursor-grabbing' : ''
-                                        }`}
+                                        className={`absolute inset-0 glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/30 ${stackIndex === 0 ? 'cursor-grab active:cursor-grabbing' : ''
+                                            }`}
                                         style={{
                                             zIndex,
                                             transform: `scale(${scale}) translateY(${translateY}px)`,
@@ -829,57 +883,54 @@ const buscarMatchx = () => {
                                                 className="w-full h-full object-cover"
                                                 draggable={false}
                                             />
-                                            
+
                                             {/* Overlay gradiente más sutil */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
-                                            
+
                                             {/* Botones de navegación de imagen (solo en la primera tarjeta) */}
                                             {stackIndex === 0 && user?.profile_pic?.length > 1 && (
                                                 <div className="absolute inset-0 z-10 flex justify-between items-center px-4">
-                                                    <button 
-                                                        onClick={handlePrev} 
+                                                    <button
+                                                        onClick={handlePrev}
                                                         className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all duration-300"
                                                     >
                                                         <ArrowLeft className="w-5 h-5" />
                                                     </button>
-                                                    <button 
-                                                        onClick={handleNext} 
+                                                    <button
+                                                        onClick={handleNext}
                                                         className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all duration-300"
                                                     >
                                                         <ArrowLeft className="w-5 h-5 rotate-180" />
                                                     </button>
                                                 </div>
                                             )}
-                                            
+
                                             {/* Indicadores de swipe */}
                                             {stackIndex === 0 && swipeDirection && (
-                                                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
-                                                    swipeDirection === 'like' 
-                                                        ? 'bg-green-500/20' 
-                                                        : 'bg-red-500/20'
-                                                }`}>
-                                                    <div className={`p-6 rounded-full border-4 ${
-                                                        swipeDirection === 'like'
-                                                            ? 'border-green-400 bg-green-400/20'
-                                                            : 'border-red-400 bg-red-400/20'
-                                                    } animate-pulse`}>
+                                                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${swipeDirection === 'like'
+                                                    ? 'bg-green-500/20'
+                                                    : 'bg-red-500/20'
+                                                    }`}>
+                                                    <div className={`p-6 rounded-full border-4 ${swipeDirection === 'like'
+                                                        ? 'border-green-400 bg-green-400/20'
+                                                        : 'border-red-400 bg-red-400/20'
+                                                        } animate-pulse`}>
                                                         {swipeDirection === 'like' ? (
                                                             <Heart className="w-16 h-16 text-green-400 fill-current" />
                                                         ) : (
                                                             <X className="w-16 h-16 text-red-400" />
                                                         )}
                                                     </div>
-                                                </div>                                            )}
-                                            
+                                                </div>)}
+
                                             {/* Indicadores de imagen */}
                                             {stackIndex === 0 && user?.profile_pic?.length > 1 && (
                                                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
                                                     {user.profile_pic.map((_, idx) => (
                                                         <div
                                                             key={idx}
-                                                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                                                idx === currentImageIndex ? 'bg-white' : 'bg-white/40'
-                                                            }`}
+                                                            className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'bg-white' : 'bg-white/40'
+                                                                }`}
                                                         />
                                                     ))}
                                                 </div>
@@ -896,14 +947,14 @@ const buscarMatchx = () => {
                                                         A 2 km de distancia
                                                     </p>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={() => navigate('../verLike')}
                                                     className="p-3 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300"
                                                 >
                                                     <Sparkles className="w-5 h-5 text-white" />
                                                 </button>
                                             </div>
-                                            
+
                                             {/* Preferencias del usuario */}
                                             <div className="flex flex-wrap gap-2 mb-3">
                                                 {user?.preferencias_evento?.slice(0, 3).map((pref, idx) => (
@@ -926,13 +977,12 @@ const buscarMatchx = () => {
                                     </div>
                                 );
                             })}
-                            
+
                             {/* Animaciones de acción */}
                             {likeAnimation && (
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
-                                    <div className={`animate-ping ${
-                                        likeAnimation === 'like' ? 'text-green-400' : 'text-red-400'
-                                    }`}>
+                                    <div className={`animate-ping ${likeAnimation === 'like' ? 'text-green-400' : 'text-red-400'
+                                        }`}>
                                         {likeAnimation === 'like' && <Heart className="w-32 h-32 fill-current" />}
                                         {likeAnimation === 'dislike' && <X className="w-32 h-32" />}
                                     </div>
@@ -957,7 +1007,7 @@ const buscarMatchx = () => {
                             >
                                 Ajustar Filtros
                             </button>
-                        </div>                    )}
+                        </div>)}
                 </div>
             </div>
 
@@ -988,25 +1038,26 @@ const buscarMatchx = () => {
 
             {/* Modal de verificación premium */}
             {verificar === false && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-pink-500/90 via-purple-600/90 to-indigo-600/90 backdrop-blur-md">
+                <div className="fixed inset-0 z-70 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
                     <div className="text-center text-white p-8 glass-premium rounded-3xl border border-white/30 max-w-md mx-4">
                         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Sparkles className="w-10 h-10 text-white" />
+                            <CircleUserIcon className="w-10 h-10 text-white" />
+
                         </div>
-                        <h1 className="text-3xl font-bold mb-4">Perfil Premium Requerido</h1>
+                        <h1 className="text-3xl font-bold mb-4">Perfil Requerido</h1>
                         <p className="text-white/90 mb-6">Aún no cuentas con tu perfil de acompañantes. ¡Créalo ahora y comienza a conectar!</p>
-                        <button 
-                            className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105" 
+                        <button
+                            className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
                             onClick={handdleVerificar}
                         >                            Crear Perfil
                         </button>
                     </div>
                 </div>
             )}
-            
+
             {/* Indicador de estado de conexión */}
             <ConnectionStatus />
-            
+
             {/* Indicador offline en la parte superior derecha si hay datos offline */}
             {isOffline && (
                 <div className="fixed top-4 right-4 z-40 bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">

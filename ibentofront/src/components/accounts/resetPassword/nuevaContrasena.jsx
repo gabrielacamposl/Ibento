@@ -27,6 +27,7 @@ export default function PasswordResetChange() {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
       navigate("/recuperar-cuenta"); // si no hay email, redirige al inicio
+      navigate("/recuperar-cuenta"); // si no hay email, redirige al inicio
     } else {
       setEmail(emailGuardado);
     }
@@ -43,6 +44,7 @@ export default function PasswordResetChange() {
     }
 
     try {
+      const response = await api.post("password-reset/change/", {
       const response = await api.post("password-reset/change/", {
         email: email,
         new_password: password,

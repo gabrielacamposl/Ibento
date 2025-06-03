@@ -23,7 +23,7 @@ const Matches = () => {
         };
 
         window.addEventListener('connectionChange', handleConnectionChange);
-        
+
         return () => {
             window.removeEventListener('connectionChange', handleConnectionChange);
         };
@@ -35,7 +35,9 @@ const Matches = () => {
 
     const handleVerificar = () => { // Renamed
         setTimeout(() => navigate("../verificar"), 0);
-    };    useEffect(() => {
+    };
+
+    useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchUserValidationData = async () => {
             try {
@@ -46,10 +48,10 @@ const Matches = () => {
                     },
                     'user-validation'
                 );
-                
+
                 if (result.data) {
                     const userData = result.data;
-                    setVerificar(userData.is_ine_validated && userData.is_validated_camera);
+                    setVerificar(userData.is_ine_validated);
                 } else {
                     setVerificar(false);
                 }
@@ -77,7 +79,7 @@ const Matches = () => {
                     },
                     'likes-received'
                 );
-                
+
                 if (result.data) {
                     setLikes(result.data);
                 }
@@ -89,7 +91,7 @@ const Matches = () => {
             fetchLikesData();
         }
         // setLoading(false) is handled by the main data fetching useEffect
-    }, []);    useEffect(() => {
+    }, []); useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchConversationsData = async () => {
             try {
@@ -100,7 +102,7 @@ const Matches = () => {
                     },
                     'conversations'
                 );
-                
+
                 if (result.data) {
                     const mensajes = [];
                     const sinMensajes = [];
@@ -150,7 +152,7 @@ const Matches = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
-            
+
             <div className="max-w-lg mx-auto relative z-10 pb-16"> {/* Added pb-16 */}
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-b-3xl sticky top-0 z-20"> {/* Made header sticky */}
                     <div className="px-6 py-8">
@@ -191,7 +193,7 @@ const Matches = () => {
                                 Crear Perfil
                             </button>
                         </div>
-                    </div>                )}
+                    </div>)}
 
                 <div className="px-6 py-6 space-y-8">
                     <div className="space-y-4">
@@ -311,10 +313,10 @@ const Matches = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Indicador de estado de conexión */}
             <ConnectionStatus />
-            
+
             {/* Indicador offline en la parte superior derecha si hay datos offline */}
             {isOffline && (
                 <div className="fixed top-4 right-4 z-40 bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">

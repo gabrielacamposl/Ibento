@@ -25,8 +25,8 @@ interface ListEvent {
 }
 export default function EventWrapper({ eventos }: { eventos: ListEvent[] }) {
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-row flex-wrap items-center justify-center py-2 gap-4">
+        <div className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
                 {eventos.map((event) => (
                     <EventCard
                         key={event._id}
@@ -71,41 +71,52 @@ function AddressFormat(address: string): string {
 }
 
 export function EventCard({ id, imageUrl, title, date, location, price, url, Category }) {
-
     const urls = "../eventos/" + id;
-    return (
-        <Link to={urls} className="bg-white rounded-lg p-1 h-auto w-full drop-shadow-xl ">
-            <div className="bg-white w-full rounded-lg flex flex-row items-center">
-
-                <img
-                    src={`${imageUrl}`}
-                    className="rounded-lg object-cover w-40 h-40"
-                    alt={title} />
-
-                <div className='flex flex-col justify-center px-4 gap-2'>
-                    <p className="text-base font-bold text-black text-left">{title}</p>
-                    <div className='flex flex-row space-x-2'>
-                        <CalendarIcon className='text-black h-4 w-4' />
-                        <p className='text-sm font-light text-black text-left'>{DateFormat(date[0])}</p>
+      return (
+        <Link 
+            to={urls} 
+            className="group block bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] overflow-hidden"
+        >
+            <div className="relative">
+                {/* Imagen con overlay gradient */}
+                <div className="relative overflow-hidden rounded-t-2xl h-40 sm:h-48">
+                    <img
+                        src={`${imageUrl}`}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        alt={title} 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                
+                {/* Contenido */}
+                <div className='p-3 sm:p-4 space-y-2 sm:space-y-3'>
+                    <h3 className="text-base sm:text-lg font-bold text-gray-800 line-clamp-2 group-hover:text-purple-700 transition-colors duration-200">
+                        {title}
+                    </h3>
+                    
+                    <div className='flex items-center space-x-2 text-gray-600'>
+                        <CalendarIcon className='h-4 w-4 text-pink-500 flex-shrink-0' />
+                        <p className='text-sm font-medium'>{DateFormat(date[0])}</p>
                     </div>
 
-                    <div className='flex flex-row space-x-2'>
-                        <MapPinIcon className='text-black h-4 w-4' />
-                        <p className='text-sm font-bold text-black text-left'>{AddressFormat(location)}</p>
-                    </div>
-                    <div className='flex flex-row space-x-1'>
-                        <button className='bg-purple-300 text-black mb-1 rounded-full w-22'>
-                            {CategoryFormat(Category)}
-                        </button>
-                        <button className='bg-purple-300 text-black mb-1 rounded-full w-22 truncate'>
-                            {CategoryFormat2(Category)}
-                        </button>
+                    <div className='flex items-center space-x-2 text-gray-600'>
+                        <MapPinIcon className='h-4 w-4 text-purple-500 flex-shrink-0' />
+                        <p className='text-sm font-medium truncate'>{AddressFormat(location)}</p>
                     </div>
                     
+                    {/* Categories */}
+                    <div className='flex flex-wrap gap-1.5 sm:gap-2 pt-1 sm:pt-2'>
+                        <span className='px-2 sm:px-3 py-1 bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-pink-700 text-xs font-medium rounded-full border border-pink-200'>
+                            {CategoryFormat(Category)}
+                        </span>
+                        {CategoryFormat2(Category) && CategoryFormat2(Category) !== CategoryFormat(Category) && (
+                            <span className='px-2 sm:px-3 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-700 text-xs font-medium rounded-full border border-purple-200'>
+                                {CategoryFormat2(Category)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
-
         </Link>
-
     );
 }
