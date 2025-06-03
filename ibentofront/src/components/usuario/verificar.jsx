@@ -1137,9 +1137,10 @@ const Verificar = () => {
                         <Button
                             className={buttonStyle}
                             onClick={() => setActiveIndex(2)}
-                            disabled={uploadingPhotos}
+                            // onClick={handleUploadPictures}
+                            // disabled={uploadingPhotos}
                         >
-                            {uploadingPhotos ? (
+                            {/* {uploadingPhotos ? (
                                 <div className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -1149,7 +1150,7 @@ const Verificar = () => {
                                 </div>
                             ) : (
                                 'Subir Fotos'
-                            )}
+                            )} */}
                         </Button>
                     ) : activeIndex === 1 ? (
                         <Button
@@ -1173,9 +1174,10 @@ const Verificar = () => {
                         <Button
                             className={buttonStyle}
                             onClick={() => setActiveIndex(3)}
-                            disabled={validatingIne}
+                            // onClick={handleIneValidation}
+                            // disabled={validatingIne}
                         >
-                            {validatingIne ? (
+                            {/* {validatingIne ? (
                                 <div className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -1185,7 +1187,7 @@ const Verificar = () => {
                                 </div>
                             ) : (
                                 'Validando INE'
-                            )}
+                            )} */}
                         </Button>
                     ) : activeIndex === 3 ? (
                         <Button
