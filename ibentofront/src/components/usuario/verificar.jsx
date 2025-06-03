@@ -1136,7 +1136,7 @@ const Verificar = () => {
                     {activeIndex === 0 ? (
                         <Button
                             className={buttonStyle}
-                            onClick={handleUploadPictures}
+                            onClick={() => setActiveIndex(2)}
                             disabled={uploadingPhotos}
                         >
                             {uploadingPhotos ? (
@@ -1172,7 +1172,7 @@ const Verificar = () => {
                     ) : activeIndex === 2 ? (
                         <Button
                             className={buttonStyle}
-                            onClick={handleIneValidation}
+                            onClick={() => setActiveIndex(3)}
                             disabled={validatingIne}
                         >
                             {validatingIne ? (
