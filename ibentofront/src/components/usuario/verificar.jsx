@@ -390,15 +390,19 @@ const Verificar = () => {
         setValidatingFace(true)
 
         try {
+
+            showInfo('Validando rostro 0, por favor espera...');
             const formData = new FormData();
             formData.append('ine_front', ineImages[0]);
             formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
 
+            showInfo('Validando rostro 1, por favor espera...');
             const response = await api.post('validar-rostro/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                }
+                },
             });
+            showInfo('Validando rostro 2, por favor espera...');
             const data = response.data;
 
             if (data.success && data.rostro_validado) {
