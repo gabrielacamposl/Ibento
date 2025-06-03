@@ -19,41 +19,41 @@ export default function Confirm() {
   const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
 
 
-  useEffect(() => {
-    // Evitar hacer la petición si ya fue confirmada
-    const confirmarCuenta = async () => {
-      if (isConfirmed) {return};
-      try {
-        // Hacemos la llamada al backend para confirmar el token
-        const response = await api.get(`confirmar/${token}/`);
+  //useEffect(() => {
+  //   // Evitar hacer la petición si ya fue confirmada
+  //   const confirmarCuenta = async () => {
+  //     if (isConfirmed) {return};
+  //     try {
+  //       // Hacemos la llamada al backend para confirmar el token
+  //       const response = await api.get(`confirmar/${token}/`);
       
-        if (response.status === 200) {
-          console.log("ENTRE PRIMERO EN EXITO");
-          setEstado("exito");
-          setIsConfirmed(true); // Marcamos que ya se confirmó
-        } else {
-          // Si la respuesta del backend indica que la confirmación falló
-          console.log("ENTRE PRIMERO EN ELSE");
-          setEstado("error");
-          setMensaje("El enlace de confirmación es inválido o ha expirado.");
-        }
-      } catch (error) {
-        // Si hubo un error en la comunicación con el backend
-        console.log("ENTRE EN ERROR");
-        setEstado("exito");
-        setMensaje("Felicidades! Eres un nuevo usuario de Ibento!");
-      }
-    };
+  //       if (response.status === 200) {
+  //         console.log("ENTRE PRIMERO EN EXITO");
+  //         setEstado("exito");
+  //         setIsConfirmed(true); // Marcamos que ya se confirmó
+  //       } else {
+  //         // Si la respuesta del backend indica que la confirmación falló
+  //         console.log("ENTRE PRIMERO EN ELSE");
+  //         setEstado("error");
+  //         setMensaje("El enlace de confirmación es inválido o ha expirado.");
+  //       }
+  //     } catch (error) {
+  //       // Si hubo un error en la comunicación con el backend
+  //       console.log("ENTRE EN ERROR");
+  //       setEstado("exito");
+  //       setMensaje("Felicidades! Eres un nuevo usuario de Ibento!");
+  //     }
+  //   };
 
-    confirmarCuenta();
-  }, [token, isConfirmed]); // Dependencia para controlar si ya se confirmó
+  //   confirmarCuenta();
+  // }, [token, isConfirmed]); // Dependencia para controlar si ya se confirmó
 
 
   return (
-    <div className="h-screen flex justify-center items-center">
+    <div className="flex justify-center items-center">
       {/* Formulario para la visualización web  */}
       <motion.div
-        className="hidden md:block relative w-full h-screen flex justify-center items-center overflow-hidden "
+        className=" relative w-full   overflow-hidden "
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300 "></div>
         <div className="absolute inset-0 z-10">
@@ -125,7 +125,7 @@ export default function Confirm() {
                ¡Tu cuenta ha sido verificada con éxito!
                
                </Typography>
-               <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
+               <img src="/Chimmy.webp" alt="nutria jsjs" className="nutria" />
                </div>
             )}
             {/* Mensaje de error o éxito */}
@@ -139,9 +139,12 @@ export default function Confirm() {
               </div>
             )}
 
-            <Button className={buttonStyle} type="submit" 
-                fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate("/")}> Inicia Sesión </Button>
+            <button
+              onClick={() => navigate("/")}
+              className="mt-6 w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold py-2 rounded-xl shadow-md hover:scale-105 transition-all duration-300"
+            >
+              Inicia Sesión
+            </button>
           </Container>
         </Box>
       </motion.div>
@@ -182,7 +185,7 @@ export default function Confirm() {
         </div>
 
         {/* Contenedor del formulario */}
-        <Box
+        {/* <Box
           className="bg-white rounded-t-3xl shadow-lg flex justify-center items-start p-6"
           sx={{
             width: "100%",
@@ -206,7 +209,7 @@ export default function Confirm() {
                <img src="/nutria.png" alt="nutria jsjs" className="nutria" />
                </div>
             )}
-            {/* Mensaje de error o éxito */}
+          
             {estado === "error" && (
              
               <div>
@@ -220,7 +223,7 @@ export default function Confirm() {
                 fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
                 onClick={() => navigate("/")}> Inicia Sesión </Button>
           </Grid>
-        </Box>
+        </Box> */}
       </div>
     </div>
   );
