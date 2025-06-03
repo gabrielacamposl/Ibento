@@ -32,7 +32,7 @@ const Verificar = () => {
     const [validationFeedback, setValidationFeedback] = useState('');
     const [canRetakePhoto, setCanRetakePhoto] = useState(false);
     const [canRetakeINE, setCanRetakeINE] = useState(false);
-    
+
 
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
@@ -388,128 +388,128 @@ const Verificar = () => {
     };
 
     const handleValidacionRostro = async () => {
-    if (!capturedPhoto) {
-        showWarn('Debes capturar una imagen de tu rostro');
-        return;
-    }
+        if (!capturedPhoto) {
+            showWarn('Debes capturar una imagen de tu rostro');
+            return;
+        }
 
-    setValidatingFace(true);
-    setValidationFeedback('');
+        setValidatingFace(true);
+        setValidationFeedback('');
 
-    try {
-        showInfo('Validando rostro, por favor espera...');
-        
-        const formData = new FormData();
-        formData.append('ine_front', ineImages[0]);
-        formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
+        try {
+            showInfo('Validando rostro, por favor espera...');
 
-        const response = await api.post('validar-rostro/', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        
-        const data = response.data;
+            const formData = new FormData();
+            formData.append('ine_front', ineImages[0]);
+            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
 
-        if (data.success && data.rostro_validado) {
-            // Validación exitosa
-            setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
-            try {
-                await uploadAllData();
-                setStepsCompleted(prev => ({ ...prev, face: true }));
-                showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
-                setActiveIndex(4);
-            } catch (uploadError) {
-                console.error("Error al subir datos después de validación:", uploadError);
-                setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                setActiveIndex(4);
+            const response = await api.post('validar-rostro/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const data = response.data;
+
+            if (data.success && data.rostro_validado) {
+                // Validación exitosa
+                setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
+                try {
+                    await uploadAllData();
+                    setStepsCompleted(prev => ({ ...prev, face: true }));
+                    showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
+                    setActiveIndex(4);
+                } catch (uploadError) {
+                    console.error("Error al subir datos después de validación:", uploadError);
+                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                    setActiveIndex(4);
+                }
+            } else {
+                // Validación falló
+                handleValidationFailure(data);
             }
+
+        } catch (error) {
+            console.error('Error al validar rostro:', error);
+            const errorData = error.response?.data;
+
+            if (errorData) {
+                handleValidationFailure(errorData);
+            } else {
+                setValidationAttempts(prev => prev + 1);
+                showError('Error de conexión. Intenta nuevamente.');
+                setValidationFeedback('Error de conexión. Verifica tu internet.');
+            }
+        } finally {
+            setValidatingFace(false);
+        }
+    };
+    const handleValidationFailure = (errorData) => {
+        const newAttempts = validationAttempts + 1;
+        setValidationAttempts(newAttempts);
+
+        // Determinar el tipo de error y dar feedback específico
+        const errorMessage = errorData.error || errorData.mensaje || '';
+        let feedback = '';
+        let shouldRetakePhoto = false;
+        let shouldRetakeINE = false;
+
+        if (errorMessage.includes('No se detectó rostro en la INE')) {
+            feedback = 'No se detectó rostro en tu INE. Sube una imagen más clara de tu INE y toma una nueva foto.';
+            shouldRetakeINE = true;
+            shouldRetakePhoto = true;
+            showWarn('La imagen de tu INE no es clara. Sube una nueva imagen y retoma la foto.');
+        } else if (errorMessage.includes('No se detectó rostro en la imagen de la cámara')) {
+            feedback = 'No se detectó tu rostro en la foto. Asegúrate de que tu cara esté bien visible y centrada.';
+            shouldRetakePhoto = true;
+            showWarn('No se detectó tu rostro. Retoma la foto asegurándote de que tu cara esté bien visible.');
+        } else if (errorMessage.includes('Rostro demasiado cerca') || errorData.sugerencia?.includes('Aléjate')) {
+            feedback = 'Tu rostro está demasiado cerca de la cámara. Aléjate un poco y retoma la foto.';
+            shouldRetakePhoto = true;
+            showWarn('Aléjate un poco de la cámara y retoma la foto.');
+        } else if (errorMessage.includes('Rostro muy lejos') || errorData.sugerencia?.includes('Acércate')) {
+            feedback = 'Tu rostro está muy lejos de la cámara. Acércate un poco y retoma la foto.';
+            shouldRetakePhoto = true;
+            showWarn('Acércate un poco más a la cámara y retoma la foto.');
+        } else if (errorMessage.includes('no coincide') || errorMessage.includes('no match')) {
+            feedback = 'Tu rostro no coincide con la foto de la INE. Asegúrate de que la iluminación sea buena y retoma la foto.';
+            shouldRetakePhoto = true;
+            showWarn('El rostro no coincide. Mejora la iluminación y retoma la foto.');
         } else {
-            // Validación falló
-            handleValidationFailure(data);
+            feedback = errorMessage || 'Error en la validación. Intenta nuevamente.';
+            shouldRetakePhoto = true;
+            showError(feedback);
         }
 
-    } catch (error) {
-        console.error('Error al validar rostro:', error);
-        const errorData = error.response?.data;
-        
-        if (errorData) {
-            handleValidationFailure(errorData);
-        } else {
-            setValidationAttempts(prev => prev + 1);
-            showError('Error de conexión. Intenta nuevamente.');
-            setValidationFeedback('Error de conexión. Verifica tu internet.');
+        setValidationFeedback(feedback);
+        setCanRetakePhoto(shouldRetakePhoto);
+        setCanRetakeINE(shouldRetakeINE);
+
+        // Si ya agotó los 3 intentos, avanzar al siguiente paso
+        if (newAttempts >= 3) {
+            setTimeout(() => {
+                showInfo('Has agotado los 3 intentos. Puedes validar tu perfil después.');
+                setActiveIndex(4); // Avanzar al paso 5
+            }, 2000);
         }
-    } finally {
-        setValidatingFace(false);
-    }
-};
-const handleValidationFailure = (errorData) => {
-    const newAttempts = validationAttempts + 1;
-    setValidationAttempts(newAttempts);
-    
-    // Determinar el tipo de error y dar feedback específico
-    const errorMessage = errorData.error || errorData.mensaje || '';
-    let feedback = '';
-    let shouldRetakePhoto = false;
-    let shouldRetakeINE = false;
-    
-    if (errorMessage.includes('No se detectó rostro en la INE')) {
-        feedback = 'No se detectó rostro en tu INE. Sube una imagen más clara de tu INE y toma una nueva foto.';
-        shouldRetakeINE = true;
-        shouldRetakePhoto = true;
-        showWarn('La imagen de tu INE no es clara. Sube una nueva imagen y retoma la foto.');
-    } else if (errorMessage.includes('No se detectó rostro en la imagen de la cámara')) {
-        feedback = 'No se detectó tu rostro en la foto. Asegúrate de que tu cara esté bien visible y centrada.';
-        shouldRetakePhoto = true;
-        showWarn('No se detectó tu rostro. Retoma la foto asegurándote de que tu cara esté bien visible.');
-    } else if (errorMessage.includes('Rostro demasiado cerca') || errorData.sugerencia?.includes('Aléjate')) {
-        feedback = 'Tu rostro está demasiado cerca de la cámara. Aléjate un poco y retoma la foto.';
-        shouldRetakePhoto = true;
-        showWarn('Aléjate un poco de la cámara y retoma la foto.');
-    } else if (errorMessage.includes('Rostro muy lejos') || errorData.sugerencia?.includes('Acércate')) {
-        feedback = 'Tu rostro está muy lejos de la cámara. Acércate un poco y retoma la foto.';
-        shouldRetakePhoto = true;
-        showWarn('Acércate un poco más a la cámara y retoma la foto.');
-    } else if (errorMessage.includes('no coincide') || errorMessage.includes('no match')) {
-        feedback = 'Tu rostro no coincide con la foto de la INE. Asegúrate de que la iluminación sea buena y retoma la foto.';
-        shouldRetakePhoto = true;
-        showWarn('El rostro no coincide. Mejora la iluminación y retoma la foto.');
-    } else {
-        feedback = errorMessage || 'Error en la validación. Intenta nuevamente.';
-        shouldRetakePhoto = true;
-        showError(feedback);
-    }
-    
-    setValidationFeedback(feedback);
-    setCanRetakePhoto(shouldRetakePhoto);
-    setCanRetakeINE(shouldRetakeINE);
-    
-    // Si ya agotó los 3 intentos, avanzar al siguiente paso
-    if (newAttempts >= 3) {
-        setTimeout(() => {
-            showInfo('Has agotado los 3 intentos. Puedes validar tu perfil después.');
-            setActiveIndex(4); // Avanzar al paso 5
-        }, 2000);
-    }
-};
+    };
 
-// Función para reiniciar la foto y limpiar el feedback
-const retakePhoto = () => {
-    setCapturedPhoto(null);
-    setUser(prev => ({ ...prev, facePhoto: null }));
-    setValidationFeedback('');
-    setCanRetakePhoto(false);
-};
+    // Función para reiniciar la foto y limpiar el feedback
+    const retakePhoto = () => {
+        setCapturedPhoto(null);
+        setUser(prev => ({ ...prev, facePhoto: null }));
+        setValidationFeedback('');
+        setCanRetakePhoto(false);
+    };
 
-// Función para volver al paso anterior (INE) si es necesario
-const retakeINE = () => {
-    setActiveIndex(2); // Volver al paso de INE
-    setValidationFeedback('');
-    setCanRetakeINE(false);
-    setCanRetakePhoto(false);
-};
+    // Función para volver al paso anterior (INE) si es necesario
+    const retakeINE = () => {
+        setActiveIndex(2); // Volver al paso de INE
+        setValidationFeedback('');
+        setCanRetakeINE(false);
+        setCanRetakePhoto(false);
+    };
     // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
 
     // Función para manejar cambios en el formulario
@@ -544,8 +544,8 @@ const retakeINE = () => {
             return false;
         }
 
-      
-        
+
+
         // Validar formato de fecha (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(birthday)) {
@@ -559,10 +559,10 @@ const retakeINE = () => {
         //     return false;
         // }
         if (!curp_regex.test(curp.trim())) {
-                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
-                return false;
-         }
-        
+            showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
+            return false;
+        }
+
         return true;
     };
 
@@ -839,6 +839,21 @@ const retakeINE = () => {
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Verificar mi perfil</h1>
                             <p>Ahora, centra tu cara para verificar que la INE sea suya</p>
+
+                            {/* Mostrar contador de intentos */}
+                            <div className="text-center mt-2">
+                                <span className="text-sm text-gray-600">
+                                    Intento {validationAttempts + 1} de 3
+                                </span>
+                            </div>
+
+                            {/* Mostrar feedback de validación si existe */}
+                            {validationFeedback && (
+                                <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                                    <p className="text-sm text-yellow-800">{validationFeedback}</p>
+                                </div>
+                            )}
+
                             <div className="w-full mt-2 items-center flex flex-col">
                                 <div className="rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
                                     {!capturedPhoto ? (
@@ -852,7 +867,9 @@ const retakeINE = () => {
                                     ) : (
                                         <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
                                     )}
-                                </div>                                {!capturedPhoto ? (
+                                </div>
+
+                                {!capturedPhoto ? (
                                     <>
                                         <button
                                             onClick={capturarImagen}
@@ -865,23 +882,37 @@ const retakeINE = () => {
                                     <div className="flex flex-col items-center mt-4">
                                         <div className="flex space-x-4">
                                             <button
-                                                onClick={() => {
-                                                    setCapturedPhoto(null);
-                                                    setUser(prev => ({ ...prev, facePhoto: null }));
-                                                }}
+                                                onClick={retakePhoto}
                                                 className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors"
                                             >
                                                 Retomar foto
                                             </button>
+                                            {canRetakeINE && (
+                                                <button
+                                                    onClick={retakeINE}
+                                                    className="px-4 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-lg transition-colors"
+                                                >
+                                                    Cambiar INE
+                                                </button>
+                                            )}
                                         </div>
                                         <p className="text-center text-green-600 mt-2">Imagen capturada correctamente</p>
                                     </div>
                                 )}
+
+                                {/* Mostrar si ya agotó los intentos */}
+                                {validationAttempts >= 3 && (
+                                    <div className="mt-4 p-3 bg-blue-100 border border-blue-300 rounded-lg">
+                                        <p className="text-sm text-blue-800 text-center">
+                                            Has agotado los 3 intentos. Puedes validar tu perfil después desde tu perfil de usuario.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    )}                 
-                    
-                    { activeIndex === 4 && (
+                    )}
+
+                    {activeIndex === 4 && (
                         <div className='h-180'>
                             <h1 className="text-2xl font-bold">Tu información</h1>
                             <p>Tu INE ha sido validada exitosamente.</p>
@@ -1025,8 +1056,8 @@ const retakeINE = () => {
                     ) : activeIndex === 3 ? (
                         <Button
                             className={buttonStyle}
-                            onClick={handleValidacionRostro}
-                            disabled={validatingFace}
+                            onClick={validationAttempts >= 3 ? () => setActiveIndex(4) : handleValidacionRostro}
+                            disabled={validatingFace || !capturedPhoto}
                         >
                             {validatingFace ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1036,11 +1067,12 @@ const retakeINE = () => {
                                     </svg>
                                     Validando...
                                 </div>
+                            ) : validationAttempts >= 3 ? (
+                                'Continuar sin validar'
                             ) : (
-                                'Validando identidad'
+                                'Validar identidad'
                             )}
                         </Button>
-                        
                     ) : activeIndex === 4 ? (
                         <Button
                             className={buttonStyle}
