@@ -22,7 +22,7 @@ export default function PasswordResetValidate() {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
       // Si no hay email, regresamos al inicio del flujo
-      navigate("/ibento/recuperar-cuenta");
+      navigate("/recuperar-cuenta");
     } else {
       setEmail(emailGuardado);
     }
