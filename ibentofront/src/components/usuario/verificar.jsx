@@ -7,7 +7,7 @@ import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex } from "../../utils/regex";
-import * as faceapi from 'face-api.js';
+//import * as faceapi from 'face-api.js';
 
 
 const Verificar = () => {
@@ -35,6 +35,7 @@ const Verificar = () => {
     const [canRetakePhoto, setCanRetakePhoto] = useState(false);
     const [canRetakeINE, setCanRetakeINE] = useState(false);
     // Estados de deteccción de distancia de rostro
+    const [faceapi, setFaceapi] = useState(null);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [realTimeFeedback, setRealTimeFeedback] = useState('');
     const [faceDetected, setFaceDetected] = useState(false);
@@ -88,32 +89,51 @@ const Verificar = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // Cargar modelos al montar el componente
+    // Cargar modelos con importación dinámica
     useEffect(() => {
         const loadModels = async () => {
             try {
-                await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-                console.log('Modelos de face-api cargados');
+                console.log('cargando face-api.js...');
+                
+                // Importación dinámica de face-api.js
+                const faceapiModule = await import('face-api.js');
+                setFaceapi(faceapiModule);
+                
+                console.log('face-api.js cargado, iniciando modelos...');
+                
+                await faceapiModule.nets.tinyFaceDetector.loadFromUri('/models');
+                console.log('Modelos de face-api cargados exitosamente');
                 setModelsLoaded(true);
+                
             } catch (error) {
-                console.error('Error cargando modelos:', error);
+                console.error('Error cargando face-api.js o modelos:', error);
+                // En caso de error, permitir continuar sin detección en tiempo real
+                setModelsLoaded(false);
             }
         };
 
         loadModels();
     }, []);
-    // Función para analizar la distancia en tiempo real
+
     const analyzeDistance = async () => {
-        if (!webcamRef.current || !modelsLoaded) return;
+        // Verificar que todo esté listo
+        if (!webcamRef.current || !modelsLoaded || !faceapi) {
+            return;
+        }
 
         const video = webcamRef.current.video;
-        if (!video || video.readyState !== 4) return;
+        if (!video || video.readyState !== 4) {
+            return;
+        }
 
         try {
             // Detectar rostros con face-api.js
             const detections = await faceapi.detectAllFaces(
                 video,
-                new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })
+                new faceapi.TinyFaceDetectorOptions({ 
+                    inputSize: 320, 
+                    scoreThreshold: 0.5 
+                })
             );
 
             if (detections.length === 0) {
@@ -152,12 +172,13 @@ const Verificar = () => {
             console.error('Error en análisis de rostro:', error);
         }
     };
-    // Hook para ejecutar el análisis continuamente
+
+    // Hook  para ejecutar análisis
     useEffect(() => {
         let intervalId;
 
-        if (activeIndex === 3 && !capturedPhoto && modelsLoaded) {
-            // Ejecutar análisis cada 500ms
+        // Solo ejecutar si todo está listo
+        if (activeIndex === 3 && !capturedPhoto && modelsLoaded && faceapi) {
             intervalId = setInterval(analyzeDistance, 500);
         }
 
@@ -166,7 +187,8 @@ const Verificar = () => {
                 clearInterval(intervalId);
             }
         };
-    }, [activeIndex, capturedPhoto, modelsLoaded]);
+    }, [activeIndex, capturedPhoto, modelsLoaded, faceapi]); // ✅ Agregar faceapi a dependencias
+
 
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
@@ -339,7 +361,6 @@ const Verificar = () => {
     // ---------------------------- ENVIAR TODA LA INFORMACIÓN ----------------------------- 
 
 
-    // 🔥 FUNCIÓN COMBINADA para enviar todo al final
     const uploadAllData = async () => {
         try {
             setLoading(true);
@@ -666,7 +687,17 @@ const Verificar = () => {
     };
 
     // Función mejorada para capturar imagen
-    const capturarImagen = () => {
+     const capturarImagen = () => {
+        // Si no hay face-api cargado, permitir captura sin validación de distancia
+        if (!faceapi || !modelsLoaded) {
+            const imageSrc = webcamRef.current.getScreenshot();
+            setCapturedPhoto(imageSrc);
+            setUser(prev => ({ ...prev, facePhoto: imageSrc }));
+            setRealTimeFeedback('');
+            return;
+        }
+
+        // Con face-api, validar distancia
         if (distanceStatus !== 'good') {
             showWarn('Ajusta tu posición según las indicaciones antes de capturar.');
             return;
