@@ -27,6 +27,12 @@ const Verificar = () => {
     const [validatingIne, setValidatingIne] = useState(false);
     const [submittingInfo, setSubmittingInfo] = useState(false);
     const [validatingFace, setValidatingFace] = useState(false);
+    // Estados para la vali◙ación de rostro
+    const [validationAttempts, setValidationAttempts] = useState(0);
+    const [validationFeedback, setValidationFeedback] = useState('');
+    const [canRetakePhoto, setCanRetakePhoto] = useState(false);
+    const [canRetakeINE, setCanRetakeINE] = useState(false);
+    
 
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
@@ -382,57 +388,128 @@ const Verificar = () => {
     };
 
     const handleValidacionRostro = async () => {
-        if (!capturedPhoto) {
-            showWarn('Debes capturar una imagen de tu rostro');
-            return;
-        }
-
-        setValidatingFace(true)
-
-        try {
-
-            showInfo('Validando rostro 0, por favor espera...');
-            const formData = new FormData();
-            formData.append('ine_front', ineImages[0]);
-            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
-
-            showInfo('Validando rostro 1, por favor espera...');
-            const response = await api.post('validar-rostro/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            showInfo('Validando rostro 2, por favor espera...');
-            const data = response.data;
-
-            if (data.success && data.rostro_validado) {
-                setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
-                try {
-                    await uploadAllData(); // Subir todas las fotos y preferencias
-                    setStepsCompleted(prev => ({ ...prev, face: true }));
-                    showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
-                    setActiveIndex(4); // Navegar al paso 5 (Información adicional)
-                } catch (uploadError) {
-                    console.error("Error al subir datos después de validación:", uploadError);
-                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(4); // Navegar al paso 5 (Información adicional)
-                }
-            } else {
-                setMessage(data.error || 'La validación falló. Revisa las imágenes.');
-                showError(data.error || 'La validación falló. Revisa las imágenes.');
-            }
-
-
-        }
-        catch (error) {
-            console.error('Error al capturar imagen:', error);
-            showError('Error al capturar imagen. Por favor, intenta de nuevo.');
-            setValidatingFace(false);
-            return;
-        }
+    if (!capturedPhoto) {
+        showWarn('Debes capturar una imagen de tu rostro');
+        return;
     }
 
+    setValidatingFace(true);
+    setValidationFeedback('');
+
+    try {
+        showInfo('Validando rostro, por favor espera...');
+        
+        const formData = new FormData();
+        formData.append('ine_front', ineImages[0]);
+        formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
+
+        const response = await api.post('validar-rostro/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        
+        const data = response.data;
+
+        if (data.success && data.rostro_validado) {
+            // Validación exitosa
+            setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
+            try {
+                await uploadAllData();
+                setStepsCompleted(prev => ({ ...prev, face: true }));
+                showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
+                setActiveIndex(4);
+            } catch (uploadError) {
+                console.error("Error al subir datos después de validación:", uploadError);
+                setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
+                setActiveIndex(4);
+            }
+        } else {
+            // Validación falló
+            handleValidationFailure(data);
+        }
+
+    } catch (error) {
+        console.error('Error al validar rostro:', error);
+        const errorData = error.response?.data;
+        
+        if (errorData) {
+            handleValidationFailure(errorData);
+        } else {
+            setValidationAttempts(prev => prev + 1);
+            showError('Error de conexión. Intenta nuevamente.');
+            setValidationFeedback('Error de conexión. Verifica tu internet.');
+        }
+    } finally {
+        setValidatingFace(false);
+    }
+};
+const handleValidationFailure = (errorData) => {
+    const newAttempts = validationAttempts + 1;
+    setValidationAttempts(newAttempts);
+    
+    // Determinar el tipo de error y dar feedback específico
+    const errorMessage = errorData.error || errorData.mensaje || '';
+    let feedback = '';
+    let shouldRetakePhoto = false;
+    let shouldRetakeINE = false;
+    
+    if (errorMessage.includes('No se detectó rostro en la INE')) {
+        feedback = 'No se detectó rostro en tu INE. Sube una imagen más clara de tu INE y toma una nueva foto.';
+        shouldRetakeINE = true;
+        shouldRetakePhoto = true;
+        showWarn('La imagen de tu INE no es clara. Sube una nueva imagen y retoma la foto.');
+    } else if (errorMessage.includes('No se detectó rostro en la imagen de la cámara')) {
+        feedback = 'No se detectó tu rostro en la foto. Asegúrate de que tu cara esté bien visible y centrada.';
+        shouldRetakePhoto = true;
+        showWarn('No se detectó tu rostro. Retoma la foto asegurándote de que tu cara esté bien visible.');
+    } else if (errorMessage.includes('Rostro demasiado cerca') || errorData.sugerencia?.includes('Aléjate')) {
+        feedback = 'Tu rostro está demasiado cerca de la cámara. Aléjate un poco y retoma la foto.';
+        shouldRetakePhoto = true;
+        showWarn('Aléjate un poco de la cámara y retoma la foto.');
+    } else if (errorMessage.includes('Rostro muy lejos') || errorData.sugerencia?.includes('Acércate')) {
+        feedback = 'Tu rostro está muy lejos de la cámara. Acércate un poco y retoma la foto.';
+        shouldRetakePhoto = true;
+        showWarn('Acércate un poco más a la cámara y retoma la foto.');
+    } else if (errorMessage.includes('no coincide') || errorMessage.includes('no match')) {
+        feedback = 'Tu rostro no coincide con la foto de la INE. Asegúrate de que la iluminación sea buena y retoma la foto.';
+        shouldRetakePhoto = true;
+        showWarn('El rostro no coincide. Mejora la iluminación y retoma la foto.');
+    } else {
+        feedback = errorMessage || 'Error en la validación. Intenta nuevamente.';
+        shouldRetakePhoto = true;
+        showError(feedback);
+    }
+    
+    setValidationFeedback(feedback);
+    setCanRetakePhoto(shouldRetakePhoto);
+    setCanRetakeINE(shouldRetakeINE);
+    
+    // Si ya agotó los 3 intentos, avanzar al siguiente paso
+    if (newAttempts >= 3) {
+        setTimeout(() => {
+            showInfo('Has agotado los 3 intentos. Puedes validar tu perfil después.');
+            setActiveIndex(4); // Avanzar al paso 5
+        }, 2000);
+    }
+};
+
+// Función para reiniciar la foto y limpiar el feedback
+const retakePhoto = () => {
+    setCapturedPhoto(null);
+    setUser(prev => ({ ...prev, facePhoto: null }));
+    setValidationFeedback('');
+    setCanRetakePhoto(false);
+};
+
+// Función para volver al paso anterior (INE) si es necesario
+const retakeINE = () => {
+    setActiveIndex(2); // Volver al paso de INE
+    setValidationFeedback('');
+    setCanRetakeINE(false);
+    setCanRetakePhoto(false);
+};
     // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
 
     // Función para manejar cambios en el formulario
