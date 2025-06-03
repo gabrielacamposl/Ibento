@@ -7,6 +7,8 @@ import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex } from "../../utils/regex";
+import * as faceapi from 'face-api.js';
+
 
 const Verificar = () => {
     const navigate = useNavigate();
@@ -32,7 +34,11 @@ const Verificar = () => {
     const [validationFeedback, setValidationFeedback] = useState('');
     const [canRetakePhoto, setCanRetakePhoto] = useState(false);
     const [canRetakeINE, setCanRetakeINE] = useState(false);
-
+    // Estados de deteccción de distancia de rostro
+    const [modelsLoaded, setModelsLoaded] = useState(false);
+    const [realTimeFeedback, setRealTimeFeedback] = useState('');
+    const [faceDetected, setFaceDetected] = useState(false);
+    const [distanceStatus, setDistanceStatus] = useState('');
 
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
@@ -81,6 +87,86 @@ const Verificar = () => {
         }
         window.scrollTo(0, 0);
     }, []);
+
+    // Cargar modelos al montar el componente
+    useEffect(() => {
+        const loadModels = async () => {
+            try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+                console.log('Modelos de face-api cargados');
+                setModelsLoaded(true);
+            } catch (error) {
+                console.error('Error cargando modelos:', error);
+            }
+        };
+
+        loadModels();
+    }, []);
+    // Función para analizar la distancia en tiempo real
+    const analyzeDistance = async () => {
+        if (!webcamRef.current || !modelsLoaded) return;
+
+        const video = webcamRef.current.video;
+        if (!video || video.readyState !== 4) return;
+
+        try {
+            // Detectar rostros con face-api.js
+            const detections = await faceapi.detectAllFaces(
+                video,
+                new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })
+            );
+
+            if (detections.length === 0) {
+                setFaceDetected(false);
+                setRealTimeFeedback('No se detecta rostro. Colócate frente a la cámara.');
+                setDistanceStatus('');
+                return;
+            }
+
+            setFaceDetected(true);
+            const detection = detections[0];
+
+            // Calcular el tamaño del rostro en relación al video
+            const faceWidth = detection.box.width;
+            const videoWidth = video.videoWidth;
+            const faceRatio = faceWidth / videoWidth;
+
+            let feedback = '';
+            let status = '';
+
+            if (faceRatio > 0.4) {
+                feedback = 'Muy cerca - Aléjate un poco de la cámara';
+                status = 'close';
+            } else if (faceRatio < 0.15) {
+                feedback = 'Muy lejos - Acércate más a la cámara';
+                status = 'far';
+            } else {
+                feedback = 'Distancia perfecta - Listo para capturar';
+                status = 'good';
+            }
+
+            setRealTimeFeedback(feedback);
+            setDistanceStatus(status);
+
+        } catch (error) {
+            console.error('Error en análisis de rostro:', error);
+        }
+    };
+    // Hook para ejecutar el análisis continuamente
+    useEffect(() => {
+        let intervalId;
+
+        if (activeIndex === 3 && !capturedPhoto && modelsLoaded) {
+            // Ejecutar análisis cada 500ms
+            intervalId = setInterval(analyzeDistance, 500);
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [activeIndex, capturedPhoto, modelsLoaded]);
 
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
@@ -137,26 +223,6 @@ const Verificar = () => {
         } finally {
             setUploadingPhotos(false);
         }
-
-        // const formData = new FormData();
-        // user.pictures.forEach((picture) => {
-        //     formData.append("pictures", picture);
-        // });
-
-        // try {
-        //     const response = await api.post("perfil/subir-fotos/", formData, {
-        //         headers: {
-        //             "Content-Type": "multipart/form-data",
-        //         },
-        //     });
-
-        //     console.log("Fotos subidas:", response.data.pictures);
-        //     alert("¡Fotos subidas con éxito!");
-        //     setActiveIndex(prev => prev + 1);
-        // } catch (error) {
-        //     console.error("Error al subir fotos:", error.response?.data || error);
-        //     alert("Error al subir fotos. Revisa el tamaño o intenta de nuevo.");
-        // }
     };
 
     const uploadSavedPhotos = async () => {
@@ -247,11 +313,6 @@ const Verificar = () => {
             console.error("Error al procesar preferencias:", err);
             showError(`Error al guardar preferencias: ${err.message}`);
 
-            // console.error("Error completo:", err);
-            // console.error("Error response:", err.response?.data);
-            // console.error("Error status:", err.response?.status);
-            // console.error("Error message:", err.message);
-            // alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
         } finally {
             setSavingPreferences(false);
         }
@@ -604,10 +665,17 @@ const Verificar = () => {
         facingMode: "user", // Usa la cámara frontal
     };
 
+    // Función mejorada para capturar imagen
     const capturarImagen = () => {
+        if (distanceStatus !== 'good') {
+            showWarn('Ajusta tu posición según las indicaciones antes de capturar.');
+            return;
+        }
+
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
+        setRealTimeFeedback('');
     };
 
     // Funciones para mostrar toasts
@@ -847,6 +915,20 @@ const Verificar = () => {
                                 </span>
                             </div>
 
+                            {/* Feedback en tiempo real */}
+                            {!capturedPhoto && realTimeFeedback && (
+                                <div className={`mt-3 p-3 rounded-lg border ${distanceStatus === 'good'
+                                        ? 'bg-green-100 border-green-300 text-green-800'
+                                        : distanceStatus === 'close'
+                                            ? 'bg-orange-100 border-orange-300 text-orange-800'
+                                            : distanceStatus === 'far'
+                                                ? 'bg-blue-100 border-blue-300 text-blue-800'
+                                                : 'bg-gray-100 border-gray-300 text-gray-800'
+                                    }`}>
+                                    <p className="text-sm font-medium text-center">{realTimeFeedback}</p>
+                                </div>
+                            )}
+
                             {/* Mostrar feedback de validación si existe */}
                             {validationFeedback && (
                                 <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
@@ -855,15 +937,49 @@ const Verificar = () => {
                             )}
 
                             <div className="w-full mt-2 items-center flex flex-col">
-                                <div className="rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
+                                <div className={`rounded-[30px] overflow-hidden border-4 shadow-md transition-all duration-300 ${!capturedPhoto && faceDetected
+                                        ? distanceStatus === 'good'
+                                            ? 'border-green-400'
+                                            : distanceStatus === 'close'
+                                                ? 'border-orange-400'
+                                                : distanceStatus === 'far'
+                                                    ? 'border-blue-400'
+                                                    : 'border-purple-300'
+                                        : 'border-purple-300'
+                                    }`}>
                                     {!capturedPhoto ? (
-                                        <Webcam
-                                            ref={webcamRef}
-                                            audio={false}
-                                            screenshotFormat="image/jpeg"
-                                            videoConstraints={videoConstraints}
-                                            className="w-72 h-96 object-cover"
-                                        />
+                                        <div className="relative">
+                                            <Webcam
+                                                ref={webcamRef}
+                                                audio={false}
+                                                screenshotFormat="image/jpeg"
+                                                videoConstraints={videoConstraints}
+                                                className="w-72 h-96 object-cover"
+                                            />
+
+                                            {/* Overlay con guías visuales */}
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <div className={`w-48 h-64 border-2 border-dashed rounded-lg transition-all duration-300 ${distanceStatus === 'good'
+                                                        ? 'border-green-400'
+                                                        : distanceStatus === 'close'
+                                                            ? 'border-orange-400'
+                                                            : distanceStatus === 'far'
+                                                                ? 'border-blue-400'
+                                                                : 'border-white'
+                                                    }`}>
+                                                    <div className="text-center text-white text-xs mt-2 px-2">
+                                                        Coloca tu rostro aquí
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Indicador de estado de carga de modelos */}
+                                            {!modelsLoaded && (
+                                                <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                                    Cargando detector...
+                                                </div>
+                                            )}
+                                        </div>
                                     ) : (
                                         <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
                                     )}
@@ -873,10 +989,28 @@ const Verificar = () => {
                                     <>
                                         <button
                                             onClick={capturarImagen}
-                                            className="mt-4 w-14 h-14 rounded-full bg-purple-400 hover:bg-purple-500 transition-colors"
+                                            disabled={!modelsLoaded || distanceStatus !== 'good'}
+                                            className={`mt-4 w-14 h-14 rounded-full transition-all duration-300 ${modelsLoaded && distanceStatus === 'good'
+                                                    ? 'bg-green-500 hover:bg-green-600 animate-pulse'
+                                                    : 'bg-gray-400 cursor-not-allowed'
+                                                }`}
                                         />
-                                        <p className="text-center mt-2">Capturar imagen</p>
-                                        <p className="text-center text-red-500 mt-2">No se ha capturado ninguna imagen.</p>
+                                        <p className="text-center mt-2">
+                                            {!modelsLoaded
+                                                ? 'Cargando detector...'
+                                                : distanceStatus === 'good'
+                                                    ? 'Capturar imagen'
+                                                    : 'Ajusta tu posición'
+                                            }
+                                        </p>
+                                        {!capturedPhoto && (
+                                            <p className="text-center text-red-500 mt-2">
+                                                {!faceDetected && modelsLoaded
+                                                    ? 'No se detecta rostro'
+                                                    : 'No se ha capturado ninguna imagen.'
+                                                }
+                                            </p>
+                                        )}
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center mt-4">
