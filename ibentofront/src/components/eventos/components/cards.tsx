@@ -30,7 +30,6 @@ function Cards({
 
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border">
-            <h3 className="mb-4 text-xl font-bold text-black text-left mx-2">{name}</h3>
             {/* Contenedor con scroll horizontal */}
             <div className="w-full overflow-x-auto">   
                 {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
