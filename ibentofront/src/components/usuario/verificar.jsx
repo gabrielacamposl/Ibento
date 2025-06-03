@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from "primereact/button";
 import { useNavigate } from 'react-router-dom';
-import { buttonStyle } from "../../styles/styles";
-import "../../assets/css/botones.css";
+import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X } from 'lucide-react';
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
@@ -824,432 +822,561 @@ const Verificar = () => {
         const u8arr = new Uint8Array(n);
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
+        }        return new File([u8arr], filename, { type: mime });
     };
-
+    
     return (
-        <div className="text-black flex justify-center items-center h-full">
-            <div className="degradadoPerfil relative flex flex-col items-center p-5 shadow-t max-w-lg w-full">
-                <div className="justify-start w-full">
-                    <h1 className='font-semibold texto'>{items[activeIndex].label}</h1>
-                    <div className="w-50 bg-gray-200 rounded-full h-1.5 dark:bg-gray-400 mt-2">
-                        <div
-                            className="btn-custom h-1.5 rounded-full"
-                            style={{ width: `${((activeIndex + 1) / items.length) * 100}%` }}
-                        ></div>
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+            {/* Header Section */}
+            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+                <div className="flex items-center justify-between p-6">
+                    <button 
+                        onClick={() => navigate(-1)}
+                        className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
+                    >
+                        <ArrowLeft className="w-5 h-5 text-gray-700" />
+                    </button>
+                    
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl">
+                            <Shield className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                                Verificación
+                            </h1>
+                            <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
+                        </div>
+                    </div>
+
+                    <div className="w-12 h-12 flex items-center justify-center">
+                        <div className="relative w-10 h-10">
+                            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+                            <div 
+                                className="absolute inset-0 bg-white rounded-full"
+                                style={{ 
+                                    clipPath: `polygon(0 0, ${((activeIndex + 1) / items.length) * 100}% 0, ${((activeIndex + 1) / items.length) * 100}% 100%, 0 100%)` 
+                                }}
+                            ></div>
+                            <div className="absolute inset-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">{activeIndex + 1}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="w-full overflow-y-auto gap-2 custom-scrollbar">
-                    {/*VENTANA PARA INGRESAR IMAGENES */}
-                    {activeIndex === 0 && (
-                        <div className="">
-                            <h1 className='mt-2 text-3xl font-bold miPerfil'>Editar Perfil</h1>
-                            <React.Fragment>
-                                <h2 className="mt-2">Elige tus mejores fotos, elige como mínimo 3 fotografías</h2>
-                                <div className="grid grid-cols-2 md:grid-cols-3 ">
+            {/* Main Content */}
+            <div className="pt-24 px-4 pb-8">
+                <div className="max-w-4xl mx-auto">
+                    {/* Content Cards */}
+                    <div className="glass-premium rounded-3xl p-6 mb-6">
+                        
+                        {/*STEP 1: PHOTOS */}
+                        {activeIndex === 0 && (
+                            <div className="space-y-6">
+                                <div className="text-center mb-8">
+                                    <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
+                                        <Camera className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Agrega tus fotos</h2>
+                                    <p className="text-gray-600">Elige tus mejores fotos (mínimo 3, máximo 6)</p>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {Array.from({ length: 6 }).map((_, index) => (
-                                        <div key={index} className="relative">
-                                            <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
+                                        <div key={index} className="relative group">
+                                            <div className="relative w-full aspect-square glass-premium rounded-2xl overflow-hidden border-2 border-dashed border-purple-200 hover:border-purple-400 transition-colors duration-300">
                                                 {user.pictures[index] ? (
-                                                    <img
-                                                        src={
-                                                            typeof user.pictures[index] === "string"
-                                                                ? user.pictures[index]
-                                                                : URL.createObjectURL(user.pictures[index])
-                                                        }
-                                                        alt={`Imagen ${index + 1}`}
-                                                        className="w-full h-full object-cover"
-                                                    />
+                                                    <>
+                                                        <img
+                                                            src={
+                                                                typeof user.pictures[index] === "string"
+                                                                    ? user.pictures[index]
+                                                                    : URL.createObjectURL(user.pictures[index])
+                                                            }
+                                                            alt={`Imagen ${index + 1}`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        <button
+                                                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                                            onClick={() => handleImageDelete(index)}
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </>
                                                 ) : (
-                                                    <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                        </svg>
-                                                        <span className="block mt-2 colorTexto">Agregar</span>
+                                                    <label htmlFor={`fileInput-${index}`} className="cursor-pointer w-full h-full flex flex-col items-center justify-center text-purple-600 hover:text-purple-700 transition-colors">
+                                                        <Plus className="w-8 h-8 mb-2" />
+                                                        <span className="text-sm font-medium">Agregar</span>
                                                     </label>
                                                 )}
-
-                                                {user.pictures[index] && (
-                                                    <button
-                                                        className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
-                                                        onClick={() => handleImageDelete(index)}
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-7 h-7 ">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                                <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
+                                                <input 
+                                                    id={`fileInput-${index}`} 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    accept="image/*"
+                                                    onChange={(e) => handleImageChange(e, index)} 
+                                                />
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </React.Fragment>
-                        </div>
-                    )}
-
-                    {/* SELECCIÓN DE INTERESES */}
-                    {activeIndex === 1 && (
-                        <div className="grid grid-cols-1 gap-4 mt-2">
-                            {itemsAboutMe.map((item, index) => {
-
-                                // 👇 Parseamos "answers" por si vienen mal como string
-                                let answers = [];
-                                try {
-                                    answers = Array.isArray(item.answers)
-                                        ? item.answers
-                                        : JSON.parse(item.answers.replace(/'/g, '"'));
-                                } catch (e) {
-                                    console.error("No se pudo parsear answers para:", item.question);
-                                    answers = [];
-                                }
-
-                                return (
-                                    <div key={index} className="flex flex-col">
-                                        {item.question === '¿Cuál es tu personalidad?' ? (
-                                            <div className="flex space-x-1 items-center">
-                                                <p className="text-black font-semibold">
-                                                    {item.question}
-                                                    {!item.optional && <span className="text-red-500"> *</span>}
-                                                </p>
-                                                <a
-                                                    className="botonLink"
-                                                    href="https://www.16personalities.com/es/test-de-personalidad"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    Hacer test de personalidad
-                                                </a>
-                                            </div>
-                                        ) : (
-                                            <p className="font-semibold">
-                                                {item.question}
-                                                {!item.optional && <span className="text-red-500"> *</span>}
-                                            </p>
-                                        )}
-
-                                        <div className="grid grid-cols-2 gap-2 mt-2">
-                                            {answers.map((answer, i) => {
-                                                const isSelected = selectedAnswers[item._id]?.includes(answer);
-
-                                                return (
-                                                    <button
-                                                        key={i}
-                                                        className={`rounded-full ${isSelected ? 'btn-active' : 'btn-inactive'}`}
-                                                        onClick={() => {
-                                                            setSelectedAnswers((prev) => {
-                                                                const currentAnswers = prev[item._id] || [];
-
-                                                                if (item.multi_option) {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item._id]: currentAnswers.includes(answer)
-                                                                            ? currentAnswers.filter((a) => a !== answer)
-                                                                            : [...currentAnswers, answer]
-                                                                    };
-                                                                } else {
-                                                                    return {
-                                                                        ...prev,
-                                                                        [item._id]: [answer]
-                                                                    };
-                                                                }
-                                                            });
-                                                        }}
-                                                    >
-                                                        {answer}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {/*VENTANA PARA VERIFICAR IDENTIDAD*/}
-                    {activeIndex === 2 && (
-                        <div className='h-180'>
-                            <h1 className="text-2xl font-bold">Verificar mi perfil</h1>
-                            <p>Para verificar su identidad deberás subir foto de su INE.</p>
-                            <div className="w-full mt-2 items-center flex flex-col">
-                                {Array.from({ length: 2 }).map((_, index) => (
-                                    <div key={index} className="relative w-80 h-45 m-2 border-dashed divBorder flex items-center justify-center mt-6">
-                                        {ineImages[index] ? (
-                                            <>
-                                                <img
-                                                    src={URL.createObjectURL(ineImages[index])}
-                                                    alt={`Imagen ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <button
-                                                    className="w-7 h-7 btn-custom absolute top-0 right-0 text-white rounded-full"
-                                                    onClick={() => handleImageDeleteINE(index)}
-                                                >
-                                                    X
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto flex flex-col items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                </svg>
-                                                <span className="block mt-2 colorTexto text-center">
-                                                    {index === 0 ? 'Subir INE (parte frontal)' : 'Subir INE (parte trasera)'} en formato jpg, png
-                                                </span>
-                                            </label>
-                                        )}
-                                        <input
-                                            id={`fileInput-${index}`}
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageINE(e, index)}
-                                        />
-                                    </div>
-                                ))}
                             </div>
-                        </div>
-                    )}
-
-                    {/*===== VENTANA PARA VERIFICAR IDENTIDAD CON DETECCIÓN EN TIEMPO REAL =====*/}
-                    {activeIndex === 3 && (
-                        <div className='h-180'>
-                            <h1 className="text-2xl font-bold">Verificar mi perfil</h1>
-                            <p>Ahora, centra tu cara para verificar que la INE sea suya</p>
-                            
-                            {/* Indicador de carga de modelos */}
-                            {!isModelLoaded && (
-                                <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-lg">
-                                    <div className="flex items-center justify-center">
-                                        <svg className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></svg>
-                                        <span className="text-blue-700 text-sm">Cargando sistema de detección facial...</span>
+                        )}                        {/* STEP 2: INTERESTS */}
+                        {activeIndex === 1 && (
+                            <div className="space-y-6">
+                                <div className="text-center mb-8">
+                                    <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
+                                        <User className="w-8 h-8 text-white" />
                                     </div>
-                                </div>
-                            )}
-
-                            <div className="w-full mt-2 items-center flex flex-col">
-                                <div className="relative rounded-[30px] overflow-hidden border-4 border-purple-300 shadow-md">
-                                    {!capturedPhoto ? (
-                                        <>
-                                            <Webcam
-                                                ref={webcamRef}
-                                                audio={false}
-                                                screenshotFormat="image/jpeg"
-                                                videoConstraints={videoConstraints}
-                                                className="w-72 h-96 object-cover"
-                                            />
-                                            {/* Canvas para detección en tiempo real */}
-                                            <canvas
-                                                ref={canvasRef}
-                                                className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                                                style={{ transform: 'scaleX(-1)' }}
-                                            />
-                                        </>
-                                    ) : (
-                                        <img src={capturedPhoto} alt="Captura" className="w-72 h-96 object-cover" />
-                                    )}
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Cuéntanos sobre ti</h2>
+                                    <p className="text-gray-600">Responde estas preguntas para personalizar tu experiencia</p>
                                 </div>
 
-                                {/* Feedback en tiempo real */}
-                                {!capturedPhoto && realTimeDetection && (
-                                    <div className={`mt-4 p-4 rounded-lg text-center max-w-xs transition-all duration-300 ${
-                                        faceStatus.distance === 'optimal' ? 'bg-green-100 border-green-500 border-2' :
-                                        faceStatus.distance === 'close' ? 'bg-red-100 border-red-500 border-2' :
-                                        faceStatus.distance === 'far' ? 'bg-yellow-100 border-yellow-500 border-2' :
-                                        'bg-gray-100 border-gray-400 border-2'
-                                    }`}>
-                                        <p className="font-semibold text-sm">{faceStatus.feedback}</p>
-                                        {faceStatus.detected && (
-                                            <p className="text-xs mt-1 text-gray-600">
-                                                Confianza: {Math.round(faceStatus.confidence * 100)}%
-                                            </p>
-                                        )}
+                                <div className="space-y-6">
+                                    {itemsAboutMe.map((item, index) => {
+                                        let answers = [];
+                                        try {
+                                            answers = Array.isArray(item.answers)
+                                                ? item.answers
+                                                : JSON.parse(item.answers.replace(/'/g, '"'));
+                                        } catch (e) {
+                                            console.error("No se pudo parsear answers para:", item.question);
+                                            answers = [];
+                                        }
+
+                                        return (
+                                            <div key={index} className="glass-premium rounded-2xl p-6">
+                                                <div className="mb-4">
+                                                    {item.question === '¿Cuál es tu personalidad?' ? (
+                                                        <div className="flex flex-col space-y-2">
+                                                            <p className="text-lg font-semibold text-gray-800">
+                                                                {item.question}
+                                                                {!item.optional && <span className="text-red-500"> *</span>}
+                                                            </p>
+                                                            <a
+                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:scale-105 transition-transform duration-200 text-sm font-medium w-fit"
+                                                                href="https://www.16personalities.com/es/test-de-personalidad"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                Hacer test de personalidad
+                                                            </a>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-lg font-semibold text-gray-800">
+                                                            {item.question}
+                                                            {!item.optional && <span className="text-red-500"> *</span>}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {answers.map((answer, i) => {
+                                                        const isSelected = selectedAnswers[item._id]?.includes(answer);
+
+                                                        return (
+                                                            <button
+                                                                key={i}
+                                                                className={`p-3 rounded-2xl border-2 transition-all duration-300 font-medium ${
+                                                                    isSelected 
+                                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-500 shadow-lg transform scale-105' 
+                                                                        : 'bg-white/50 text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-white/70'
+                                                                }`}
+                                                                onClick={() => {
+                                                                    setSelectedAnswers((prev) => {
+                                                                        const currentAnswers = prev[item._id] || [];
+
+                                                                        if (item.multi_option) {
+                                                                            return {
+                                                                                ...prev,
+                                                                                [item._id]: currentAnswers.includes(answer)
+                                                                                    ? currentAnswers.filter((a) => a !== answer)
+                                                                                    : [...currentAnswers, answer]
+                                                                            };
+                                                                        } else {
+                                                                            return {
+                                                                                ...prev,
+                                                                                [item._id]: [answer]
+                                                                            };
+                                                                        }
+                                                                    });
+                                                                }}
+                                                            >
+                                                                {answer}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}                        {/* STEP 3: INE VERIFICATION */}
+                        {activeIndex === 2 && (
+                            <div className="space-y-6">
+                                <div className="text-center mb-8">
+                                    <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
+                                        <Shield className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifica tu identidad</h2>
+                                    <p className="text-gray-600">Sube fotos de ambos lados de tu INE para verificar tu identidad</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {Array.from({ length: 2 }).map((_, index) => (
+                                        <div key={index} className="glass-premium rounded-2xl p-6">
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                                                {index === 0 ? 'Parte frontal' : 'Parte trasera'}
+                                            </h3>
+                                            <div className="relative w-full aspect-[3/2] border-2 border-dashed border-purple-200 rounded-2xl overflow-hidden hover:border-purple-400 transition-colors duration-300">
+                                                {ineImages[index] ? (
+                                                    <>
+                                                        <img
+                                                            src={URL.createObjectURL(ineImages[index])}
+                                                            alt={`INE ${index === 0 ? 'frontal' : 'trasera'}`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        <button
+                                                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                                            onClick={() => handleImageDeleteINE(index)}
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <label htmlFor={`ineInput-${index}`} className="cursor-pointer w-full h-full flex flex-col items-center justify-center text-purple-600 hover:text-purple-700 transition-colors">
+                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <span className="text-sm font-medium text-center px-4">
+                                                            Subir {index === 0 ? 'frontal' : 'trasera'}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500 mt-1">JPG, PNG</span>
+                                                    </label>
+                                                )}
+                                                <input
+                                                    id={`ineInput-${index}`}
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleImageINE(e, index)}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {message && (
+                                    <div className="glass-premium rounded-2xl p-4 border-l-4 border-blue-500">
+                                        <p className="text-blue-700 font-medium">{message}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}                        {/* STEP 4: FACE VERIFICATION */}
+                        {activeIndex === 3 && (
+                            <div className="space-y-6">
+                                <div className="text-center mb-8">
+                                    <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
+                                        <Camera className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Verificación facial</h2>
+                                    <p className="text-gray-600">Centra tu cara para verificar que la INE sea tuya</p>
+                                </div>
+
+                                {/* Model Loading Indicator */}
+                                {!isModelLoaded && (
+                                    <div className="glass-premium rounded-2xl p-4 border-l-4 border-blue-500">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                            <span className="text-blue-700 font-medium">Cargando sistema de detección facial...</span>
+                                        </div>
                                     </div>
                                 )}
 
-                                {!capturedPhoto ? (
-                                    <>
-                                        {!realTimeDetection ? (
-                                            <button
-                                                onClick={startFaceDetection}
-                                                disabled={!isModelLoaded}
-                                                className="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
-                                            >
-                                                {isModelLoaded ? 'Iniciar detección facial' : 'Cargando modelos...'}
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={capturarImagenMejorada}
-                                                disabled={!canCaptureOptimal}
-                                                className={`mt-4 w-16 h-16 rounded-full transition-all duration-300 ${
-                                                    canCaptureOptimal
-                                                        ? 'bg-green-500 hover:bg-green-600 shadow-lg transform hover:scale-105 animate-pulse'
-                                                        : 'bg-gray-400 cursor-not-allowed'
-                                                }`}
-                                            />
-                                        )}
-                                        <p className="text-center mt-2 text-sm font-medium">
-                                            {!realTimeDetection 
-                                                ? 'Inicia la detección para continuar'
-                                                : (canCaptureOptimal 
-                                                    ? '✓ Toca para capturar la foto' 
-                                                    : 'Posiciona tu rostro correctamente')
-                                            }
-                                        </p>
-                                        {realTimeDetection && !faceStatus.detected && (
-                                            <p className="text-center text-red-500 text-xs mt-1">
-                                                ❌ No se detecta rostro
+                                <div className="flex flex-col items-center space-y-6">
+                                    {/* Camera/Photo Container */}
+                                    <div className="relative">
+                                        <div className="glass-premium rounded-3xl p-4 shadow-2xl">
+                                            <div className="relative rounded-2xl overflow-hidden w-80 h-96 bg-gray-100">
+                                                {!capturedPhoto ? (
+                                                    <>
+                                                        <Webcam
+                                                            ref={webcamRef}
+                                                            audio={false}
+                                                            screenshotFormat="image/jpeg"
+                                                            videoConstraints={videoConstraints}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        <canvas
+                                                            ref={canvasRef}
+                                                            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                                                            style={{ transform: 'scaleX(-1)' }}
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <img 
+                                                        src={capturedPhoto} 
+                                                        alt="Captura" 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Real-time Feedback */}
+                                    {!capturedPhoto && realTimeDetection && (
+                                        <div className={`glass-premium rounded-2xl p-4 text-center transition-all duration-300 border-2 ${
+                                            faceStatus.distance === 'optimal' ? 'border-green-500 bg-green-50' :
+                                            faceStatus.distance === 'close' ? 'border-red-500 bg-red-50' :
+                                            faceStatus.distance === 'far' ? 'border-yellow-500 bg-yellow-50' :
+                                            'border-gray-400 bg-gray-50'
+                                        }`}>
+                                            <p className="font-semibold text-sm">{faceStatus.feedback}</p>
+                                            {faceStatus.detected && (
+                                                <p className="text-xs mt-1 text-gray-600">
+                                                    Confianza: {Math.round(faceStatus.confidence * 100)}%
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    {!capturedPhoto ? (
+                                        <div className="flex flex-col items-center space-y-4">
+                                            {!realTimeDetection ? (
+                                                <button
+                                                    onClick={startFaceDetection}
+                                                    disabled={!isModelLoaded}
+                                                    className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                                                >
+                                                    {isModelLoaded ? 'Iniciar detección facial' : 'Cargando modelos...'}
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={capturarImagenMejorada}
+                                                    disabled={!canCaptureOptimal}
+                                                    className={`w-20 h-20 rounded-full transition-all duration-300 flex items-center justify-center ${
+                                                        canCaptureOptimal
+                                                            ? 'bg-gradient-to-r from-green-500 to-green-600 hover:scale-110 shadow-lg animate-pulse'
+                                                            : 'bg-gray-400 cursor-not-allowed'
+                                                    }`}
+                                                >
+                                                    <Camera className="w-8 h-8 text-white" />
+                                                </button>
+                                            )}
+                                            <p className="text-center text-sm font-medium text-gray-600">
+                                                {!realTimeDetection 
+                                                    ? 'Inicia la detección para continuar'
+                                                    : (canCaptureOptimal 
+                                                        ? '✓ Toca para capturar la foto' 
+                                                        : 'Posiciona tu rostro correctamente')
+                                                }
                                             </p>
-                                        )}
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center mt-4">
-                                        <div className="flex space-x-4">
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center space-y-4">
                                             <button
                                                 onClick={retakePhoto}
-                                                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors"
+                                                className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-2xl transition-colors duration-300"
                                             >
                                                 Retomar foto
                                             </button>
+                                            <div className="flex items-center space-x-2 text-green-600">
+                                                <CheckCircle className="w-5 h-5" />
+                                                <span className="font-medium">Imagen capturada correctamente</span>
+                                            </div>
                                         </div>
-                                        <p className="text-center text-green-600 mt-2 font-medium">✓ Imagen capturada correctamente</p>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Información adicional y feedback de validación */}
-                                {validationFeedback && (
-                                    <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded-lg max-w-xs">
-                                        <p className="text-red-700 text-sm font-medium">{validationFeedback}</p>
-                                        <div className="flex space-x-2 mt-2">
-                                            {canRetakePhoto && (
-                                                <button
-                                                    onClick={retakePhoto}
-                                                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs transition-colors"
-                                                >
-                                                    Nueva foto
-                                                </button>
-                                            )}
-                                            {canRetakeINE && (
-                                                <button
-                                                    onClick={retakeINE}
-                                                    className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded text-xs transition-colors"
-                                                >
-                                                    Nueva INE
-                                                </button>
-                                            )}
+                                    {/* Validation Feedback */}
+                                    {validationFeedback && (
+                                        <div className="glass-premium rounded-2xl p-4 border-l-4 border-red-500 bg-red-50">
+                                            <p className="text-red-700 font-medium mb-3">{validationFeedback}</p>
+                                            <div className="flex space-x-3">
+                                                {canRetakePhoto && (
+                                                    <button
+                                                        onClick={retakePhoto}
+                                                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm transition-colors"
+                                                    >
+                                                        Nueva foto
+                                                    </button>
+                                                )}
+                                                {canRetakeINE && (
+                                                    <button
+                                                        onClick={retakeINE}
+                                                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm transition-colors"
+                                                    >
+                                                        Nueva INE
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Instrucciones */}
-                                <div className="mt-4 p-3 bg-white rounded-lg shadow-sm max-w-xs">
-                                    <h4 className="font-semibold text-sm mb-2">💡 Consejos:</h4>
-                                    <ul className="text-xs space-y-1 text-gray-600">
-                                        <li>• Buena iluminación natural</li>
-                                        <li>• Rostro centrado y visible</li>
-                                        <li>• Sin lentes oscuros</li>
-                                        <li>• Espera el marco verde</li>
-                                    </ul>
+                                    {/* Tips */}
+                                    <div className="glass-premium rounded-2xl p-6 max-w-md">
+                                        <h4 className="font-semibold text-lg mb-3 flex items-center">
+                                            <span className="mr-2">💡</span>
+                                            Consejos para una mejor captura
+                                        </h4>
+                                        <ul className="space-y-2 text-sm text-gray-600">
+                                            <li className="flex items-center">
+                                                <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                                                Buena iluminación natural
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                                                Rostro centrado y visible
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                                                Sin lentes oscuros
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                                                Espera el marco verde
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}                 
-                    
-                    { activeIndex === 4 && (
-                        <div className='h-180'>
-                            <h1 className="text-2xl font-bold">Tu información</h1>
-                            <p>Tu INE ha sido validada exitosamente.</p>
-                            <p>Agrega los siguientes datos para finalizar tu registro.</p>
-
-                            <div className="mt-6 space-y-4">
-                                {/* Fecha de nacimiento */}
-                                <div className="flex flex-col">
-                                    <label className="font-semibold mb-2">
-                                        Fecha de nacimiento <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={formData.birthday}
-                                        onChange={(e) => handleFormChange('birthday', e.target.value)}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
-                                        required
-                                    />
+                        )}
+                      { activeIndex === 4 && (
+                        <div className="flex flex-col items-center justify-center min-h-[600px] px-6 py-8">
+                            <div className="w-full max-w-2xl space-y-8">
+                                {/* Header */}
+                                <div className="text-center mb-8">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 mb-4 shadow-lg">
+                                        <User className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                                        Tu información personal
+                                    </h1>
+                                    <p className="text-gray-600 text-lg">
+                                        Tu INE ha sido validada exitosamente ✓
+                                    </p>
+                                    <p className="text-gray-500">
+                                        Agrega los siguientes datos para finalizar tu registro
+                                    </p>
                                 </div>
 
-                                {/* Género */}
-                                <div className="flex flex-col">
-                                    <label className="font-semibold mb-2">
-                                        Género <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        value={formData.gender}
-                                        onChange={(e) => handleFormChange('gender', e.target.value)}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all bg-white"
-                                        required
-                                    >
-                                        <option value="">Selecciona tu género</option>
-                                        <option value="H">Hombre</option>
-                                        <option value="M">Mujer</option>
-                                        <option value="O">Otro</option>
-                                    </select>
-                                </div>
+                                {/* Form Container */}
+                                <div className="glass-premium rounded-3xl p-8 shadow-2xl">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Fecha de nacimiento */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <span className="mr-2">📅</span>
+                                                Fecha de nacimiento
+                                                <span className="text-red-500 ml-1">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={formData.birthday}
+                                                onChange={(e) => handleFormChange('birthday', e.target.value)}
+                                                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                                                required
+                                            />
+                                        </div>
 
-                                {/* Descripción */}
-                                <div className="flex flex-col">
-                                    <label className="font-semibold mb-2">
-                                        Descripción personal <span className="text-red-500">*</span>
-                                    </label>
-                                    <textarea
-                                        value={formData.description}
-                                        onChange={(e) => handleFormChange('description', e.target.value)}
-                                        placeholder="Cuéntanos un poco sobre ti..."
-                                        rows={4}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all resize-none"
-                                        required
-                                    />
-                                </div>
+                                        {/* Género */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <span className="mr-2">👤</span>
+                                                Género
+                                                <span className="text-red-500 ml-1">*</span>
+                                            </label>
+                                            <select
+                                                value={formData.gender}
+                                                onChange={(e) => handleFormChange('gender', e.target.value)}
+                                                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                                                required
+                                            >
+                                                <option value="">Selecciona tu género</option>
+                                                <option value="H">Hombre</option>
+                                                <option value="M">Mujer</option>
+                                                <option value="O">Otro</option>
+                                            </select>
+                                        </div>
 
-                                {/* CURP */}
-                                <div className="flex flex-col">
-                                    <label className="font-semibold mb-2">
-                                        CURP <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.curp}
-                                        onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
-                                        placeholder="Ingresa tu CURP (18 caracteres)"
-                                        maxLength={18}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all uppercase"
-                                        required
-                                    />
-                                    <small className="text-gray-600 mt-1">
-                                        El CURP debe tener exactamente 18 caracteres
-                                    </small>
+                                        {/* CURP */}
+                                        <div className="md:col-span-2 space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <span className="mr-2">🆔</span>
+                                                CURP
+                                                <span className="text-red-500 ml-1">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.curp}
+                                                onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
+                                                placeholder="Ingresa tu CURP (18 caracteres)"
+                                                maxLength={18}
+                                                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm uppercase font-mono"
+                                                required
+                                            />
+                                            <div className="flex items-center text-xs text-gray-500 mt-1">
+                                                <span className="mr-2">💡</span>
+                                                El CURP debe tener exactamente 18 caracteres
+                                            </div>
+                                        </div>
+
+                                        {/* Descripción */}
+                                        <div className="md:col-span-2 space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <span className="mr-2">📝</span>
+                                                Descripción personal
+                                                <span className="text-red-500 ml-1">*</span>
+                                            </label>
+                                            <textarea
+                                                value={formData.description}
+                                                onChange={(e) => handleFormChange('description', e.target.value)}
+                                                placeholder="Cuéntanos un poco sobre ti... ¿Qué te gusta hacer? ¿Cuáles son tus aficiones?"
+                                                rows={4}
+                                                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm resize-none"
+                                                required
+                                            />
+                                            <div className="flex justify-between items-center text-xs text-gray-500">
+                                                <span className="flex items-center">
+                                                    <span className="mr-1">💡</span>
+                                                    Sé auténtico y describe tus intereses
+                                                </span>
+                                                <span className="text-gray-400">
+                                                    {formData.description.length}/500
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Success Message */}
+                                    <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+                                        <div className="flex items-center text-green-700">
+                                            <CheckCircle className="w-5 h-5 mr-2" />
+                                            <span className="font-medium">¡Casi terminamos! Solo falta completar estos datos.</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
                 
-               
-                <div className="mt-2 flex justify-center space-x-2 w-full mb-20 ">
-                    <Button
-                        className={buttonStyle}
+                 <div className="mt-8 flex justify-center space-x-4 w-full mb-20">
+                    <button
                         onClick={() => setActiveIndex(prev => prev - 1)}
                         disabled={activeIndex === 0}
+                        className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
                     >
                         Anterior
-                    </Button>
+                    </button>
 
                     {activeIndex === 0 ? (
-                        <Button
-                            className={buttonStyle}
+                        <button
                             onClick={handleUploadPictures}
                             disabled={uploadingPhotos}
+                            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {uploadingPhotos ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1262,12 +1389,12 @@ const Verificar = () => {
                             ) : (
                                 'Subir Fotos'
                             )}
-                        </Button>
+                        </button>
                     ) : activeIndex === 1 ? (
-                        <Button
-                            className={buttonStyle}
+                        <button
                             onClick={handleSavePreferences}
                             disabled={savingPreferences}
+                            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {savingPreferences ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1280,12 +1407,12 @@ const Verificar = () => {
                             ) : (
                                 'Guardar Preferencias'
                             )}
-                        </Button>
+                        </button>
                     ) : activeIndex === 2 ? (
-                        <Button
-                            className={buttonStyle}
+                        <button
                             onClick={handleIneValidation}
                             disabled={validatingIne}
+                            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {validatingIne ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1296,14 +1423,14 @@ const Verificar = () => {
                                     Validando...
                                 </div>
                             ) : (
-                                'Validando INE'
+                                'Validar INE'
                             )}
-                        </Button>
+                        </button>
                     ) : activeIndex === 3 ? (
-                        <Button
-                            className={buttonStyle}
+                        <button
                             onClick={handleValidacionRostro}
                             disabled={validatingFace}
+                            className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {validatingFace ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1314,15 +1441,15 @@ const Verificar = () => {
                                     Validando...
                                 </div>
                             ) : (
-                                'Validando identidad'
+                                'Validar Identidad'
                             )}
-                        </Button>
+                        </button>
                         
                     ) : activeIndex === 4 ? (
-                        <Button
-                            className={buttonStyle}
+                        <button
                             onClick={handleSubmitInfo}
                             disabled={submittingInfo}
+                            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {submittingInfo ? (
                                 <div className="flex items-center justify-center gap-2">
@@ -1334,13 +1461,13 @@ const Verificar = () => {
                                 </div>
                             ) : (
                                 'Finalizar Registro'
-                            )}
-                        </Button>
+                            )}                        </button>
                     ) : null}
                 </div>
             </div>
-            <Toast ref={toast} position="bottom-center" />
         </div>
+        <Toast ref={toast} position="bottom-center" />
+    </div>
     );
 };
 
