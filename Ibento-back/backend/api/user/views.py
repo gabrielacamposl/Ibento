@@ -36,7 +36,6 @@ from api.services.recommended_events import obtener_eventos_recomendados
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
 #from api.services.ticketmaster import guardar_eventos_desde_json
-from api.services.tasks import guardar_eventos_desde_json, prueba
 #Servicio de recomendación de usuarios
 from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
@@ -722,8 +721,17 @@ def ine_validation_view(request):
             del front_b64
         if 'back_b64' in locals():
             del back_b64
+        
+    return Response({
+            "success": True,
+            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
+            "ine_validada": True,
+            "rostro_validado": True
+        }, status=status.HTTP_200_OK)
 
 
+# ine_front + selfie
+# -------------------------------------- VALIDACIÓN DE ROSTRO CON SELFIE ----------------------------------------
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -798,10 +806,8 @@ def face_validation_view(request):
         # RESPUESTA EXITOSA
         return Response({
             "success": True,
-            "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
             "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
             "usuario_validado": True,
-            "ine_validada": True,
             "rostro_validado": True
         }, status=status.HTTP_200_OK)
     
@@ -1490,10 +1496,6 @@ def importar_ticketmaster(request):
     guardar_eventos_desde_json.delay(eventos_json)
     return Response({'mensaje': 'Eventos importados correctamente'})
 
-@api_view(['POST'])
-def prueba(request):
-    stat = prueba.delay("681d9e134f3b2936f471436a")
-    return Response({'task_id': stat})
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radio promedio de la Tierra en km
