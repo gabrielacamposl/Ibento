@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 // Clave VAPID para web push
-const VAPID_KEY = "BKw8gZ5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z8Z5Z";
+const VAPID_KEY = import.meta.env.VAPID_KEY;
 
 class PushNotificationService {
   constructor() {
