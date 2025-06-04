@@ -404,98 +404,95 @@ def actualizar_perfil(request):
     
     # Hacer mutable la información para poder modificarla
     informacion = request.data.copy()
-    #Obtener las imágenes de perfil
+    print("Datos recibidos:", informacion)
+    
+    # Obtener las imágenes de perfil
     pictures = informacion.getlist('pictures') if hasattr(informacion, 'getlist') else informacion.get('pictures', [])
- 
-    # Imagenes del usuario de la BD
-    current_photos = usuario.profile_pic or []
-    urls_recibidas = [p for p in pictures if isinstance(p, str) and p.startswith('http')]
-    nuevas_imagenes = [p for p in pictures if not isinstance(p, str)]
-    print("Nuevas imágenes recibidas:", nuevas_imagenes)
     
-    #print("Fotos Actuales:", current_photos)
-    #print("URLs recibidas:", urls_recibidas)
+    # Solo procesar imágenes si se enviaron y no están vacías
+    if pictures and len(pictures) > 0 and not all(p == '' for p in pictures if isinstance(p, str)):
+        # Imagenes del usuario de la BD
+        current_photos = usuario.profile_pic or []
+        urls_recibidas = [p for p in pictures if isinstance(p, str) and p.startswith('http')]
+        nuevas_imagenes = [p for p in pictures if not isinstance(p, str)]
+        print("Nuevas imágenes recibidas:", len(nuevas_imagenes))
+        
+        # Proceso de eliminación de imágenes de cloudinary y actualiza la variable de fotos actuales
+        if urls_recibidas:
+            delete_urls = []
+            for url_delete in current_photos:
+                try:
+                    if url_delete not in urls_recibidas:
+                        public_id = extract_public_id(url_delete)
+                        if public_id: 
+                            result = cloudinary.uploader.destroy(public_id)
+                            if result.get('result') == 'ok':
+                                delete_urls.append(url_delete)
+                        else: 
+                            return Response({"error": "Error al eliminar la imagen de Cloudinary."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except Exception as e:
+                    return Response({"error": "No se procesó la imagen."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            # Eliminar las URLs de las imágenes actuales
+            current_photos = [url for url in current_photos if url not in delete_urls]
+            usuario.profile_pic = current_photos
+            usuario.save(update_fields=['profile_pic'])
+            print("Fotos actuales después de eliminar:", current_photos)
 
-    #Proceso de eliminación de imágenes de couldinary y actualiza la variable de fotos actuales
-    if urls_recibidas:
-        delete_urls = []
-        for url_delete in current_photos:
-            try:
-                if url_delete not in urls_recibidas:
-                    public_id = extract_public_id(url_delete)
-                    if public_id: 
-                        result = cloudinary.uploader.destroy(public_id)
-                        if result.get('result') == 'ok':
-                            delete_urls.append(url_delete)
-                    else: 
-                        return Response({"error": "Error al eliminar la imagen de Cloudinary."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            except Exception as e:
-                return Response({"error": "No se procesó la imagen."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Proceso de subida de nuevas imágenes a Cloudinary
+        if nuevas_imagenes:
+            data = {'pictures': nuevas_imagenes}
+            serializer = UpdateProfilePicture(data=data)
+            # Path dinámico por usuario
+            folder_path = f"usuarios/perfiles/{usuario.nombre}_{usuario._id}"
 
-        # Eliminar las URLs de las imágenes actuales
-        current_photos = [url for url in current_photos if url not in delete_urls]
-        usuario.profile_pic = current_photos  # <-- Actualiza la BD aquí
-        usuario.save(update_fields=['profile_pic'])
-        print("Fotos actuales después de eliminar:", current_photos)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Proceso de subida de nuevas imágenes a Cloudinary
-    if nuevas_imagenes:
-        data = {'pictures': nuevas_imagenes}
-        serializer = UpdateProfilePicture(data=data)
-        # Path dinámico por usuario
-        folder_path = f"usuarios/perfiles/{usuario.nombre}_{usuario._id}"
-
-        print("Datos del serializer:", serializer)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        new_images = serializer.validated_data['pictures']
-        print("Nuevas imágenes a subir:", len(new_images))
-        if len(current_photos) + len(new_images) > 6:
-            max_allowed = 6 - len(current_photos)
-            return Response(
-                {"error": f"Solo puedes subir {max_allowed} foto(s) más."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        uploaded_urls = []
-
-        for image in new_images:
-            try:
-                result = cloudinary.uploader.upload(
-                    image,
-                    folder=folder_path,
-                    transformation=[
-                        {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
-                    ]
-                )
-                uploaded_urls.append(result['secure_url'])
-            except Exception as e:
+            new_images = serializer.validated_data['pictures']
+            print("Nuevas imágenes a subir:", len(new_images))
+            
+            # Actualizar current_photos después de eliminar
+            current_photos = usuario.profile_pic or []
+            
+            if len(current_photos) + len(new_images) > 6:
+                max_allowed = 6 - len(current_photos)
                 return Response(
-                    {"error": "Error al subir una imagen.", "details": str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    {"error": f"Solo puedes subir {max_allowed} foto(s) más."},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-        print("URLs subidas:", uploaded_urls)
 
-        print("Fotos actuales antes de actualizar:", current_photos)
-        # Actualiza la lista de fotos en la BD después de subir nuevas imágenes
-        usuario.profile_pic = current_photos + uploaded_urls
-        usuario.save(update_fields=['profile_pic'])
+            uploaded_urls = []
+            for image in new_images:
+                try:
+                    result = cloudinary.uploader.upload(
+                        image,
+                        folder=folder_path,
+                        transformation=[
+                            {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+                        ]
+                    )
+                    uploaded_urls.append(result['secure_url'])
+                except Exception as e:
+                    return Response(
+                        {"error": "Error al subir una imagen.", "details": str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            print("URLs subidas:", uploaded_urls)
 
+            # Actualizar la lista de fotos en la BD después de subir nuevas imágenes
+            usuario.profile_pic = current_photos + uploaded_urls
+            usuario.save(update_fields=['profile_pic'])
 
-    
-    
-
+    # Procesar preferencias_evento
     if 'preferencias_evento' in informacion:
         valor = informacion['preferencias_evento']
         # Si viene como una lista con un solo string
         if isinstance(valor, list) and len(valor) == 1 and isinstance(valor[0], str):
             try:
-                informacion['preferencias_evento'] = json.loads(valor[0])  # convierte el string a lista real
+                informacion['preferencias_evento'] = json.loads(valor[0])
             except json.JSONDecodeError:
                 return Response({'error': 'preferencias_evento no es un JSON válido'}, status=400)
-        
         # Si viene como string directamente
         elif isinstance(valor, str):
             try:
@@ -503,7 +500,7 @@ def actualizar_perfil(request):
             except json.JSONDecodeError:
                 return Response({'error': 'preferencias_evento no es un JSON válido'}, status=400)
     
-    print("Preferencias evento después de parsear:", informacion.get('preferencias_generales'))
+    # Procesar preferencias_generales
     if 'preferencias_generales' in informacion:
         valor = informacion['preferencias_generales']
         # Si viene como una lista con un solo string
@@ -524,6 +521,8 @@ def actualizar_perfil(request):
         # Si no es lista ni dict, lo dejamos como lista vacía
         if not isinstance(informacion['preferencias_generales'], (list, dict)):
             informacion['preferencias_generales'] = []
+    
+    # Campos permitidos para actualizar
     campos_a_actualizar = [
         'nombre',
         'apellido',
@@ -535,20 +534,27 @@ def actualizar_perfil(request):
     ]
 
     update = False
+    campos_actualizados = []
+    
     for campo in campos_a_actualizar:
         if campo in informacion:
             valor = informacion[campo]
-            if valor is not None:
+            # Permitir valores válidos, incluyendo strings vacíos para algunos campos como description
+            if valor is not None and (valor != "" or campo in ['description']):
                 if campo == 'preferencias_evento':
                     if not isinstance(valor, list):
                         return Response({'error': 'preferencias_evento debe ser una lista'}, status=400)
                     for preferencia in valor:
                         if not isinstance(preferencia, str):
                             return Response({'error': 'Cada preferencia debe ser un string'}, status=400)
+                
                 setattr(usuario, campo, valor)
+                campos_actualizados.append(campo)
                 update = True
+                print(f"Campo actualizado: {campo} = {valor}")
 
     if update:
+        # Asegurar que los campos no sean None después de la actualización
         if usuario.preferencias_generales is None:
             usuario.preferencias_generales = []
         if usuario.profile_pic is None:
@@ -557,11 +563,14 @@ def actualizar_perfil(request):
             usuario.gender = ""
         if usuario.preferencias_evento is None:
             usuario.preferencias_evento = []
-        if usuario.preferencias_generales is None:
-            usuario.preferencias_generales = []
 
-        usuario.save(update_fields=campos_a_actualizar)
-        return Response({'message': 'Perfil actualizado correctamente'}, status=200)
+        try:
+            usuario.save(update_fields=campos_actualizados)
+            print(f"Perfil actualizado exitosamente. Campos: {campos_actualizados}")
+            return Response({'message': 'Perfil actualizado correctamente'}, status=200)
+        except Exception as e:
+            print(f"Error al guardar usuario: {e}")
+            return Response({'error': f'Error al guardar los cambios: {str(e)}'}, status=500)
 
     return Response({'error': 'No se proporcionaron campos válidos para actualizar'}, status=400)
 

@@ -18,12 +18,12 @@ import { WifiOff } from 'lucide-react';
 const Perfil = () => {
     const toast = useRef(null);
     const navigate = useNavigate();
-    const { makeRequest } = useOfflineRequest();
-    const [favoritos, setFavoritos] = useState([]);
+    const { makeRequest } = useOfflineRequest();    const [favoritos, setFavoritos] = useState([]);
     const [saveEvents, setSaveEvents] = useState([]);
-    const [userPerfil, setUserPerfil] = useState([]);
+    const [userPerfil, setUserPerfil] = useState({});
     const [verificar, setVerificar] = useState(false);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [loading, setLoading] = useState(true);
 
 
     // Detectar cambios en conexión
@@ -37,11 +37,17 @@ const Perfil = () => {
         return () => {
             window.removeEventListener('connectionChange', handleConnectionChange);
         };
-    }, []);
-    useEffect(() => {
+    }, []);    useEffect(() => {
         const Perfil = async () => {
             try {
-                const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
+                const token = localStorage.getItem('access');
+                
+                if (!token) {
+                    console.error("No se encontró token de autenticación");
+                    setLoading(false);
+                    return;
+                }
+
                 const result = await makeRequest(
                     `${api.defaults.baseURL}usuarios/info_to_edit/`,
                     {
@@ -63,15 +69,20 @@ const Perfil = () => {
                 }
             } catch (error) {
                 console.error("Error al obtener perfil:", error);
+            } finally {
+                setLoading(false);
             }
         };
         Perfil();
-    }, []);
-
-    useEffect(() => {
+    }, [makeRequest]);    useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchVerify = async () => {
             try {
+                if (!token) {
+                    console.error("No se encontró token para eventos guardados");
+                    return;
+                }
+
                 const response = await api.get("usuarios/obtener_eventos_guardados/", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -80,7 +91,6 @@ const Perfil = () => {
                 if (response.status === 200) {
                     setSaveEvents(response.data["Eventos guardados"]);
                     console.log("Guardados", response.data["Eventos guardados"]);
-
                 }
             } catch (error) {
                 console.error("Error al obtener los datos del usuario:", error);
@@ -112,14 +122,17 @@ const Perfil = () => {
 
         }
 
-    }, []);
-
-    useEffect(() => {
+    }, []);    useEffect(() => {
         const fetchFavoritos = async () => {
             try {
-                const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
-                const response = await api.get('perfil/favoritos/', {
+                const token = localStorage.getItem('access');
+                
+                if (!token) {
+                    console.error("No se encontró token para favoritos");
+                    return;
+                }
 
+                const response = await api.get('perfil/favoritos/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -134,19 +147,14 @@ const Perfil = () => {
                         dates: favorito.dates,
                         imgs: favorito.imgs,
                         isFavorite: true
-
-
                     }));
                     setFavoritos(favoritosData);
                     console.log("Favoritos obtenidos:", response.data);
                 } else {
                     console.error("Error al obtener favoritos");
                 }
-
             } catch (error) {
                 console.error("Error al obtener favoritos:", error);
-            } finally {
-                setLoading(false);
             }
         };
         fetchFavoritos();
@@ -189,10 +197,8 @@ const Perfil = () => {
                 <img src={product} alt="Fotos" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
             </div>
-        );
-    };
+        );    };
 
-    const [loading, setLoading] = useState(true);
     if (loading) {
         return (
             <div className="fixed inset-0 bg-white z-50">
@@ -268,12 +274,11 @@ const Perfil = () => {
                     <div className="text-center mb-6">
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">
                             {userPerfil.nombre + " " + userPerfil.apellido}
-                        </h1>
-                        <div className="flex items-center justify-center space-x-3 text-gray-600">
+                        </h1>                        <div className="flex items-center justify-center space-x-3 text-gray-600">
                             <div className="flex items-center space-x-1">
-                                {userPerfil.gender != "" && (
+                                {userPerfil.gender !== "" && userPerfil.gender && (
                                     <>
-                                        {userPerfil.gender == 'H' || userPerfil.gender == 'Hombre' ? (
+                                        {userPerfil.gender === 'H' || userPerfil.gender === 'Hombre' ? (
                                             <i className="pi pi-mars" style={{ color: '#8b5cf6' }}></i>
                                         ) : (
                                             <i className="pi pi-venus" style={{ color: '#ec4899' }}></i>
@@ -283,7 +288,7 @@ const Perfil = () => {
                                 )}
                             </div>
                         </div>
-                        {userPerfil.birthday == null && (
+                        {userPerfil.birthday === null && (
                             <>
                                 <div className="flex items-center justify-center space-x-2 text-gray-500 mt-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
@@ -316,7 +321,7 @@ const Perfil = () => {
                             ))}
                         </div>
                     </div>
-                    {userPerfil.preferencias_generales.length == 0 && (
+                    {userPerfil.preferencias_generales?.length === 0 && (
 
                         <div className="col-span-full text-center py-2">
                             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
@@ -326,10 +331,8 @@ const Perfil = () => {
                             </div>
                         </div>
 
-                    )}
-
-                    {/* Sobre mí */}
-                    {userPerfil.description != null && (
+                    )}                    {/* Sobre mí */}
+                    {userPerfil.description !== null && userPerfil.description && (
                         <div className="mb-8">
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-blue-500 mr-2">
