@@ -3,6 +3,8 @@ import Footer from "../components/footer";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import useIsWebVersion from "../hooks/useIsWebVersion";
+import InstallPrompt from "../components/pwa/InstallPrompt";
+import PWAStatus from "../components/pwa/PWAStatus";
 
 function MainLayout() {
     const isWebVersion = useIsWebVersion();
@@ -16,6 +18,8 @@ function MainLayout() {
             <Outlet />
           </main>
           <Footer />
+          <InstallPrompt />
+          {process.env.NODE_ENV === 'development' && <PWAStatus />}
         </div>
       );
     }
@@ -27,6 +31,8 @@ function MainLayout() {
           <Outlet />
         </main>
         <BottomNav />
+        <InstallPrompt />
+        {process.env.NODE_ENV === 'development' && <PWAStatus />}
       </div>
     );
   }

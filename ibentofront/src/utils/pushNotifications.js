@@ -1,23 +1,9 @@
 // utils/pushNotifications.js - Sistema mejorado de notificaciones push
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC9cLzJYYBPB1ERFyjUrnbVeB-gewCIkbM",
-  authDomain: "ibento-8e4fc.firebaseapp.com",
-  projectId: "ibento-8e4fc",
-  storageBucket: "ibento-8e4fc.firebasestorage.app",
-  messagingSenderId: "156357411233",
-  appId: "1:156357411233:web:dafd393eebb9174c43cbe0",
-  measurementId: "G-MZJSYRXE4E"
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+import { messaging } from '../firebase.js';
+import { getToken, onMessage } from "firebase/messaging";
 
 // Clave VAPID para web push
-const VAPID_KEY = import.meta.env.VAPID_KEY;
+const VAPID_KEY = import.meta.env.VAPID_PUBLICA;
 
 class PushNotificationService {
   constructor() {

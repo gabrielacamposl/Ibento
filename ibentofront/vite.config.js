@@ -12,24 +12,57 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
+      devOptions: {
+        enabled: true, // Habilitar SW en desarrollo
+        type: 'module'
+      },
+      // Configuración específica para injectManifest
+      injectManifest: {
+        rollupFormat: 'es'
+      },
       workbox: {
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024, // 6 MB
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-         // o excluye la carpeta entera
-        globIgnores: ['images_for_preview/**'],
-        // runtimeCaching: [
-        //   {
-        //     urlPattern: /^https:\/\/ibento\.onrender\.com\/api\//,
-        //     handler: 'NetworkFirst',
-        //     options: {
-        //       cacheName: 'evento-api-cache',
-        //       expiration: {
-        //         maxEntries: 100,
-        //         maxAgeSeconds: 60 * 60 * 24, // 24 horas
-        //       },
-        //     },
-        //   },
-        // ],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Excluir archivos grandes y de preview
+        globIgnores: ['images_for_preview/**', '**/node_modules/**'],
+        // Excluir archivos de Firebase del Service Worker
+        skipWaiting: true,
+        clientsClaim: true,
+        // Mejorar el runtime caching
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/ibento\.onrender\.com\/api\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ibento-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 24 horas
+              },
+              cacheKeyWillBeUsed: async ({ request }) => {
+                return `${request.url}?v=${Date.now()}`;
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 año
+              },
+            },
+          },
+        ],
       },
       includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
@@ -97,10 +130,19 @@ export default defineConfig({
             sizes: "678x907",
             type: "image/jpeg",
             form_factor: "wide"
-          }
-        ]
+          }        ]
       }
     })
-  ]
+  ],  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude Firebase modules from Service Worker build
+        if (id.includes('firebase')) {
+          return true;
+        }
+        return false;
+      }
+    }
+  }
 });
 

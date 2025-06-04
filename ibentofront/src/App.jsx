@@ -46,26 +46,12 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-   // Registrar service workers e inicializar notificaciones push
+  const [isLoading, setIsLoading] = useState(true);  // Inicializar notificaciones push
   useEffect(() => {
     const initializeApp = async () => {
-      // Registrar service workers
-      if ('serviceWorker' in navigator) {
-        try {
-          // Registrar el service worker principal (sw.js)
-          const swRegistration = await navigator.serviceWorker.register('/sw.js');
-          console.log('✅ SW principal registrado:', swRegistration);
-
-          // Registrar el service worker de Firebase Messaging
-          const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('✅ FCM SW registrado:', fcmRegistration);
-          
-        } catch (registrationError) {
-          console.log('❌ Error registrando Service Workers:', registrationError);
-        }
-      }
-
+      // Los Service Workers se registran en ServiceWorkerProvider
+      // para evitar conflictos y duplicación
+      
       // Inicializar servicio de notificaciones push
       try {
         const initialized = await pushNotificationService.initialize();
