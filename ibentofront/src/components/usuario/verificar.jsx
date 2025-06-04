@@ -4,7 +4,7 @@ import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X } from 'l
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
-import { curp_regex } from "../../utils/regex";
+import { curp_regex, patron_curp } from "../../utils/regex";
 // Agregar esta importación para face-api.js
 // import * as faceapi from 'face-api.js';
 
@@ -745,7 +745,7 @@ const Verificar = () => {
         //     showWarn('El CURP debe tener exactamente 18 caracteres');
         //     return false;
         // }
-        if (!curp_regex.test(curp.trim().toUpperCase())) {
+        if (!patron_curp.test(curp.trim().toUpperCase())) {
                 showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
                 return false;
          }
