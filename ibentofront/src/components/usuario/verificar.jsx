@@ -741,11 +741,16 @@ const Verificar = () => {
             showWarn('El formato de fecha debe ser YYYY-MM-DD');
             return false;
         }
-
-        if (!curp_regex.test(curp.trim())) {
-            showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
-            return false;
-        }
+        
+        // Validar CURP (18 caracteres alfanuméricos)
+        // if (curp.length !== 18) {
+        //     showWarn('El CURP debe tener exactamente 18 caracteres');
+        //     return false;
+        // }
+        if (!curp_regex.test(curp.trim().toUpperCase())) {
+                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
+                return false;
+         }
         
         return true;
     };
