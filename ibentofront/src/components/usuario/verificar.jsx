@@ -438,7 +438,7 @@ const uploadAllData = async () => {
         //     showWarn('El CURP debe tener exactamente 18 caracteres');
         //     return false;
         // }
-        if (!curp_regex.test(curp.trim())) {
+        if (!curp_regex.test(curp.trim().toUpperCase())) {
                 showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
                 return false;
          }
