@@ -7,13 +7,14 @@ const ServiceWorkerProvider = ({ children }) => {
     const toast = useRef(null);
     const [swRegistration, setSwRegistration] = useState(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [updateAvailable, setUpdateAvailable] = useState(false);    useEffect(() => {
-        // Registrar Service Workers
+    const [updateAvailable, setUpdateAvailable] = useState(false);
+
+    useEffect(() => {
+        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
-            // Registrar el service worker principal (gestionado por Vite PWA)
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/src/sw.js')
                 .then((registration) => {
-                    console.log('SW principal registrado: ', registration);
+                    console.log('SW registered: ', registration);
                     setSwRegistration(registration);
 
                     // Escuchar actualizaciones del SW
