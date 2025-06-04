@@ -8,7 +8,7 @@ import api from "../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex } from "../../utils/regex";
 // Agregar esta importación para face-api.js
-// import * as faceapi from 'face-api.js';
+// import * as face-api.js;
 
 const Verificar = () => {
     const navigate = useNavigate();
@@ -287,59 +287,39 @@ const Verificar = () => {
         if (user.pictures.length < 3 || user.pictures.length > 6) {
             showWarn("Debes subir entre 3 y 6 fotos.");
             return;
-        }        
-        // Validar cada archivo
+        }
         for (const picture of user.pictures) {
             if (!["image/jpeg", "image/png", "image/jpg"].includes(picture.type)) {
                 showWarn("Solo se permiten imágenes JPG o PNG.");
                 return;
             }
-            if (picture.size > 5 * 1024 * 1024) { // 5MB
+            if (picture.size > 5 * 1024 * 1024) {
                 showWarn("Cada imagen debe pesar menos de 5MB.");
                 return;
             }
         }
 
         setUploadingPhotos(true);
-        try {            
-            // Guardar las fotos en local para enviar despues
-            setSavedPhotos([...user.pictures]);
-            setStepsCompleted(prev => ({ ...prev, photos: true }));
-            console.log("Fotos guardadas localmente:", user.pictures);            
-            // Simular un pequeño delay para mostrar el loading
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            showSuccess("¡Fotos guardadas correctamente!");
-            setActiveIndex(prev => prev + 1);
-        } finally {
-            setUploadingPhotos(false);
-        }
-    };
-
-    const uploadSavedPhotos = async () => {
-        if (savedPhotos.length === 0) {
-            console.error("No hay fotos guardadas para subir");
-            return;
-        }
-
         try {
+            // Subir fotos al backend aquí
             const formData = new FormData();
-            savedPhotos.forEach((picture) => {
+            user.pictures.forEach((picture) => {
                 formData.append("pictures", picture);
             });
-
-            console.log("Subiendo fotos guardadas:", savedPhotos);
-            const response = await api.post("perfil/subir-fotos/", formData, {
+            await api.post("perfil/subir-fotos/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
-            console.log("Fotos subidas exitosamente:", response.data.pictures);
-            return response.data;
+            setSavedPhotos([...user.pictures]);
+            setStepsCompleted(prev => ({ ...prev, photos: true }));
+            showSuccess("¡Fotos subidas correctamente!");
+            setActiveIndex(prev => prev + 1);
         } catch (error) {
-            console.error("Error al subir fotos:", error.response?.data || error);
-            throw error;
+            showError("Error al subir fotos. Intenta de nuevo.");
+        } finally {
+            setUploadingPhotos(false);
         }
     };
 
@@ -361,46 +341,31 @@ const Verificar = () => {
     const handleSavePreferences = async () => {
         setSavingPreferences(true);
         try {
-            // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
             const respuestas = itemsAboutMe.map(item => {
                 const respuesta = selectedAnswers[item._id] || [];
-
-                // Si es multi_option, enviamos el array completo
-                // Si no es multi_option, enviamos solo el primer elemento (o string vacío si no hay respuesta)
                 return {
                     categoria_id: item._id,
                     respuesta: item.multi_option ? respuesta : (respuesta.length > 0 ? respuesta[0] : "")
                 };
             });
 
-            // Validación: asegurarse de que todas las obligatorias estén contestadas
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 const respuestaUsuario = selectedAnswers[item._id] || [];
                 return !item.optional && respuestaUsuario.length === 0;
-            }); 
-            
+            });
             if (obligatoriasNoRespondidas.length > 0) {
                 showWarn("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
 
-            console.log("=== DEBUG RESPUESTAS ===");
-            console.log("selectedAnswers:", selectedAnswers);
-            console.log("itemsAboutMe:", itemsAboutMe);
-            console.log("respuestas a enviar:", respuestas);
-            console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
+            // Subir preferencias al backend aquí
+            await api.post("intereses-respuestas/", { respuestas });
 
-            // Simular delay para mostrar loading
-            await new Promise(resolve => setTimeout(resolve, 500));            
-            // Guardamos las preferencias en un estado
             setSavedPreferences({ respuestas });
             setStepsCompleted(prev => ({ ...prev, preferences: true }));
-            console.log("Preferencias guardadas localmente:", { respuestas })
-
             showSuccess("Preferencias guardadas correctamente.");
             setActiveIndex(prev => prev + 1);
         } catch (err) {
-            console.error("Error al procesar preferencias:", err);
             showError(`Error al guardar preferencias: ${err.message}`);
         } finally {
             setSavingPreferences(false);
