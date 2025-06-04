@@ -22,7 +22,7 @@ export default function PasswordResetValidate() {
     const emailGuardado = localStorage.getItem("emailReset");
     if (!emailGuardado) {
       // Si no hay email, regresamos al inicio del flujo
-      navigate("/ibento/recuperar-cuenta");
+      navigate("/recuperar-cuenta");
     } else {
       setEmail(emailGuardado);
     }
@@ -42,7 +42,7 @@ export default function PasswordResetValidate() {
 
       // Código válido, redirige a cambiar contraseña
       setTimeout(() => {
-        navigate("/ibento/recuperar-cuenta-nueva-contrasena"); 
+        navigate("/recuperar-cuenta-nueva-contrasena"); 
       }, 1500);
     } catch (err) {
       setError(err.response?.data?.error || "Error al validar el código.");

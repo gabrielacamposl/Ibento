@@ -27,7 +27,7 @@ export default function PasswordResetRequest() {
       // Espera 1 segundo antes de redirigir
       localStorage.setItem("emailReset", email);
       setTimeout(() => {
-       navigate("/ibento/recuperar-cuenta-codigo");
+       navigate("/recuperar-cuenta-codigo");
     }, 1000); 
     } catch (err) {
       setError(err.response?.data?.error || "Error al enviar la solicitud.");
