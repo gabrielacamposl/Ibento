@@ -35,7 +35,7 @@ from api.services.recommended_events import obtener_eventos_recomendados
 # Envio de correos
 from api.utils import enviar_email_confirmacion, enviar_codigo_recuperacion
 #Servicio de ticketmaster
-#from api.services.ticketmaster import guardar_eventos_desde_json
+from api.services.ticketmaster import guardar_eventos_desde_json
 #Servicio de recomendación de usuarios
 from api.services.recommended_users import recomendacion_de_usuarios
 #Creación de usuarios
@@ -1493,7 +1493,7 @@ def obtener_match_id(request, match_id):
 def importar_ticketmaster(request):
     with open("api/user/ticketmaster_events_max.json", "r", encoding="utf-8") as f:
         eventos_json = json.load(f)
-    guardar_eventos_desde_json.delay(eventos_json)
+    guardar_eventos_desde_json(eventos_json)
     return Response({'mensaje': 'Eventos importados correctamente'})
 
 
