@@ -84,24 +84,45 @@ const handleDeleteAccount = async () => {
     
     return (
         <div className=" z-0 w-full flex justify-center items-center  ">
-            
-            <div className=" flex  space-x-1 gap-2 absolute top-2 right-2  ">
-             
-             <Button  onClick={() => setVisibleRight(true)} >
-             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-</svg>
-
-
+              <div className="flex space-x-1 gap-2 absolute top-4 right-4 z-50">
+               <Button 
+                onClick={() => setVisibleRight(true)}
+                className="menu-button-enhanced bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl border-2 border-purple-200 hover:border-purple-400 transition-all duration-300 hover:scale-110 p-3 rounded-xl"
+                aria-label="Abrir menú de configuración"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+                    minWidth: '48px',
+                    minHeight: '48px'
+                }}
+             >
+             <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                strokeWidth="2.5" 
+                stroke="currentColor" 
+                className="size-6 text-purple-600 hover:text-purple-800 transition-colors duration-200"
+             >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+             </svg>
              </Button>
             </div>
 
-            <Sidebar visible={visibleRight} position="right"   role="region" className='degradadoPerfil sidebar colorRosa  ' onHide={() => setVisibleRight(false)} showCloseIcon={false}>
-                <button className="absolute top-2 right-2" onClick={() => setVisibleRight(false)}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-</svg>
-
+            <Sidebar visible={visibleRight} position="right"   role="region" className='degradadoPerfil sidebar colorRosa  ' onHide={() => setVisibleRight(false)} showCloseIcon={false}>                <button 
+                    className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm hover:bg-white/95 rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-gray-200 hover:border-purple-300" 
+                    onClick={() => setVisibleRight(false)}
+                    aria-label="Cerrar menú de configuración"
+                >
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth="2.5" 
+                    stroke="currentColor" 
+                    className="size-5 text-gray-600 hover:text-purple-600 transition-colors duration-200"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
                 </button>
            
 
@@ -262,7 +283,7 @@ const handleDeleteAccount = async () => {
                                           transition
                                           className="relative transform overflow-hidden rounded bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
                                       >
-                                          <div className="degradadoPerfil px-2 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                          <div className="degradadoPerfil px-2 pt-5 pb-4 sm:p-6 sm:pb-4 z-30">
                                               <div className="sm:flex sm:items-start">
                                                   <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full btn-custom sm:mx-0 sm:size-10">
                                                       <ExclamationTriangleIcon aria-hidden="true" className="size-6" />

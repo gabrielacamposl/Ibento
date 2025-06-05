@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import "../../assets/css/botones.css";
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
+import useIsWebVersion from '../../hooks/useIsWebVersion';
 
 const Chat = () => {
     const navigate = useNavigate();
+    const isWebVersion = useIsWebVersion();
     const [messages, setMessages] = useState([
         { sender: 'Harry Styles', text: ['Hola, ¿cómo estás?'] ,image: "/minovio.jpeg"},
         { sender: 'Tú', text: '¡Hola! Estoy bien, ¿y tú?' ,image: "/jin3.jpeg"},
@@ -102,13 +104,14 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 };
 
-
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    if (!isWebVersion) {
+      document.body.style.overflow = 'hidden';
+    }
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, []);
+  }, [isWebVersion]);
 
   
 useEffect(() => {
@@ -202,12 +205,10 @@ useEffect(() => {
             console.error("Error al enviar el mensaje:", error);
         }
     }
-    };
-
-    return (
-        <div className="relative min-h-screen w-full flex items-center justify-center bg-white">
+    };    return (
+        <div className={`relative w-full flex items-center justify-center bg-white ${isWebVersion ? 'min-h-screen pt-6 pb-6' : 'min-h-screen'}`}>
             {/* Contenedor principal glass */}
-            <div className="relative z-10 w-full max-w-md mx-auto min-h-screen flex flex-col rounded-3xl bg-white border border-blue-100 shadow-xl overflow-hidden">
+            <div className={`relative z-10 w-full flex flex-col rounded-3xl bg-white border border-blue-100 shadow-xl overflow-hidden ${isWebVersion ? 'max-w-2xl h-[calc(100vh-8rem)] mt-4 mx-4' : 'max-w-md mx-auto min-h-screen'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-blue-100">
                     <button className="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition" onClick={handleBack}>
@@ -226,10 +227,8 @@ useEffect(() => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                     </button>
-                </div>
-
-                {/* Mensajes */}
-                <div className="max-h-[calc(100vh-17rem)] h-screen flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white">
+                </div>                {/* Mensajes */}
+                <div className={`flex-1 px-4 py-6 overflow-y-auto custom-scrollbar bg-white ${isWebVersion ? 'max-h-[calc(100vh-22rem)]' : 'max-h-[calc(100vh-17rem)] h-screen'}`}>
                     <div className="flex flex-col gap-4">
                         {mensajes.map((message, index) => (
                             <div key={index} className={`flex ${message.receptor != myId ? 'justify-end' : 'justify-start'}`}>

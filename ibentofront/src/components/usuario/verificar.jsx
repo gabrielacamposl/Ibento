@@ -4,7 +4,7 @@ import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X } from 'l
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
-import { curp_regex } from "../../utils/regex";
+import { curp_regex, patron_curp } from "../../utils/regex";
 // Agregar esta importación para face-api.js
 // import * as faceapi from 'face-api.js';
 
@@ -745,7 +745,7 @@ const Verificar = () => {
         //     showWarn('El CURP debe tener exactamente 18 caracteres');
         //     return false;
         // }
-        if (!curp_regex.test(curp.trim().toUpperCase())) {
+        if (!patron_curp.test(curp.trim().toUpperCase())) {
                 showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
                 return false;
          }
@@ -879,55 +879,50 @@ const Verificar = () => {
                         
                         {/*STEP 1: PHOTOS */}
                         {activeIndex === 0 && (
-                            <div className="space-y-6">
-                                <div className="text-center mb-8">
-                                    <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
-                                        <Camera className="w-8 h-8 text-white" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Agrega tus fotos</h2>
-                                    <p className="text-gray-600">Elige tus mejores fotos (mínimo 3, máximo 6)</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="">
+                            <h1 className='mt-2 text-3xl font-bold miPerfil'>Editar Perfil</h1>
+                            <React.Fragment>
+                                <h2 className="mt-2">Elige tus mejores fotos, elige como mínimo 3 fotografías</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-3 ">
                                     {Array.from({ length: 6 }).map((_, index) => (
-                                        <div key={index} className="relative group">
-                                            <div className="relative w-full aspect-square glass-premium rounded-2xl overflow-hidden border-2 border-dashed border-purple-200 hover:border-purple-400 transition-colors duration-300">
+                                        <div key={index} className="relative">
+                                            <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
                                                 {user.pictures[index] ? (
-                                                    <>
-                                                        <img
-                                                            src={
-                                                                typeof user.pictures[index] === "string"
-                                                                    ? user.pictures[index]
-                                                                    : URL.createObjectURL(user.pictures[index])
-                                                            }
-                                                            alt={`Imagen ${index + 1}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        <button
-                                                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
-                                                            onClick={() => handleImageDelete(index)}
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </>
+                                                    <img
+                                                        src={
+                                                            typeof user.pictures[index] === "string"
+                                                                ? user.pictures[index]
+                                                                : URL.createObjectURL(user.pictures[index])
+                                                        }
+                                                        alt={`Imagen ${index + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 ) : (
-                                                    <label htmlFor={`fileInput-${index}`} className="cursor-pointer w-full h-full flex flex-col items-center justify-center text-purple-600 hover:text-purple-700 transition-colors">
-                                                        <Plus className="w-8 h-8 mb-2" />
-                                                        <span className="text-sm font-medium">Agregar</span>
+                                                    <label htmlFor={`fileInput-${index}`} className="cursor-pointer texto">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-15 h-12">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                        </svg>
+                                                        <span className="block mt-2 colorTexto">Agregar</span>
                                                     </label>
                                                 )}
-                                                <input 
-                                                    id={`fileInput-${index}`} 
-                                                    type="file" 
-                                                    className="hidden" 
-                                                    accept="image/*"
-                                                    onChange={(e) => handleImageChange(e, index)} 
-                                                />
+
+                                                {user.pictures[index] && (
+                                                    <button
+                                                        className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
+                                                        onClick={() => handleImageDelete(index)}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-7 h-7 ">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </React.Fragment>
+                        </div>
                         )}                        {/* STEP 2: INTERESTS */}
                         {activeIndex === 1 && (
                             <div className="space-y-6">
@@ -959,14 +954,13 @@ const Verificar = () => {
                                                             <p className="text-lg font-semibold text-gray-800">
                                                                 {item.question}
                                                                 {!item.optional && <span className="text-red-500"> *</span>}
-                                                            </p>
-                                                            <a
-                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:scale-105 transition-transform duration-200 text-sm font-medium w-fit"
+                                                            </p>                                                            <a
+                                                                className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm underline"
                                                                 href="https://www.16personalities.com/es/test-de-personalidad"
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
-                                                                Hacer test de personalidad
+                                                                Hacer test de personalidad →
                                                             </a>
                                                         </div>
                                                     ) : (
@@ -984,9 +978,9 @@ const Verificar = () => {
                                                         return (
                                                             <button
                                                                 key={i}
-                                                                className={`p-3 rounded-2xl border-2 transition-all duration-300 font-medium ${
-                                                                    isSelected 
-                                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-500 shadow-lg transform scale-105' 
+                                                                className={`p-2 rounded-2xl border-2 transition-all duration-300 font-light text-sm ${
+                                                                    isSelected
+                                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-500 shadow-lg transform scale-105'
                                                                         : 'bg-white/50 text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-white/70'
                                                                 }`}
                                                                 onClick={() => {

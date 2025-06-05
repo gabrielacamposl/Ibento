@@ -165,14 +165,15 @@ const EditarPerfil = () => {
             age--;
         }
         return age;
-    };
+    };    const handleSubmit = async () => {
+        const token = localStorage.getItem('access');
+        
+        if (!token) {
+            alert("No se encontró token de autenticación");
+            return;
+        }
 
-    const handleSubmit = async () => {
-
-        const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
-        // Construir el objeto de datos antes de enviar
         try {
-
             const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
                 categoria_id,
                 respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
@@ -183,42 +184,76 @@ const EditarPerfil = () => {
                 return !item.optional && !(selectedAnswers[item._id]?.length > 0);
             });
 
-            if (userPerfil.preferencias_generales.length > 0 &&obligatoriasNoRespondidas.length > 0) {
+            if (userPerfil.preferencias_generales?.length > 0 && obligatoriasNoRespondidas.length > 0) {
                 alert("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
 
             const formData = new FormData();
-            fotos.forEach((picture, index) => {
-                formData.append("pictures", picture); // Puedes usar `pictures[]` si tu backend lo espera como lista
-            });
-            formData.append("nombre", nombre || userPerfil.nombre);
-            formData.append("apellido", apellido || userPerfil.apellido);
-            formData.append("birthday", cumpleanos || userPerfil.birthday);
-            formData.append(
-                "gender",
-                genero
-                    ? genero === "H"
-                        ? "H"
-                        : genero === "M"
-                            ? "M"
-                            : genero
-                    : userPerfil.gender
-            );
-            formData.append("description", descripcion || userPerfil.descripcion);
-            // Añadir preferencias_evento como JSON string
-            formData.append(
-                "preferencias_evento",
-                JSON.stringify(selectedEvents || userPerfil.preferencias_evento)
-            );
-            formData.append("preferencias_generales", JSON.stringify(respuestas) || userPerfil.preferencias_generales);
+            
+            // Solo agregar imágenes si hay cambios en las fotos
+            // Verificar si hay nuevas imágenes (archivos File) o cambios en las existentes
+            const hasNewImages = fotos.some(foto => foto instanceof File);
+            const hasImageChanges = JSON.stringify(fotos) !== JSON.stringify(userPerfil.profile_pic);
+            
+            if (hasNewImages || hasImageChanges) {
+                fotos.forEach((picture) => {
+                    formData.append("pictures", picture);
+                });
+            }
 
+            // Agregar solo los campos que han cambiado
+            if (nombre && nombre !== userPerfil.nombre) {
+                formData.append("nombre", nombre);
+            }
+            
+            if (apellido && apellido !== userPerfil.apellido) {
+                formData.append("apellido", apellido);
+            }
+            
+            if (cumpleanos && cumpleanos !== userPerfil.birthday) {
+                formData.append("birthday", cumpleanos);
+            }
+            
+            if (genero && genero !== userPerfil.gender) {
+                const genderValue = genero === "H" ? "H" : genero === "M" ? "M" : genero;
+                formData.append("gender", genderValue);
+            }
+            
+            if (descripcion !== undefined && descripcion !== userPerfil.description) {
+                formData.append("description", descripcion);
+            }
 
-            //preferencias_eventos: userPerfil.preferencias_evento
-            console.log("Datos a enviar:", fotos);
+            // Siempre enviar preferencias_evento si han cambiado
+            if (JSON.stringify(selectedEvents) !== JSON.stringify(userPerfil.preferencias_evento)) {
+                formData.append("preferencias_evento", JSON.stringify(selectedEvents));
+            }
 
+            // Solo enviar preferencias_generales si hay respuestas y han cambiado
+            if (respuestas.length > 0) {
+                const currentPreferencias = JSON.stringify(userPerfil.preferencias_generales || []);
+                const newPreferencias = JSON.stringify(respuestas);
+                if (currentPreferencias !== newPreferencias) {
+                    formData.append("preferencias_generales", newPreferencias);
+                }
+            }
 
+            // Verificar si hay algo que actualizar
+            let hasChanges = false;
+            for (let pair of formData.entries()) {
+                hasChanges = true;
+                break;
+            }
 
+            if (!hasChanges) {
+                alert("No se detectaron cambios para actualizar.");
+                return;
+            }
+
+            console.log("Datos a enviar:");
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? 'File object' : pair[1]));
+            }
 
             const response = await api.patch('perfil/actualizar/', formData, {
                 headers: {
@@ -228,18 +263,17 @@ const EditarPerfil = () => {
             });
 
             if (response.status === 200) {
-
                 console.log("Perfil actualizado:", response.data);
                 setLoading(true);
-                setTimeout(() => navigate('../perfil'), 2000); // Redirigir al perfil después de actualizar
+                setTimeout(() => navigate('../perfil'), 2000);
             } else {
                 console.error("Error al actualizar perfil");
+                alert("Error al actualizar el perfil. Inténtalo de nuevo.");
             }
         } catch (error) {
             console.error("Error al actualizar perfil:", error);
+            alert("Error al actualizar el perfil: " + (error.response?.data?.error || error.message));
         }
-
-
     }
 
     return (
@@ -459,7 +493,7 @@ const EditarPerfil = () => {
                     </div>
 
                     {/* Intereses Generales */}
-                    {userPerfil.preferencias_generales.length > 0 && (
+                    {userPerfil.preferencias_generales?.length > 0 && (
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                             <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
                                 <h2 className="text-lg font-bold text-white flex items-center">
