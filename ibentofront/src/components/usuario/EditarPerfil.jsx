@@ -493,7 +493,7 @@ const EditarPerfil = () => {
                     </div>
 
                     {/* Intereses Generales */}
-                    {userPerfil.preferencias_generales.length > 0 && (
+                    {userPerfil.preferencias_generales?.length > 0 && (
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                             <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
                                 <h2 className="text-lg font-bold text-white flex items-center">
