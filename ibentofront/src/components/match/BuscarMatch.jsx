@@ -624,7 +624,7 @@ const buscarMatchx = () => {
                                 </select>
                             </div>
 
-                                                        {/* Rango de edad */}
+                            {/* Rango de edad */}
                             <div className="bg-white rounded-2xl p-5 shadow-sm">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                                     Rango de edad: {value[0]} - {value[1]} años
