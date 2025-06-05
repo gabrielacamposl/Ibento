@@ -7,6 +7,7 @@ import LoadingSpinner from './../../assets/components/LoadingSpinner';
 import offlineUtils, { ConnectionStatus, useOfflineRequest } from '../../utils/offlineUtils.jsx';
 import '../../assets/css/swipe-animations.css';
 import '../../assets/css/botones.css';
+
 const buscarMatchx = () => {
     const navigate = useNavigate();
     const cardRefs = useRef([]);
@@ -53,7 +54,6 @@ const buscarMatchx = () => {
             window.removeEventListener('connectionChange', handleConnectionChange);
         };
     }, []);
-
 
     const handleVerificar = () => { // Renamed
         setTimeout(() => navigate("../verificar"), 0);
@@ -154,8 +154,6 @@ const buscarMatchx = () => {
         fetchMode();
     }, []);
 
-
-
     // Función para cambiar el modo de búsqueda
     const changeSearchMode = async (newMode) => {
         const token = localStorage.getItem('access');
@@ -247,7 +245,9 @@ const buscarMatchx = () => {
     // Utilidades
     const hasMoreUsers = () => {
         return currentIndex < UserMatch.length;
-    }; const calculateAge = (birthDate) => {
+    };
+
+    const calculateAge = (birthDate) => {
         const today = new Date();
         const birth = new Date(birthDate);
         let age = today.getFullYear() - birth.getFullYear();
@@ -404,7 +404,6 @@ const buscarMatchx = () => {
 
     const handleApplyFilters = async () => {
         try {
-
             const token = localStorage.getItem('access');
             // Activar estado de carga
             setFilters(prev => ({ ...prev, isLoading: true }));
@@ -435,15 +434,12 @@ const buscarMatchx = () => {
             });
 
             if (response.status === 200) {
-
                 setUserMatch(response.data);
                 console.log('Usuarios disponibles:', response.data);
-
             } else {
                 console.error('Error en la respuesta:', response.status);
             }
-            // Actualizar estado global o context
-            // setGlobalFilters(filterData);            // Cerrar el modal
+            // Cerrar el modal
             document.getElementById('my_modal_2').close();
 
         } catch (error) {
@@ -453,7 +449,9 @@ const buscarMatchx = () => {
             // Desactivar estado de carga
             setFilters(prev => ({ ...prev, isLoading: false }));
         }
-    };    //Darle Dislike a un usuario
+    };
+
+    //Darle Dislike a un usuario
     const handleNextUser = async (user_id) => {
         console.log(user_id);
         try {
@@ -472,7 +470,9 @@ const buscarMatchx = () => {
         } catch (error) {
             console.error('Error:', error);
         }
-    };    //Darle Like a un usuario
+    };
+
+    //Darle Like a un usuario
     const handleMatch = async (user_id) => {
         try {
             const token = localStorage.getItem('access');
@@ -494,6 +494,7 @@ const buscarMatchx = () => {
             console.error('Error:', error);
         }
     };
+
     const handdleVerificar = () => {
         setTimeout(() => navigate("../verificar"), 0);
     };
@@ -506,7 +507,9 @@ const buscarMatchx = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % user.profile_pic.length);
         }
-    }; const handlePrev = () => {
+    };
+
+    const handlePrev = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.profile_pic.length) % user.profile_pic.length);
         }
@@ -556,14 +559,14 @@ const buscarMatchx = () => {
                 </div>
 
                 {verificar == false && (
-                        <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                            <div className="text-center text-white">
-                                <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
-                                <p className="mt-2">¡Créalo ahora!.</p>
-                                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
-                            </div>
+                    <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
+                        <div className="text-center text-white">
+                            <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
+                            <p className="mt-2">¡Créalo ahora!.</p>
+                            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
                         </div>
-                    )}
+                    </div>
+                )}
 
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box max-w-sm mx-auto glass-premium rounded-3xl shadow-2xl border border-white/30 p-0 overflow-hidden">
@@ -706,7 +709,6 @@ const buscarMatchx = () => {
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                                 Descubre
                             </h1>
-                            {/* <p className="text-sm text-gray-600">{UserMatch.length - currentIndex} personas disponibles</p> */}
                         </div>
                     </div>
 
@@ -718,6 +720,7 @@ const buscarMatchx = () => {
                     </button>
                 </div>
             </div>
+
             <dialog id="my_modal_2" className="modal">
                 <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
                     {/* Header */}
@@ -839,11 +842,14 @@ const buscarMatchx = () => {
                             )}
                         </button>
                     </div>
-                </div>                <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
+                </div>
+                <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
                     <button className="cursor-pointer">cerrar</button>
                 </form>
-            </dialog>            {/* Card Stack Container */}
-            <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-32 pb-32">
+            </dialog>
+
+            {/* Card Stack Container */}
+            <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-32 pb-40">
                 <div
                     ref={containerRef}
                     className="relative w-full max-w-sm mx-auto"
@@ -875,7 +881,8 @@ const buscarMatchx = () => {
                                         onMouseDown={stackIndex === 0 ? handleMouseDown : undefined}
                                         onMouseMove={stackIndex === 0 ? (e) => isDragging && handleMouseMove(e) : undefined}
                                         onMouseUp={stackIndex === 0 ? handleMouseUp : undefined}
-                                    >                                        {/* Imagen de perfil */}
+                                    >
+                                        {/* Imagen de perfil */}
                                         <div className="relative h-full">
                                             <img
                                                 src={user?.profile_pic?.[currentImageIndex] || '/profile_empty.webp'}
@@ -921,7 +928,8 @@ const buscarMatchx = () => {
                                                             <X className="w-16 h-16 text-red-400" />
                                                         )}
                                                     </div>
-                                                </div>)}
+                                                </div>
+                                            )}
 
                                             {/* Indicadores de imagen */}
                                             {stackIndex === 0 && user?.profile_pic?.length > 1 && (
@@ -935,17 +943,15 @@ const buscarMatchx = () => {
                                                     ))}
                                                 </div>
                                             )}
-                                        </div>                                        {/* Información del usuario */}
+                                        </div>
+
+                                        {/* Información del usuario - SIN DISTANCIA NI PUNTO VERDE */}
                                         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent text-white">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div>
                                                     <h2 className="text-2xl font-bold">
                                                         {user?.nombre}{user?.edad ? `, ${user.edad}` : (user?.fecha_nacimiento ? calculateAge(user.fecha_nacimiento) : '')}
                                                     </h2>
-                                                    <p className="text-white/80 flex items-center">
-                                                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                                                        A 2 km de distancia
-                                                    </p>
                                                 </div>
                                                 <button
                                                     onClick={() => navigate('../verLike')}
@@ -990,7 +996,7 @@ const buscarMatchx = () => {
                             )}
                         </>
                     ) : (
-                        // Estado sin más usuarios (ya actualizado arriba)
+                        // Estado sin más usuarios
                         <div className="flex flex-col items-center justify-center h-full text-center p-8">
                             <div className="w-32 h-32 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                 <Heart className="w-16 h-16 text-white" />
@@ -1007,30 +1013,31 @@ const buscarMatchx = () => {
                             >
                                 Ajustar Filtros
                             </button>
-                        </div>)}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Botones de acción flotantes premium */}
+            {/* Botones de acción flotantes premium - MEJORADOS */}
             {hasMoreUsers() && (
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="flex items-center space-x-6 bg-white/80 backdrop-blur-xl p-4 rounded-3xl border border-white/30 shadow-2xl">
-                        {/* Botón Dislike */}
+                <div className="fixed bottom-6 left-0 right-0 z-30 flex justify-center">
+                    <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
+                        {/* Botón Dislike - Más grande */}
                         <button
                             onClick={handleDislikeButton}
                             disabled={isAnimating}
-                            className="p-4 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                            <X className="w-6 h-6 text-white" />
+                            <X className="w-8 h-8 text-white" />
                         </button>
 
-                        {/* Botón Like */}
+                        {/* Botón Like - Más grande */}
                         <button
                             onClick={handleLikeButton}
                             disabled={isAnimating}
-                            className="p-4 bg-gradient-to-r from-green-400 to-green-600 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                            <Heart className="w-6 h-6 text-white" />
+                            <Heart className="w-8 h-8 text-white" />
                         </button>
                     </div>
                 </div>
@@ -1042,14 +1049,14 @@ const buscarMatchx = () => {
                     <div className="text-center text-white p-8 glass-premium rounded-3xl border border-white/30 max-w-md mx-4">
                         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
                             <CircleUserIcon className="w-10 h-10 text-white" />
-
                         </div>
                         <h1 className="text-3xl font-bold mb-4">Perfil Requerido</h1>
                         <p className="text-white/90 mb-6">Aún no cuentas con tu perfil de acompañantes. ¡Créalo ahora y comienza a conectar!</p>
                         <button
                             className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
                             onClick={handdleVerificar}
-                        >                            Crear Perfil
+                        >
+                            Crear Perfil
                         </button>
                     </div>
                 </div>
