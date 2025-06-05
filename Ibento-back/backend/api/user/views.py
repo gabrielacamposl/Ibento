@@ -878,9 +878,9 @@ def sugerencia_usuarios(request):
 
     usuario = request.user
 
-    us_preferencias_generales = usuario.preferencias_generales
+    us_preferencias_generales = usuario.preferencias_generales or []
     us_id = usuario._id
-    us_eventos_guardados = usuario.save_events
+    us_eventos_guardados = usuario.save_events or []
     us_modo_busqueda = usuario.modo_busqueda_match
 
     #Datos del json
@@ -906,6 +906,10 @@ def sugerencia_usuarios(request):
         usuario_bloqueador_id=usuario
     ).values_list('usuario_bloqueado_id', flat=True)
 
+    usuarios_con_match = Matches.objects.filter(
+        Q(usuario_a_id=us_id) | Q(usuario_b_id=us_id)
+    ).values_list('usuario_b_id', 'usuario_a_id')
+
     # Usuarios que ya esta registrados para matches
     candidatos = Usuario.objects.filter(~Q(preferencias_generales=[]) & Q(preferencias_generales__isnull=False))
 
@@ -922,14 +926,18 @@ def sugerencia_usuarios(request):
             g = 'O'
         candidatos = candidatos.filter(gender = g)
     
-    usuarios_no = []
-    if age_range != None:
-        for candidato in candidatos:
-            edad = calcular_edad(candidato.birthday)
-            if edad >= min_age and edad <= max_age:
-                continue
-            usuarios_no.append(candidato._id)
-        candidatos = candidatos.exclude(_id__in=usuarios_no)
+    if age_range is not None and min_age is not None and max_age is not None:
+        from datetime import date
+        today = date.today()
+        
+        # Calcular fechas de nacimiento límite
+        fecha_min = today.replace(year=today.year - max_age - 1)
+        fecha_max = today.replace(year=today.year - min_age)
+        
+        candidatos = candidatos.filter(
+            birthday__gte=fecha_min,
+            birthday__lte=fecha_max
+        )
 
     print("Candidatos")
     print(candidatos)
@@ -939,17 +947,54 @@ def sugerencia_usuarios(request):
 
     print("Bloqueados")
     print(usuarios_bloqueados)
+    
+    print("Usuarios con match")
+    print(usuarios_con_match)
 
     sugerencias = []
 
-    if us_modo_busqueda == 'global':
-        if interacciones_realizadas:
+    if interacciones_realizadas:
             ids_objeto = [ObjectId(id_str) for id_str in interacciones_realizadas if id_str]
             candidatos = candidatos.exclude(_id__in=ids_objeto)
         
-        if usuarios_bloqueados:
-            ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
+    if usuarios_bloqueados:
+        ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
+        candidatos = candidatos.exclude(_id__in=ids_objeto)
+    
+    if usuarios_con_match:
+        todos_ids_match = []
+        for usuario_b_id, usuario_a_id in usuarios_con_match:
+            if str(usuario_a_id) != str(us_id):
+                todos_ids_match.append(usuario_a_id)
+            if str(usuario_b_id) != str(us_id):
+                todos_ids_match.append(usuario_b_id)
+        
+        if todos_ids_match:
+            ids_objeto = [ObjectId(id_str) for id_str in todos_ids_match if id_str]
             candidatos = candidatos.exclude(_id__in=ids_objeto)
+
+    if us_modo_busqueda == 'global':
+
+        # if interacciones_realizadas:
+        #     ids_objeto = [ObjectId(id_str) for id_str in interacciones_realizadas if id_str]
+        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
+        
+        # if usuarios_bloqueados:
+        #     ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
+        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
+        
+        # if usuarios_con_match:
+        #     todos_ids_match = []
+        #     for usuario_b_id, usuario_a_id in usuarios_con_match:
+        #         if str(usuario_a_id) != str(us_id):
+        #             todos_ids_match.append(usuario_a_id)
+        #         if str(usuario_b_id) != str(us_id):
+        #             todos_ids_match.append(usuario_b_id)
+            
+        #     if todos_ids_match:
+        #         ids_objeto = [ObjectId(id_str) for id_str in todos_ids_match if id_str]
+        #         candidatos = candidatos.exclude(_id__in=ids_objeto)
+        pass
 
     if us_modo_busqueda == 'evento':
 
@@ -1001,23 +1046,34 @@ def sugerencia_usuarios(request):
     print("Sugerencias: ")
     print(sugerencias)
     
-    #sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)
-    sugerencias_ordenadas = sorted(sugerencias, key=lambda x: sugerencias[x], reverse=True)[:100]
+    # Ordenar sugerencias por compatibilidad (mayor a menor)
+    sugerencias_ordenadas = sorted(sugerencias.items(), key=lambda x: x[1], reverse=True)[:30]
 
-    #Enviar la edad, eventos en comun, num_eventos en comun
+    # Extraer solo los IDs en el orden correcto
+    ids_ordenados = [item[0] for item in sugerencias_ordenadas]
 
-    usuarios_filtrados = candidatos.filter(_id__in=sugerencias_ordenadas)
+    print("IDs ordenados por compatibilidad:", ids_ordenados)
 
-    serializer = SugerenciaSerializer(usuarios_filtrados, many=True)
+    # Obtener usuarios manteniendo el orden
+    # usuarios_ordenados = []
+    # for user_id in ids_ordenados:
+    #     try:
+    #         usuario = candidatos.get(_id=user_id)
+    #         usuarios_ordenados.append(usuario)
+    #     except Usuario.DoesNotExist:
+    #         continue
+    usuarios_dict = {str(u._id): u for u in candidatos.filter(_id__in=ids_ordenados)}
+    usuarios_ordenados = [usuarios_dict[str(user_id)] for user_id in ids_ordenados if str(user_id) in usuarios_dict]
+
+    serializer = SugerenciaSerializer(usuarios_ordenados, many=True)
 
     # Añadir la edad a cada sugerencia
     for i, user_data in enumerate(serializer.data):
-        user_data['edad'] = calcular_edad(candidatos[i].birthday)
-        user_data['eventos_en_comun'] = len(set(candidatos[i].save_events)&set(us_eventos_guardados))
-        user_data['nombres_eventos'] = [Evento.objects.filter(_id__in = set(candidatos[i].save_events)&set(us_eventos_guardados)).values_list("title", flat=True)]
-        user_data['verificado'] = candidatos[i].is_ine_validated and candidatos[i].is_validated_camera
-
-    
+        user_data['edad'] = calcular_edad(usuarios_ordenados[i].birthday)
+        user_data['compatibilidad'] = sugerencias_ordenadas[i][1]
+        user_data['eventos_en_comun'] = len(set(usuarios_ordenados[i].save_events)&set(us_eventos_guardados))
+        user_data['nombres_eventos'] = [Evento.objects.filter(_id__in = set(usuarios_ordenados[i].save_events)&set(us_eventos_guardados)).values_list("title", flat=True)]
+        user_data['verificado'] = usuarios_ordenados[i].is_ine_validated and usuarios_ordenados[i].is_validated_camera
 
     return Response(serializer.data)
 
