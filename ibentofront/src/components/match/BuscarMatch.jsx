@@ -624,7 +624,7 @@ const buscarMatchx = () => {
                                 </select>
                             </div>
 
-                            {/* Rango de edad */}
+                                                        {/* Rango de edad */}
                             <div className="bg-white rounded-2xl p-5 shadow-sm">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                                     Rango de edad: {value[0]} - {value[1]} años
@@ -632,13 +632,21 @@ const buscarMatchx = () => {
                                 <div className="px-2">
                                     <Slider
                                         min={18}
+                                        max={65}
                                         value={value}
                                         onChange={(e) => setValue(e.value)}
-                                        className="w-full rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
+                                        className="w-full"
                                         range
+                                        pt={{
+                                            root: { className: 'h-2' },
+                                            range: { className: 'bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full' },
+                                            track: { className: 'bg-gray-200 h-2 rounded-full' },
+                                            thumb: { className: 'w-5 h-5 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:scale-110 transition-transform' }
+                                        }}
                                     />
                                 </div>
                             </div>
+
 
                             {/* Botón de aplicar */}
                             <button
