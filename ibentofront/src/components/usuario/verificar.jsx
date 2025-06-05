@@ -954,14 +954,13 @@ const Verificar = () => {
                                                             <p className="text-lg font-semibold text-gray-800">
                                                                 {item.question}
                                                                 {!item.optional && <span className="text-red-500"> *</span>}
-                                                            </p>
-                                                            <a
-                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:scale-105 transition-transform duration-200 text-sm font-medium w-fit"
+                                                            </p>                                                            <a
+                                                                className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm underline"
                                                                 href="https://www.16personalities.com/es/test-de-personalidad"
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
-                                                                Hacer test de personalidad
+                                                                Hacer test de personalidad →
                                                             </a>
                                                         </div>
                                                     ) : (
@@ -979,9 +978,9 @@ const Verificar = () => {
                                                         return (
                                                             <button
                                                                 key={i}
-                                                                className={`p-3 rounded-2xl border-2 transition-all duration-300 font-medium ${
-                                                                    isSelected 
-                                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-500 shadow-lg transform scale-105' 
+                                                                className={`p-2 rounded-2xl border-2 transition-all duration-300 font-light text-sm ${
+                                                                    isSelected
+                                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-500 shadow-lg transform scale-105'
                                                                         : 'bg-white/50 text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-white/70'
                                                                 }`}
                                                                 onClick={() => {

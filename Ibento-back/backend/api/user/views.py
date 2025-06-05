@@ -1015,7 +1015,7 @@ def sugerencia_usuarios(request):
         user_data['edad'] = calcular_edad(candidatos[i].birthday)
         user_data['eventos_en_comun'] = len(set(candidatos[i].save_events)&set(us_eventos_guardados))
         user_data['nombres_eventos'] = [Evento.objects.filter(_id__in = set(candidatos[i].save_events)&set(us_eventos_guardados)).values_list("title", flat=True)]
-        
+        user_data['verificado'] = candidatos[i].is_ine_validated and candidatos[i].is_validated_camera
 
     
 
