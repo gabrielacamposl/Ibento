@@ -1020,7 +1020,7 @@ const buscarMatchx = () => {
 
             {/* Botones de acción flotantes premium - MEJORADOS */}
             {hasMoreUsers() && (
-                <div className="fixed bottom-6 left-0 right-0 z-30 flex justify-center">
+                <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
                     <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
                         {/* Botón Dislike - Más grande */}
                         <button
