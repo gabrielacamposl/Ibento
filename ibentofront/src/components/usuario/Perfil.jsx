@@ -321,7 +321,7 @@ const Perfil = () => {
                             ))}
                         </div>
                     </div>
-                    {userPerfil.preferencias_generales?.length === 0 && (
+                    {userPerfil.is_ine_validated === false && (
 
                         <div className="col-span-full text-center py-2">
                             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
