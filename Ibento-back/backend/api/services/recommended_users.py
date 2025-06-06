@@ -301,10 +301,6 @@ compatibilidad = {
 
     questions[1]["question"]: 
     {
-            #"Sí, bebo con frecuencia",
-            # "Lo hago para socializar o en reuniones",
-            # "Rara vez bebo alcohol",
-            # "No me gusta beber",
 
         (questions[1]["options"][0], questions[1]["options"][0]): 1.0,
         (questions[1]["options"][0], questions[1]["options"][1]): 0.7,
@@ -381,18 +377,6 @@ def compatibilidad_transporte(respuesta_a, respuesta_b):
 
     return 0.4
 
-            # "Metro",
-            # "Cablebus",
-            # "Taxi",
-            # "Metrobus",
-            # "Camión",
-            # "Combi",
-            # "Suburbano",
-            # "Uber",
-            # "Bicicleta",
-            # "Motocicleta",
-            # "Tengo carro propio"
-
 #3  Optional
 def compatibilidad_redes(respuesta_a, respuesta_b):
 
@@ -430,11 +414,6 @@ def compatibilidad_redes(respuesta_a, respuesta_b):
             return 0.5
     
     return 0.2
-            # "Estoy al pendiente siempre",
-            # "Normalmente estoy activo",
-            # "En mis ratos libres",
-            # "No estoy muy al pendiente",
-            # "No las uso"
 
 #4 Multi
 def compatibilidad_zonas(respuesta_a, respuesta_b):
@@ -464,14 +443,6 @@ def compatibilidad_zonas(respuesta_a, respuesta_b):
     proporcion = len(elementos_comunes)*2/total_elementos
 
     return proporcion
-    
-    # 'Centro (Cuauhtémoc, Doctores, Juárez, Roma, Condesa)',
-    # 'Sur (Coyoacán, Tlalpan, Xochimilco)', 
-    # 'Poniente (Santa Fe, Álvaro Obregón, San Ángel)',
-    # 'Norte (GAM, Azcapotzalco, Lindavista)', 
-    # 'Oriente (Iztapalapa, Iztacalco, Neza)', 
-    # 'Me muevo por toda la ciudad', 
-    # 'Vivo en el Estado de México pero voy seguido a CDMX'
 
 #5
 def compatibilidad_dias(respuesta_a, respuesta_b):
@@ -588,32 +559,12 @@ def compatibilidad_planes(respuesta_a, respuesta_b):
 
     return 0.2     
 
-            # "Me encantan, siempre estoy listo/a",
-            # "Los disfruto si son interesantes",
-            # "Prefiero tener algo de tiempo para organizarme",
-            # "No son lo mío",
-
-
-        
-    pass
-            # "Buen sentido del humor",
-            # "Amabilidad y cortesía",
-            # "Confianza y apoyo",
-            # "Capacidad para adaptarse",
-            # "Gusto por las mismas actividades"
-
 #10
 def compatibilidad_interaccion(respuesta_a, respuesta_b):
     
-    # Definir la lógica de compatibilidad para interacción
     if respuesta_a == respuesta_b:
         return 1.0
     return 0.5
-
-            # "Muchas risas y diversión",
-            # "Compartir intereses mutuos",
-            # "Solo estar presente y disfrutar el momento",
-            # "Conversaciones profundas y significativas"
 
 #11 Optional    Multi
 def compatibilidad_mascotas(respuesta_a, respuesta_b):
@@ -699,10 +650,8 @@ def compatibilidad_tipoAcompañante(respuesta_a, respuesta_b):
 def compatibilidad_personalidad(respuesta_a, respuesta_b):
     type1, type2 = respuesta_a.upper(), respuesta_b.upper()
     if type1 not in compatibility_matrix_personality or type2 not in compatibility_matrix_personality:
-        # print("Tipo de personalidad no válido. Usa uno de estos: " + ", ".join(types))
         return 0.0
     index = types.index(type2)
-    # print(f"La compatibilidad entre {type1} y {type2} es del {compatibility_matrix_personality[type1][index]}.")
     return compatibility_matrix_personality[type1][index]
 
 
@@ -834,11 +783,6 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
 
     lista_preguntas = []
 
-    # print("Preferencias del usuario: ")
-    # print(preferencias_usuario)
-    # print("Preferencias del candidato:")
-    # print(preferencias_candidato)
-
     for respuesta_usuario in preferencias_usuario:
         for respuesta_candidato in preferencias_candidato:
 
@@ -848,19 +792,6 @@ def recomendacion_de_usuarios(preferencias_usuario, preferencias_candidato):
                 lista_preguntas.append(respuesta_usuario['categoria_id'])
                 break
 
-
-    # print("Lista preguntas 1: ")
-    # print(lista_preguntas)
-
-    # print("Usuario 1: ")
-    # print(usuario1)
-
-    # print("Usuario 2: ")
-    # print(usuario2)
-
     compatibilidad = compatibilidad_total(lista_preguntas, usuario1, usuario2)
-
-    print("Compatibilidad de : ")
-    print(compatibilidad)
 
     return compatibilidad
