@@ -2,6 +2,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "face-api.js": "^0.20.0",
     "numpy": "^0.0.1"
   }
 }

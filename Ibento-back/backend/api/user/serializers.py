@@ -414,7 +414,7 @@ class UsuarioSerializerEdit(serializers.ModelSerializer):
                   'preferencias_evento', 'save_events', 
                   'favourite_events', 'profile_pic', 
                   'preferencias_generales', 'birthday',
-                  'gender', 'description']
+                  'gender', 'description', 'is_ine_validated', 'is_validated_camera']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

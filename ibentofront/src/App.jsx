@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
-//import { useNotifications } from './hooks/useNotifications';
-//import NotificationManager from './notificationManager';
+import pushNotificationService from './utils/pushNotifications';
 import api from './apilogin'
 import AuthGuard from './components/auth/AuthGuard';
 
@@ -48,10 +47,10 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
- 
-  // Registrar service workers
+   // Registrar service workers e inicializar notificaciones push
   useEffect(() => {
-    const registerServiceWorkers = async () => {
+    const initializeApp = async () => {
+      // Registrar service workers
       if ('serviceWorker' in navigator) {
         try {
           // Registrar el service worker principal (sw.js)
@@ -66,10 +65,105 @@ export default function App() {
           console.log('❌ Error registrando Service Workers:', registrationError);
         }
       }
+
+      // Inicializar servicio de notificaciones push
+      try {
+        const initialized = await pushNotificationService.initialize();
+        if (initialized) {
+          console.log('✅ Servicio de notificaciones push inicializado');
+        }
+      } catch (error) {
+        console.error('❌ Error inicializando notificaciones push:', error);
+      }
     };
 
-    registerServiceWorkers();
+    initializeApp();
   }, []);
+
+  // Configurar listeners de notificaciones
+  useEffect(() => {
+    const handleNotificationReceived = (event) => {
+      console.log('📨 Nueva notificación recibida:', event.detail);
+    };
+
+    const handleLikeNotification = (event) => {
+      console.log('💕 Notificación de like:', event.detail);
+      showNotificationToast(`💕 ${event.detail.liker_name} te dio like!`, 'like');
+    };
+
+    const handleMatchNotification = (event) => {
+      console.log('🎉 Notificación de match:', event.detail);
+      showNotificationToast(`🎉 ¡Match con ${event.detail.match_name}!`, 'match');
+    };
+
+    const handleMessageNotification = (event) => {
+      console.log('💬 Notificación de mensaje:', event.detail);
+      showNotificationToast(`💬 Nuevo mensaje de ${event.detail.sender_name}`, 'message');
+    };
+
+    const handleEventNotification = (event) => {
+      console.log('🎪 Notificación de evento:', event.detail);
+      showNotificationToast(`🎪 ${event.detail.event_title}`, 'event');
+    };
+
+    // Agregar listeners
+    window.addEventListener('notification:received', handleNotificationReceived);
+    window.addEventListener('notification:like', handleLikeNotification);
+    window.addEventListener('notification:match', handleMatchNotification);
+    window.addEventListener('notification:message', handleMessageNotification);
+    window.addEventListener('notification:event', handleEventNotification);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('notification:received', handleNotificationReceived);
+      window.removeEventListener('notification:like', handleLikeNotification);
+      window.removeEventListener('notification:match', handleMatchNotification);
+      window.removeEventListener('notification:message', handleMessageNotification);
+      window.removeEventListener('notification:event', handleEventNotification);
+    };
+  }, []);
+
+  // Función para mostrar toasts de notificaciones
+  const showNotificationToast = (message, type) => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      animation: slideInRight 0.3s ease-out;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    `;
+
+    const colors = {
+      like: 'linear-gradient(135deg, #ec4899, #be185d)',
+      match: 'linear-gradient(135deg, #10b981, #059669)',
+      message: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+      event: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+      error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+      success: 'linear-gradient(135deg, #10b981, #059669)'
+    };
+
+    toast.style.background = colors[type] || colors.success;
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, 4000);
+  };
 
   // // Manejar notificaciones recibidas
   // useEffect(() => {

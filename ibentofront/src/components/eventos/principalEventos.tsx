@@ -12,6 +12,7 @@ import LoadingSpinner from './../../assets/components/LoadingSpinner';
 
 import { useFetchEvents, useFetchRecommendedEvents } from '../../hooks/usefetchEvents';
 import { useUserNotifications } from '../../hooks/useNotificationSidebar';
+import useIsWebVersion from '../../hooks/useIsWebVersion';
 
 // Función para obtener el saludo según la hora
 const getGreeting = () => {
@@ -26,6 +27,7 @@ function Page() {
     const [usuarioName, setUsuarioName] = useState('');
     const [visible, setVisible] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const isWebVersion = useIsWebVersion();
 
     const token = localStorage.getItem("access") ?? "";
     const {
@@ -125,76 +127,76 @@ function Page() {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-300/10 to-yellow-300/10 rounded-full blur-3xl animate-pulse delay-500"></div>
             </div>
 
-            {/* Header Premium */}
-            <div className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg">
-                <div className="flex w-full items-center h-24 px-6 pt-2">
-                    {/* Avatar y saludo */}
-                    <div className="flex items-center space-x-4 flex-1">
-                        <div className="relative">
-                            <img 
-                                src="/icons/ibento.png" 
-                                alt="Perfil" 
-                                className="w-14 h-14 rounded-2xl object-cover shadow-xl border-3 border-white ring-4 ring-purple-100 transition-transform hover:scale-105" 
-                            />
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+            {/* Header Premium - Solo en versión móvil */}
+            {!isWebVersion && (
+                <div className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg">
+                    <div className="flex w-full items-center h-24 px-6 pt-2">
+                        {/* Avatar y saludo */}
+                        <div className="flex items-center space-x-4 flex-1">
+                            <div className="relative">
+                                <img 
+                                    src="/icons/ibento.png" 
+                                    alt="Perfil" 
+                                    className="w-14 h-14 rounded-2xl object-cover shadow-xl border-3 border-white ring-4 ring-purple-100 transition-transform hover:scale-105" 
+                                />
+                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm font-medium tracking-wide">{getGreeting()}</span>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-800 bg-clip-text text-transparent leading-tight">
+                                    {usuarioName || 'Usuario'}
+                                </span>
+                                <span className="text-xs text-gray-400 font-medium">
+                                    {currentTime.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-gray-500 text-sm font-medium tracking-wide">{getGreeting()}</span>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-800 bg-clip-text text-transparent leading-tight">
-                                {usuarioName || 'Usuario'}
-                            </span>
-                            <span className="text-xs text-gray-400 font-medium">
-                                {currentTime.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}
-                            </span>
-                        </div>
-                    </div>
 
-                    {/* Acciones del header */}
-                    <div className="flex items-center space-x-3">
-                        {/* Botón de búsqueda premium */}
-                        <button
-                            onClick={() => navigate('../busqueda')}
-                            className="relative p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
-                        >
-                            <Search className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                        </button>
-
-                        {/* Notificaciones premium */}
-                        <div className="relative">
+                        {/* Acciones del header */}
+                        <div className="flex items-center space-x-3">
+                            {/* Botón de búsqueda premium */}
                             <button
-                                onClick={handleSidebarOpen}
-                                className={`
-                                    relative p-3 rounded-2xl transition-all duration-300 transform hover:scale-105 group
-                                    ${unreadCount > 0
-                                        ? 'bg-gradient-to-r from-red-500 to-pink-500 shadow-lg hover:shadow-xl'
-                                        : 'bg-white/60 backdrop-blur-sm border border-gray-200 hover:bg-white/80 shadow-md hover:shadow-lg'
-                                    }
-                                `}
+                                onClick={() => navigate('../busqueda')}
+                                className="relative p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
                             >
-                                <Bell className={`
-                                    w-5 h-5 transition-all duration-300
-                                    ${unreadCount > 0 
-                                        ? 'text-white animate-swing' 
-                                        : 'text-gray-600 group-hover:text-purple-600'
-                                    }
-                                `} />
-                                {unreadCount > 0 && (
-                                    <>
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-full min-w-[20px] h-[20px] shadow-lg animate-bounce border-2 border-white">
-                                            {unreadCount > 99 ? '99+' : unreadCount}
-                                        </span>
-                                        <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-400 rounded-2xl animate-ping opacity-75 -z-10"></div>
-                                    </>
-                                )}
+                                <Search className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
                             </button>
+
+                            {/* Notificaciones premium */}
+                            <div className="relative">
+                                <button
+                                    onClick={handleSidebarOpen}
+                                    className={`
+                                        relative p-3 rounded-2xl transition-all duration-300 transform hover:scale-105 group
+                                        ${unreadCount > 0
+                                            ? 'bg-gradient-to-r from-red-500 to-pink-500 shadow-lg hover:shadow-xl'
+                                            : 'bg-white/60 backdrop-blur-sm border border-gray-200 hover:bg-white/80 shadow-md hover:shadow-lg'
+                                        }
+                                    `}
+                                >
+                                    <Bell className={`
+                                        w-5 h-5 transition-all duration-300
+                                        ${unreadCount > 0 
+                                            ? 'text-white animate-swing' 
+                                            : 'text-gray-600 group-hover:text-purple-600'
+                                        }
+                                    `} />
+                                    {unreadCount > 0 && (
+                                        <>
+                                            <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-full min-w-[20px] h-[20px] shadow-lg animate-bounce border-2 border-white">
+                                                {unreadCount > 99 ? '99+' : unreadCount}
+                                            </span>
+                                            <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-400 rounded-2xl animate-ping opacity-75 -z-10"></div>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Contenido principal */}
-            <div className="relative z-10 pb-24">
+            )}            {/* Contenido principal */}
+            <div className={`relative z-10 pb-24 ${isWebVersion ? 'pt-4' : ''}`}>
                 {/* Quick Stats Cards */}
                 <div className="px-6 py-4">
                     <div className="grid grid-cols-2 gap-4 mb-6">
@@ -278,18 +280,18 @@ function Page() {
 
                 {/* Espaciado inferior */}
                 <div className="h-8"></div>
-            </div>
-
-            {/* Sidebar de Notificaciones */}
-            <NotificationSidebar
-                visible={visible}
-                onHide={handleSidebarClose}
-                notifications={notifications}
-                loading={notifLoading}
-                error={notifError}
-                unreadCount={unreadCount}
-                markAsRead={markAsRead}
-            />
+            </div>            {/* Sidebar de Notificaciones - Solo en versión móvil */}
+            {!isWebVersion && (
+                <NotificationSidebar
+                    visible={visible}
+                    onHide={handleSidebarClose}
+                    notifications={notifications}
+                    loading={notifLoading}
+                    error={notifError}
+                    unreadCount={unreadCount}
+                    markAsRead={markAsRead}
+                />
+            )}
         </div>
     );
 }
