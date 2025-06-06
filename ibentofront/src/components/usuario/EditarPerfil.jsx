@@ -1,4 +1,4 @@
-import React, { useState,useEffect, use } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import { buttonStyle, inputStyles } from "../../styles/styles";
@@ -20,44 +20,44 @@ const EditarPerfil = () => {
     const [nombre, setNombre] = useState('');
     const [apellido, setApellido] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [fotos, setFotos] = useState([] );
+    const [fotos, setFotos] = useState([]);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
     const [myAwnsers, setMyAwnsers] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
-    
+
     const [loading, setLoading] = useState(true);
     // Función para obtener categorías de eventos
-useEffect(() => {
-  const fetchCategorias = async () => {
-    try {
-      const res = await apiaxios.get('eventos/categorias/');
-      const categoriasFormateadas = res.data.map(cat => ({
-        id: cat._id,
-        nombre: cat.nombre,
-        valores: cat.subcategorias.map(sub => sub.nombre_subcategoria),
-      }));
-      setCategorias(categoriasFormateadas);
-      console.log("categorias", categoriasFormateadas);
-    } catch (err) {
-      console.error('Error al obtener categorías:', err);
-    }
-  };
-    fetchCategorias();
-}, []);
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const res = await apiaxios.get('eventos/categorias/');
+                const categoriasFormateadas = res.data.map(cat => ({
+                    id: cat._id,
+                    nombre: cat.nombre,
+                    valores: cat.subcategorias.map(sub => sub.nombre_subcategoria),
+                }));
+                setCategorias(categoriasFormateadas);
+                console.log("categorias", categoriasFormateadas);
+            } catch (err) {
+                console.error('Error al obtener categorías:', err);
+            }
+        };
+        fetchCategorias();
+    }, []);
 
-// Función para manejar la selección y deselección de eventos
-  const toggleSeleccionado = (valor) => {
-    setSelectedEvents((prevSelected) => {
-      if (prevSelected.includes(valor)) {
-        // Si el valor ya está seleccionado, lo quitamos
-        return prevSelected.filter((item) => item !== valor);
-      } else {
-        // Si no está seleccionado, lo agregamos
-        return [...prevSelected, valor];
-      }
-    });
-  };
-    
+    // Función para manejar la selección y deselección de eventos
+    const toggleSeleccionado = (valor) => {
+        setSelectedEvents((prevSelected) => {
+            if (prevSelected.includes(valor)) {
+                // Si el valor ya está seleccionado, lo quitamos
+                return prevSelected.filter((item) => item !== valor);
+            } else {
+                // Si no está seleccionado, lo agregamos
+                return [...prevSelected, valor];
+            }
+        });
+    };
+
     useEffect(() => {
         const Perfil = async () => {
             try {
@@ -65,57 +65,57 @@ useEffect(() => {
                 const response = await api.get('usuarios/info_to_edit/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
-                        
+
                     }
                 });
-    
+
                 if (response.status === 200) {
                     setUserPerfil(response.data);
-                   
+
                     setFotos(response.data.profile_pic);
-                   
+
                     setDescripcion(response.data.description);
                     setSelectedEvents(response.data.preferencias_evento);
                     setGenero(response.data.gender);
 
                     const respuestas = response.data.preferencias_generales || [];
                     const transformado = respuestas.reduce((acc, curr) => {
-                    acc[curr.categoria_id] = curr.respuesta;
-                    return acc;
+                        acc[curr.categoria_id] = curr.respuesta;
+                        return acc;
                     }, {});
                     setSelectedAnswers(transformado);
 
                     setMyAwnsers(response.data.preferencias_generales);
                     console.log("Perfil de usuario:", response.data);
-                   
+
                 } else {
                     console.error("Error al obtener perfil");
                 }
             } catch (error) {
                 console.error("Error al obtener perfil:", error);
             }
-            finally{
+            finally {
                 setLoading(false); // Cambiar el estado de loading a false una vez que se haya cargado el perfil
             }
         };
         Perfil();
     }, []);
 
-     useEffect(() => {
+    useEffect(() => {
         const fetchQuestions = async () => {
             try {
                 const response = await api.get('categorias-perfil/');
-                
+
                 setItemsAboutMe(response.data);
-              
+
             } catch (error) {
                 console.error("Error al cargar las preguntas", error);
             }
         };
-         fetchQuestions();
+        fetchQuestions();
     }, []);
-   
-    if (loading){
+
+    if (loading) {
         return (
             <div className="fixed inset-0 bg-white z-50">
                 <LoadingSpinner
@@ -127,13 +127,13 @@ useEffect(() => {
     }
 
     const handleImageChange = (e, index) => {
-    const file = e.target.files[0];
-    if (file) {
-        const newFotos = [...fotos];
-        newFotos[index] = file;
-        setFotos(newFotos);
-    }
-};
+        const file = e.target.files[0];
+        if (file) {
+            const newFotos = [...fotos];
+            newFotos[index] = file;
+            setFotos(newFotos);
+        }
+    };
 
 
     const handleImageDelete = (index) => {
@@ -141,21 +141,21 @@ useEffect(() => {
         setFotos(newFotos);
     };
 
-   const handleAddImage = (e) => {
-    const file = e.target.files[0];
-    if (file && fotos.length < 6) {
-        setFotos([...fotos, file]);
-    }
-};
+    const handleAddImage = (e) => {
+        const file = e.target.files[0];
+        if (file && fotos.length < 6) {
+            setFotos([...fotos, file]);
+        }
+    };
 
 
 
 
-    
 
-    
 
-//Convertir la fecha de cumpleaños AAAA-MM-DD a edad
+
+
+    //Convertir la fecha de cumpleaños AAAA-MM-DD a edad
     const calculateAge = (birthday) => {
         const today = new Date();
         const birthDate = new Date(birthday);
@@ -165,17 +165,16 @@ useEffect(() => {
             age--;
         }
         return age;
-    };
+    };    const handleSubmit = async () => {
+        const token = localStorage.getItem('access');
+        
+        if (!token) {
+            alert("No se encontró token de autenticación");
+            return;
+        }
 
-    
-
-    const handleSubmit = async () => {
-       
-        const token = localStorage.getItem('access'); // Obtén el token JWT del almacenamiento local
-        // Construir el objeto de datos antes de enviar
-       try {
-
-        const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
+        try {
+            const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
                 categoria_id,
                 respuesta: respuesta.length === 1 ? respuesta[0] : respuesta
             }));
@@ -185,42 +184,76 @@ useEffect(() => {
                 return !item.optional && !(selectedAnswers[item._id]?.length > 0);
             });
 
-            if (obligatoriasNoRespondidas.length > 0) {
+            if (userPerfil.preferencias_generales?.length > 0 && obligatoriasNoRespondidas.length > 0) {
                 alert("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
 
             const formData = new FormData();
-            fotos.forEach((picture, index) => {
-            formData.append("pictures", picture); // Puedes usar `pictures[]` si tu backend lo espera como lista
-        });
-            formData.append("nombre", nombre || userPerfil.nombre);
-            formData.append("apellido", apellido || userPerfil.apellido);
-            formData.append("birthday", cumpleanos || userPerfil.birthday);
-            formData.append(
-                "gender",
-                genero
-                ? genero === "H"
-                    ? "H"
-                    : genero === "M"
-                    ? "M"
-                    : genero
-                : userPerfil.gender
-            );
-            formData.append("description", descripcion || userPerfil.descripcion);
-            // Añadir preferencias_evento como JSON string
-            formData.append(
-                "preferencias_evento",
-                JSON.stringify(selectedEvents || userPerfil.preferencias_evento)
-            );
-            formData.append("preferencias_generales", JSON.stringify(respuestas));
+            
+            // Solo agregar imágenes si hay cambios en las fotos
+            // Verificar si hay nuevas imágenes (archivos File) o cambios en las existentes
+            const hasNewImages = fotos.some(foto => foto instanceof File);
+            const hasImageChanges = JSON.stringify(fotos) !== JSON.stringify(userPerfil.profile_pic);
+            
+            if (hasNewImages || hasImageChanges) {
+                fotos.forEach((picture) => {
+                    formData.append("pictures", picture);
+                });
+            }
 
-        
-            //preferencias_eventos: userPerfil.preferencias_evento
-            console.log("Datos a enviar:", fotos);
+            // Agregar solo los campos que han cambiado
+            if (nombre && nombre !== userPerfil.nombre) {
+                formData.append("nombre", nombre);
+            }
+            
+            if (apellido && apellido !== userPerfil.apellido) {
+                formData.append("apellido", apellido);
+            }
+            
+            if (cumpleanos && cumpleanos !== userPerfil.birthday) {
+                formData.append("birthday", cumpleanos);
+            }
+            
+            if (genero && genero !== userPerfil.gender) {
+                const genderValue = genero === "H" ? "H" : genero === "M" ? "M" : genero;
+                formData.append("gender", genderValue);
+            }
+            
+            if (descripcion !== undefined && descripcion !== userPerfil.description) {
+                formData.append("description", descripcion);
+            }
 
+            // Siempre enviar preferencias_evento si han cambiado
+            if (JSON.stringify(selectedEvents) !== JSON.stringify(userPerfil.preferencias_evento)) {
+                formData.append("preferencias_evento", JSON.stringify(selectedEvents));
+            }
 
-        
+            // Solo enviar preferencias_generales si hay respuestas y han cambiado
+            if (respuestas.length > 0) {
+                const currentPreferencias = JSON.stringify(userPerfil.preferencias_generales || []);
+                const newPreferencias = JSON.stringify(respuestas);
+                if (currentPreferencias !== newPreferencias) {
+                    formData.append("preferencias_generales", newPreferencias);
+                }
+            }
+
+            // Verificar si hay algo que actualizar
+            let hasChanges = false;
+            for (let pair of formData.entries()) {
+                hasChanges = true;
+                break;
+            }
+
+            if (!hasChanges) {
+                alert("No se detectaron cambios para actualizar.");
+                return;
+            }
+
+            console.log("Datos a enviar:");
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? 'File object' : pair[1]));
+            }
 
             const response = await api.patch('perfil/actualizar/', formData, {
                 headers: {
@@ -228,29 +261,28 @@ useEffect(() => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            
+
             if (response.status === 200) {
-                
                 console.log("Perfil actualizado:", response.data);
                 setLoading(true);
-                setTimeout(() => navigate('../perfil'), 2000); // Redirigir al perfil después de actualizar
+                setTimeout(() => navigate('../perfil'), 2000);
             } else {
                 console.error("Error al actualizar perfil");
+                alert("Error al actualizar el perfil. Inténtalo de nuevo.");
             }
         } catch (error) {
             console.error("Error al actualizar perfil:", error);
+            alert("Error al actualizar el perfil: " + (error.response?.data?.error || error.message));
         }
-        
-    
-}
+    }
 
     return (
         <div className="min-h-screen bg-white">
             {/* Header con navegación */}
             <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-6 pb-8">
                 <div className="flex items-center justify-between">
-                    <Link 
-                        to="../perfil" 
+                    <Link
+                        to="../perfil"
                         className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-300"
                     >
                         <ArrowLeft className="w-6 h-6 text-white" />
@@ -265,14 +297,11 @@ useEffect(() => {
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
                     <div className="flex flex-col items-center">
                         <div className="relative mb-4">
-                            <img 
-                                src={userPerfil.profile_pic[0] ? userPerfil.profile_pic[0] : '/profile_empty.webp'} 
-                                className="w-28 h-28 rounded-full object-cover border-4 border-gradient-to-r from-purple-400 to-blue-400 shadow-lg" 
-                                alt={userPerfil.nombre} 
+                            <img
+                                src={userPerfil.profile_pic[0] ? userPerfil.profile_pic[0] : '/profile_empty.webp'}
+                                className="w-28 h-28 rounded-full object-cover border-4 border-gradient-to-r from-purple-400 to-blue-400 shadow-lg"
+                                alt={userPerfil.nombre}
                             />
-                            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-full shadow-lg">
-                                <Camera className="w-4 h-4 text-white" />
-                            </div>
                         </div>
                     </div>
 
@@ -284,7 +313,7 @@ useEffect(() => {
                                     <User className="w-4 h-4 mr-2 text-purple-500" />
                                     Nombre
                                 </label>
-                                <input 
+                                <input
                                     type="text"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
                                     defaultValue={userPerfil.nombre}
@@ -292,13 +321,13 @@ useEffect(() => {
                                     placeholder="Tu nombre"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="flex items-center text-gray-700 font-semibold mb-2">
                                     <User className="w-4 h-4 mr-2 text-purple-500" />
                                     Apellido
                                 </label>
-                                <input 
+                                <input
                                     type="text"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
                                     defaultValue={userPerfil.apellido}
@@ -307,114 +336,122 @@ useEffect(() => {
                                 />
                             </div>
                         </div>
+                        {userPerfil.gender != "" && userPerfil.birthday != null && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                        Sexo
+                                    </label>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        {userPerfil.gender === 'H' ? (
+                                            <i className="pi pi-mars text-blue-500 text-lg"></i>
+                                        ) : (
+                                            <i className="pi pi-venus text-pink-500 text-lg"></i>
+                                        )}
+                                        <select
+                                            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
+                                            value={genero}
+                                            onChange={(e) => setGenero(e.target.value)}
+                                        >
+                                            <option value="H">Hombre</option>
+                                            <option value="M">Mujer</option>
+                                            <option value="O">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="flex items-center text-gray-700 font-semibold mb-2">
-                                    Sexo
-                                </label>
-                                <div className="flex items-center space-x-2 mb-2">
-                                    {userPerfil.gender === 'H' ? (
-                                        <i className="pi pi-mars text-blue-500 text-lg"></i>
-                                    ) : (
-                                        <i className="pi pi-venus text-pink-500 text-lg"></i>
-                                    )}
-                                    <select
-                                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
-                                        value={genero}
-                                        onChange={(e) => setGenero(e.target.value)}
-                                    >
-                                        <option value="H">Hombre</option>
-                                        <option value="M">Mujer</option>
-                                        <option value="O">Otro</option>
-                                    </select>
+                                <div>
+                                    <label className="flex items-center text-gray-700 font-semibold mb-2">
+                                        <Calendar className="w-4 h-4 mr-2 text-purple-500" />
+                                        Fecha
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
+                                        defaultValue={userPerfil.birthday}
+                                        placeholder='AAAA-MM-DD'
+                                        onChange={(e) => setCumpleanos(e.target.value)}
+                                    />
+                                    <span className="text-sm text-gray-500 mt-1 block">
+                                        {calculateAge(userPerfil.birthday)} años
+                                    </span>
                                 </div>
                             </div>
+                        )}
 
-                            <div>
-                                <label className="flex items-center text-gray-700 font-semibold mb-2">
-                                    <Calendar className="w-4 h-4 mr-2 text-purple-500" />
-                                    Fecha
-                                </label>
-                                <input 
-                                    type="text"
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
-                                    defaultValue={userPerfil.birthday}
-                                    placeholder='AAAA-MM-DD'  
-                                    onChange={(e) => setCumpleanos(e.target.value)}
-                                />
-                                <span className="text-sm text-gray-500 mt-1 block">
-                                    {calculateAge(userPerfil.birthday)} años
-                                </span>
-                            </div>
-                        </div>
                     </div>
                 </div>                {/* Fotos section */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                            <Camera className="w-5 h-5 mr-2 text-purple-500" />
-                            Mis fotografías
-                        </h2>
-                        <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                            {fotos.length}/6
-                        </span>
+
+                {userPerfil.profile_pic.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                                <Camera className="w-5 h-5 mr-2 text-purple-500" />
+                                Mis fotografías
+                            </h2>
+                            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                {fotos.length}/6
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                            {Array.from({ length: 6 }).map((_, index) => (
+                                <div key={index} className="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-400 transition-all duration-300 flex items-center justify-center relative group">
+                                    {fotos[index] ? (
+                                        <>
+                                            <img
+                                                src={fotos[index] instanceof File ? URL.createObjectURL(fotos[index]) : fotos[index]}
+                                                alt="preview"
+                                                className="object-cover w-full h-full rounded-xl"
+                                            />
+                                            <button
+                                                onClick={() => handleImageDelete(index)}
+                                                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                            <label
+                                                htmlFor={`fileInput-${index}`}
+                                                className="absolute bottom-2 left-2 right-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                            >
+                                                <div className='flex items-center justify-center'>
+                                                    <Camera className="w-3 h-3 mr-1" />
+                                                    Cambiar
+                                                </div>
+                                            </label>
+                                            <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <label htmlFor={`fileInput-${index}`} className="cursor-pointer text-purple-400 hover:text-purple-600 transition-colors flex flex-col items-center justify-center h-full w-full">
+                                                <Upload className="w-8 h-8 mb-2" />
+                                                <span className="text-xs font-medium">Agregar</span>
+                                            </label>
+                                            <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleAddImage(e)} />
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    
-                    <div className="grid grid-cols-3 gap-3">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <div key={index} className="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-purple-200 hover:border-purple-400 transition-all duration-300 flex items-center justify-center relative group">
-                                {fotos[index] ? (
-                                    <>
-                                        <img 
-                                            src={fotos[index] instanceof File ? URL.createObjectURL(fotos[index]) : fotos[index]}
-                                            alt="preview" 
-                                            className="object-cover w-full h-full rounded-xl"
-                                        />
-                                        <button 
-                                            onClick={() => handleImageDelete(index)} 
-                                            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg"
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                        <label 
-                                            htmlFor={`fileInput-${index}`} 
-                                            className="absolute bottom-2 left-2 right-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300"
-                                        >
-                                            <div className='flex items-center justify-center'>
-                                                <Camera className="w-3 h-3 mr-1" />
-                                                Cambiar
-                                            </div>
-                                        </label>
-                                        <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} />
-                                    </>
-                                ) : (
-                                    <>
-                                        <label htmlFor={`fileInput-${index}`} className="cursor-pointer text-purple-400 hover:text-purple-600 transition-colors flex flex-col items-center justify-center h-full w-full">
-                                            <Upload className="w-8 h-8 mb-2" />
-                                            <span className="text-xs font-medium">Agregar</span>
-                                        </label>
-                                        <input id={`fileInput-${index}`} type="file" className="hidden" onChange={(e) => handleAddImage(e)} />
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                )}
 
                 {/* Descripción section */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <User className="w-5 h-5 mr-2 text-purple-500" />
-                        Sobre mí
-                    </h2>
-                    <textarea
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800 h-32 resize-none"
-                        defaultValue={descripcion !== '' ? descripcion : (userPerfil.description || '')}
-                        onChange={(e) => setDescripcion(e.target.value)}
-                        placeholder="Cuéntanos sobre ti..."
-                    />
-                </div>                {/* Intereses sections */}
+                {userPerfil.description != null && (
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <User className="w-5 h-5 mr-2 text-purple-500" />
+                            Sobre mí
+                        </h2>
+                        <textarea
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800 h-32 resize-none"
+                            defaultValue={descripcion !== '' ? descripcion : (userPerfil.description || '')}
+                            onChange={(e) => setDescripcion(e.target.value)}
+                            placeholder="Cuéntanos sobre ti..."
+                        />
+                    </div>
+                )}
+                {/* Intereses sections */}
                 <div className="space-y-6">
                     {/* Intereses de Eventos */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -439,11 +476,10 @@ useEffect(() => {
                                             {categoria.valores.map((valor) => (
                                                 <button
                                                     key={valor}
-                                                    className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
-                                                        selectedEvents.includes(valor)
-                                                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105' 
-                                                            : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
-                                                    }`}
+                                                    className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${selectedEvents.includes(valor)
+                                                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                                                        }`}
                                                     onClick={() => toggleSeleccionado(valor)}
                                                 >
                                                     {valor}
@@ -457,97 +493,98 @@ useEffect(() => {
                     </div>
 
                     {/* Intereses Generales */}
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
-                            <h2 className="text-lg font-bold text-white flex items-center">
-                                <User className="w-5 h-5 mr-2" />
-                                Intereses Generales
-                            </h2>
-                        </div>
-                        <div className="p-6">
-                            <div className="space-y-6">
-                                {itemsAboutMe.map((item, index) => {
-                                    let answers = [];
-                                    try {
-                                        answers = Array.isArray(item.answers)
-                                            ? item.answers
-                                            : JSON.parse(item.answers.replace(/'/g, '"'));
-                                    } catch (e) {
-                                        console.error("No se pudo parsear answers para:", item.question);
-                                        answers = [];
-                                    }
-                                   
-                                    return (
-                                        <div key={index} className="space-y-3">
-                                            {item.question === '¿Cuál es tu personalidad?' ? (
-                                                <div className="space-y-2">
-                                                    <p className="font-bold text-gray-800">
+                    {userPerfil.preferencias_generales?.length > 0 && (
+                        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
+                                <h2 className="text-lg font-bold text-white flex items-center">
+                                    <User className="w-5 h-5 mr-2" />
+                                    Intereses Generales
+                                </h2>
+                            </div>
+                            <div className="p-6">
+                                <div className="space-y-6">
+                                    {itemsAboutMe.map((item, index) => {
+                                        let answers = [];
+                                        try {
+                                            answers = Array.isArray(item.answers)
+                                                ? item.answers
+                                                : JSON.parse(item.answers.replace(/'/g, '"'));
+                                        } catch (e) {
+                                            console.error("No se pudo parsear answers para:", item.question);
+                                            answers = [];
+                                        }
+
+                                        return (
+                                            <div key={index} className="space-y-3">
+                                                {item.question === '¿Cuál es tu personalidad?' ? (
+                                                    <div className="space-y-2">
+                                                        <p className="font-bold text-gray-800">
+                                                            {item.question}
+                                                            {!item.optional && <span className="text-red-500"> *</span>}
+                                                        </p>
+                                                        <a
+                                                            className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm underline"
+                                                            href="https://www.16personalities.com/es/test-de-personalidad"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Hacer test de personalidad →
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <p className="font-semibold text-gray-800">
                                                         {item.question}
                                                         {!item.optional && <span className="text-red-500"> *</span>}
                                                     </p>
-                                                    <a
-                                                        className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm underline"
-                                                        href="https://www.16personalities.com/es/test-de-personalidad"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        Hacer test de personalidad →
-                                                    </a>
-                                                </div>
-                                            ) : (
-                                                <p className="font-semibold text-gray-800">
-                                                    {item.question}
-                                                    {!item.optional && <span className="text-red-500"> *</span>}
-                                                </p>
-                                            )}
+                                                )}
 
-                                            <div className="flex flex-wrap gap-2">
-                                                {answers.map((answer, i) => {
-                                                    const isSelected = selectedAnswers[item._id]?.includes(answer);
-                                                   
-                                                    return (
-                                                        <button
-                                                            key={i}
-                                                            className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${
-                                                                isSelected
-                                                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105' 
+                                                <div className="flex flex-wrap gap-2">
+                                                    {answers.map((answer, i) => {
+                                                        const isSelected = selectedAnswers[item._id]?.includes(answer);
+
+                                                        return (
+                                                            <button
+                                                                key={i}
+                                                                className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${isSelected
+                                                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105'
                                                                     : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200'
-                                                            }`}
-                                                            onClick={() => {
-                                                                setSelectedAnswers((prev) => {
-                                                                    const currentAnswers = prev[item._id] || [];
+                                                                    }`}
+                                                                onClick={() => {
+                                                                    setSelectedAnswers((prev) => {
+                                                                        const currentAnswers = prev[item._id] || [];
 
-                                                                    if (item.multi_option) {
-                                                                        return {
-                                                                            ...prev,
-                                                                            [item._id]: currentAnswers.includes(answer)
-                                                                                ? currentAnswers.filter((a) => a !== answer)
-                                                                                : [...currentAnswers, answer]
-                                                                        };
-                                                                    } else {
-                                                                        return {
-                                                                            ...prev,
-                                                                            [item._id]: [answer]
-                                                                        };
-                                                                    }
-                                                                });
-                                                            }}
-                                                        >
-                                                            {answer}
-                                                        </button>
-                                                    );
-                                                })}
+                                                                        if (item.multi_option) {
+                                                                            return {
+                                                                                ...prev,
+                                                                                [item._id]: currentAnswers.includes(answer)
+                                                                                    ? currentAnswers.filter((a) => a !== answer)
+                                                                                    : [...currentAnswers, answer]
+                                                                            };
+                                                                        } else {
+                                                                            return {
+                                                                                ...prev,
+                                                                                [item._id]: [answer]
+                                                                            };
+                                                                        }
+                                                                    });
+                                                                }}
+                                                            >
+                                                                {answer}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>                {/* Botón de guardar */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
-                    <button 
-                        onClick={handleSubmit} 
+                    <button
+                        onClick={handleSubmit}
                         className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                         Guardar Cambios

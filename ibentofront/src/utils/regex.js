@@ -9,4 +9,6 @@ export const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const password_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
 
 // CURP: Formato CURP válido (12 letras, 6 números, 1 letra y 2 números al final)
-export const curp_regex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}\d{2}$/;
+export const curp_regex = /^[A-Z]{4}\d{6}[HM][A-Z]{6}\d{2}$/;
+
+export const patron_curp = /^[A-Z]{1}[AEIOU]{1}[A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[HM]{1}(AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]{1}[A-Z\d]{1}$/;
