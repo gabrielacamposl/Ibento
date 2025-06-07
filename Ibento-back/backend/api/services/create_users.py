@@ -4,6 +4,8 @@ import random
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
 import ast
+import json
+import os
 
 
 preguntas = [
@@ -267,26 +269,34 @@ def crearUsuarios():
     
     inicio = datetime(1997, 1, 1)
     final =  datetime(2007, 12, 12)
+    
+    # Lista para almacenar los usuarios generados
+    usuarios_json = []
 
-    random_date = inicio + (final - inicio) * random.random()
+    for i in range(0, 80):
 
-    for i in range(0,99):
+        random_date = inicio + (final - inicio) * random.random()
+        preferencias_generadas = random_respuestas(preguntas)
+        preferencias_evento_generadas = random.choices(events_classification, k=7)
+        # Generar eventos guardados basados en las preferencias del usuario
+        eventosG = eventos_guardados(preferencias_evento_generadas)
+        eventos_buscar_match_generados = random.choices(eventosG, k=5)
+        genero_seleccionado = random.choice(gender)
 
-        eventosG = eventos_guardados()
-
-        Usuario.objects.create(
+        # Crear usuario en la base de datos
+        usuario = Usuario.objects.create(
             nombre = "Usuario " + str(i),
             apellido = "Sanchez",
             password = make_password("Usuario123"),
             is_confirmed = True,
             email = f"usuario{i}@ibento.com",
-            preferencias_evento = random.choices(events_classification, k=7),
+            preferencias_evento = preferencias_evento_generadas,
             save_events = eventosG,
             #favourite_events
             profile_pic = fotos,
-            preferencias_generales = random_respuestas(preguntas),
+            preferencias_generales = preferencias_generadas,
             birthday = random_date,
-            gender = random.choice(gender),
+            gender = genero_seleccionado,
             description = "Esta es una descripción de mi perfil. Espero sea de tu agrado.",
             curp = make_password("Usuario" + str(i) + str(random_date)),
             is_ine_validated = True,
@@ -295,8 +305,43 @@ def crearUsuarios():
             #futuros_matches
             #blocked
             modo_busqueda_match = "global",
-            eventos_buscar_match = random.choices(eventosG, k=5)
+            eventos_buscar_match = eventos_buscar_match_generados
         )
+        
+        # Agregar usuario al JSON (convertir fecha a string para serialización)
+        usuario_data = {
+            "_id": str(usuario._id),
+            "nombre": usuario.nombre,
+            "apellido": usuario.apellido,
+            "email": usuario.email,
+            "is_confirmed": usuario.is_confirmed,
+            "preferencias_evento": preferencias_evento_generadas,
+            "save_events": eventosG,
+            "profile_pic": fotos,
+            "preferencias_generales": preferencias_generadas,
+            "birthday": random_date.strftime("%Y-%m-%d"),
+            "gender": genero_seleccionado,
+            "description": usuario.description,
+            "is_ine_validated": usuario.is_ine_validated,
+            "is_validated_camera": usuario.is_validated_camera,
+            "modo_busqueda_match": usuario.modo_busqueda_match,
+            "eventos_buscar_match": eventos_buscar_match_generados
+        }
+        usuarios_json.append(usuario_data)
+
+    # Guardar usuarios en archivo JSON
+    try:
+        # Obtener la ruta del directorio actual del script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        json_file_path = os.path.join(current_dir, "usuarios_generados.json")
+        
+        with open(json_file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(usuarios_json, json_file, ensure_ascii=False, indent=2)
+        
+        print(f"Usuarios guardados en: {json_file_path}")
+        
+    except Exception as e:
+        print(f"Error al guardar usuarios en JSON: {e}")
 
     return True
 
@@ -328,10 +373,80 @@ def random_respuestas(preguntas):
     return respuestas
 
 
-def eventos_guardados():
-    eventos = Evento.objects.all().values_list('_id', flat=True)
+def eventos_guardados(preferencias_evento):
+    """
+    Genera una lista de eventos guardados donde la mayoría están alineados con las preferencias
+    del usuario, pero mantiene 2 eventos fuera de sus gustos.
+    """
+    # Obtener todos los eventos
+    todos_eventos = list(Evento.objects.all().values_list('_id', flat=True))
+    
+    if len(todos_eventos) < 3:
+        # Si hay muy pocos eventos, retornar los que haya más uno fijo
+        eventos_seleccionados = list(todos_eventos)
+        eventos_seleccionados.append("681d9e394f3b2936f4714483")
+        return eventos_seleccionados
+    
+    # Separar eventos que coinciden con las preferencias del usuario
+    eventos_preferidos = []
+    eventos_no_preferidos = []
+    
+    # Obtener eventos con sus clasificaciones
+    eventos_con_clasificaciones = Evento.objects.all().values('_id', 'classifications')
+    
+    for evento in eventos_con_clasificaciones:
+        evento_id = evento['_id']
+        clasificaciones = evento['classifications'] or []
+        
+        # Verificar si alguna clasificación del evento coincide con las preferencias del usuario
+        coincide = False
+        for clasificacion in clasificaciones:
+            if clasificacion in preferencias_evento:
+                coincide = True
+                break
+        
+        if coincide:
+            eventos_preferidos.append(evento_id)
+        else:
+            eventos_no_preferidos.append(evento_id)
+    
+    # Construir la lista final de eventos guardados
+    eventos_seleccionados = []
+    
+    # Seleccionar 8 eventos que coincidan con las preferencias (si hay suficientes)
+    if len(eventos_preferidos) >= 8:
+        eventos_seleccionados.extend(random.sample(eventos_preferidos, 8))
+    else:
+        # Si no hay suficientes eventos preferidos, tomar todos los disponibles
+        eventos_seleccionados.extend(eventos_preferidos)
+        # Completar con eventos no preferidos hasta llegar a 8
+        eventos_restantes = 8 - len(eventos_preferidos)
+        if len(eventos_no_preferidos) >= eventos_restantes:
+            eventos_seleccionados.extend(random.sample(eventos_no_preferidos, eventos_restantes))
+        else:
+            eventos_seleccionados.extend(eventos_no_preferidos)
+    
+    # Agregar 2 eventos que NO coincidan con las preferencias del usuario
+    if len(eventos_no_preferidos) >= 2:
+        eventos_seleccionados.extend(random.sample(eventos_no_preferidos, 2))
+    else:
+        # Si no hay suficientes eventos no preferidos, agregar los que haya
+        eventos_seleccionados.extend(eventos_no_preferidos)
+    
+    # Agregar el evento fijo
+    eventos_seleccionados.append("681d9e394f3b2936f4714483")
+    
+    # Eliminar duplicados manteniendo el orden
+    eventos_unicos = []
+    for evento in eventos_seleccionados:
+        if evento not in eventos_unicos:
+            eventos_unicos.append(evento)
+    
+    # Asegurar que tenemos al menos 10 eventos (o los que haya disponibles)
+    while len(eventos_unicos) < 10 and len(todos_eventos) > len(eventos_unicos):
+        evento_aleatorio = random.choice(todos_eventos)
+        if evento_aleatorio not in eventos_unicos:
+            eventos_unicos.append(evento_aleatorio)
+    
+    return eventos_unicos
 
-    eventos = random.choices(eventos, k=10)
-    eventos.append("681d9e394f3b2936f4714483")
-
-    return eventos
