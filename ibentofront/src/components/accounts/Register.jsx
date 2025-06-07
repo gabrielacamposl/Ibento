@@ -277,6 +277,7 @@ export default function Register() {
                         onChange={handleChange}
                         required
                       />
+                     
                       <button
                         type="button"
                         className="absolute inset-y-0 right-2 flex items-center"
@@ -298,8 +299,10 @@ export default function Register() {
                           onChange={(e) => setIsTermsAccepted(e.target.checked)}
                         />
                       }
-                      label={
-                        <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
+                      
+                     
+                    />
+                    <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
                           He leído y acepto el
                           <span
                             className="mx-1 text-purple-600 cursor-pointer"
@@ -309,8 +312,6 @@ export default function Register() {
                           {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
                           y los <strong>Aviso de privacidad</strong>.
                         </span>
-                      }
-                    />
                   </div>
 
                   <div className="card flex justify-content-center">
