@@ -60,7 +60,8 @@ const Guardados = ({ events }) => {
     }
 
     //VERIFICA SI EL USUARIO TIENE SU PERFIL DE ACOMPAÑANTE
-    const isVerify = async () => {
+  useEffect(() => {
+      const isVerify = async () => {
         const token = localStorage.getItem('access');
         try {
             const response = await api.get("estado-validacion/", {
@@ -74,9 +75,9 @@ const Guardados = ({ events }) => {
                 const estado2 = userData.is_validated_camera;
 
                 console.log(estado1, estado2)
-                if (estado1 == true) {
+                if (estado1 == true && estado2 == true) {
                     setVerificar(true);
-                    navigate('../verificar');
+                   
                 } else {
                     setVerificar(false);
                 }
@@ -87,8 +88,8 @@ const Guardados = ({ events }) => {
             console.error("Error al obtener los datos del usuario:", error);
         }
     }
-
-
+    isVerify();
+    }, []);
     const bucarMatch = async (eventId, index) => {
         console.log("Buscar match para el evento:", eventId, index);
         //cambiar a true el estado del evento
@@ -141,7 +142,9 @@ const Guardados = ({ events }) => {
                         </div>
                     </div>
                 ) : (
+                    verify ? (
                     <div className="relative flex flex-col items-center bg-white  rounded-xl max-w-lg w-full ">
+                       
                         <div className=" flex-col w-full mb-2">
                             {checked == false ? (
                                 <h2 className="text-base text-gray-700 text-center">
@@ -163,8 +166,25 @@ const Guardados = ({ events }) => {
                             <span className="slider"></span>
                         </label>
                     </div>
+                    ) : (
+                    <div className="mb-12 w-full h-16 rounded-lg flex flex-col items-center">
+                        <h2 className="text-base text-gray-700 text-center mb-4">
+                            Verifica tu perfil para acceder a todas las funcionalidades!
+                        </h2>
+                        <div className="flex justify-center w-full">
+                            <button
+                                className="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition"
+                                onClick={() => {
+                                    navigate('../verificar');
+                                }}
+                            >
+                                Verificar Perfil
+                            </button>
+                        </div>
+                    </div>
+                    )
                 )}
-
+           
                 <div className="flex flex-col w-full gap-4">
                     {eventsCopy.map((event, index) => (
                         <div
@@ -211,20 +231,6 @@ const Guardados = ({ events }) => {
                                     </button>
                                 )}
                             </div>
-                            {verify === false && (
-                                <div className="fixed inset-0 z-60 flex items-center justify-center bg-gradient-to-b from-blue-600/70 via-purple-600/70 to-pink-600/70 backdrop-blur-md">
-                                    <div className="text-center text-white bg-white/20 p-8 rounded-xl shadow-lg">
-                                        <h1 className="text-3xl font-bold mb-2">Aún no cuentas con tu perfil de acompañantes</h1>
-                                        <p className="mb-4">¡Créalo ahora!.</p>
-                                        <button
-                                            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition"
-                                            onClick={() => navigate('../verificar')}
-                                        >
-                                            Crear
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     ))}
                 </div>
