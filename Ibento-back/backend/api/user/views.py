@@ -1615,6 +1615,8 @@ class EventoViewSet(viewsets.ModelViewSet):
         
         eventosProximos = []
 
+        assistentes_fotos = []
+
         for event in self.get_queryset():
             cadena_primera_fecha = None
             objeto_primera_fecha = None
@@ -1636,11 +1638,50 @@ class EventoViewSet(viewsets.ModelViewSet):
             if objeto_primera_fecha and now <= objeto_primera_fecha <= fecha_mas_siete_dias:
                 eventosProximos.append({'event': event, 'date_to_sort_by': objeto_primera_fecha})
 
+            #Obtener assitants por evento
+
+            #Obtienes los usuarios filtrando que esten en la lista de asistentes del evento
+            #Filtras la lista para que solo te de el _id y el arreglo de fotos
+            event.assistants = Usuario.objects.filter(_id__in=event.assistants).values_list('_id', 'profile_pic')
+
+            #Agregar fotos al arreglo
+            if event.assistants:
+                for asistente in event.assistants:
+                    asistente_id, fotos = asistente
+                    if fotos:
+                        # Asegurarse de que haya al menos una foto
+                        assistentes_fotos.append({
+                            'user_id': str(asistente_id),
+                            'profile_pic': fotos[0] if isinstance(fotos, list) and len(fotos) > 0 else None
+                        })
+            #Agregar fotos al arreglo
+            if event.assistants:
+                for asistente in event.assistants:
+                    asistente_id, fotos = asistente
+                    if fotos:
+                        # Asegurarse de que haya al menos una foto
+                        assistentes_fotos.append({
+                            'user_id': str(asistente_id),
+                            'profile_pic': fotos[0] if isinstance(fotos, list) and len(fotos) > 0 else None
+                        })
+
         sorted_events = sorted(eventosProximos, key=lambda x: x['date_to_sort_by'])
 
         upcoming_events = [item['event'] for item in sorted_events]
 
         serializer = EventoSerializerLimitadoWithFecha(upcoming_events, many=True)
+        
+        #upcoming events
+        # _id, title, place, location, price, dates, coordenates, classifications, description, image, numLike, numDislike, assistants
+
+        #serializer
+        #'_id', 'title', 'imgs', 'numLike', 'dates', 'location', 'classifications'
+
+        for i, event_data in enumerate(serializer.data):
+            # Añadir el número de asistentes al evento
+            event_data['assistants'] = len(eventosProximos[i]['event'].assistants) if eventosProximos[i]['event'].assistants else 0
+            # Añadir la fecha del primer evento para ordenar
+            event_data['first_date'] = eventosProximos[i]['date_to_sort_by'].isoformat() if eventosProximos[i]['date_to_sort_by'] else None
 
         return Response(serializer.data)
     
