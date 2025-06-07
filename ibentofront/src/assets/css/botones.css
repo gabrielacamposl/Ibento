@@ -16,13 +16,13 @@
    
   }
 .interes {
-    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6); /* Gradient */
+    background: linear-gradient(to right, #2878fa, #6e4ff9,#bc51f6 ); /* Gradient */
     color: white;
   
   }
 
 .degradadoPerfil{
-  background: linear-gradient(to bottom, #f5abff, #F3D1FF, #FFFFFF 30rem); /* Gradient */
+  background: linear-gradient(to bottom, #f5abff, #F3D1FF, #FFFFFF 12rem); /* Gradient */
 }
 
 .miPerfil{
@@ -177,9 +177,12 @@
   top: 0;
   left: 0;
   width: 100%; /* Adjust as needed */
-  height: calc(100% - 4rem); /* Subtract the height of the BottomNav (4rem) */
+  height: calc(100% - 6rem); /* Subtract the height of the BottomNav (4rem) */
   padding: auto;
   overflow-y: auto; /* Add scrolling if content overflows */
+  border-radius: 0px;
+
+  z-index: 1000; /* Ensure it appears above other content */
 }
 
 
