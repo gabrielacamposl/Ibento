@@ -390,7 +390,7 @@ function Page() {
 
 
 
-  const bucarMatch = async () => {
+  const buscarMatch = async () => {
 
     const token = localStorage.getItem('access');
     try {
@@ -566,7 +566,7 @@ function Page() {
           <button
             onClick={async () => {
               await handleSave();
-              await bucarMatch();
+              await buscarMatch();
             }}
             className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
