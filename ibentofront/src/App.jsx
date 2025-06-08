@@ -346,7 +346,7 @@ export default function App() {
 
               {/* Verificar */}
               <Route path="verificar-ine" element={<IneValidation />} />
-
+v
               {/* Matches y chat */}
               <Route path="matches" element={<BuscarMatches />} />
               <Route path="verPerfil" element={<Perfiles />} />
