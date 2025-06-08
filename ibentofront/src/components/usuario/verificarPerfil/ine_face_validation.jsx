@@ -33,7 +33,7 @@ const VerifyProfile = () => {
     const [canRetakeINE, setCanRetakeINE] = useState(false);
 
     const [ineImages, setIneImages] = useState([null, null]);
-    const [activeIndex, setActiveIndex] = useState(2); // Para testing, cambiar a 0 en producción
+    const [activeIndex, setActiveIndex] = useState(0); 
     const [message, setMessage] = useState([]);
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [stepsCompleted, setStepsCompleted] = useState({ ine: false, face: false });
