@@ -38,7 +38,7 @@ const VerifyProfile = () => {
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [stepsCompleted, setStepsCompleted] = useState({ ine: false, face: false });
 
-    // ESTADOS PARA INE CON 4 PUNTOS - ACTUALIZADO
+    // ESTADOS PARA INE CON SISTEMA IPHONE
     const [ineCapture, setIneCapture] = useState({
         mode: null,
         activeIndex: 0,
@@ -47,12 +47,16 @@ const VerifyProfile = () => {
         showCrop: false,
         selectedFromGallery: null,
         cropData: {
-            topLeft: { x: 50, y: 50 },
-            topRight: { x: 300, y: 50 },
-            bottomLeft: { x: 50, y: 200 },
-            bottomRight: { x: 300, y: 200 },
-            dragging: null,
-            imageSize: { width: 0, height: 0 }
+            scale: 1,
+            translateX: 0,
+            translateY: 0,
+            cropArea: { x: 50, y: 50, width: 200, height: 130 },
+            imageSize: { width: 0, height: 0 },
+            isDragging: false,
+            startPos: { x: 0, y: 0 },
+            showGrid: false,
+            initialPinchDistance: null,
+            initialScale: null
         }
     });
 
@@ -72,7 +76,278 @@ const VerifyProfile = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // ===== FUNCIONES PARA INE CON 4 PUNTOS =====
+    // ===== FUNCIONES PARA SISTEMA IPHONE =====
+
+    const initializeImageCrop = (imageElement) => {
+        if (!imageElement) return;
+        
+        const containerRect = imageElement.parentElement.getBoundingClientRect();
+        
+        // Calcular escala inicial para que la imagen cubra el área de recorte
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
+        const imageAspect = imageElement.naturalWidth / imageElement.naturalHeight;
+        const containerAspect = containerWidth / containerHeight;
+        
+        let initialScale;
+        if (imageAspect > containerAspect) {
+            initialScale = containerHeight / imageElement.naturalHeight;
+        } else {
+            initialScale = containerWidth / imageElement.naturalWidth;
+        }
+        
+        // Área de recorte centrada (tamaño de INE aproximado 3:2)
+        const cropWidth = Math.min(containerWidth * 0.8, 320);
+        const cropHeight = cropWidth * (2/3);
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                scale: Math.max(initialScale * 1.2, 1),
+                translateX: 0,
+                translateY: 0,
+                cropArea: {
+                    x: (containerWidth - cropWidth) / 2,
+                    y: (containerHeight - cropHeight) / 2,
+                    width: cropWidth,
+                    height: cropHeight
+                },
+                imageSize: {
+                    width: imageElement.naturalWidth,
+                    height: imageElement.naturalHeight
+                }
+            }
+        }));
+    };
+
+    const handleImageMouseDown = (e) => {
+        e.preventDefault();
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                isDragging: true,
+                startPos: {
+                    x: e.clientX - prev.cropData.translateX,
+                    y: e.clientY - prev.cropData.translateY
+                },
+                showGrid: true
+            }
+        }));
+    };
+
+    const handleImageMouseMove = (e) => {
+        if (!ineCapture.cropData.isDragging) return;
+        
+        e.preventDefault();
+        const newTranslateX = e.clientX - ineCapture.cropData.startPos.x;
+        const newTranslateY = e.clientY - ineCapture.cropData.startPos.y;
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                translateX: newTranslateX,
+                translateY: newTranslateY
+            }
+        }));
+    };
+
+    const handleImageMouseUp = () => {
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                isDragging: false,
+                showGrid: false
+            }
+        }));
+    };
+
+    const handleImageWheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.5, Math.min(4, ineCapture.cropData.scale * delta));
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                scale: newScale
+            }
+        }));
+    };
+
+    // Gestos táctiles para móvil
+    const handleTouchStart = (e) => {
+        e.preventDefault();
+        
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            setIneCapture(prev => ({
+                ...prev,
+                cropData: {
+                    ...prev.cropData,
+                    isDragging: true,
+                    startPos: {
+                        x: touch.clientX - prev.cropData.translateX,
+                        y: touch.clientY - prev.cropData.translateY
+                    },
+                    showGrid: true
+                }
+            }));
+        } else if (e.touches.length === 2) {
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.sqrt(
+                Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                Math.pow(touch2.clientY - touch1.clientY, 2)
+            );
+            
+            setIneCapture(prev => ({
+                ...prev,
+                cropData: {
+                    ...prev.cropData,
+                    initialPinchDistance: distance,
+                    initialScale: prev.cropData.scale,
+                    showGrid: true
+                }
+            }));
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        e.preventDefault();
+        
+        if (e.touches.length === 1 && ineCapture.cropData.isDragging) {
+            const touch = e.touches[0];
+            const newTranslateX = touch.clientX - ineCapture.cropData.startPos.x;
+            const newTranslateY = touch.clientY - ineCapture.cropData.startPos.y;
+            
+            setIneCapture(prev => ({
+                ...prev,
+                cropData: {
+                    ...prev.cropData,
+                    translateX: newTranslateX,
+                    translateY: newTranslateY
+                }
+            }));
+        } else if (e.touches.length === 2 && ineCapture.cropData.initialPinchDistance) {
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.sqrt(
+                Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                Math.pow(touch2.clientY - touch1.clientY, 2)
+            );
+            
+            const scale = (distance / ineCapture.cropData.initialPinchDistance) * ineCapture.cropData.initialScale;
+            const newScale = Math.max(0.5, Math.min(4, scale));
+            
+            setIneCapture(prev => ({
+                ...prev,
+                cropData: {
+                    ...prev.cropData,
+                    scale: newScale
+                }
+            }));
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                isDragging: false,
+                initialPinchDistance: null,
+                initialScale: null,
+                showGrid: false
+            }
+        }));
+    };
+
+    const resetImagePosition = () => {
+        if (cropImageRef.current) {
+            initializeImageCrop(cropImageRef.current);
+        }
+    };
+
+    const confirmCropIPhone = async () => {
+        if (!cropCanvasRef.current || !cropImageRef.current) {
+            showError('Error: Referencias no disponibles');
+            return;
+        }
+
+        try {
+            const canvas = cropCanvasRef.current;
+            const ctx = canvas.getContext('2d');
+            const img = cropImageRef.current;
+            const { scale, translateX, translateY, cropArea } = ineCapture.cropData;
+            
+            canvas.width = cropArea.width;
+            canvas.height = cropArea.height;
+            
+            const tempImg = new Image();
+            tempImg.crossOrigin = 'anonymous';
+            
+            tempImg.onload = () => {
+                try {
+                    const containerRect = img.parentElement.getBoundingClientRect();
+                    const scaleX = img.naturalWidth / (img.offsetWidth * scale);
+                    const scaleY = img.naturalHeight / (img.offsetHeight * scale);
+                    
+                    const sourceX = (cropArea.x - translateX) * scaleX;
+                    const sourceY = (cropArea.y - translateY) * scaleY;
+                    const sourceWidth = cropArea.width * scaleX;
+                    const sourceHeight = cropArea.height * scaleY;
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(
+                        tempImg,
+                        sourceX, sourceY, sourceWidth, sourceHeight,
+                        0, 0, cropArea.width, cropArea.height
+                    );
+                    
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            showError('Error al crear la imagen recortada');
+                            return;
+                        }
+                        
+                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
+                            type: 'image/jpeg'
+                        });
+                        
+                        const newImages = [...ineImages];
+                        newImages[ineCapture.activeIndex] = file;
+                        setIneImages(newImages);
+                        
+                        const updatedUserINE = [...user.ine];
+                        updatedUserINE[ineCapture.activeIndex] = file;
+                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
+                        
+                        resetIneCaptureWithHandles();
+                        showSuccess('Imagen recortada correctamente');
+                    }, 'image/jpeg', 0.9);
+                    
+                } catch (error) {
+                    console.error('Error al procesar imagen:', error);
+                    showError('Error al procesar la imagen');
+                }
+            };
+            
+            tempImg.onerror = () => showError('Error al cargar la imagen');
+            tempImg.src = ineCapture.selectedFromGallery;
+            
+        } catch (error) {
+            console.error('Error en crop:', error);
+            showError('Error al procesar el recorte');
+        }
+    };
+
+    // ===== FUNCIONES ORIGINALES =====
 
     const startIneCapture = (mode, index) => {
         setIneCapture(prev => ({
@@ -84,12 +359,16 @@ const VerifyProfile = () => {
             capturedImage: null,
             selectedFromGallery: null,
             cropData: {
-                topLeft: { x: 50, y: 50 },
-                topRight: { x: 300, y: 50 },
-                bottomLeft: { x: 50, y: 200 },
-                bottomRight: { x: 300, y: 200 },
-                dragging: null,
-                imageSize: { width: 0, height: 0 }
+                scale: 1,
+                translateX: 0,
+                translateY: 0,
+                cropArea: { x: 50, y: 50, width: 200, height: 130 },
+                imageSize: { width: 0, height: 0 },
+                isDragging: false,
+                startPos: { x: 0, y: 0 },
+                showGrid: false,
+                initialPinchDistance: null,
+                initialScale: null
             }
         }));
     };
@@ -123,172 +402,6 @@ const VerifyProfile = () => {
         showSuccess('Imagen de INE guardada correctamente');
     };
 
-    // ===== FUNCIONES PARA EL SISTEMA DE 4 PUNTOS =====
-
-    const initializeCropPoints = (imageElement) => {
-        if (!imageElement) return;
-        
-        const rect = imageElement.getBoundingClientRect();
-        const padding = 30;
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                topLeft: { x: padding, y: padding },
-                topRight: { x: rect.width - padding, y: padding },
-                bottomLeft: { x: padding, y: rect.height - padding },
-                bottomRight: { x: rect.width - padding, y: rect.height - padding },
-                imageSize: { width: rect.width, height: rect.height }
-            }
-        }));
-    };
-
-    const startDragHandle = (e, handleType) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                dragging: handleType
-            }
-        }));
-    };
-
-    const updateDragHandle = (e) => {
-        if (!ineCapture.cropData.dragging || !cropImageRef.current) return;
-        
-        const rect = cropImageRef.current.getBoundingClientRect();
-        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
-        const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
-        
-        const { dragging } = ineCapture.cropData;
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                [dragging]: { x, y }
-            }
-        }));
-        
-        e.preventDefault();
-    };
-
-    const endDragHandle = (e) => {
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                dragging: null
-            }
-        }));
-        
-        e?.preventDefault();
-    };
-
-    const getCropRectangle = () => {
-        const { topLeft, topRight, bottomLeft, bottomRight } = ineCapture.cropData;
-        
-        const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-        const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-        const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-        const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-        
-        return {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
-        };
-    };
-
-    const confirmCropWithHandles = async () => {
-        console.log('Iniciando crop con handles...');
-        
-        if (!cropCanvasRef.current || !cropImageRef.current) {
-            showError('Error: Referencias no disponibles');
-            return;
-        }
-
-        const rect = getCropRectangle();
-        
-        if (rect.width < 20 || rect.height < 20) {
-            showWarn('El área seleccionada es demasiado pequeña');
-            return;
-        }
-
-        try {
-            const canvas = cropCanvasRef.current;
-            const ctx = canvas.getContext('2d');
-            const img = cropImageRef.current;
-            
-            const scaleX = img.naturalWidth / img.offsetWidth;
-            const scaleY = img.naturalHeight / img.offsetHeight;
-            
-            const cropX = rect.x * scaleX;
-            const cropY = rect.y * scaleY;
-            const cropWidth = rect.width * scaleX;
-            const cropHeight = rect.height * scaleY;
-            
-            canvas.width = cropWidth;
-            canvas.height = cropHeight;
-            
-            const tempImg = new Image();
-            tempImg.crossOrigin = 'anonymous';
-            
-            tempImg.onload = () => {
-                try {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    ctx.drawImage(
-                        tempImg,
-                        cropX, cropY, cropWidth, cropHeight,
-                        0, 0, cropWidth, cropHeight
-                    );
-                    
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            showError('Error al crear la imagen recortada');
-                            return;
-                        }
-                        
-                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
-                            type: 'image/jpeg'
-                        });
-                        
-                        const newImages = [...ineImages];
-                        newImages[ineCapture.activeIndex] = file;
-                        setIneImages(newImages);
-                        
-                        const updatedUserINE = [...user.ine];
-                        updatedUserINE[ineCapture.activeIndex] = file;
-                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
-                        
-                        resetIneCaptureWithHandles();
-                        showSuccess('Imagen recortada correctamente');
-                    }, 'image/jpeg', 0.9);
-                    
-                } catch (error) {
-                    console.error('Error al procesar imagen:', error);
-                    showError('Error al procesar la imagen');
-                }
-            };
-            
-            tempImg.onerror = () => {
-                showError('Error al cargar la imagen');
-            };
-            
-            tempImg.src = ineCapture.selectedFromGallery;
-            
-        } catch (error) {
-            console.error('Error en crop:', error);
-            showError('Error al procesar el recorte');
-        }
-    };
-
     const handleGallerySelectionWithHandles = (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -317,12 +430,6 @@ const VerifyProfile = () => {
                 capturedImage: null,
                 showCamera: false
             }));
-            
-            setTimeout(() => {
-                if (cropImageRef.current) {
-                    initializeCropPoints(cropImageRef.current);
-                }
-            }, 100);
         };
         
         reader.onerror = () => {
@@ -342,12 +449,16 @@ const VerifyProfile = () => {
             showCrop: false,
             selectedFromGallery: null,
             cropData: {
-                topLeft: { x: 50, y: 50 },
-                topRight: { x: 300, y: 50 },
-                bottomLeft: { x: 50, y: 200 },
-                bottomRight: { x: 300, y: 200 },
-                dragging: null,
-                imageSize: { width: 0, height: 0 }
+                scale: 1,
+                translateX: 0,
+                translateY: 0,
+                cropArea: { x: 50, y: 50, width: 200, height: 130 },
+                imageSize: { width: 0, height: 0 },
+                isDragging: false,
+                startPos: { x: 0, y: 0 },
+                showGrid: false,
+                initialPinchDistance: null,
+                initialScale: null
             }
         });
         
@@ -635,7 +746,7 @@ const VerifyProfile = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-premium rounded-3xl p-6 mb-6">
 
-                        {/* STEP 1: INE VERIFICATION CON 4 PUNTOS */}
+                        {/* STEP 1: INE VERIFICATION CON SISTEMA IPHONE */}
                         {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -734,209 +845,200 @@ const VerifyProfile = () => {
                                     </div>
                                 )}
 
-                                {/* Modal de Crop con 4 Puntos */}
+                                {/* Modal de Crop estilo iPhone */}
                                 {ineCapture.showCrop && ineCapture.selectedFromGallery && (
-                                    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                                        <div className="bg-white rounded-3xl p-6 max-w-3xl w-full max-h-[95vh] overflow-auto">
-                                            <div className="text-center mb-4">
-                                                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                                                    Ajustar INE {ineCapture.activeIndex === 0 ? 'Frontal' : 'Trasera'}
-                                                </h3>
-                                                <p className="text-gray-600 text-sm">
-                                                    Arrastra los 4 puntos azules para seleccionar el área de tu INE
-                                                </p>
-                                            </div>
+                                    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between p-4 bg-black text-white">
+                                            <button
+                                                onClick={resetIneCaptureWithHandles}
+                                                className="text-blue-400 font-medium text-lg"
+                                                type="button"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            
+                                            <h3 className="text-lg font-medium">
+                                                Recortar
+                                            </h3>
+                                            
+                                            <button
+                                                onClick={confirmCropIPhone}
+                                                className="text-yellow-400 font-medium text-lg"
+                                                type="button"
+                                            >
+                                                Listo
+                                            </button>
+                                        </div>
 
-                                            <div className="relative mb-6 bg-gray-100 rounded-2xl overflow-hidden">
-                                                <img
-                                                    ref={cropImageRef}
-                                                    src={ineCapture.selectedFromGallery}
-                                                    alt="Imagen a recortar"
-                                                    className="w-full h-auto max-h-96 object-contain select-none"
-                                                    onLoad={() => {
-                                                        if (cropImageRef.current) {
-                                                            initializeCropPoints(cropImageRef.current);
-                                                        }
-                                                    }}
-                                                    onMouseMove={updateDragHandle}
-                                                    onMouseUp={endDragHandle}
-                                                    onMouseLeave={endDragHandle}
-                                                    onDragStart={(e) => e.preventDefault()}
-                                                    draggable={false}
+                                        {/* Área de recorte */}
+                                        <div className="flex-1 relative overflow-hidden">
+                                            <div className="absolute inset-0">
+                                                {/* Imagen que se puede mover y escalar */}
+                                                <div 
+                                                    className="absolute inset-0 flex items-center justify-center"
                                                     style={{
-                                                        userSelect: 'none',
-                                                        WebkitUserSelect: 'none',
-                                                        MozUserSelect: 'none',
-                                                        msUserSelect: 'none'
+                                                        transform: `translate(${ineCapture.cropData.translateX}px, ${ineCapture.cropData.translateY}px)`
                                                     }}
-                                                />
+                                                >
+                                                    <img
+                                                        ref={cropImageRef}
+                                                        src={ineCapture.selectedFromGallery}
+                                                        alt="Imagen a recortar"
+                                                        className="select-none"
+                                                        style={{
+                                                            transform: `scale(${ineCapture.cropData.scale})`,
+                                                            maxWidth: 'none',
+                                                            maxHeight: 'none',
+                                                            userSelect: 'none',
+                                                            WebkitUserSelect: 'none',
+                                                            cursor: ineCapture.cropData.isDragging ? 'grabbing' : 'grab'
+                                                        }}
+                                                        onLoad={() => {
+                                                            if (cropImageRef.current) {
+                                                                setTimeout(() => initializeImageCrop(cropImageRef.current), 100);
+                                                            }
+                                                        }}
+                                                        onMouseDown={handleImageMouseDown}
+                                                        onMouseMove={handleImageMouseMove}
+                                                        onMouseUp={handleImageMouseUp}
+                                                        onMouseLeave={handleImageMouseUp}
+                                                        onWheel={handleImageWheel}
+                                                        onTouchStart={handleTouchStart}
+                                                        onTouchMove={handleTouchMove}
+                                                        onTouchEnd={handleTouchEnd}
+                                                        onDragStart={(e) => e.preventDefault()}
+                                                        draggable={false}
+                                                    />
+                                                </div>
 
-                                                {ineCapture.cropData.imageSize.width > 0 && (
-                                                    <>
-                                                        {/* Área seleccionada */}
-                                                        <div
-                                                            className="absolute border-2 border-blue-400 bg-blue-400/10 pointer-events-none"
-                                                            style={{
-                                                                left: getCropRectangle().x,
-                                                                top: getCropRectangle().y,
-                                                                width: getCropRectangle().width,
-                                                                height: getCropRectangle().height,
-                                                            }}
-                                                        >
-                                                            <div className="absolute inset-0">
-                                                                <div className="absolute top-0 left-0 right-0 h-px bg-blue-400"></div>
-                                                                <div className="absolute bottom-0 left-0 right-0 h-px bg-blue-400"></div>
-                                                                <div className="absolute top-0 bottom-0 left-0 w-px bg-blue-400"></div>
-                                                                <div className="absolute top-0 bottom-0 right-0 w-px bg-blue-400"></div>
-                                                                <div className="absolute top-1/3 left-0 right-0 h-px bg-blue-300 opacity-50"></div>
-                                                                <div className="absolute top-2/3 left-0 right-0 h-px bg-blue-300 opacity-50"></div>
-                                                                <div className="absolute top-0 bottom-0 left-1/3 w-px bg-blue-300 opacity-50"></div>
-                                                                <div className="absolute top-0 bottom-0 left-2/3 w-px bg-blue-300 opacity-50"></div>
-                                                            </div>
+                                                {/* Overlay oscura con área de recorte transparente */}
+                                                <div className="absolute inset-0 pointer-events-none">
+                                                    {/* Overlay superior */}
+                                                    <div 
+                                                        className="absolute top-0 left-0 right-0 bg-black/60"
+                                                        style={{ height: ineCapture.cropData.cropArea.y }}
+                                                    ></div>
+                                                    
+                                                    {/* Overlay inferior */}
+                                                    <div 
+                                                        className="absolute bottom-0 left-0 right-0 bg-black/60"
+                                                        style={{ 
+                                                            height: `calc(100% - ${ineCapture.cropData.cropArea.y + ineCapture.cropData.cropArea.height}px)` 
+                                                        }}
+                                                    ></div>
+                                                    
+                                                    {/* Overlay izquierda */}
+                                                    <div 
+                                                        className="absolute bg-black/60"
+                                                        style={{ 
+                                                            top: ineCapture.cropData.cropArea.y,
+                                                            left: 0,
+                                                            width: ineCapture.cropData.cropArea.x,
+                                                            height: ineCapture.cropData.cropArea.height
+                                                        }}
+                                                    ></div>
+                                                    
+                                                    {/* Overlay derecha */}
+                                                    <div 
+                                                        className="absolute bg-black/60"
+                                                        style={{ 
+                                                            top: ineCapture.cropData.cropArea.y,
+                                                            right: 0,
+                                                            width: `calc(100% - ${ineCapture.cropData.cropArea.x + ineCapture.cropData.cropArea.width}px)`,
+                                                            height: ineCapture.cropData.cropArea.height
+                                                        }}
+                                                    ></div>
 
-                                                            <div className="absolute -top-8 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
-                                                                {getCropRectangle().width.toFixed(0)} x {getCropRectangle().height.toFixed(0)}
-                                                            </div>
+                                                    {/* Borde del área de recorte */}
+                                                    <div 
+                                                        className="absolute border-2 border-white rounded-lg"
+                                                        style={{
+                                                            left: ineCapture.cropData.cropArea.x,
+                                                            top: ineCapture.cropData.cropArea.y,
+                                                            width: ineCapture.cropData.cropArea.width,
+                                                            height: ineCapture.cropData.cropArea.height,
+                                                            boxShadow: '0 0 0 1px rgba(0,0,0,0.5)'
+                                                        }}
+                                                    >
+                                                        {/* Cuadrícula de regla de los tercios */}
+                                                        {ineCapture.cropData.showGrid && (
+                                                            <>
+                                                                {/* Líneas verticales */}
+                                                                <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/40"></div>
+                                                                <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white/40"></div>
+                                                                
+                                                                {/* Líneas horizontales */}
+                                                                <div className="absolute top-1/3 left-0 right-0 h-px bg-white/40"></div>
+                                                                <div className="absolute top-2/3 left-0 right-0 h-px bg-white/40"></div>
+                                                            </>
+                                                        )}
+
+                                                        {/* Esquinas del marco de recorte */}
+                                                        <div className="absolute -top-1 -left-1 w-6 h-6">
+                                                            <div className="absolute top-0 left-0 w-4 h-1 bg-white rounded-r"></div>
+                                                            <div className="absolute top-0 left-0 w-1 h-4 bg-white rounded-b"></div>
                                                         </div>
-
-                                                        {/* Handle 1: Superior izquierda */}
-                                                        <div
-                                                            className={`absolute w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-move shadow-lg transform -translate-x-2 -translate-y-2 hover:bg-blue-600 transition-colors ${ineCapture.cropData.dragging === 'topLeft' ? 'bg-blue-600 scale-125' : ''
-                                                                }`}
-                                                            style={{
-                                                                left: ineCapture.cropData.topLeft.x,
-                                                                top: ineCapture.cropData.topLeft.y,
-                                                                zIndex: 10
-                                                            }}
-                                                            onMouseDown={(e) => startDragHandle(e, 'topLeft')}
-                                                        >
-                                                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-1 py-0.5 rounded text-xs whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                                                                1
-                                                            </div>
+                                                        
+                                                        <div className="absolute -top-1 -right-1 w-6 h-6">
+                                                            <div className="absolute top-0 right-0 w-4 h-1 bg-white rounded-l"></div>
+                                                            <div className="absolute top-0 right-0 w-1 h-4 bg-white rounded-b"></div>
                                                         </div>
-
-                                                        {/* Handle 2: Superior derecha */}
-                                                        <div
-                                                            className={`absolute w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-move shadow-lg transform -translate-x-2 -translate-y-2 hover:bg-blue-600 transition-colors ${ineCapture.cropData.dragging === 'topRight' ? 'bg-blue-600 scale-125' : ''
-                                                                }`}
-                                                            style={{
-                                                                left: ineCapture.cropData.topRight.x,
-                                                                top: ineCapture.cropData.topRight.y,
-                                                                zIndex: 10
-                                                            }}
-                                                            onMouseDown={(e) => startDragHandle(e, 'topRight')}
-                                                        >
-                                                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-1 py-0.5 rounded text-xs whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                                                                2
-                                                            </div>
+                                                        
+                                                        <div className="absolute -bottom-1 -left-1 w-6 h-6">
+                                                            <div className="absolute bottom-0 left-0 w-4 h-1 bg-white rounded-r"></div>
+                                                            <div className="absolute bottom-0 left-0 w-1 h-4 bg-white rounded-t"></div>
                                                         </div>
-
-                                                        {/* Handle 3: Inferior izquierda */}
-                                                        <div
-                                                            className={`absolute w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-move shadow-lg transform -translate-x-2 -translate-y-2 hover:bg-blue-600 transition-colors ${ineCapture.cropData.dragging === 'bottomLeft' ? 'bg-blue-600 scale-125' : ''
-                                                                }`}
-                                                            style={{
-                                                                left: ineCapture.cropData.bottomLeft.x,
-                                                                top: ineCapture.cropData.bottomLeft.y,
-                                                                zIndex: 10
-                                                            }}
-                                                            onMouseDown={(e) => startDragHandle(e, 'bottomLeft')}
-                                                        >
-                                                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-1 py-0.5 rounded text-xs whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                                                                3
-                                                            </div>
+                                                        
+                                                        <div className="absolute -bottom-1 -right-1 w-6 h-6">
+                                                            <div className="absolute bottom-0 right-0 w-4 h-1 bg-white rounded-l"></div>
+                                                            <div className="absolute bottom-0 right-0 w-1 h-4 bg-white rounded-t"></div>
                                                         </div>
-
-                                                        {/* Handle 4: Inferior derecha */}
-                                                        <div
-                                                            className={`absolute w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-move shadow-lg transform -translate-x-2 -translate-y-2 hover:bg-blue-600 transition-colors ${ineCapture.cropData.dragging === 'bottomRight' ? 'bg-blue-600 scale-125' : ''
-                                                                }`}
-                                                            style={{
-                                                                left: ineCapture.cropData.bottomRight.x,
-                                                                top: ineCapture.cropData.bottomRight.y,
-                                                                zIndex: 10
-                                                            }}
-                                                            onMouseDown={(e) => startDragHandle(e, 'bottomRight')}
-                                                        >
-                                                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-1 py-0.5 rounded text-xs whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                                                                4
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
-
-                                                {ineCapture.cropData.imageSize.width === 0 && (
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                        <div className="bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
-                                                            Cargando herramientas de recorte...
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Información del área */}
-                                            <div className="mb-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                                    <div>
-                                                        <span className="font-medium text-blue-700">Área:</span>
-                                                        <span className="ml-2 text-blue-600">
-                                                            {getCropRectangle().width.toFixed(0)} × {getCropRectangle().height.toFixed(0)} px
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium text-blue-700">Proporción:</span>
-                                                        <span className="ml-2 text-blue-600">
-                                                            {(getCropRectangle().width / getCropRectangle().height).toFixed(2)}:1
-                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            {/* Botones */}
-                                            <div className="flex space-x-3">
+                                        {/* Bottom controls */}
+                                        <div className="bg-black p-4">
+                                            <div className="flex items-center justify-center space-x-8">
+                                                {/* Botón de reset */}
                                                 <button
-                                                    onClick={resetIneCaptureWithHandles}
-                                                    className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors font-medium"
+                                                    onClick={resetImagePosition}
+                                                    className="p-3 bg-gray-800 rounded-full"
                                                     type="button"
                                                 >
-                                                    Cancelar
+                                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
                                                 </button>
 
+                                                {/* Indicador de zoom */}
+                                                <div className="text-white text-sm font-medium">
+                                                    {Math.round(ineCapture.cropData.scale * 100)}%
+                                                </div>
+
+                                                {/* Botón de ajuste automático */}
                                                 <button
                                                     onClick={() => {
                                                         if (cropImageRef.current) {
-                                                            initializeCropPoints(cropImageRef.current);
+                                                            initializeImageCrop(cropImageRef.current);
                                                         }
                                                     }}
-                                                    className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors font-medium"
+                                                    className="p-3 bg-gray-800 rounded-full"
                                                     type="button"
                                                 >
-                                                    Reiniciar
-                                                </button>
-
-                                                <button
-                                                    onClick={confirmCropWithHandles}
-                                                    disabled={getCropRectangle().width < 20 || getCropRectangle().height < 20}
-                                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
-                                                    type="button"
-                                                >
-                                                    <Crop className="w-5 h-5" />
-                                                    <span>Recortar</span>
+                                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                                    </svg>
                                                 </button>
                                             </div>
 
-                                            {/* Consejos */}
-                                            <div className="mt-4 p-3 bg-gray-50 rounded-xl">
-                                                <h4 className="font-medium text-gray-800 mb-2 flex items-center">
-                                                    <span className="mr-2">💡</span>
-                                                    Consejos:
-                                                </h4>
-                                                <ul className="text-xs text-gray-600 space-y-1">
-                                                    <li>• Arrastra los 4 puntos azules para ajustar el área</li>
-                                                    <li>• Incluye toda la información importante de la INE</li>
-                                                    <li>• La imagen debe ser clara y legible</li>
-                                                    <li>• Usa "Reiniciar" para volver a centrar los puntos</li>
-                                                </ul>
+                                            {/* Instrucciones */}
+                                            <div className="mt-4 text-center">
+                                                <p className="text-gray-400 text-sm">
+                                                    Arrastra para mover • Pellizca para hacer zoom
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -976,7 +1078,6 @@ const VerifyProfile = () => {
                                                 )}
                                             </div>
 
-                                            {/* Botones de acción - ACTUALIZADO */}
                                             {!ineImages[index] && (
                                                 <div className="flex space-x-3">
                                                     <button
