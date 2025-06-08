@@ -171,16 +171,7 @@ const Guardados = ({ events }) => {
                         <h2 className="text-base text-gray-700 text-center mb-4">
                             Verifica tu perfil para acceder a todas las funcionalidades!
                         </h2>
-                        <div className="flex justify-center w-full">
-                            <button
-                                className="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition"
-                                onClick={() => {
-                                    navigate('../verificar');
-                                }}
-                            >
-                                Verificar Perfil
-                            </button>
-                        </div>
+                        
                     </div>
                     )
                 )}

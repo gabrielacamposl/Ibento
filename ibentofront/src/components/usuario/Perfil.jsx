@@ -74,7 +74,9 @@ const Perfil = () => {
             }
         };
         Perfil();
-    }, [makeRequest]);    useEffect(() => {
+    }, []);  
+    
+    useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchVerify = async () => {
             try {

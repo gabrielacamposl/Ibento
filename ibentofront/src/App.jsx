@@ -36,7 +36,10 @@ import Matches from "./components/match/itsMatch";
 import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
-
+import SubirFotos from "./components/usuario/verificar/upload_photos";
+import Descripcion from "./components/usuario/verificar/profile_description" ;
+import IneValidation from "./components/usuario/verificar/ine_face_validation";
+import Intereses from "./components/usuario/verificar/select_interests";
 // Eventos
 import EventoPage from "./components/eventos/eventoPage";
 import PrincipalEventos from "./components/eventos/principalEventos";
@@ -348,6 +351,12 @@ export default function App() {
               <Route path="match" element={<MisMatches />} />
               <Route path="verLike" element={<Like />} />
               <Route path="chat" element={<Chat />} />
+
+              {/* Acciones de verificación */}
+              <Route path="subirFotos" element={<SubirFotos />} />
+              <Route path="descripcion" element={<Descripcion />} />
+              <Route path="ineValidation" element={<IneValidation />} />
+              <Route path="intereses" element={<Intereses />} />
             </Route>
           </Routes>
         </AuthGuard>
