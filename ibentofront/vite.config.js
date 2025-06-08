@@ -101,6 +101,22 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          faceapi: ['@vladmandic/face-api']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    target: 'esnext'
+  },
+  define: {
+    global: 'globalThis'
+  }
+  
 });
 
