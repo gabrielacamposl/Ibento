@@ -569,18 +569,22 @@ const buscarMatchx = () => {
                 )}
 
                 <dialog id="my_modal_2" className="modal">
-                    <div className="modal-box max-w-sm mx-auto glass-premium rounded-3xl shadow-2xl border border-white/30 p-0 overflow-hidden">
+                    <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/20">
+                        <div className="flex items-center justify-between p-6 pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl flex items-center justify-center">
-                                    <Filter className="w-5 h-5 text-white" />
+                                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Filtros Premium</h2>
+                                <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
                             </div>
                             <form method="dialog">
-                                <button className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-300 border border-white/30">
-                                    <X className="w-5 h-5 text-gray-700" />
+                                <button className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                 </button>
                             </form>
                         </div>
@@ -617,36 +621,54 @@ const buscarMatchx = () => {
                             {/* Género */}
                             <div className="bg-white rounded-2xl p-5 shadow-sm">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Género</h3>
-                                <select className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                                    <option>Todos</option>
-                                    <option>Masculino</option>
-                                    <option>Femenino</option>
-                                </select>
+                                <div className="relative">
+                                    <select className="w-full bg-gray-100 border-0 rounded-xl py-3 px-4 text-gray-800 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>Búsqueda de acompañante</option>
+                                        <option>Hombre</option>
+                                        <option>Mujer</option>
+                                        <option>Otro</option>
+                                        <option>Todos</option>
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Rango de edad */}
                             <div className="bg-white rounded-2xl p-5 shadow-sm">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                                    Rango de edad: {value[0]} - {value[1]} años
+                                    Rango de edad
                                 </h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-500 mb-1">Mínimo</p>
+                                        <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                            <span className="text-lg font-bold text-gray-800">{value[0]}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 mx-4">
+                                        <div className="h-px bg-gray-200"></div>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-500 mb-1">Máximo</p>
+                                        <div className="bg-gray-100 rounded-lg px-3 py-2 min-w-[50px]">
+                                            <span className="text-lg font-bold text-gray-800">{value[1]}</span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="px-2">
                                     <Slider
                                         min={18}
-                                        max={65}
                                         value={value}
                                         onChange={(e) => setValue(e.value)}
-                                        className="w-full"
+                                        className="w-full p-1 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"
                                         range
-                                        pt={{
-                                            root: { className: 'h-2' },
-                                            range: { className: 'bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full' },
-                                            track: { className: 'bg-gray-200 h-2 rounded-full' },
-                                            thumb: { className: 'w-5 h-5 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:scale-110 transition-transform' }
-                                        }}
                                     />
                                 </div>
                             </div>
-
 
                             {/* Botón de aplicar */}
                             <button
@@ -668,7 +690,6 @@ const buscarMatchx = () => {
                             </button>
                         </div>
                     </div>
-
                     <form method="dialog" className="modal-backdrop bg-black bg-opacity-30">
                         <button className="cursor-pointer">cerrar</button>
                     </form>
