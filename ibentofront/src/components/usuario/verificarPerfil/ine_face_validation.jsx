@@ -4,7 +4,7 @@ import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCc
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
-import * as faceapi from '@vladmandic/face-api';
+//import * as faceapi from '@vladmandic/face-api';
 
 const VerifyProfile = () => {
     const navigate = useNavigate();
@@ -86,10 +86,10 @@ const VerifyProfile = () => {
                 
                 // Cargar modelos necesarios desde la carpeta public/models
                 await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-                    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+                    window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+                    window.faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
                 ]);
                 
                 setIsModelLoaded(true);
@@ -123,8 +123,8 @@ const VerifyProfile = () => {
 
         try {
             // ===== DETECCIÓN REAL CON FACE-API.JS =====
-            const detections = await faceapi
-                .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({
+            const detections = await window.faceapi
+                .detectAllFaces(video, new window.faceapi.TinyFaceDetectorOptions({
                     inputSize: 416,
                     scoreThreshold: 0.5
                 }))
@@ -132,7 +132,7 @@ const VerifyProfile = () => {
 
             // Configurar canvas
             const displaySize = { width: video.videoWidth, height: video.videoHeight };
-            faceapi.matchDimensions(canvas, displaySize);
+            window.faceapi.matchDimensions(canvas, displaySize);
             
             // Limpiar canvas anterior
             const ctx = canvas.getContext('2d');

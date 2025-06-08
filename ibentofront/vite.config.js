@@ -102,9 +102,8 @@ export default defineConfig({
       }
     })
   ],
-  build: {
+   build: {
     rollupOptions: {
-      external: ['face-api.js'],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom']
@@ -116,9 +115,6 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis'
-  },
-  optimizeDeps: {
-    exclude: ['face-api.js']
   }
   
 });
