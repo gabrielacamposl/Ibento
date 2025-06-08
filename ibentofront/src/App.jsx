@@ -19,14 +19,18 @@ import RecuperarContrasena from "./components/accounts/resetPassword/recuperarCo
 import IngresarCodigo from "./components/accounts/resetPassword/validarCodigo";
 import NuevaContrasena from "./components/accounts/resetPassword/nuevaContrasena";
 
-// Match
+// Editar Perfil
 import Perfil from "./components/usuario/Perfil";
 import SideBar from "./components/usuario/sidebar";
 import EditarPerfil from "./components/usuario/EditarPerfil";
 import EditarIntereses from "./components/usuario/Intereses";
 import Favoritos from "./components/usuario/Favoritos";
 import Guardados from "./components/usuario/Guardados";
+
+// Verificar Perfil
 import VerificarPerfil from "./components/usuario/verificar";
+import IneValidation from "./components/usuario/verificarPerfil/ine_face_validation";
+// Match
 import PerfilCheck from "./components/usuario/PerfilVerificado";
 import PerfilRepetido from "./components/usuario/profileRepeat";
 import BuscarMatches from "./components/match/BuscarMatch";
@@ -340,6 +344,9 @@ export default function App() {
               <Route path="profileVerify" element={<PerfilCheck />} />
               <Route path="profileRepeat" element={<PerfilRepetido />} />
 
+              {/* Verificar */}
+              <Route path="verificar-ine" element={<IneValidation />} />
+v
               {/* Matches y chat */}
               <Route path="matches" element={<BuscarMatches />} />
               <Route path="verPerfil" element={<Perfiles />} />
