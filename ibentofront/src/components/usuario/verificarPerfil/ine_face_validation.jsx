@@ -125,18 +125,29 @@ const VerifyProfile = () => {
 
     // ===== FUNCIONES PARA EL SISTEMA DE 4 PUNTOS =====
 
-    const initializeCropPoints = (imageElement) => {
+    const getCropRectangle = () => {
+        if (!ineCapture.cropData) return { x: 0, y: 0, width: 0, height: 0 };
+        
+        const { topLeft, topRight, bottomLeft, bottomRight } = ineCapture.cropData;
+        
+        const x = Math.min(topLeft.x, bottomLeft.x);
+        const y = Math.min(topLeft.y, topRight.y);
+        const width = Math.max(topRight.x, bottomRight.x) - x;
+        const height = Math.max(bottomLeft.y, bottomRight.y) - y;
+        
+        return { x, y, width, height };
+    };
+
+    const initializeCropPoints = useCallback((imageElement) => {
         if (!imageElement) return;
         
         const rect = imageElement.getBoundingClientRect();
-        const idealAspectRatio = 1.6; // Proporción común para INE/ID
-        const padding = 30;
+        const idealAspectRatio = 1.6; // Proporción típica de INE
+        const padding = 40;
         
-        // Calcular dimensiones iniciales manteniendo la proporción
         let width = rect.width - (padding * 2);
         let height = width / idealAspectRatio;
         
-        // Ajustar si la altura es demasiado grande
         if (height > rect.height - (padding * 2)) {
             height = rect.height - (padding * 2);
             width = height * idealAspectRatio;
@@ -145,23 +156,37 @@ const VerifyProfile = () => {
         const left = (rect.width - width) / 2;
         const top = (rect.height - height) / 2;
         
+        const newCropData = {
+            topLeft: { x: left, y: top },
+            topRight: { x: left + width, y: top },
+            bottomLeft: { x: left, y: top + height },
+            bottomRight: { x: left + width, y: top + height },
+            imageSize: { width: rect.width, height: rect.height },
+            dragging: null
+        };
+        
         setIneCapture(prev => ({
             ...prev,
-            cropData: {
-                ...prev.cropData,
-                topLeft: { x: left, y: top },
-                topRight: { x: left + width, y: top },
-                bottomLeft: { x: left, y: top + height },
-                bottomRight: { x: left + width, y: top + height },
-                imageSize: { width: rect.width, height: rect.height },
-                aspectRatio: idealAspectRatio
-            }
+            cropData: newCropData
         }));
-    };
+        
+        setCropState(prev => ({
+            ...prev,
+            imageRef: imageElement,
+            cropPoints: newCropData
+        }));
+    }, []);
 
-    const startDragHandle = (e, handleType) => {
+    const startDragHandle = useCallback((e, handleType) => {
         e.preventDefault();
-        e.stopPropagation();
+        if (!cropImageRef.current) return;
+
+        const rect = cropImageRef.current.getBoundingClientRect();
+        setCropState(prev => ({
+            ...prev,
+            isDragging: true,
+            currentPoint: handleType
+        }));
         
         setIneCapture(prev => ({
             ...prev,
@@ -170,23 +195,22 @@ const VerifyProfile = () => {
                 dragging: handleType
             }
         }));
-    };
+    }, []);
 
-    const updateDragHandle = (e) => {
-        if (!ineCapture.cropData.dragging || !cropImageRef.current) return;
+    const updateDragHandle = useCallback((e) => {
+        if (!cropState.isDragging || !cropImageRef.current) return;
         
         const rect = cropImageRef.current.getBoundingClientRect();
         const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
         const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
         
-        const { dragging, aspectRatio } = ineCapture.cropData;
-        const newCropData = { ...ineCapture.cropData };
-        
-        // Actualizar la posición del punto arrastrado
-        newCropData[dragging] = { x, y };
-        
-        // Mantener proporción al arrastrar las esquinas
-        if (aspectRatio) {
+        setIneCapture(prev => {
+            if (!prev.cropData || !prev.cropData.dragging) return prev;
+            
+            const newCropData = { ...prev.cropData };
+            newCropData[prev.cropData.dragging] = { x, y };
+            
+            // Mantener proporción 1.6:1
             const opposite = {
                 topLeft: 'bottomRight',
                 topRight: 'bottomLeft',
@@ -194,28 +218,30 @@ const VerifyProfile = () => {
                 bottomRight: 'topLeft'
             };
             
-            const anchor = newCropData[opposite[dragging]];
+            const anchor = newCropData[opposite[prev.cropData.dragging]];
             const width = Math.abs(x - anchor.x);
-            const height = width / aspectRatio;
+            const height = width / 1.6;
             
-            // Calcular nueva posición manteniendo la proporción
-            if (dragging.includes('top')) {
-                newCropData[dragging].y = anchor.y - height;
-            } else {
-                newCropData[dragging].y = anchor.y + height;
+            if (prev.cropData.dragging.includes('top')) {
+                newCropData[prev.cropData.dragging].y = anchor.y - height;
+            } else if (prev.cropData.dragging.includes('bottom')) {
+                newCropData[prev.cropData.dragging].y = anchor.y + height;
             }
-        }
-        
-        // Aplicar los cambios
-        setIneCapture(prev => ({
+            
+            return {
+                ...prev,
+                cropData: newCropData
+            };
+        });
+    }, [cropState.isDragging]);
+
+    const endDragHandle = useCallback((e) => {
+        setCropState(prev => ({
             ...prev,
-            cropData: newCropData
+            isDragging: false,
+            currentPoint: null
         }));
         
-        e.preventDefault();
-    };
-
-    const endDragHandle = (e) => {
         setIneCapture(prev => ({
             ...prev,
             cropData: {
@@ -223,29 +249,33 @@ const VerifyProfile = () => {
                 dragging: null
             }
         }));
-        
-        e?.preventDefault();
-    };
+    }, []);
 
-    const getCropRectangle = () => {
-        const { topLeft, topRight, bottomLeft, bottomRight } = ineCapture.cropData;
-        
-        const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-        const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-        const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-        const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-        
-        return {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
+    useEffect(() => {
+        const handleMouseUp = (e) => {
+            if (cropState.isDragging) {
+                endDragHandle(e);
+            }
         };
-    };
 
-    const confirmCropWithHandles = async () => {
-        console.log('Iniciando crop con handles...');
+        const handleMouseMove = (e) => {
+            if (cropState.isDragging) {
+                updateDragHandle(e);
+            }
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
         
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [cropState.isDragging, updateDragHandle, endDragHandle]);
+
+    // ...existing code...
+
+    const confirmCropWithHandles = useCallback(async () => {
         if (!cropCanvasRef.current || !cropImageRef.current) {
             showError('Error: Referencias no disponibles');
             return;
@@ -253,7 +283,7 @@ const VerifyProfile = () => {
 
         const rect = getCropRectangle();
         
-        // Validar tamaño mínimo y proporción
+        // Validaciones
         if (rect.width < 100 || rect.height < 100) {
             showWarn('El área seleccionada es demasiado pequeña. Debe ser al menos 100x100 píxeles.');
             return;
@@ -271,78 +301,89 @@ const VerifyProfile = () => {
         try {
             const canvas = cropCanvasRef.current;
             const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                showError('Error: Contexto del canvas no disponible');
+                return;
+            }
+
             const img = cropImageRef.current;
             
-            // Calcular la escala para mantener la calidad
-            const scaleX = img.naturalWidth / img.offsetWidth;
-            const scaleY = img.naturalHeight / img.offsetHeight;
+            // Calcular dimensiones manteniendo la calidad
+            const scaleX = img.naturalWidth / img.width;
+            const scaleY = img.naturalHeight / img.height;
             
             const cropX = rect.x * scaleX;
             const cropY = rect.y * scaleY;
             const cropWidth = rect.width * scaleX;
             const cropHeight = rect.height * scaleY;
             
-            // Ajustar el tamaño del canvas para mantener la calidad
+            // Configurar el canvas
             canvas.width = cropWidth;
             canvas.height = cropHeight;
             
-            const tempImg = new Image();
-            tempImg.crossOrigin = 'anonymous';
-            
-            tempImg.onload = () => {
-                try {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Dibujar con suavizado
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    
-                    ctx.drawImage(
-                        tempImg,
-                        cropX, cropY, cropWidth, cropHeight,
-                        0, 0, cropWidth, cropHeight
-                    );
-                    
-                    // Convertir a blob con alta calidad
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            showError('Error al crear la imagen recortada');
-                            return;
-                        }
+            // Crear una imagen temporal
+            return new Promise((resolve, reject) => {
+                const tempImg = new Image();
+                tempImg.crossOrigin = 'anonymous';
+                
+                tempImg.onload = () => {
+                    try {
+                        // Limpiar y configurar el canvas
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
                         
-                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
-                            type: 'image/jpeg'
-                        });
+                        // Dibujar la imagen recortada
+                        ctx.drawImage(
+                            tempImg,
+                            cropX, cropY, cropWidth, cropHeight,
+                            0, 0, cropWidth, cropHeight
+                        );
                         
-                        const newImages = [...ineImages];
-                        newImages[ineCapture.activeIndex] = file;
-                        setIneImages(newImages);
+                        // Convertir a blob con alta calidad
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('Error al crear la imagen recortada'));
+                                return;
+                            }
+                            
+                            const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
+                                type: 'image/jpeg'
+                            });
+                            
+                            // Actualizar estados
+                            const newImages = [...ineImages];
+                            newImages[ineCapture.activeIndex] = file;
+                            setIneImages(newImages);
+                            
+                            const updatedUserINE = [...user.ine];
+                            updatedUserINE[ineCapture.activeIndex] = file;
+                            setUser(prev => ({ ...prev, ine: updatedUserINE }));
+                            
+                            resetIneCaptureWithHandles();
+                            showSuccess('Imagen recortada y optimizada correctamente');
+                            resolve();
+                        }, 'image/jpeg', 0.95);
                         
-                        const updatedUserINE = [...user.ine];
-                        updatedUserINE[ineCapture.activeIndex] = file;
-                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
-                        
-                        resetIneCaptureWithHandles();
-                        showSuccess('Imagen recortada y optimizada correctamente');
-                    }, 'image/jpeg', 0.95); // Aumentar calidad a 95%
-                    
-                } catch (error) {
-                    console.error('Error al procesar imagen:', error);
-                    showError('Error al procesar la imagen');
-                }
-            };
-            
-            tempImg.onerror = () => {
-                showError('Error al cargar la imagen');
-            };
-            
-            tempImg.src = ineCapture.selectedFromGallery;
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                tempImg.onerror = () => {
+                    reject(new Error('Error al cargar la imagen'));
+                };
+                
+                tempImg.src = ineCapture.selectedFromGallery;
+            });
             
         } catch (error) {
             console.error('Error en crop:', error);
-            showError('Error al procesar el recorte');
+            showError('Error al procesar el recorte: ' + error.message);
+            throw error;
         }
-    };
+    }, [ineCapture.activeIndex, ineCapture.selectedFromGallery, getCropRectangle, resetIneCaptureWithHandles, showError, showSuccess, showWarn]);
 
     const handleGallerySelectionWithHandles = (e, index) => {
         const file = e.target.files[0];
@@ -1011,7 +1052,7 @@ const VerifyProfile = () => {
                                                 {index === 0 ? 'Parte frontal' : 'Parte trasera'}
                                             </h3>
 
-                                            <div className="relative w-full aspect-[3/2] border-2 border-dashed border-purple-200 rounded-2xl overflow-hidden hover:border-purple-400 transition-colors duration-300 mb-4">
+                                            <div className="relative w-full aspect-[3/2] border-2 border-dashed border-purple-200 rounded-2xl overflow-hidden hover:border-purple-400 transition-colores duration-300 mb-4">
                                                 {ineImages[index] ? (
                                                     <>
                                                         <img
@@ -1157,7 +1198,7 @@ const VerifyProfile = () => {
                                                 {canRetakeINE && (
                                                     <button
                                                         onClick={retakeINE}
-                                                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm transition-colors"
+                                                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm transition-colores"
                                                         type="button"
                                                     >
                                                         Nueva INE
