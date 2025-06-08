@@ -93,10 +93,10 @@ const VerifyProfile = () => {
                 ]);
                 
                 setIsModelLoaded(true);
-                console.log('✅ Modelos de face-api.js cargados correctamente');
+                console.log('Modelos de face-api.js cargados correctamente');
                 showSuccess('Sistema de detección facial listo');
             } catch (error) {
-                console.error('❌ Error cargando modelos de face-api.js:', error);
+                console.error('Error cargando modelos de face-api.js:', error);
                 showError('Error al cargar el sistema de detección facial. Verifica que los modelos estén en /public/models');
                 
                 // Como fallback, usar simulación
@@ -109,6 +109,90 @@ const VerifyProfile = () => {
 
         loadFaceAPIModels();
     }, []);
+
+    // ===== INICIALIZACIÓN DE MODELOS PARA VERCEL =====
+useEffect(() => {
+    const loadFaceAPIModels = async () => {
+        console.log('Iniciando carga de face-api.js en Vercel...');
+        
+        // Esperar a que window.faceapi esté disponible
+        const waitForFaceAPI = () => {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 100; // Más tiempo para Vercel
+                
+                const checkFaceAPI = () => {
+                    attempts++;
+                    
+                    if (window.faceapi && window.faceapi.nets && window.faceapi.detectAllFaces) {
+                        console.log('Face-api.js cargado en Vercel');
+                        resolve(window.faceapi);
+                        return;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
+                        reject(new Error('Face-api.js timeout en Vercel'));
+                        return;
+                    }
+                    
+                    console.log(`Esperando face-api.js en Vercel... intento ${attempts}`);
+                    setTimeout(checkFaceAPI, 100);
+                };
+                
+                checkFaceAPI();
+            });
+        };
+
+        try {
+            // Esperar a que face-api esté disponible
+            await waitForFaceAPI();
+            
+            console.log('Cargando modelos desde CDN para Vercel...');
+            
+            // ===== USAR CDN PARA MODELOS EN VERCEL =====
+            const modelUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.6.8/model';
+            
+            await Promise.all([
+                window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+                window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+                window.faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl)
+            ]);
+            
+            setIsModelLoaded(true);
+            console.log('🎉 Modelos cargados exitosamente desde CDN');
+            showSuccess('Sistema de detección facial listo');
+            
+        } catch (error) {
+            console.error('Error cargando face-api.js en Vercel:', error);
+            
+            // ===== FALLBACK PARA VERCEL =====
+            console.log('🔄 Intentando fallback con modelos locales...');
+            try {
+                await Promise.all([
+                    window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    window.faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+                ]);
+                
+                setIsModelLoaded(true);
+                console.log('Modelos locales cargados como fallback');
+                showSuccess('Sistema de detección facial listo (local)');
+                
+            } catch (fallbackError) {
+                console.error('Fallback también falló:', fallbackError);
+                showError('Error al cargar el sistema de detección facial');
+                
+                // Último recurso: simulación
+                setTimeout(() => {
+                    setIsModelLoaded(true);
+                    showInfo('Usando detección simulada');
+                }, 1000);
+            }
+        }
+    };
+
+    loadFaceAPIModels();
+}, []);
 
     // ===== FUNCIÓN DE DETECCIÓN FACIAL EN TIEMPO REAL =====
     const detectFaceRealTime = useCallback(async () => {
