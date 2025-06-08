@@ -4,7 +4,7 @@ import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCc
 import Webcam from 'react-webcam';
 import api from "../../api";
 import { Toast } from 'primereact/toast';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 
 const VerifyProfile = () => {
     const navigate = useNavigate();
