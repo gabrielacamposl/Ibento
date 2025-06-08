@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCcw, Check, Image, Crop } from 'lucide-react';
 import Webcam from 'react-webcam';
-import api from "../../api";
+import api from "../../../api";
 import { Toast } from 'primereact/toast';
 //import * as faceapi from '@vladmandic/face-api';
 
