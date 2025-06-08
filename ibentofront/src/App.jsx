@@ -29,7 +29,7 @@ import Guardados from "./components/usuario/Guardados";
 
 // Verificar Perfil
 import VerificarPerfil from "./components/usuario/verificar";
-import IneValidation from "./components/usuario/verificar/ine_face_validation";
+import IneValidation from "./components/usuario/verificarPerfil/ine_face_validation";
 // Match
 import PerfilCheck from "./components/usuario/PerfilVerificado";
 import PerfilRepetido from "./components/usuario/profileRepeat";
