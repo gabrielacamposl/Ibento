@@ -30,6 +30,10 @@ import Guardados from "./components/usuario/Guardados";
 // Verificar Perfil
 import VerificarPerfil from "./components/usuario/verificar";
 import IneValidation from "./components/usuario/verificarPerfil/ine_face_validation";
+import SubirFotos from "./components/usuario/verificarPerfil/upload_photos";
+import Descripcion from "./components/usuario/verificarPerfil/profile_description" ;
+import Intereses from "./components/usuario/verificarPerfil/select_interests";
+
 // Match
 import PerfilCheck from "./components/usuario/PerfilVerificado";
 import PerfilRepetido from "./components/usuario/profileRepeat";
@@ -40,6 +44,9 @@ import Matches from "./components/match/itsMatch";
 import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
+import SubirFotos from "./components/usuario/verificar/upload_photos";
+import Descripcion from "./components/usuario/verificar/profile_description" ;
+import Intereses from "./components/usuario/verificar/select_interests";
 
 // Eventos
 import EventoPage from "./components/eventos/eventoPage";
@@ -355,6 +362,12 @@ v
               <Route path="match" element={<MisMatches />} />
               <Route path="verLike" element={<Like />} />
               <Route path="chat" element={<Chat />} />
+
+              {/* Acciones de verificación */}
+              <Route path="subirFotos" element={<SubirFotos />} />
+              <Route path="descripcion" element={<Descripcion />} />
+              <Route path="ineValidation" element={<IneValidation />} />
+              <Route path="intereses" element={<Intereses />} />
             </Route>
           </Routes>
         </AuthGuard>
