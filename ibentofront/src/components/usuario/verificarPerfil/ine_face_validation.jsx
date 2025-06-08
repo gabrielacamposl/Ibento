@@ -38,22 +38,21 @@ const VerifyProfile = () => {
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [stepsCompleted, setStepsCompleted] = useState({ ine: false, face: false });
 
-    // ESTADOS PARA INE MEJORADA
+    // ESTADOS PARA INE CON 4 PUNTOS - ACTUALIZADO
     const [ineCapture, setIneCapture] = useState({
-        mode: null, // 'camera' | 'gallery' | null
-        activeIndex: 0, // 0 para frontal, 1 para trasera
+        mode: null,
+        activeIndex: 0,
         showCamera: false,
         capturedImage: null,
         showCrop: false,
         selectedFromGallery: null,
         cropData: {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-            isDragging: false,
-            startX: 0,
-            startY: 0
+            topLeft: { x: 50, y: 50 },
+            topRight: { x: 300, y: 50 },
+            bottomLeft: { x: 50, y: 200 },
+            bottomRight: { x: 300, y: 200 },
+            dragging: null,
+            imageSize: { width: 0, height: 0 }
         }
     });
 
@@ -73,7 +72,7 @@ const VerifyProfile = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // ===== FUNCIONES PARA INE MEJORADA =====
+    // ===== FUNCIONES PARA INE CON 4 PUNTOS =====
 
     const startIneCapture = (mode, index) => {
         setIneCapture(prev => ({
@@ -85,13 +84,12 @@ const VerifyProfile = () => {
             capturedImage: null,
             selectedFromGallery: null,
             cropData: {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0,
-                isDragging: false,
-                startX: 0,
-                startY: 0
+                topLeft: { x: 50, y: 50 },
+                topRight: { x: 300, y: 50 },
+                bottomLeft: { x: 50, y: 200 },
+                bottomRight: { x: 300, y: 200 },
+                dragging: null,
+                imageSize: { width: 0, height: 0 }
             }
         }));
     };
@@ -121,25 +119,186 @@ const VerifyProfile = () => {
         updatedUserINE[ineCapture.activeIndex] = newImages[ineCapture.activeIndex];
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
 
-        resetIneCapture();
+        resetIneCaptureWithHandles();
         showSuccess('Imagen de INE guardada correctamente');
     };
 
-    // Función mejorada para manejar la selección de galería
-    const handleGallerySelection = (e, index) => {
+    // ===== FUNCIONES PARA EL SISTEMA DE 4 PUNTOS =====
+
+    const initializeCropPoints = (imageElement) => {
+        if (!imageElement) return;
+        
+        const rect = imageElement.getBoundingClientRect();
+        const padding = 30;
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                topLeft: { x: padding, y: padding },
+                topRight: { x: rect.width - padding, y: padding },
+                bottomLeft: { x: padding, y: rect.height - padding },
+                bottomRight: { x: rect.width - padding, y: rect.height - padding },
+                imageSize: { width: rect.width, height: rect.height }
+            }
+        }));
+    };
+
+    const startDragHandle = (e, handleType) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                dragging: handleType
+            }
+        }));
+    };
+
+    const updateDragHandle = (e) => {
+        if (!ineCapture.cropData.dragging || !cropImageRef.current) return;
+        
+        const rect = cropImageRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+        
+        const { dragging } = ineCapture.cropData;
+        
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                [dragging]: { x, y }
+            }
+        }));
+        
+        e.preventDefault();
+    };
+
+    const endDragHandle = (e) => {
+        setIneCapture(prev => ({
+            ...prev,
+            cropData: {
+                ...prev.cropData,
+                dragging: null
+            }
+        }));
+        
+        e?.preventDefault();
+    };
+
+    const getCropRectangle = () => {
+        const { topLeft, topRight, bottomLeft, bottomRight } = ineCapture.cropData;
+        
+        const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+        const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+        
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+    };
+
+    const confirmCropWithHandles = async () => {
+        console.log('Iniciando crop con handles...');
+        
+        if (!cropCanvasRef.current || !cropImageRef.current) {
+            showError('Error: Referencias no disponibles');
+            return;
+        }
+
+        const rect = getCropRectangle();
+        
+        if (rect.width < 20 || rect.height < 20) {
+            showWarn('El área seleccionada es demasiado pequeña');
+            return;
+        }
+
+        try {
+            const canvas = cropCanvasRef.current;
+            const ctx = canvas.getContext('2d');
+            const img = cropImageRef.current;
+            
+            const scaleX = img.naturalWidth / img.offsetWidth;
+            const scaleY = img.naturalHeight / img.offsetHeight;
+            
+            const cropX = rect.x * scaleX;
+            const cropY = rect.y * scaleY;
+            const cropWidth = rect.width * scaleX;
+            const cropHeight = rect.height * scaleY;
+            
+            canvas.width = cropWidth;
+            canvas.height = cropHeight;
+            
+            const tempImg = new Image();
+            tempImg.crossOrigin = 'anonymous';
+            
+            tempImg.onload = () => {
+                try {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.drawImage(
+                        tempImg,
+                        cropX, cropY, cropWidth, cropHeight,
+                        0, 0, cropWidth, cropHeight
+                    );
+                    
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            showError('Error al crear la imagen recortada');
+                            return;
+                        }
+                        
+                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
+                            type: 'image/jpeg'
+                        });
+                        
+                        const newImages = [...ineImages];
+                        newImages[ineCapture.activeIndex] = file;
+                        setIneImages(newImages);
+                        
+                        const updatedUserINE = [...user.ine];
+                        updatedUserINE[ineCapture.activeIndex] = file;
+                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
+                        
+                        resetIneCaptureWithHandles();
+                        showSuccess('Imagen recortada correctamente');
+                    }, 'image/jpeg', 0.9);
+                    
+                } catch (error) {
+                    console.error('Error al procesar imagen:', error);
+                    showError('Error al procesar la imagen');
+                }
+            };
+            
+            tempImg.onerror = () => {
+                showError('Error al cargar la imagen');
+            };
+            
+            tempImg.src = ineCapture.selectedFromGallery;
+            
+        } catch (error) {
+            console.error('Error en crop:', error);
+            showError('Error al procesar el recorte');
+        }
+    };
+
+    const handleGallerySelectionWithHandles = (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        console.log('Archivo seleccionado:', file.name, file.size, file.type);
-
-        // Validar que sea una imagen
         if (!file.type.startsWith('image/')) {
-            showError('Por favor selecciona un archivo de imagen válido');
+            showError('Por favor selecciona una imagen válida');
             e.target.value = '';
             return;
         }
 
-        // Validar el tamaño del archivo (máximo 10MB)
         if (file.size > 10 * 1024 * 1024) {
             showError('La imagen es demasiado grande. Máximo 10MB');
             e.target.value = '';
@@ -147,9 +306,8 @@ const VerifyProfile = () => {
         }
 
         const reader = new FileReader();
-
+        
         reader.onload = (event) => {
-            console.log('Imagen cargada desde galería para índice:', index);
             setIneCapture(prev => ({
                 ...prev,
                 activeIndex: index,
@@ -157,196 +315,25 @@ const VerifyProfile = () => {
                 showCrop: true,
                 mode: 'gallery',
                 capturedImage: null,
-                showCamera: false,
-                cropData: {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0,
-                    isDragging: false,
-                    startX: 0,
-                    startY: 0
-                }
+                showCamera: false
             }));
+            
+            setTimeout(() => {
+                if (cropImageRef.current) {
+                    initializeCropPoints(cropImageRef.current);
+                }
+            }, 100);
         };
-
-        reader.onerror = (error) => {
-            console.error('Error al cargar la imagen:', error);
+        
+        reader.onerror = () => {
             showError('Error al cargar la imagen');
             e.target.value = '';
         };
-
+        
         reader.readAsDataURL(file);
     };
 
-    // Funciones de crop CORREGIDAS
-    const startCrop = (e) => {
-        if (!cropImageRef.current) return;
-
-        const rect = cropImageRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                isDragging: true,
-                startX: x,
-                startY: y,
-                x: x,
-                y: y,
-                width: 0,
-                height: 0
-            }
-        }));
-
-        e.preventDefault();
-    };
-
-    const updateCrop = (e) => {
-        if (!ineCapture.cropData.isDragging || !cropImageRef.current) return;
-
-        const rect = cropImageRef.current.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
-
-        const width = currentX - ineCapture.cropData.startX;
-        const height = currentY - ineCapture.cropData.startY;
-
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                width: width,
-                height: height
-            }
-        }));
-
-        e.preventDefault();
-    };
-
-    const endCrop = (e) => {
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                isDragging: false
-            }
-        }));
-
-        e?.preventDefault();
-    };
-
-    // Función para confirmar el crop CORREGIDA
-    const confirmCrop = async () => {
-        console.log('Iniciando confirmCrop...');
-
-        if (!cropCanvasRef.current || !cropImageRef.current) {
-            console.error('Referencias no disponibles');
-            showError('Error: Referencias de canvas no disponibles');
-            return;
-        }
-
-        const canvas = cropCanvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const img = cropImageRef.current;
-
-        const { x, y, width, height } = ineCapture.cropData;
-
-        console.log('Datos del crop:', { x, y, width, height });
-
-        // Validar que el área sea válida
-        if (Math.abs(width) <= 10 || Math.abs(height) <= 10) {
-            showWarn('Selecciona un área más grande para recortar');
-            return;
-        }
-
-        try {
-            // Calcular las coordenadas correctas considerando valores negativos
-            const finalX = Math.min(x, x + width);
-            const finalY = Math.min(y, y + height);
-            const finalWidth = Math.abs(width);
-            const finalHeight = Math.abs(height);
-
-            const scaleX = img.naturalWidth / img.offsetWidth;
-            const scaleY = img.naturalHeight / img.offsetHeight;
-
-            const cropX = finalX * scaleX;
-            const cropY = finalY * scaleY;
-            const cropWidth = finalWidth * scaleX;
-            const cropHeight = finalHeight * scaleY;
-
-            console.log('Coordenadas finales:', { cropX, cropY, cropWidth, cropHeight });
-
-            // Ajustar el canvas
-            canvas.width = cropWidth;
-            canvas.height = cropHeight;
-
-            // Crear una nueva imagen para cargar
-            const tempImg = new Image();
-            tempImg.crossOrigin = 'anonymous';
-
-            tempImg.onload = () => {
-                try {
-                    // Limpiar el canvas
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // Dibujar la imagen recortada
-                    ctx.drawImage(
-                        tempImg,
-                        cropX, cropY, cropWidth, cropHeight,
-                        0, 0, cropWidth, cropHeight
-                    );
-
-                    // Convertir a blob
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            showError('Error al crear la imagen recortada');
-                            return;
-                        }
-
-                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
-                            type: 'image/jpeg'
-                        });
-
-                        console.log('Archivo creado:', file);
-
-                        // Actualizar los estados
-                        const newImages = [...ineImages];
-                        newImages[ineCapture.activeIndex] = file;
-                        setIneImages(newImages);
-
-                        const updatedUserINE = [...user.ine];
-                        updatedUserINE[ineCapture.activeIndex] = file;
-                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
-
-                        resetIneCapture();
-                        showSuccess('Imagen recortada y guardada correctamente');
-                    }, 'image/jpeg', 0.9);
-                } catch (error) {
-                    console.error('Error al dibujar en canvas:', error);
-                    showError('Error al procesar la imagen recortada');
-                }
-            };
-
-            tempImg.onerror = () => {
-                console.error('Error al cargar la imagen');
-                showError('Error al cargar la imagen para recortar');
-            };
-
-            tempImg.src = ineCapture.selectedFromGallery;
-
-        } catch (error) {
-            console.error('Error en confirmCrop:', error);
-            showError('Error al procesar el recorte: ' + error.message);
-        }
-    };
-
-    // Función para resetear el capture MEJORADA
-    const resetIneCapture = () => {
-        console.log('Reseteando INE capture...');
-
+    const resetIneCaptureWithHandles = () => {
         setIneCapture({
             mode: null,
             activeIndex: 0,
@@ -355,20 +342,18 @@ const VerifyProfile = () => {
             showCrop: false,
             selectedFromGallery: null,
             cropData: {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0,
-                isDragging: false,
-                startX: 0,
-                startY: 0
+                topLeft: { x: 50, y: 50 },
+                topRight: { x: 300, y: 50 },
+                bottomLeft: { x: 50, y: 200 },
+                bottomRight: { x: 300, y: 200 },
+                dragging: null,
+                imageSize: { width: 0, height: 0 }
             }
         });
-
-        // Limpiar el input de archivo
+        
         const fileInputs = document.querySelectorAll('input[type="file"]');
         fileInputs.forEach(input => input.value = '');
-
+        
         showInfo('Operación cancelada');
     };
 
@@ -409,7 +394,7 @@ const VerifyProfile = () => {
                 try {
                     setStepsCompleted(prev => ({ ...prev, ine: true }));
                     showSuccess("¡INE validada exitosamente! Ahora valida tu identidad.");
-                    setActiveIndex(1); // Navigate to step 2 (Validación del rostro)
+                    setActiveIndex(1);
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
@@ -432,7 +417,7 @@ const VerifyProfile = () => {
         }
     };
 
-    // ===== VALIDACIÓN DE ROSTRO (SIMPLIFICADA COMO EN EL SEGUNDO CÓDIGO) =====
+    // ===== VALIDACIÓN DE ROSTRO =====
     const handleValidacionRostro = async () => {
         if (!capturedPhoto) {
             showWarn('Debes capturar una imagen de tu rostro');
@@ -530,7 +515,7 @@ const VerifyProfile = () => {
         }
     };
 
-    // ===== CAPTURA DE FOTO SIMPLE (COMO EN EL SEGUNDO CÓDIGO) =====
+    // ===== CAPTURA DE FOTO =====
     const capturarImagen = () => {
         if (!webcamRef.current) {
             showWarn('La cámara no está disponible');
@@ -559,13 +544,13 @@ const VerifyProfile = () => {
 
     // ===== CONFIGURACIONES DE CÁMARA =====
     const videoConstraints = {
-        facingMode: "user", // Cámara frontal para rostro
+        facingMode: "user",
         width: { ideal: 640 },
         height: { ideal: 480 }
     };
 
     const ineVideoConstraints = {
-        facingMode: "environment", // Cámara trasera para INE
+        facingMode: "environment",
         width: { ideal: 1280 },
         height: { ideal: 720 }
     };
@@ -602,7 +587,6 @@ const VerifyProfile = () => {
 
     const uploadAllData = async () => {
         console.log('Subiendo todos los datos...');
-        // Implementar tu lógica de subida de datos aquí
     };
 
     return (
@@ -651,7 +635,7 @@ const VerifyProfile = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-premium rounded-3xl p-6 mb-6">
 
-                        {/* STEP 1: INE VERIFICATION MEJORADA */}
+                        {/* STEP 1: INE VERIFICATION CON 4 PUNTOS */}
                         {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -686,13 +670,11 @@ const VerifyProfile = () => {
                                                                 videoConstraints={ineVideoConstraints}
                                                                 className="w-full h-full object-cover"
                                                             />
-                                                            {/* Overlay de centrado */}
                                                             <div className="absolute inset-0 flex items-center justify-center">
                                                                 <div className="w-[80%] h-[70%] border-4 border-yellow-400 rounded-2xl shadow-lg">
                                                                     <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
                                                                         Centra tu INE aquí
                                                                     </div>
-                                                                    {/* Esquinas para guía */}
                                                                     <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
                                                                     <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
                                                                     <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
@@ -712,7 +694,7 @@ const VerifyProfile = () => {
 
                                             <div className="flex space-x-3">
                                                 <button
-                                                    onClick={resetIneCapture}
+                                                    onClick={resetIneCaptureWithHandles}
                                                     className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors"
                                                     type="button"
                                                 >
@@ -752,7 +734,7 @@ const VerifyProfile = () => {
                                     </div>
                                 )}
 
-                                {/* Crop */}
+                                {/* Modal de Crop con 4 Puntos */}
                                 {ineCapture.showCrop && ineCapture.selectedFromGallery && (
                                     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
                                         <div className="bg-white rounded-3xl p-6 max-w-3xl w-full max-h-[95vh] overflow-auto">
@@ -801,14 +783,11 @@ const VerifyProfile = () => {
                                                                 height: getCropRectangle().height,
                                                             }}
                                                         >
-                                                            {/* Líneas de guía */}
                                                             <div className="absolute inset-0">
                                                                 <div className="absolute top-0 left-0 right-0 h-px bg-blue-400"></div>
                                                                 <div className="absolute bottom-0 left-0 right-0 h-px bg-blue-400"></div>
                                                                 <div className="absolute top-0 bottom-0 left-0 w-px bg-blue-400"></div>
                                                                 <div className="absolute top-0 bottom-0 right-0 w-px bg-blue-400"></div>
-
-                                                                {/* Cuadrícula */}
                                                                 <div className="absolute top-1/3 left-0 right-0 h-px bg-blue-300 opacity-50"></div>
                                                                 <div className="absolute top-2/3 left-0 right-0 h-px bg-blue-300 opacity-50"></div>
                                                                 <div className="absolute top-0 bottom-0 left-1/3 w-px bg-blue-300 opacity-50"></div>
@@ -963,14 +942,6 @@ const VerifyProfile = () => {
                                     </div>
                                 )}
 
-                                {/* Y actualiza el input de galería por: */}
-                                <input
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={(e) => handleGallerySelectionWithHandles(e, index)}
-                                />
-
                                 {/* Grid de imágenes INE */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {Array.from({ length: 2 }).map((_, index) => (
@@ -1005,7 +976,7 @@ const VerifyProfile = () => {
                                                 )}
                                             </div>
 
-                                            {/* Botones de acción */}
+                                            {/* Botones de acción - ACTUALIZADO */}
                                             {!ineImages[index] && (
                                                 <div className="flex space-x-3">
                                                     <button
@@ -1026,7 +997,7 @@ const VerifyProfile = () => {
                                                             type="file"
                                                             className="hidden"
                                                             accept="image/*"
-                                                            onChange={(e) => handleGallerySelection(e, index)}
+                                                            onChange={(e) => handleGallerySelectionWithHandles(e, index)}
                                                         />
                                                     </label>
                                                 </div>
@@ -1043,7 +1014,7 @@ const VerifyProfile = () => {
                             </div>
                         )}
 
-                        {/* STEP 2: FACE VERIFICATION SIMPLIFICADA */}
+                        {/* STEP 2: FACE VERIFICATION */}
                         {activeIndex === 1 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -1055,7 +1026,6 @@ const VerifyProfile = () => {
                                 </div>
 
                                 <div className="flex flex-col items-center space-y-6">
-                                    {/* Camera/Photo Container */}
                                     <div className="relative">
                                         <div className="glass-premium rounded-3xl p-4 shadow-2xl">
                                             <div className="relative rounded-2xl overflow-hidden w-80 h-96 bg-gray-100">
@@ -1081,7 +1051,6 @@ const VerifyProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Action Buttons */}
                                     {!capturedPhoto ? (
                                         <div className="flex flex-col items-center space-y-4">
                                             <button
@@ -1111,7 +1080,6 @@ const VerifyProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Validation Feedback */}
                                     {validationFeedback && (
                                         <div className="glass-premium rounded-2xl p-4 border-l-4 border-red-500 bg-red-50">
                                             <p className="text-red-700 font-medium mb-3">{validationFeedback}</p>
@@ -1138,7 +1106,6 @@ const VerifyProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Tips */}
                                     <div className="glass-premium rounded-2xl p-6 max-w-md">
                                         <h4 className="font-semibold text-lg mb-3 flex items-center">
                                             <span className="mr-2">💡</span>
@@ -1224,7 +1191,6 @@ const VerifyProfile = () => {
 
             <Toast ref={toast} position="bottom-center" />
 
-            {/* Canvas oculto para crop MEJORADO */}
             <canvas
                 ref={cropCanvasRef}
                 className="hidden"
