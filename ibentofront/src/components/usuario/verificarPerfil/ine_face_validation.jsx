@@ -4,16 +4,14 @@ import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCc
 import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
-//import * as faceapi from '@vladmandic/face-api';
 
 const VerifyProfile = () => {
     const navigate = useNavigate();
     const webcamRef = useRef(null);
-    const canvasRef = useRef(null); //Canvas de detección facial
     const toast = useRef(null);
-    const detectionIntervalRef = useRef(null); // Intervalo de detección
-
-    const ineWebcamRef = useRef(null); // Cámara de INE
+    
+    // REFS PARA INE
+    const ineWebcamRef = useRef(null);
     const cropCanvasRef = useRef(null);
     const cropImageRef = useRef(null);
     
@@ -33,25 +31,14 @@ const VerifyProfile = () => {
     const [validationFeedback, setValidationFeedback] = useState('');
     const [canRetakePhoto, setCanRetakePhoto] = useState(false);
     const [canRetakeINE, setCanRetakeINE] = useState(false);
-    
-    // ===== ESTADOS PARA DETECCIÓN FACIAL EN TIEMPO REAL =====
-    const [faceStatus, setFaceStatus] = useState({
-        detected: false,
-        distance: 'unknown',
-        confidence: 0,
-        feedback: 'Posiciona tu rostro frente a la cámara'
-    });
-    const [isModelLoaded, setIsModelLoaded] = useState(false);
-    const [realTimeDetection, setRealTimeDetection] = useState(false);
-    const [canCaptureOptimal, setCanCaptureOptimal] = useState(false);
 
     const [ineImages, setIneImages] = useState([null, null]);
-    const [activeIndex, setActiveIndex] = useState(0); // Para testing 2, cambiar a 0 en producción
+    const [activeIndex, setActiveIndex] = useState(2); // Para testing, cambiar a 0 en producción
     const [message, setMessage] = useState([]);
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [stepsCompleted, setStepsCompleted] = useState({ ine: false, face: false });
 
-    // ===== NUEVOS ESTADOS PARA INE MEJORADA =====
+    // ESTADOS PARA INE MEJORADA
     const [ineCapture, setIneCapture] = useState({
         mode: null, // 'camera' | 'gallery' | null
         activeIndex: 0, // 0 para frontal, 1 para trasera
@@ -78,324 +65,16 @@ const VerifyProfile = () => {
         { label: 'Paso 5' },
     ];
 
-    // ===== INICIALIZACIÓN DE MODELOS DE FACE-API.JS =====
-    useEffect(() => {
-        const loadFaceAPIModels = async () => {
-            try {
-                console.log('Iniciando carga de modelos de face-api.js...');
-                
-                // Cargar modelos necesarios desde la carpeta public/models
-                await Promise.all([
-                    window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                    window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                    window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-                    window.faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
-                ]);
-                
-                setIsModelLoaded(true);
-                console.log('Modelos de face-api.js cargados correctamente');
-                showSuccess('Sistema de detección facial listo');
-            } catch (error) {
-                console.error('Error cargando modelos de face-api.js:', error);
-                showError('Error al cargar el sistema de detección facial. Verifica que los modelos estén en /public/models');
-                
-                // Como fallback, usar simulación
-                console.log('🔄 Usando modo simulación...');
-                setTimeout(() => {
-                    setIsModelLoaded(true);
-                }, 1000);
-            }
-        };
-
-        loadFaceAPIModels();
-    }, []);
-
-    // ===== INICIALIZACIÓN DE MODELOS PARA VERCEL =====
-useEffect(() => {
-    const loadFaceAPIModels = async () => {
-        console.log('Iniciando carga de face-api.js en Vercel...');
-        
-        // Esperar a que window.faceapi esté disponible
-        const waitForFaceAPI = () => {
-            return new Promise((resolve, reject) => {
-                let attempts = 0;
-                const maxAttempts = 100; // Más tiempo para Vercel
-                
-                const checkFaceAPI = () => {
-                    attempts++;
-                    
-                    if (window.faceapi && window.faceapi.nets && window.faceapi.detectAllFaces) {
-                        console.log('Face-api.js cargado en Vercel');
-                        resolve(window.faceapi);
-                        return;
-                    }
-                    
-                    if (attempts >= maxAttempts) {
-                        reject(new Error('Face-api.js timeout en Vercel'));
-                        return;
-                    }
-                    
-                    console.log(`Esperando face-api.js en Vercel... intento ${attempts}`);
-                    setTimeout(checkFaceAPI, 100);
-                };
-                
-                checkFaceAPI();
-            });
-        };
-
-        try {
-            // Esperar a que face-api esté disponible
-            await waitForFaceAPI();
-            
-            console.log('Cargando modelos desde CDN para Vercel...');
-            
-            // ===== USAR CDN PARA MODELOS EN VERCEL =====
-            const modelUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.6.8/model';
-            
-            await Promise.all([
-                window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
-                window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
-                window.faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl)
-            ]);
-            
-            setIsModelLoaded(true);
-            console.log('🎉 Modelos cargados exitosamente desde CDN');
-            showSuccess('Sistema de detección facial listo');
-            
-        } catch (error) {
-            console.error('Error cargando face-api.js en Vercel:', error);
-            
-            // ===== FALLBACK PARA VERCEL =====
-            console.log('🔄 Intentando fallback con modelos locales...');
-            try {
-                await Promise.all([
-                    window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                    window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                    window.faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-                ]);
-                
-                setIsModelLoaded(true);
-                console.log('Modelos locales cargados como fallback');
-                showSuccess('Sistema de detección facial listo (local)');
-                
-            } catch (fallbackError) {
-                console.error('Fallback también falló:', fallbackError);
-                showError('Error al cargar el sistema de detección facial');
-                
-                // Último recurso: simulación
-                setTimeout(() => {
-                    setIsModelLoaded(true);
-                    showInfo('Usando detección simulada');
-                }, 1000);
-            }
-        }
-    };
-
-    loadFaceAPIModels();
-}, []);
-
-    // ===== FUNCIÓN DE DETECCIÓN FACIAL EN TIEMPO REAL =====
-    const detectFaceRealTime = useCallback(async () => {
-        if (!webcamRef.current || !webcamRef.current.video || !canvasRef.current || !isModelLoaded) {
-            return;
-        }
-
-        const video = webcamRef.current.video;
-        const canvas = canvasRef.current;
-        
-        if (!video.videoWidth || !video.videoHeight) return;
-
-        try {
-            // ===== DETECCIÓN REAL CON FACE-API.JS =====
-            const detections = await window.faceapi
-                .detectAllFaces(video, new window.faceapi.TinyFaceDetectorOptions({
-                    inputSize: 416,
-                    scoreThreshold: 0.5
-                }))
-                .withFaceLandmarks();
-
-            // Configurar canvas
-            const displaySize = { width: video.videoWidth, height: video.videoHeight };
-            window.faceapi.matchDimensions(canvas, displaySize);
-            
-            // Limpiar canvas anterior
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (detections.length > 0) {
-                // Tomar la primera detección (la más confiable)
-                const detection = detections[0];
-                const box = detection.detection.box;
-                const confidence = detection.detection.score;
-                
-                // Analizar distancia basada en el tamaño de la caja de detección
-                const faceSize = Math.max(box.width, box.height);
-                const videoSize = Math.min(video.videoWidth, video.videoHeight);
-                const sizeRatio = faceSize / videoSize;
-                
-                let distance, boxColor, feedback;
-                
-                if (sizeRatio > 0.45) {
-                    distance = 'close';
-                    boxColor = '#ff4444';
-                    feedback = '🔴 Aléjate un poco de la cámara';
-                } else if (sizeRatio < 0.25) {
-                    distance = 'far';
-                    boxColor = '#ffaa00';
-                    feedback = '🟡 Acércate más a la cámara';
-                } else {
-                    distance = 'optimal';
-                    boxColor = '#44ff44';
-                    feedback = '🟢 ¡Perfecto! Ya puedes capturar la foto';
-                }
-
-                // Dibujar rectángulo alrededor del rostro
-                ctx.strokeStyle = boxColor;
-                ctx.lineWidth = 4;
-                ctx.strokeRect(box.x, box.y, box.width, box.height);
-                
-                // Dibujar puntos de landmarks (opcional)
-                if (detection.landmarks) {
-                    ctx.fillStyle = boxColor;
-                    detection.landmarks.positions.forEach(point => {
-                        ctx.beginPath();
-                        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
-                        ctx.fill();
-                    });
-                }
-
-                // Actualizar estado
-                setFaceStatus({
-                    detected: true,
-                    distance,
-                    confidence,
-                    feedback
-                });
-                
-                setCanCaptureOptimal(distance === 'optimal' && confidence > 0.7);
-                
-            } else {
-                // No se detectó rostro
-                setFaceStatus({
-                    detected: false,
-                    distance: 'unknown',
-                    confidence: 0,
-                    feedback: 'No se detecta rostro. Posiciona tu cara frente a la cámara'
-                });
-                setCanCaptureOptimal(false);
-            }
-        } catch (error) {
-            console.error('Error en detección facial en tiempo real:', error);
-            // Fallback a simulación en caso de error
-            const mockDetection = simulateFaceDetection(video.videoWidth, video.videoHeight);
-            if (mockDetection) {
-                const { box, distance, confidence } = mockDetection;
-                
-                let boxColor, feedback;
-                switch (distance) {
-                    case 'close':
-                        boxColor = '#ff4444';
-                        feedback = '🔴 Aléjate un poco de la cámara';
-                        break;
-                    case 'far':
-                        boxColor = '#ffaa00';
-                        feedback = '🟡 Acércate más a la cámara';
-                        break;
-                    case 'optimal':
-                        boxColor = '#44ff44';
-                        feedback = '🟢 ¡Perfecto! Ya puedes capturar la foto';
-                        break;
-                    default:
-                        boxColor = '#ffffff';
-                        feedback = 'Posiciona tu rostro frente a la cámara';
-                }
-
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = boxColor;
-                ctx.lineWidth = 4;
-                ctx.strokeRect(box.x, box.y, box.width, box.height);
-
-                setFaceStatus({
-                    detected: true,
-                    distance,
-                    confidence,
-                    feedback
-                });
-                
-                setCanCaptureOptimal(distance === 'optimal' && confidence > 0.7);
-            }
-        }
-    }, [isModelLoaded]);
-
-    // ===== SIMULACIÓN DE DETECCIÓN FACIAL =====
-    const simulateFaceDetection = (videoWidth, videoHeight) => {
-        // Simulamos detección facial variando aleatoriamente
-        const random = Math.random();
-        
-        // 20% de probabilidad de no detectar rostro
-        if (random < 0.2) return null;
-        
-        const centerX = videoWidth / 2;
-        const centerY = videoHeight / 2;
-        
-        // Simulamos diferentes tamaños de rostro
-        const baseSize = Math.min(videoWidth, videoHeight) * 0.25;
-        const sizeVariation = (Math.random() - 0.5) * 0.6; // -0.3 a +0.3
-        const faceSize = baseSize + (baseSize * sizeVariation);
-        
-        const box = {
-            x: centerX - faceSize / 2,
-            y: centerY - faceSize / 2,
-            width: faceSize,
-            height: faceSize
-        };
-        
-        // Determinar distancia basada en el tamaño
-        const sizeRatio = faceSize / Math.min(videoWidth, videoHeight);
-        let distance;
-        
-        if (sizeRatio > 0.4) {
-            distance = 'close';
-        } else if (sizeRatio < 0.2) {
-            distance = 'far';
-        } else {
-            distance = 'optimal';
-        }
-        
-        return {
-            box,
-            distance,
-            confidence: Math.random() * 0.3 + 0.7 // 0.7 a 1.0
-        };
-    };
-
-    // ===== INICIAR/DETENER DETECCIÓN EN TIEMPO REAL =====
-    useEffect(() => {
-        if (isModelLoaded && realTimeDetection && !capturedPhoto) {
-            // Usar un intervalo más optimizado para face-api.js
-            detectionIntervalRef.current = setInterval(detectFaceRealTime, 300); // 300ms para mejor rendimiento
-            
-            return () => {
-                if (detectionIntervalRef.current) {
-                    clearInterval(detectionIntervalRef.current);
-                }
-            };
-        }
-    }, [isModelLoaded, realTimeDetection, capturedPhoto, detectFaceRealTime]);
-
     useEffect(() => {
         const token = localStorage.getItem("access");
         if (!token) {
-            // Redirige si no hay token
             navigate("/login");
         }
         window.scrollTo(0, 0);
     }, []);
 
-    // ===== NUEVAS FUNCIONES PARA INE MEJORADA =====
+    // ===== FUNCIONES PARA INE MEJORADA =====
     
-    // Iniciar captura de INE
     const startIneCapture = (mode, index) => {
         setIneCapture(prev => ({
             ...prev,
@@ -408,7 +87,6 @@ useEffect(() => {
         }));
     };
 
-    // Capturar imagen desde cámara
     const captureInePhoto = () => {
         if (!ineWebcamRef.current) return;
         
@@ -420,7 +98,6 @@ useEffect(() => {
         }));
     };
 
-    // Confirmar imagen capturada desde cámara
     const confirmIneCapture = () => {
         if (!ineCapture.capturedImage) return;
 
@@ -439,7 +116,6 @@ useEffect(() => {
         showSuccess('Imagen de INE guardada correctamente');
     };
 
-    // Manejar selección desde galería
     const handleGallerySelection = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -509,7 +185,6 @@ useEffect(() => {
         }));
     };
 
-    // Confirmar crop
     const confirmCrop = () => {
         if (!cropCanvasRef.current || !cropImageRef.current) return;
 
@@ -519,13 +194,11 @@ useEffect(() => {
         
         const { x, y, width, height } = ineCapture.cropData;
         
-        // Asegurar que el crop sea válido
         if (width <= 0 || height <= 0) {
             showWarn('Selecciona un área válida para recortar');
             return;
         }
 
-        // Calcular ratios para el crop
         const scaleX = img.naturalWidth / img.offsetWidth;
         const scaleY = img.naturalHeight / img.offsetHeight;
         
@@ -534,11 +207,9 @@ useEffect(() => {
         const cropWidth = width * scaleX;
         const cropHeight = height * scaleY;
 
-        // Configurar canvas
         canvas.width = cropWidth;
         canvas.height = cropHeight;
 
-        // Crear imagen temporal para cargar
         const tempImg = new Image();
         tempImg.onload = () => {
             ctx.drawImage(
@@ -547,7 +218,6 @@ useEffect(() => {
                 0, 0, cropWidth, cropHeight
             );
 
-            // Convertir a blob y crear archivo
             canvas.toBlob((blob) => {
                 const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
                     type: 'image/jpeg'
@@ -569,7 +239,6 @@ useEffect(() => {
         tempImg.src = ineCapture.selectedFromGallery;
     };
 
-    // Resetear captura de INE
     const resetIneCapture = () => {
         setIneCapture({
             mode: null,
@@ -590,7 +259,6 @@ useEffect(() => {
         });
     };
 
-    // Eliminar imagen de INE (MODIFICADA para usar la nueva estructura)
     const handleImageDeleteINE = (index) => {
         const newImages = [...ineImages];
         newImages[index] = null;
@@ -601,7 +269,7 @@ useEffect(() => {
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
     };
 
-    // -------- Validar imagenes de INE (MANTENIDA ORIGINAL)
+    // ===== VALIDACIÓN DE INE =====
     const handleIneValidation = async () => {
         if (!ineImages[0] || !ineImages[1]) {
             showWarn('Debes subir ambas imágenes de la INE');
@@ -633,31 +301,25 @@ useEffect(() => {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(4); // Still navigate to step 5 even if upload fails
+                    setActiveIndex(4);
                 }
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
-            console.error('=== ERROR COMPLETO ===');
             console.error('Error:', error);
-            console.error('Error response:', error.response?.data);
-            console.error('Error status:', error.response?.status);
-            console.error('Error headers:', error.response?.headers);
-
             const errorMessage = error.response?.data?.error ||
                 error.response?.data?.message ||
                 error.message ||
                 'Error desconocido'; 
             setMessage(`Error: ${errorMessage}`);
-            showError(`Error detallado: ${JSON.stringify(error.response?.data, null, 2)}`);
+            showError(`Error: ${errorMessage}`);
         } finally {
             setValidatingIne(false);
         }
     };
 
-    // ===== FUNCIONES MANTENIDAS ORIGINALES =====
-    
+    // ===== VALIDACIÓN DE ROSTRO (SIMPLIFICADA COMO EN EL SEGUNDO CÓDIGO) =====
     const handleValidacionRostro = async () => {
         if (!capturedPhoto) {
             showWarn('Debes capturar una imagen de tu rostro');
@@ -683,12 +345,11 @@ useEffect(() => {
             const data = response.data;
 
             if (data.success && data.rostro_validado) {
-                // Validación exitosa
                 setMessage('¡Rostro validado exitosamente! Ahora completa tu información personal.');
                 try {
                     await uploadAllData();
                     setStepsCompleted(prev => ({ ...prev, face: true }));
-                    showSuccess("¡Rostro validado exitosamente! Ahora completa tu información personal.");
+                    showSuccess("¡Rostro validado exitosamente!");
                     setActiveIndex(4);
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
@@ -697,7 +358,6 @@ useEffect(() => {
                     setActiveIndex(4);
                 }
             } else {
-                // Validación falló
                 handleValidationFailure(data);
             }
 
@@ -721,7 +381,6 @@ useEffect(() => {
         const newAttempts = validationAttempts + 1;
         setValidationAttempts(newAttempts);
         
-        // Determinar el tipo de error y dar feedback específico
         const errorMessage = errorData.error || errorData.mensaje || '';
         let feedback = '';
         let shouldRetakePhoto = false;
@@ -736,14 +395,6 @@ useEffect(() => {
             feedback = 'No se detectó tu rostro en la foto. Asegúrate de que tu cara esté bien visible y centrada.';
             shouldRetakePhoto = true;
             showWarn('No se detectó tu rostro. Retoma la foto asegurándote de que tu cara esté bien visible.');
-        } else if (errorMessage.includes('Rostro demasiado cerca') || errorData.sugerencia?.includes('Aléjate')) {
-            feedback = 'Tu rostro está demasiado cerca de la cámara. Aléjate un poco y retoma la foto.';
-            shouldRetakePhoto = true;
-            showWarn('Aléjate un poco de la cámara y retoma la foto.');
-        } else if (errorMessage.includes('Rostro muy lejos') || errorData.sugerencia?.includes('Acércate')) {
-            feedback = 'Tu rostro está muy lejos de la cámara. Acércate un poco y retoma la foto.';
-            shouldRetakePhoto = true;
-            showWarn('Acércate un poco más a la cámara y retoma la foto.');
         } else if (errorMessage.includes('no coincide') || errorMessage.includes('no match')) {
             feedback = 'Tu rostro no coincide con la foto de la INE. Asegúrate de que la iluminación sea buena y retoma la foto.';
             shouldRetakePhoto = true;
@@ -758,117 +409,55 @@ useEffect(() => {
         setCanRetakePhoto(shouldRetakePhoto);
         setCanRetakeINE(shouldRetakeINE);
         
-        // Si ya agotó los 3 intentos, avanzar al siguiente paso
         if (newAttempts >= 3) {
             setTimeout(() => {
                 showInfo('Has agotado los 3 intentos. Puedes validar tu perfil después.');
-                setActiveIndex(4); // Avanzar al paso 5
+                setActiveIndex(4);
             }, 2000);
         }
     };
 
-    // ===== FUNCIONES MEJORADAS PARA CAPTURA DE FOTO =====
-    const startFaceDetection = () => {
-        if (!isModelLoaded) {
-            showWarn('El sistema de detección aún se está cargando, espera un momento');
+    // ===== CAPTURA DE FOTO SIMPLE (COMO EN EL SEGUNDO CÓDIGO) =====
+    const capturarImagen = () => {
+        if (!webcamRef.current) {
+            showWarn('La cámara no está disponible');
             return;
         }
         
-        showInfo('Iniciando detección facial en tiempo real...');
-        setRealTimeDetection(true);
-        setValidationFeedback('');
-        
-        // Reset face status
-        setFaceStatus({
-            detected: false,
-            distance: 'unknown',
-            confidence: 0,
-            feedback: 'Buscando rostro...'
-        });
-    };
-
-    const capturarImagenMejorada = () => {
-        if (!faceStatus.detected) {
-            showWarn('Espera a que se detecte tu rostro.');
-            return;
-        }
-        
-        if (faceStatus.distance !== 'optimal') {
-            showWarn('Posiciona tu rostro a la distancia correcta.');
-            return;
-        }
-        
-        if (faceStatus.confidence < 0.7) {
-            showWarn('Mejora la iluminación para una mejor detección');
-            return;
-        }
-
-        // Capturar imagen normal (sin espejo) para validación
-        const video = webcamRef.current.video;
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        
-        // Dibujar la imagen sin efecto espejo
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-        
-        const imageSrc = canvas.toDataURL('image/jpeg', 0.9);
+        const imageSrc = webcamRef.current.getScreenshot();
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
-        setRealTimeDetection(false);
-        
-        // Limpiar detección
-        if (detectionIntervalRef.current) {
-            clearInterval(detectionIntervalRef.current);
-        }
-        
         showSuccess('¡Foto capturada correctamente!');
     };
 
-    // Función para reiniciar la foto y limpiar el feedback
     const retakePhoto = () => {
         setCapturedPhoto(null);
         setUser(prev => ({ ...prev, facePhoto: null }));
         setValidationFeedback('');
         setCanRetakePhoto(false);
-        setCanCaptureOptimal(false);
-        setRealTimeDetection(false);
-        setFaceStatus({
-            detected: false,
-            distance: 'unknown',
-            confidence: 0,
-            feedback: 'Posiciona tu rostro frente a la cámara'
-        });
     };
 
-    // Función para volver al paso anterior (INE) si es necesario
     const retakeINE = () => {
-        setActiveIndex(2); // Volver al paso de INE
+        setActiveIndex(2);
         setValidationFeedback('');
         setCanRetakeINE(false);
         setCanRetakePhoto(false);
     };
 
-    //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
-    // -------- Capturar imagen con cámara
+    // ===== CONFIGURACIONES DE CÁMARA =====
     const videoConstraints = {
-        facingMode: "user", // Usa la cámara frontal para rostro
-        width: { ideal: 640 }, // Resolución optimizada para face-api.js
-        height: { ideal: 480 },
-        frameRate: { ideal: 30, max: 30 } // Frame rate optimizado
+        facingMode: "user", // Cámara frontal para rostro
+        width: { ideal: 640 },
+        height: { ideal: 480 }
     };
 
-    // Configuración de cámara para INE (mayor resolución para OCR)
     const ineVideoConstraints = {
         facingMode: "environment", // Cámara trasera para INE
         width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30 }
+        height: { ideal: 720 }
     };
 
-    // Funciones para mostrar toasts (MANTENIDAS ORIGINALES)
+    // ===== FUNCIONES DE TOAST =====
     const showSuccess = (message) => {
         toast.current.show({ severity: 'success', summary: 'Éxito', detail: message, life: 4000 });
     };
@@ -885,15 +474,7 @@ useEffect(() => {
         toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
     };
 
-    const showSecondary = (message) => {
-        toast.current.show({ severity: 'secondary', summary: 'Información', detail: message, life: 4000 });
-    };
-
-    const showContrast = (message) => {
-        toast.current.show({ severity: 'contrast', summary: 'Completado', detail: message, life: 4000 });
-    };
-
-    // Función auxiliar para convertir dataURL a File (MANTENIDA ORIGINAL)
+    // ===== FUNCIONES AUXILIARES =====
     const dataURLtoFile = (dataurl, filename) => {
         const arr = dataurl.split(',');
         const mime = arr[0].match(/:(.*?);/)[1];
@@ -906,10 +487,9 @@ useEffect(() => {
         return new File([u8arr], filename, { type: mime });
     };
 
-    // Función uploadAllData (placeholder - agregar tu implementación)
     const uploadAllData = async () => {
-        // Implementar tu lógica de subida de datos aquí
         console.log('Subiendo todos los datos...');
+        // Implementar tu lógica de subida de datos aquí
     };
     
     return (
@@ -956,7 +536,6 @@ useEffect(() => {
             {/* Main Content */}
             <div className="pt-24 px-4 pb-8">
                 <div className="max-w-4xl mx-auto">
-                    {/* Content Cards */}
                     <div className="glass-premium rounded-3xl p-6 mb-6">
                         
                         {/* STEP 3: INE VERIFICATION MEJORADA */}
@@ -1186,32 +765,6 @@ useEffect(() => {
                                     ))}
                                 </div>
 
-                                {/* Guía de tips */}
-                                <div className="glass-premium rounded-2xl p-6 max-w-md mx-auto">
-                                    <h4 className="font-semibold text-lg mb-3 flex items-center">
-                                        <span className="mr-2">💡</span>
-                                        Consejos para mejores resultados
-                                    </h4>
-                                    <ul className="space-y-2 text-sm text-gray-600">
-                                        <li className="flex items-center">
-                                            <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                            Usa buena iluminación natural
-                                        </li>
-                                        <li className="flex items-center">
-                                            <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                            Superficie plana y lisa
-                                        </li>
-                                        <li className="flex items-center">
-                                            <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                            INE sin doblez ni rayaduras
-                                        </li>
-                                        <li className="flex items-center">
-                                            <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                            Evita sombras y reflejos
-                                        </li>
-                                    </ul>
-                                </div>
-
                                 {message && (
                                     <div className="glass-premium rounded-2xl p-4 border-l-4 border-blue-500">
                                         <p className="text-blue-700 font-medium">{message}</p>
@@ -1220,7 +773,7 @@ useEffect(() => {
                             </div>
                         )}
 
-                        {/* STEP 4: FACE VERIFICATION (MANTENIDA ORIGINAL) */}
+                        {/* STEP 4: FACE VERIFICATION SIMPLIFICADA */}
                         {activeIndex === 3 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -1231,71 +784,21 @@ useEffect(() => {
                                     <p className="text-gray-600">Centra tu cara para verificar que la INE sea tuya</p>
                                 </div>
 
-                                {/* Model Loading Indicator */}
-                                {!isModelLoaded && (
-                                    <div className="glass-premium rounded-2xl p-4 border-l-4 border-blue-500">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                            <div>
-                                                <span className="text-blue-700 font-medium block">Cargando sistema de detección facial...</span>
-                                                <span className="text-blue-600 text-xs">Descargando modelos de IA</span>
-                                            </div>
-                                        </div>
-                                        <div className="mt-2 text-xs text-blue-600">
-                                            <strong>Nota:</strong> Asegúrate de tener los modelos de face-api.js en /public/models:
-                                            <ul className="list-disc list-inside mt-1 ml-2">
-                                                <li>tiny_face_detector_model-weights_manifest.json</li>
-                                                <li>face_landmark_68_model-weights_manifest.json</li>
-                                                <li>face_recognition_model-weights_manifest.json</li>
-                                                <li>ssd_mobilenetv1_model-weights_manifest.json</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="flex flex-col items-center space-y-6">
                                     {/* Camera/Photo Container */}
                                     <div className="relative">
                                         <div className="glass-premium rounded-3xl p-4 shadow-2xl">
                                             <div className="relative rounded-2xl overflow-hidden w-80 h-96 bg-gray-100">
                                                 {!capturedPhoto ? (
-                                                    <>
-                                                        <Webcam
-                                                            ref={webcamRef}
-                                                            audio={false}
-                                                            screenshotFormat="image/jpeg"
-                                                            videoConstraints={videoConstraints}
-                                                            className="w-full h-full object-cover"
-                                                            style={{ transform: 'scaleX(-1)' }}
-                                                            mirrored={true}
-                                                        />
-                                                        <canvas
-                                                            ref={canvasRef}
-                                                            className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                                                            style={{ transform: 'scaleX(-1)' }}
-                                                        />
-                                                        
-                                                        {/* Overlay de estado de detección */}
-                                                        {realTimeDetection && (
-                                                            <div className="absolute top-2 left-2 right-2">
-                                                                <div className={`px-3 py-2 rounded-xl text-xs font-medium text-center ${
-                                                                    faceStatus.distance === 'optimal' ? 'bg-green-500 text-white' :
-                                                                    faceStatus.distance === 'close' ? 'bg-red-500 text-white' :
-                                                                    faceStatus.distance === 'far' ? 'bg-yellow-500 text-black' :
-                                                                    'bg-gray-500 text-white'
-                                                                }`}>
-                                                                    {faceStatus.detected ? (
-                                                                        <>
-                                                                            {faceStatus.distance === 'optimal' ? '✓ ' : ''}
-                                                                            Rostro detectado - {Math.round(faceStatus.confidence * 100)}%
-                                                                        </>
-                                                                    ) : (
-                                                                        'Buscando rostro...'
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
+                                                    <Webcam
+                                                        ref={webcamRef}
+                                                        audio={false}
+                                                        screenshotFormat="image/jpeg"
+                                                        videoConstraints={videoConstraints}
+                                                        className="w-full h-full object-cover"
+                                                        style={{ transform: 'scaleX(-1)' }}
+                                                        mirrored={true}
+                                                    />
                                                 ) : (
                                                     <img 
                                                         src={capturedPhoto} 
@@ -1308,54 +811,17 @@ useEffect(() => {
                                         </div>
                                     </div>
 
-                                    {/* Real-time Feedback */}
-                                    {!capturedPhoto && realTimeDetection && (
-                                        <div className={`glass-premium rounded-2xl p-4 text-center transition-all duration-300 border-2 ${
-                                            faceStatus.distance === 'optimal' ? 'border-green-500 bg-green-50' :
-                                            faceStatus.distance === 'close' ? 'border-red-500 bg-red-50' :
-                                            faceStatus.distance === 'far' ? 'border-yellow-500 bg-yellow-50' :
-                                            'border-gray-400 bg-gray-50'
-                                        }`}>
-                                            <p className="font-semibold text-sm">{faceStatus.feedback}</p>
-                                            {faceStatus.detected && (
-                                                <p className="text-xs mt-1 text-gray-600">
-                                                    Confianza: {Math.round(faceStatus.confidence * 100)}%
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-
                                     {/* Action Buttons */}
                                     {!capturedPhoto ? (
                                         <div className="flex flex-col items-center space-y-4">
-                                            {!realTimeDetection ? (
-                                                <button
-                                                    onClick={startFaceDetection}
-                                                    disabled={!isModelLoaded}
-                                                    className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
-                                                >
-                                                    {isModelLoaded ? 'Iniciar detección facial' : 'Cargando modelos...'}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={capturarImagenMejorada}
-                                                    disabled={!canCaptureOptimal}
-                                                    className={`w-20 h-20 rounded-full transition-all duration-300 flex items-center justify-center ${
-                                                        canCaptureOptimal
-                                                            ? 'bg-gradient-to-r from-green-500 to-green-600 hover:scale-110 shadow-lg animate-pulse'
-                                                            : 'bg-gray-400 cursor-not-allowed'
-                                                    }`}
-                                                >
-                                                    <Camera className="w-8 h-8 text-white" />
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={capturarImagen}
+                                                className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 hover:scale-110 shadow-lg rounded-full transition-all duration-300 flex items-center justify-center"
+                                            >
+                                                <Camera className="w-8 h-8 text-white" />
+                                            </button>
                                             <p className="text-center text-sm font-medium text-gray-600">
-                                                {!realTimeDetection 
-                                                    ? 'Inicia la detección para continuar'
-                                                    : (canCaptureOptimal 
-                                                        ? '✓ Toca para capturar la foto' 
-                                                        : 'Posiciona tu rostro correctamente')
-                                                }
+                                                Toca para capturar tu foto
                                             </p>
                                         </div>
                                     ) : (
@@ -1419,7 +885,7 @@ useEffect(() => {
                                             </li>
                                             <li className="flex items-center">
                                                 <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                                Espera el marco verde
+                                                Mantén la cabeza quieta
                                             </li>
                                         </ul>
                                     </div>
@@ -1459,7 +925,7 @@ useEffect(() => {
                     ) : activeIndex === 3 ? (
                         <button
                             onClick={handleValidacionRostro}
-                            disabled={validatingFace}
+                            disabled={validatingFace || !capturedPhoto}
                             className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
                             {validatingFace ? (
