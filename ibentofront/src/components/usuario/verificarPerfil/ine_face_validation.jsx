@@ -539,7 +539,7 @@ const VerifyProfile = () => {
                     <div className="glass-premium rounded-3xl p-6 mb-6">
                         
                         {/* STEP 3: INE VERIFICATION MEJORADA */}
-                        {activeIndex === 2 && (
+                        {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
                                     <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
@@ -774,7 +774,7 @@ const VerifyProfile = () => {
                         )}
 
                         {/* STEP 4: FACE VERIFICATION SIMPLIFICADA */}
-                        {activeIndex === 3 && (
+                        {activeIndex === 1 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
                                     <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
@@ -904,7 +904,7 @@ const VerifyProfile = () => {
                         Anterior
                     </button>
 
-                    { activeIndex === 2 ? (
+                    { activeIndex === 0 ? (
                         <button
                             onClick={handleIneValidation}
                             disabled={validatingIne}
@@ -922,7 +922,7 @@ const VerifyProfile = () => {
                                 'Validar INE'
                             )}
                         </button>
-                    ) : activeIndex === 3 ? (
+                    ) : activeIndex === 1 ? (
                         <button
                             onClick={handleValidacionRostro}
                             disabled={validatingFace || !capturedPhoto}
