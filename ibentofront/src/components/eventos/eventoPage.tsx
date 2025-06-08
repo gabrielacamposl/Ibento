@@ -408,6 +408,36 @@ function Page() {
   }
 
 
+  interface FormatDateOptions {
+    year: 'numeric' | '2-digit';
+    month: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow';
+    day: 'numeric' | '2-digit';
+  }
+
+  function formatDate(dateString: string): string {
+    const options: FormatDateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date: Date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', options);
+  }
+
+  // Formatear la hora
+  function formatTime(timeString: string): string {
+    if (/^\d{2}:\d{2}(:\d{2})?(Z)?$/.test(timeString)) {
+      const [hour, minute] = timeString.split(':');
+      let hourNum = parseInt(hour, 10);
+      let ampm = hourNum >= 12 ? 'AM' : 'PM';
+      
+      if (hourNum === 0) hourNum = 12;
+      else if (hourNum > 12) hourNum = hourNum - 12;
+      return `${hourNum}:${minute} ${ampm}`;
+    }
+   
+    const date: Date = new Date(timeString);
+    if (isNaN(date.getTime())) return timeString;
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+    return date.toLocaleTimeString('es-ES', options);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
       {/* Back Button */}
@@ -488,7 +518,7 @@ function Page() {
               <ClockIcon className="h-6 w-6 text-orange-500" />
               <div>
                 <p className="text-sm text-gray-500 font-medium">Hora</p>
-                <p className="text-gray-800 font-semibold">{timeString}</p>
+                <p className="text-gray-800 font-semibold">{formatTime(timeString)}</p>
               </div>
             </div>
 

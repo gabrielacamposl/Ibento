@@ -155,7 +155,7 @@ export default function PositionDemo() {
               
                 <div className="flex flex-col gap-3 px-2">
                     <div>
-                        <Button
+                        {/* <Button
                             className="flex items-center gap-3 w-full p-4 rounded-2xl bg-white/10 hover:bg-purple-100/20 transition-all shadow-inner border border-white/30 backdrop-blur-md ring-1 ring-inset ring-white/40 focus:outline-none focus:ring-2 focus:ring-purple-300"
                             style={{
                                 boxShadow: '0 0 16px 2px rgba(180, 120, 255, 0.25) inset, 0 1.5px 8px 0 rgba(255,255,255,0.18) inset'
@@ -166,7 +166,7 @@ export default function PositionDemo() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
                             </svg>
                             <span className="text-lg font-semibold text-gray-800">Usuarios Bloqueados</span>
-                        </Button>
+                        </Button> */}
                         <div
                             className={`overflow-hidden transition-all duration-500 ${showBlockUser ? 'max-h-96 mt-2 opacity-100' : 'max-h-0 opacity-0'}`}
                         >
