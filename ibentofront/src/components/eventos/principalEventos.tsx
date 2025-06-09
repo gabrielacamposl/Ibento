@@ -128,7 +128,7 @@ function Page() {
             </div>
 
             {/* Header Premium - Solo en versión móvil */}
-            {!isWebVersion && (
+            {/* {!isWebVersion && ( */}
                 <div className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg">
                     <div className="flex w-full items-center h-24 px-6 pt-2">
                         {/* Avatar y saludo */}
@@ -195,7 +195,7 @@ function Page() {
                         </div>
                     </div>
                 </div>
-            )}            {/* Contenido principal */}
+            {/* )}            Contenido principal */}
             <div className={`relative z-10 pb-24 ${isWebVersion ? 'pt-4' : ''}`}>
                 {/* Quick Stats Cards */}
                 <div className="px-6 py-4">
@@ -281,7 +281,7 @@ function Page() {
                 {/* Espaciado inferior */}
                 <div className="h-8"></div>
             </div>            {/* Sidebar de Notificaciones - Solo en versión móvil */}
-            {!isWebVersion && (
+            {/* {!isWebVersion && ( */}
                 <NotificationSidebar
                     visible={visible}
                     onHide={handleSidebarClose}
@@ -291,7 +291,7 @@ function Page() {
                     unreadCount={unreadCount}
                     markAsRead={markAsRead}
                 />
-            )}
+            {/* )} */}
         </div>
     );
 }

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
 
 export default function VerificarCorreo() {
+    const navigate = useNavigate();
   const colors = [
     "#a5b4fc", 
     "#c4b5fd", 
@@ -80,7 +81,12 @@ export default function VerificarCorreo() {
               </svg>
             </div>
             {/* Botón de regreso (opcional) */}
-            
+            <button
+              onClick={() => navigate("/")}
+              className="mt-6 w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold py-2 rounded-xl shadow-md hover:scale-105 transition-all duration-300"
+            >
+              Inicia Sesión
+            </button>
           </div>
         </div>
       </div>

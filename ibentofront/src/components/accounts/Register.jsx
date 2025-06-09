@@ -60,6 +60,8 @@ export default function Register() {
   const [visible, setVisible] = useState(false);
   const [checked, setChecked] = useState(false);
 
+
+  const [loading, setLoading] = useState(false);
   // Función para mostrar el diálogo
   const showDialog = () => {
     setVisible(true);
@@ -132,14 +134,16 @@ export default function Register() {
   // Función para manejar el submit del formulario
   async function handleSubmit(e) {
     e.preventDefault();
-
+    setLoading(true);
     // Verificar si se han seleccionado preferencias
     if (selectedEvents.length === 0) {
       setMessage("Debes seleccionar al menos una preferencia de evento.");
+      setLoading(false);
       return;
     }
     if (selectedEvents.length < 3) {
       setMessage("Debes seleccionar como mínimo 3 preferencias de evento.");
+      setLoading(false);
       return;
     }
 
@@ -169,6 +173,7 @@ export default function Register() {
       console.error("Error en la creación de cuenta:", err);
       const mensajeError = err.response?.data?.mensaje || 'Hubo un error en el servidor';
       setMessage("Error creando cuenta: " + mensajeError);
+      setLoading(false);
     }
   }
 
@@ -277,6 +282,7 @@ export default function Register() {
                         onChange={handleChange}
                         required
                       />
+                     
                       <button
                         type="button"
                         className="absolute inset-y-0 right-2 flex items-center"
@@ -298,8 +304,10 @@ export default function Register() {
                           onChange={(e) => setIsTermsAccepted(e.target.checked)}
                         />
                       }
-                      label={
-                        <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
+                      
+                     
+                    />
+                    <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
                           He leído y acepto el
                           <span
                             className="mx-1 text-purple-600 cursor-pointer"
@@ -309,8 +317,6 @@ export default function Register() {
                           {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
                           y los <strong>Aviso de privacidad</strong>.
                         </span>
-                      }
-                    />
                   </div>
 
                   <div className="card flex justify-content-center">
@@ -399,80 +405,60 @@ export default function Register() {
             </>)}
           {step === 2 && (
             <>
-              {/* <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
-                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold", color: "black" }}>
-                  ¿Qué tipo de eventos te gustan?
-                </Typography>
-
-                <Grid container spacing={2}>
-                  <div className="intereses-container">
-                    {categorias.map((categoria) => (
-                      <div key={categoria.id} className="categoria mb-5">
-                        <div className={buttonStyleCategoria} style={{ cursor: 'default' }}>
-                          {categoria.nombre}
-                        </div>
-                        <ul className="flex flex-wrap">
-                          {categoria.valores.map((valor) => (
-                            <li
-                              key={valor}
-                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
-                                ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                : 'btn-off'
-                                }`}
-                              onClick={() => toggleSeleccionado(valor)}
-                            >
-                              {valor}
-                            </li>
-                          ))}
-                        </ul>
+              <div className="p-6 bg-white rounded-2xl">
+                <p className="text-gray-600 mb-4">¿Qué tipo de eventos te gustan?</p>
+                <div className="space-y-6">
+                  {categorias.map((categoria) => (
+                    <div key={categoria.id} className="space-y-3">
+                      <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
+                        <h3 className="font-semibold text-purple-700">{categoria.nombre}</h3>
                       </div>
-                    ))}
-                  </div>
-                </Grid>
-
-               
-
-              </div> */}
-
-                <div className="p-6 bg-white rounded-2xl">
-                            <p className="text-gray-600 mb-4">¿Qué tipo de eventos te gustan?</p>
-                            <div className="space-y-6">
-                                {categorias.map((categoria) => (
-                                    <div key={categoria.id} className="space-y-3">
-                                        <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
-                                            <h3 className="font-semibold text-purple-700">{categoria.nombre}</h3>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {categoria.valores.map((valor) => (
-                                                <button
-                                                    key={valor}
-                                                    className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
-                                                        selectedEvents.includes(valor)
-                                                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105' 
-                                                            : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
-                                                    }`}
-                                                    onClick={() => toggleSeleccionado(valor)}
-                                                >
-                                                    {valor}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                             {/* <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
-                  Crear Cuenta
-                </Button> */}
-                 <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
-                    <button 
-                        onClick={handleSubmit} 
-                        className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    >
-                        Guardar Cambios
-                    </button>
+                      <div className="flex flex-wrap gap-2">
+                        {[...new Set(categoria.valores)].map((valor) => (
+                          <button
+                            key={valor}
+                            className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
+                              selectedEvents.includes(valor)
+                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
+                                : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                            }`}
+                            onClick={() => toggleSeleccionado(valor)}
+                          >
+                            {valor}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              
+
+                 <div className=" mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
+                  
+                   <Button 
+                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  
+               
+        
+                  onClick={handleSubmit} 
+                  loading={loading}
+                  disabled={loading}
+                >
+                <div className="ml-2 flex items-center justify-center w-full">
+                  {loading ? 
+                 
+                  'Creando Cuenta...'
+            
+                  :
+                   'Crear Cuenta'
+                  }
+                </div>
+                </Button>            
+                   
+               </div>
                         </div>
             </>
+
           )}
 
 

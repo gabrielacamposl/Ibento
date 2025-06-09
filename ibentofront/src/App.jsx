@@ -44,6 +44,9 @@ import Matches from "./components/match/itsMatch";
 import MisMatches from "./components/match/matches";
 import Like from "./components/match/verLike";
 import Chat from "./components/match/chat";
+import SubirFotos from "./components/usuario/verificar/upload_photos";
+import Descripcion from "./components/usuario/verificar/profile_description" ;
+import Intereses from "./components/usuario/verificar/select_interests";
 
 // Eventos
 import EventoPage from "./components/eventos/eventoPage";
