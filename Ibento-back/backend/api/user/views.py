@@ -1200,7 +1200,7 @@ def personas_que_me_dieron_like(request):
             u = interaccion.usuario_origen
 
             # Calcular edad si hay birthday
-            edad = None
+            edad = 18
             if u.birthday:
                 today = date.today()
                 birthday = u.birthday
@@ -1216,17 +1216,17 @@ def personas_que_me_dieron_like(request):
                 else:
                     edad = None
 
-                # Agregar datos del usuario
-                usuarios.append({
-                    "_id": str(u._id),
-                    "nombre": u.nombre,
-                    "apellido": u.apellido,
-                    "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
-                    "preferencias_evento": u.preferencias_evento or [],
-                    "preferencias_generales": u.preferencias_generales or [],
-                    "edad": edad,
-                    "descripcion": u.description or "",
-                })
+        # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })   
             
         return Response(usuarios, status=200)
 

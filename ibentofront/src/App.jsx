@@ -55,7 +55,7 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-   // Registrar service workers e inicializar notificaciones push
+  // Registrar service workers e inicializar notificaciones push
   useEffect(() => {
     const initializeApp = async () => {
       // Registrar service workers
@@ -68,7 +68,7 @@ export default function App() {
           // Registrar el service worker de Firebase Messaging
           const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
           console.log('✅ FCM SW registrado:', fcmRegistration);
-          
+
         } catch (registrationError) {
           console.log('❌ Error registrando Service Workers:', registrationError);
         }
@@ -173,149 +173,9 @@ export default function App() {
     }, 4000);
   };
 
-  // // Manejar notificaciones recibidas
-  // useEffect(() => {
-  //   if (notification) {
-  //     console.log('📨 Nueva notificación recibida:', notification);
-
-  //     // Manejar diferentes tipos de notificaciones
-  //     const { data } = notification;
-      
-  //     if (data?.type === 'message') {
-  //       // Mostrar toast para mensajes
-  //       showNotificationToast(`💬 Nuevo mensaje de ${data.sender_name}`, 'message');
-        
-  //       // Opcional: actualizar lista de conversaciones si estás en la página de chat
-  //       if (window.location.pathname.includes('/chat')) {
-  //         window.dispatchEvent(new CustomEvent('refreshChats'));
-  //       }
-  //     } 
-  //     else if (data?.type === 'match') {
-  //       showNotificationToast(`🎉 ¡Nuevo match con ${data.match_name}!`, 'match');
-        
-  //       // Actualizar contador de matches
-  //       if (window.location.pathname.includes('/match')) {
-  //         window.dispatchEvent(new CustomEvent('refreshMatches'));
-  //       }
-  //     } 
-  //     else if (data?.type === 'like') {
-  //       showNotificationToast(`💕 ${data.liker_name} te dio like!`, 'like');
-        
-  //       // Actualizar contador de likes
-  //       if (window.location.pathname.includes('/verLike')) {
-  //         window.dispatchEvent(new CustomEvent('refreshLikes'));
-  //       }
-  //     }
-  //     else if (data?.type === 'event') {
-  //       showNotificationToast(`🎪 ${data.event_title}`, 'event');
-  //     }
-  //   }
-  // }, [notification]);
-
-  // // Función para mostrar toasts de notificaciones
-  // const showNotificationToast = (message, type) => {
-  //   const toast = document.createElement('div');
-  //   toast.style.cssText = `
-  //     position: fixed;
-  //     top: 20px;
-  //     right: 20px;
-  //     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  //     color: white;
-  //     padding: 16px 20px;
-  //     border-radius: 12px;
-  //     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  //     z-index: 10000;
-  //     max-width: 350px;
-  //     animation: slideInRight 0.3s ease-out;
-  //     cursor: pointer;
-  //     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  //   `;
-    
-  //   const icons = {
-  //     message: '💬',
-  //     match: '🎉',
-  //     like: '💕',
-  //     event: '🎪',
-  //     default: '🔔'
-  //   };
-    
-  //   toast.innerHTML = `
-  //     <div style="display: flex; align-items: center; gap: 12px;">
-  //       <div style="font-size: 24px;">${icons[type] || icons.default}</div>
-  //       <div style="flex: 1; font-weight: 500;">${message}</div>
-  //       <button onclick="this.parentElement.parentElement.remove()" style="
-  //         background: rgba(255,255,255,0.2);
-  //         border: none;
-  //         color: white;
-  //         width: 24px;
-  //         height: 24px;
-  //         border-radius: 50%;
-  //         cursor: pointer;
-  //         font-size: 16px;
-  //       ">×</button>
-  //     </div>
-  //   `;
-    
-  //   document.body.appendChild(toast);
-    
-  //   // Auto-remover después de 4 segundos
-  //   setTimeout(() => {
-  //     if (toast.parentNode) {
-  //       toast.style.animation = 'slideOutRight 0.3s ease-in';
-  //       setTimeout(() => toast.remove(), 300);
-  //     }
-  //   }, 4000);
-  // };
-
-  // // Función para solicitar permisos de notificación
-  // const handleRequestNotifications = async () => {
-  //   if (isSupported && user) {
-  //     try {
-  //       console.log('🔔 Solicitando permisos de notificación...');
-  //       const fcmToken = await requestPermissions();
-        
-  //       if (fcmToken) {
-  //         console.log('✅ Notificaciones habilitadas exitosamente');
-  //         showNotificationToast('🔔 ¡Notificaciones activadas correctamente!', 'success');
-  //       } else {
-  //         console.log('❌ No se pudieron habilitar las notificaciones');
-  //         showNotificationToast('❌ No se pudieron activar las notificaciones', 'error');
-  //       }
-  //     } catch (error) {
-  //       console.error('❌ Error al solicitar notificaciones:', error);
-  //       showNotificationToast('❌ Error al activar notificaciones', 'error');
-  //     }
-  //   }
-  // };
-
-  // Mostrar loading mientras se carga el usuario
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-  //         <p className="text-gray-600">Cargando Ibento...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="App">
-      {/* Banner para solicitar notificaciones */}
-      {/* {user && isSupported && !token && (
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 text-center shadow-lg">
-          <p className="mb-3 font-medium">
-            🔔 ¡Activa las notificaciones para no perderte ningún match o mensaje!
-          </p>
-          <button
-            onClick={handleRequestNotifications}
-            className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors shadow-md"
-          >
-            Activar Notificaciones
-          </button>
-        </div>
-      )} */}      <Router>
+      <Router>
         <AuthGuard>
           <Routes>
             {/* Rutas de autenticación */}
@@ -350,7 +210,7 @@ export default function App() {
 
               {/* Verificar */}
               <Route path="verificar-ine" element={<IneValidation />} />
-v
+              v
               {/* Matches y chat */}
               <Route path="matches" element={<BuscarMatches />} />
               <Route path="verPerfil" element={<Perfiles />} />
