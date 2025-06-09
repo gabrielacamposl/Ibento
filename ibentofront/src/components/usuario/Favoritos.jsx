@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import "../../assets/css/botones.css";
 import { Link } from 'react-router-dom';
 import api from '../../api';
@@ -7,6 +7,10 @@ const Favoritos = ({ events }) => {
     const [FavoritesCopy, setFavoriteCopy] = useState([...events]);
 
 
+// Sincronizar FavoritesCopy con events cuando events cambie
+    useEffect(() => {
+        setFavoriteCopy([...events]);
+    }, [events]);
 
     function formartDate(dateString) {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };

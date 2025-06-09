@@ -110,12 +110,11 @@ const description = () => {
             const response = await api.post('usuarios/agregar_info/', formData);
             
             if (response.status === 200) {
-                setStepsCompleted(prev => ({ ...prev, info: true }));
-                showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
+                showContrast("¡Información subida !.");
                 
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
-                    navigate("../eventos");
+                    navigate("../subirFotos");
                 }, 2000);
             }
         } catch (error) {
@@ -156,7 +155,7 @@ const description = () => {
     return (
         <div className="text-black min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* Header Section */}
-            {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
@@ -173,12 +172,12 @@ const description = () => {
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                                 Verificación
                             </h1>
-                            <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
+                            <p className="text-sm text-gray-600">Paso {3} de {5}</p>
                         </div>
                     </div>
 
                     <div className="w-12 h-12 flex items-center justify-center">
-                        <div className="relative w-10 h-10">
+                        {/* <div className="relative w-10 h-10">
                             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
                             <div 
                                 className="absolute inset-0 bg-white rounded-full"
@@ -189,10 +188,10 @@ const description = () => {
                             <div className="absolute inset-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs font-bold">{activeIndex + 1}</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-            </div> */}
+            </div>
 
             {/* Main Content */}
             <div className="pt-10 px-4 pb-8">
@@ -323,7 +322,13 @@ const description = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-center mt-6">
+                        <div className="flex justify-center mt-6 space-x-4">
+                        <button
+                        onClick={() => navigate(-1)}
+                        className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
+                    >
+                        Anterior
+                    </button>
                         <button
                             onClick={handleSubmitInfo}
                             disabled={submittingInfo}

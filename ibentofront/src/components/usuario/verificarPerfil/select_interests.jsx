@@ -6,7 +6,7 @@ import api from "../../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex, patron_curp } from "../../../utils/regex";
 // Agregar esta importación para face-api.js
-// import * as faceapi from 'face-api.js';
+// import * as face-api.js;
 
 const Verificar = () => {
     const navigate = useNavigate();
@@ -27,13 +27,6 @@ const Verificar = () => {
     const [validatingIne, setValidatingIne] = useState(false);
     const [submittingInfo, setSubmittingInfo] = useState(false);
     
-    // Estados para tracking de pasos completados
-    const [stepsCompleted, setStepsCompleted] = useState({
-        photos: false,
-        preferences: false,
-        ine: false,
-        info: false
-    });
     
     // Estados para el formulario de información adicional (step 4)
     const [formData, setFormData] = useState({
@@ -79,7 +72,10 @@ const Verificar = () => {
         };
 
         fetchQuestions();
-    }, []);    const handleSavePreferences = async () => {
+    }, []);    
+    
+    
+    const handleSavePreferences = async () => {
         setSavingPreferences(true);
         try {
             // Crear array de respuestas para TODAS las preguntas (incluso las no respondidas)
@@ -98,7 +94,9 @@ const Verificar = () => {
             const obligatoriasNoRespondidas = itemsAboutMe.filter(item => {
                 const respuestaUsuario = selectedAnswers[item._id] || [];
                 return !item.optional && respuestaUsuario.length === 0;
-            });            if (obligatoriasNoRespondidas.length > 0) {
+            });
+
+            if (obligatoriasNoRespondidas.length > 0) {
                 showWarn("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
@@ -107,135 +105,31 @@ const Verificar = () => {
             console.log("selectedAnswers:", selectedAnswers);
             console.log("itemsAboutMe:", itemsAboutMe);
             console.log("respuestas a enviar:", respuestas);
-            console.log("Payload completo:", JSON.stringify({ respuestas }, null, 2));
 
-            // Simular delay para mostrar loading
-            await new Promise(resolve => setTimeout(resolve, 500));            // Guardamos las preferencias en un estado
+            // Guardar las preferencias localmente
             setSavedPreferences({ respuestas });
-            setStepsCompleted(prev => ({ ...prev, preferences: true }));
-            console.log("Preferencias guardadas localmente:", { respuestas })
+            // setStepsCompleted(prev => ({ ...prev, preferences: true }));
+            console.log("Preferencias guardadas localmente:", { respuestas });
 
-            // Intentar con el endpoint que aparece en el error            
-            // const response = await api.post("intereses-respuestas/", { respuestas });
-            // console.log("Respuesta del servidor:", response.data);
-            showSuccess("Preferencias guardadas correctamente.");
-            setActiveIndex(prev => prev + 1);        } catch (err) {
-
+            // Subir las preferencias al servidor
+            const response = await api.post("intereses-respuestas/", { respuestas });
+            console.log("Respuesta del servidor:", response.data);
+            if (response.status == 200) {
+                showSuccess("Preferencias guardadas correctamente.");
+                 setTimeout(() => {
+                    navigate("../eventos");
+                }, 2000);
+            }
+            // setActiveIndex(prev => prev + 1);
+        } catch (err) {
             console.error("Error al procesar preferencias:", err);
             showError(`Error al guardar preferencias: ${err.message}`);
-
-            // console.error("Error completo:", err);
-            // console.error("Error response:", err.response?.data);
-            // console.error("Error status:", err.response?.status);
-            // console.error("Error message:", err.message);
-            // alert(`Error al guardar preferencias: ${err.response?.data?.error || err.message}`);
         } finally {
             setSavingPreferences(false);
         }
     };
 
-    // Función para enviar las preferencias guardadas
-    const sendSavedPreferences = async () => {
-        if (!savedPreferences) {
-            console.error("No hay preferencias guardadas para enviar");
-            return;
-        }
-
-        try {
-            console.log("Enviando preferencias guardadas:", savedPreferences);
-            const response = await api.post("intereses-respuestas/", savedPreferences);
-            console.log("Respuesta del servidor:", response.data);
-            return response.data;
-        } catch (err) {
-            console.error("Error al enviar preferencias:", err);
-            throw err;
-        }
-    };
-
-    // ---------------------------- ENVIAR TODA LA INFORMACIÓN ----------------------------- 
-
-   
-    // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
-    
-    
-
-    // Función para validar el formulario
-    const validateForm = () => {
-        const { birthday, gender, description, curp } = formData;
-        
-        if (!birthday.trim()) {
-            showWarn('La fecha de nacimiento es requerida');
-            return false;
-        }
-        
-        if (!gender) {
-            showWarn('El género es requerido');
-            return false;
-        }
-        
-        if (!description.trim()) {
-            showWarn('La descripción es requerida');
-            return false;
-        }
-        
-        if (!curp.trim()) {
-            showWarn('El CURP es requerido');
-            return false;
-        }
-
-      
-        
-        // Validar formato de fecha (YYYY-MM-DD)
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateRegex.test(birthday)) {
-            showWarn('El formato de fecha debe ser YYYY-MM-DD');
-            return false;
-        }
-        
-        // Validar CURP (18 caracteres alfanuméricos)
-        // if (curp.length !== 18) {
-        //     showWarn('El CURP debe tener exactamente 18 caracteres');
-        //     return false;
-        // }
-        if (!patron_curp.test(curp.trim().toUpperCase())) {
-                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
-                return false;
-         }
-        
-        return true;
-    };
-
-    // Función para enviar la información adicional
-    const handleSubmitInfo = async () => {
-        if (!validateForm()) {
-            return;
-        }
-
-        setSubmittingInfo(true);
-
-        try {
-            const response = await api.post('usuarios/agregar_info/', formData);
-            
-            if (response.status === 200) {
-                setStepsCompleted(prev => ({ ...prev, info: true }));
-                showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
-                
-                // Navegar a la página de eventos después de un delay
-                setTimeout(() => {
-                    navigate("../eventos");
-                }, 2000);
-            }
-        } catch (error) {
-            console.error('Error al enviar información:', error);
-            const errorMessage = error.response?.data?.error || 
-                                error.response?.data?.detail || 
-                                error.message || 
-                                'Error al guardar la información';
-            showError(`Error: ${errorMessage}`);
-        } finally {
-            setSubmittingInfo(false);
-        }
-    };
+ 
 
     //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
   
@@ -269,7 +163,7 @@ const Verificar = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* Header Section */}
-            {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
@@ -286,12 +180,12 @@ const Verificar = () => {
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                                 Verificación
                             </h1>
-                            <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
+                            <p className="text-sm text-gray-600">Paso {5} de {5}</p>
                         </div>
                     </div>
 
                     <div className="w-12 h-12 flex items-center justify-center">
-                        <div className="relative w-10 h-10">
+                        {/* <div className="relative w-10 h-10">
                             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
                             <div 
                                 className="absolute inset-0 bg-white rounded-full"
@@ -302,13 +196,13 @@ const Verificar = () => {
                             <div className="absolute inset-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs font-bold">{activeIndex + 1}</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-            </div> */}
+            </div>
 
             {/* Main Content */}
-            <div className="pt-10 px-4 pb-8">
+            <div className="pt-24 px-4 pb-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Content Cards */}
                     <div className="glass-premium rounded-3xl p-6 mb-6">
@@ -406,13 +300,14 @@ const Verificar = () => {
                                     
                         
                         <div className="mt-8 flex justify-center space-x-4 w-full mb-20">
+                    
                     <button
-                        onClick={() => setActiveIndex(prev => prev - 1)}
-                        disabled={activeIndex === 0}
+                        onClick={() => navigate(-1)}
                         className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
                     >
                         Anterior
                     </button>
+                   
 
                     
                         <button
