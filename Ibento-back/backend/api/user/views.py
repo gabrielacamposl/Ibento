@@ -917,14 +917,18 @@ def sugerencia_usuarios(request):
     print(f"Age Range: {age_range}")
 
     #Filtrar por genero y edad si se especifica
-    if gender != None and gender != 'Todos':
+    if gender != None:
         if gender == 'Hombre':
             g = 'H'
         elif gender == 'Mujer':
             g = 'M'
-        else: 
+        elif gender == 'Otro': 
             g = 'O'
-        candidatos = candidatos.filter(gender = g)
+        else:
+            g = None
+        
+        if g is not None:
+            candidatos = candidatos.filter(gender = g)
     
     if age_range is not None and min_age is not None and max_age is not None:
         from datetime import date
