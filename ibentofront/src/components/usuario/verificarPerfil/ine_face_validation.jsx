@@ -649,7 +649,7 @@ const VerifyProfile = () => {
                                                         screenshotFormat="image/jpeg"
                                                         videoConstraints={videoConstraints}
                                                         className="w-full h-full object-cover"
-                                                        mirrored={true}
+                                                        mirrored={false}
                                                         style={{ transform: 'scaleX(-1)' }}
                                                     />
                                                 ) : (
