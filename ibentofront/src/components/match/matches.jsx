@@ -34,7 +34,7 @@ const Matches = () => {
     };
 
     const handleVerificar = () => { // Renamed
-        setTimeout(() => navigate("../verificar"), 0);
+        setTimeout(() => navigate("../verificar-ine"), 0);
     };
 
     useEffect(() => {

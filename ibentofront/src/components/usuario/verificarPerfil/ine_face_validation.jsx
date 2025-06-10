@@ -405,12 +405,12 @@ const VerifyProfile = () => {
                         Has agotado tus 3 intentos de verificación facial. No te preocupes, puedes verificar tu perfil más tarde desde la configuración de tu cuenta.
                     </p>
                     
-                    <div className="glass-premium rounded-2xl p-4 mb-6 border-l-4 border-orange-500">
+                    <div className="glass-premium rounded-2xl p-4 mb-6 border-l-4 border-blue-500">
                         <div className="flex items-center justify-center mb-2">
-                            <AlertTriangle className="w-5 h-5 text-orange-500 mr-2" />
-                            <span className="font-semibold text-orange-700">Importante</span>
+                            <AlertTriangle className="w-5 h-5 text-blue-500 mr-2" />
+                            <span className="font-semibold text-blue-700">Importante</span>
                         </div>
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-blue-600">
                             Tu perfil tendrá verificación pendiente hasta que completes este proceso.
                         </p>
                     </div>
@@ -510,7 +510,7 @@ const VerifyProfile = () => {
                                                         className="w-full h-full object-cover"
                                                     />
                                                     <div className="absolute inset-0 flex items-center justify-center">
-                                                        <div className="w-[80%] h-[70%] border-4 border-yellow-400 rounded-2xl shadow-lg">
+                                                        <div className="w-[80%] h-[70%] border-4 rounded-2xl shadow-lg">
                                                             <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
                                                                 Centra tu INE aquí
                                                             </div>

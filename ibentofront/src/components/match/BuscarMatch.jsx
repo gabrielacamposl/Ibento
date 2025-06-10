@@ -56,7 +56,7 @@ const buscarMatchx = () => {
     }, []);
 
     const handleVerificar = () => { // Renamed
-        setTimeout(() => navigate("../verificar"), 0);
+        setTimeout(() => navigate("../verificar-ine"), 0);
     };
 
     // Verificar si el usuario está verificado
@@ -496,7 +496,7 @@ const buscarMatchx = () => {
     };
 
     const handdleVerificar = () => {
-        setTimeout(() => navigate("../verificar"), 0);
+        setTimeout(() => navigate("../verificar-ine"), 0);
     };
 
     const user = UserMatch[currentIndex];
