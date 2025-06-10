@@ -1025,14 +1025,7 @@ const buscarMatchx = () => {
                                                         {user?.nombre}{user?.edad ? `, ${user.edad}` : (user?.fecha_nacimiento ? calculateAge(user.fecha_nacimiento) : '')}
                                                     </h2>
                                                 </div>
-                                                <button
-                                                    onClick={() => navigate('../verLike')}
-                                                    className="p-3 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300"
-                                                >
-                                                    <Sparkles className="w-5 h-5 text-white" />
-                                                </button>
                                             </div>
-
                                             {/* Preferencias del usuario */}
                                             <div className="flex flex-wrap gap-2 mb-3">
                                                 {user?.preferencias_evento?.slice(0, 3).map((pref, idx) => (
