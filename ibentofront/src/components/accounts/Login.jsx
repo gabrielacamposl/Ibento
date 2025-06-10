@@ -199,7 +199,7 @@ const Login = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
           {/* Tarjeta principal con glassmorphism */}
-          <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+          <div className="bg-white rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
             {/* Efecto de brillo superior */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
             
@@ -211,7 +211,7 @@ const Login = () => {
             
             {/* Logo y título */}
             <div className="text-center mb-8 relative z-10">
-              <div className="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-white/20 group hover:scale-110 transition-transform duration-300">
+              <div>
                  <Box
                 component="img"
                 src={ibentoLogo}
@@ -219,12 +219,10 @@ const Login = () => {
                 sx={{ width: 80, height: "auto", mb: 2 }}
               />
               </div>
-              <h1 className="text-3xl font-bold text-black mb-2" style={{ fontFamily: "system-ui, sans-serif" }}>
-                ¡Bienvenido!
-              </h1>
-              <p className="text-black/80 text-sm">
-                Inicia sesión para conectar con personas increíbles
-              </p>
+
+              <h3 className="text-black font-bold text-3x1">
+                Inicia sesión 
+              </h3>
             </div>
 
             {/* Formulario */}
@@ -236,7 +234,7 @@ const Login = () => {
                 </label>
                 <div className="relative group">
                   <input
-                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-white/50 outline-none"
+                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
                     required
                     id="email"
                     name="email"
