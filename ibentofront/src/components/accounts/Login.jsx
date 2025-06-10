@@ -3,6 +3,15 @@ import { Eye, EyeOff, Heart, Users, MessageCircle, Mail, Lock, Bell } from "luci
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import { Button } from "primereact/button";
+import {
+  FormControlLabel,
+  Checkbox,
+  Paper,
+  Box,
+  Grid,
+  Typography,
+  CssBaseline,
+} from "@mui/material";
 import { buttonStyle, inputStyles } from "../../styles/styles";
 import api from '../../apilogin';
 import InstallPrompt from "../../components/pwa/InstallPrompt";
