@@ -176,7 +176,7 @@ const Login = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Fondo degradado animado */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-350 via-purple-350 to-pink-500">
         <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-magenta-400/30"></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
       </div>
@@ -210,7 +210,7 @@ const Login = () => {
             }}></div>
             
             {/* Logo y título */}
-            <div className="text-center items-centerpt-10 px-6 min-h-screen mb-8 relative z-10">
+            <div className="text-center items-center mb-8 relative z-10">
               <div>
                  <Box
                 component="img"
