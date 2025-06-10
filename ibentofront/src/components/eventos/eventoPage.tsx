@@ -54,10 +54,10 @@ function Page() {
 
   // --- 1. LLAMADAS A HOOKS (SIEMPRE AL PRINCIPIO Y EN EL MISMO ORDEN)
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();  const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [date, setDate] = useState<Date | null>(null);
+  const [isSearchingMatch, setIsSearchingMatch] = useState(false);
 
   const [eventNumLikes, setEventNumLikes] = useState(0);
   const [eventNumSaves, setEventNumSaves] = useState(0);
@@ -589,19 +589,37 @@ function Page() {
           <div className="glass rounded-2xl overflow-hidden">
             <EventMap location={coor} />
           </div>
-        </div>
-
-        {/* Action Button */}
+        </div>        {/* Action Button */}
         <div className="glass-premium rounded-3xl p-6 text-center animate-slide-up mb-15">
           <button
             onClick={async () => {
-              await handleSave();
-              await buscarMatch();
+              setIsSearchingMatch(true);
+              try {
+                if(!isBookmarked){
+                  await handleSave();
+                }
+                await buscarMatch();
+              } catch (error) {
+                console.error("Error en buscar acompañante:", error);
+              } finally {
+                setIsSearchingMatch(false);
+              }
             }}
-            className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+            disabled={isSearchingMatch}
+            className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-2xl transform hover:scale-105 disabled:hover:scale-100 transition-all duration-300 shadow-lg hover:shadow-xl disabled:shadow-md"
           >
             <div className="flex items-center justify-center space-x-3">
-              <span>Buscar acompañante</span>
+              {isSearchingMatch ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Buscando...</span>
+                </>
+              ) : (
+                <span>Buscar acompañante</span>
+              )}
             </div>
           </button>
         </div>
