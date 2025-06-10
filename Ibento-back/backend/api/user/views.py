@@ -917,14 +917,18 @@ def sugerencia_usuarios(request):
     print(f"Age Range: {age_range}")
 
     #Filtrar por genero y edad si se especifica
-    if gender != None and gender != 'Todos':
+    if gender != None:
         if gender == 'Hombre':
             g = 'H'
         elif gender == 'Mujer':
             g = 'M'
-        else: 
+        elif gender == 'Otro': 
             g = 'O'
-        candidatos = candidatos.filter(gender = g)
+        else:
+            g = None
+        
+        if g is not None:
+            candidatos = candidatos.filter(gender = g)
     
     if age_range is not None and min_age is not None and max_age is not None:
         from datetime import date
@@ -974,26 +978,6 @@ def sugerencia_usuarios(request):
             candidatos = candidatos.exclude(_id__in=ids_objeto)
 
     if us_modo_busqueda == 'global':
-
-        # if interacciones_realizadas:
-        #     ids_objeto = [ObjectId(id_str) for id_str in interacciones_realizadas if id_str]
-        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
-        
-        # if usuarios_bloqueados:
-        #     ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
-        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
-        
-        # if usuarios_con_match:
-        #     todos_ids_match = []
-        #     for usuario_b_id, usuario_a_id in usuarios_con_match:
-        #         if str(usuario_a_id) != str(us_id):
-        #             todos_ids_match.append(usuario_a_id)
-        #         if str(usuario_b_id) != str(us_id):
-        #             todos_ids_match.append(usuario_b_id)
-            
-        #     if todos_ids_match:
-        #         ids_objeto = [ObjectId(id_str) for id_str in todos_ids_match if id_str]
-        #         candidatos = candidatos.exclude(_id__in=ids_objeto)
         pass
 
     if us_modo_busqueda == 'evento':
@@ -1054,14 +1038,6 @@ def sugerencia_usuarios(request):
 
     print("IDs ordenados por compatibilidad:", ids_ordenados)
 
-    # Obtener usuarios manteniendo el orden
-    # usuarios_ordenados = []
-    # for user_id in ids_ordenados:
-    #     try:
-    #         usuario = candidatos.get(_id=user_id)
-    #         usuarios_ordenados.append(usuario)
-    #     except Usuario.DoesNotExist:
-    #         continue
     usuarios_dict = {str(u._id): u for u in candidatos.filter(_id__in=ids_ordenados)}
     usuarios_ordenados = [usuarios_dict[str(user_id)] for user_id in ids_ordenados if str(user_id) in usuarios_dict]
 
@@ -1200,7 +1176,7 @@ def personas_que_me_dieron_like(request):
             u = interaccion.usuario_origen
 
             # Calcular edad si hay birthday
-            edad = None
+            edad = 18
             if u.birthday:
                 today = date.today()
                 birthday = u.birthday
@@ -1216,17 +1192,17 @@ def personas_que_me_dieron_like(request):
                 else:
                     edad = None
 
-                # Agregar datos del usuario
-                usuarios.append({
-                    "_id": str(u._id),
-                    "nombre": u.nombre,
-                    "apellido": u.apellido,
-                    "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
-                    "preferencias_evento": u.preferencias_evento or [],
-                    "preferencias_generales": u.preferencias_generales or [],
-                    "edad": edad,
-                    "descripcion": u.description or "",
-                })
+        # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })   
             
         return Response(usuarios, status=200)
 
