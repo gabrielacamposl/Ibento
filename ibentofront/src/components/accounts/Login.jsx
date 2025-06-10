@@ -1,27 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
+import { Eye, EyeOff, Heart, Users, MessageCircle, Mail, Lock, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../apilogin';
 import InstallPrompt from "../../components/pwa/InstallPrompt";
 import { initializePushNotifications } from '../../utils/pushNotifications';
-import {
-  FormControlLabel,
-  Checkbox,
-  Box,
-  Typography,
-} from "@mui/material";
-import { Button } from "primereact/button";
-import { Eye, EyeOff, Heart, Users, MessageCircle, Bell } from "lucide-react";
-import { motion } from "framer-motion";
-
-// Simulamos el logo y estilos
-const ibentoLogo = "/images/ibentoLogo.png";
-const buttonStyle = "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105";
-const inputStyles = "w-full p-3 border border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300";
-
-const colors = ["#FF00FF", "#00FFFF", "#FFFFFF", "#9333EA", "#3B82F6"];
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -31,7 +14,9 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const navigate = useNavigate();
-  const toast = useRef(null);
+  const toastRef = useRef(null);
+
+  const colors = ["#FF00FF", "#00FFFF", "#FFFFFF", "#9333EA", "#3B82F6"];
 
   // Verificar soporte de notificaciones al cargar
   useEffect(() => {
@@ -40,21 +25,31 @@ const Login = () => {
     }
   }, []);
 
-  // Funciones para mostrar toasts
-  const showSuccess = (message) => {
-    toast.current?.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
-  };
-
-  const showError = (message) => {
-    toast.current?.show({severity:'error', summary: 'Error', detail: message, life: 4000});
-  };
-
-  const showWarn = (message) => {
-    toast.current?.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
-  };
-
-  const showInfo = (message) => {
-    toast.current?.show({severity:'info', summary: 'Información', detail: message, life: 4000});
+  const showToast = (message, type = 'info') => {
+    // Crear toast personalizado
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-white max-w-sm transition-all duration-300 transform translate-x-full`;
+    
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warn' ? 'bg-yellow-500' : 'bg-blue-500';
+    toast.className += ` ${bgColor}`;
+    
+    toast.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span>${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">✕</button>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+    
+    // Auto-remove después de 4 segundos
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
   };
 
   const handleLogin = async (e) => {
@@ -63,7 +58,7 @@ const Login = () => {
 
     // Validaciones básicas
     if (!email || !password) {
-      showWarn("Por favor completa todos los campos");
+      showToast("Por favor completa todos los campos", 'warn');
       setLoading(false);
       return;
     }
@@ -93,15 +88,15 @@ const Login = () => {
       if (pushEnabled) {
         try {
           await initializePushNotifications(res.data.id);
-          showInfo("¡Notificaciones activadas! Recibirás alertas de matches, likes y mensajes");
+          showToast("¡Notificaciones activadas! Recibirás alertas de matches, likes y mensajes", 'info');
         } catch (pushError) {
           console.warn("Error al activar notificaciones:", pushError);
-          showInfo("Login exitoso. Para recibir notificaciones, permite el acceso cuando te lo solicite el navegador");
+          showToast("Login exitoso. Para recibir notificaciones, permite el acceso cuando te lo solicite el navegador", 'info');
         }
       }
 
       // Mostrar mensaje de éxito
-      showSuccess("¡Inicio de sesión exitoso! Redirigiendo...");
+      showToast("¡Inicio de sesión exitoso! Redirigiendo...", 'success');
 
       // Redirigir al usuario después de un breve delay para que vea el toast
       setTimeout(() => {
@@ -138,115 +133,93 @@ const Login = () => {
         mensajeError = "Error de conexión. Verifica tu internet.";
       }
       
-      showError(mensajeError);
+      showToast(mensajeError, 'error');
     }
+  };
+
+  // Animación de partículas
+  const AnimatedParticle = ({ index }) => {
+    const color = colors[index % colors.length];
+    const size = Math.random() * 100 + 50;
+    const duration = 15 + Math.random() * 10;
+    
+    return (
+      <div
+        className="absolute rounded-full opacity-20 blur-xl animate-pulse"
+        style={{
+          backgroundColor: color,
+          width: size + 'px',
+          height: size + 'px',
+          left: Math.random() * 100 + '%',
+          top: Math.random() * 100 + '%',
+          animationDuration: duration + 's',
+          animationDelay: Math.random() * 5 + 's',
+        }}
+      />
+    );
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Fondo degradado animado */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300">
-        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-300/30 via-transparent to-magenta-300/30"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-magenta-400/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
       </div>
 
-      {/* Partículas flotantes mejoradas */}
+      {/* Partículas flotantes */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(12)].map((_, i) => {
-          const color = colors[i % colors.length];
-          const size = Math.random() * 100 + 50;
-          return (
-            <motion.div
-              key={i}
-              className="absolute rounded-full opacity-20 blur-xl"
-              style={{ 
-                backgroundColor: color,
-                width: size,
-                height: size,
-              }}
-              initial={{
-                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-              }}
-              animate={{
-                x: [
-                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                ],
-                y: [
-                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                ],
-                scale: [1, 1.2, 0.8, 1],
-                opacity: [0.1, 0.3, 0.1, 0.2],
-              }}
-              transition={{
-                duration: 15 + Math.random() * 10,
-                repeat: Infinity,
-                repeatType: "mirror",
-                ease: "easeInOut",
-              }}
-            />
-          );
-        })}
+        {[...Array(12)].map((_, i) => (
+          <AnimatedParticle key={i} index={i} />
+        ))}
+      </div>
+
+      {/* Mesh gradient overlay */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Contenido principal */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-full max-w-md"
-        >
+        <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
           {/* Tarjeta principal con glassmorphism */}
           <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
             {/* Efecto de brillo superior */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
             
+            {/* Patrón de fondo sutil */}
+            <div className="absolute inset-0 opacity-5" style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, white 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }}></div>
+            
             {/* Logo y título */}
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="text-center mb-8"
-            >
-              <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <img
-                  src={ibentoLogo}
-                  alt="Ibento Logo"
-                  className="w-12 h-12 object-contain"
-                />
+            <div className="text-center mb-8 relative z-10">
+              <div className="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-white/20 group hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                  i
+                </div>
               </div>
-              <Typography 
-                component="h1" 
-                className="text-3xl font-bold text-white mb-2"
-                style={{ fontFamily: "Aptos, sans-serif" }}
-              >
+              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "system-ui, sans-serif" }}>
                 ¡Bienvenido!
-              </Typography>
+              </h1>
               <p className="text-white/80 text-sm">
                 Inicia sesión para conectar con personas increíbles
               </p>
-            </motion.div>
+            </div>
 
             {/* Formulario */}
-            <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              onSubmit={handleLogin}
-              className="space-y-6"
-            >
+            <form onSubmit={handleLogin} className="space-y-6 relative z-10">
               {/* Campo Email */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-white/90">
                   Correo electrónico <span className="text-pink-300">*</span>
                 </label>
-                <div className="relative">
-                  <InputText
-                    className={`${inputStyles} pl-4`}
+                <div className="relative group">
+                  <input
+                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-white placeholder-white/50 outline-none"
                     required
                     id="email"
                     name="email"
@@ -256,8 +229,8 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <div className="absolute inset-y-0 right-3 flex items-center">
-                    <Users className="w-5 h-5 text-purple-400" />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-white/60 group-focus-within:text-purple-300 transition-colors" />
                   </div>
                 </div>
               </div>
@@ -267,9 +240,9 @@ const Login = () => {
                 <label className="block text-sm font-medium text-white/90">
                   Contraseña <span className="text-pink-300">*</span>
                 </label>
-                <div className="relative">
-                  <InputText
-                    className={`${inputStyles} pl-4 pr-12`}
+                <div className="relative group">
+                  <input
+                    className="w-full p-4 pl-12 pr-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-white placeholder-white/50 outline-none"
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -279,9 +252,12 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-white/60 group-focus-within:text-purple-300 transition-colors" />
+                  </div>
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-purple-400 hover:text-purple-600 transition-colors"
+                    className="absolute inset-y-0 right-3 flex items-center text-white/60 hover:text-purple-300 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -291,23 +267,15 @@ const Login = () => {
 
               {/* Recordar cuenta y recuperar contraseña */}
               <div className="flex items-center justify-between">
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      sx={{
-                        color: 'white',
-                        '&.Mui-checked': {
-                          color: '#e879f9',
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <span className="text-white/80 text-sm">Recordar cuenta</span>
-                  }
-                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-purple-600 bg-white/20 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
+                  />
+                  <span className="text-white/80 text-sm">Recordar cuenta</span>
+                </label>
                 <Link
                   to="/recuperar-cuenta"
                   className="text-sm text-pink-300 hover:text-pink-200 transition-colors hover:underline"
@@ -317,17 +285,13 @@ const Login = () => {
               </div>
 
               {/* Botón de login */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  className={`${buttonStyle} w-full text-lg relative overflow-hidden`}
+              <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                <button
                   type="submit"
-                  loading={loading}
                   disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
                     {loading ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -341,52 +305,45 @@ const Login = () => {
                     )}
                   </span>
                   {/* Efecto de brillo animado */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-200%] animate-pulse"></div>
-                </Button>
-              </motion.div>
-            </motion.form>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </button>
+              </div>
+            </form>
 
             {/* Divisor */}
             <div className="my-8 flex items-center">
-              <div className="flex-1 h-px bg-white/20"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
               <span className="px-4 text-white/60 text-sm">o</span>
-              <div className="flex-1 h-px bg-white/20"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
             </div>
 
             {/* Crear cuenta */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-center"
-            >
-              <p className="text-white/80 text-sm mb-3">
+            <div className="text-center">
+              <p className="text-white/80 text-sm mb-4">
                 ¿No tienes una cuenta?
               </p>
               <Link
                 to="/crear-cuenta"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Crear cuenta
               </Link>
-            </motion.div>
+            </div>
           </div>
 
           {/* Características PWA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-6 text-center space-y-2"
-          >
+          <div className="mt-6 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Bell className="w-5 h-5 text-yellow-300" />
                 <span className="text-white font-medium">App Móvil</span>
               </div>
               <p className="text-white/70 text-xs leading-relaxed">
-                📱 Instala la app para recibir notificaciones instantáneas de matches, likes y mensajes
+                📱 ¡Instala la app para la mejor experiencia!
+              </p>
+              <p className="text-white/70 text-xs">
+                Recibe notificaciones de matches, likes y mensajes al instante
               </p>
               {pushEnabled && (
                 <div className="mt-2 text-green-300 text-xs">
@@ -394,15 +351,30 @@ const Login = () => {
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* Toast component */}
-      <Toast ref={toast} />
-      
       {/* InstallPrompt component */}
       <InstallPrompt />
+
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   );
 };

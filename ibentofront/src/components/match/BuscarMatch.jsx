@@ -1083,29 +1083,48 @@ const buscarMatchx = () => {
                 </div>
             </div>
 
-            {/* Botones de acción flotantes premium - MEJORADOS */}
+            {/* Botones de acción flotantes premium - ADAPTADOS PARA WEB */}
             {hasMoreUsers() && (
-                <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
-                    <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
-                        {/* Botón Dislike - Más grande */}
-                        <button
-                            onClick={handleDislikeButton}
-                            disabled={isAnimating}
-                            className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        >
-                            <X className="w-8 h-8 text-white" />
-                        </button>
-
-                        {/* Botón Like - Más grande */}
-                        <button
-                            onClick={handleLikeButton}
-                            disabled={isAnimating}
-                            className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        >
-                            <Heart className="w-8 h-8 text-white" />
-                        </button>
+                <>
+                    {/* Mobile: botones flotantes */}
+                    <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center lg:hidden">
+                        <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
+                            <button
+                                onClick={handleDislikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <X className="w-8 h-8 text-white" />
+                            </button>
+                            <button
+                                onClick={handleLikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <Heart className="w-8 h-8 text-white" />
+                            </button>
+                        </div>
                     </div>
-                </div>
+                    {/* Desktop: botones debajo del stack */}
+                    <div className="hidden lg:flex justify-center mt-8">
+                        <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
+                            <button
+                                onClick={handleDislikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <X className="w-8 h-8 text-white" />
+                            </button>
+                            <button
+                                onClick={handleLikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <Heart className="w-8 h-8 text-white" />
+                            </button>
+                        </div>
+                    </div>
+                </>
             )}
 
             {/* Modal de verificación premium */}
