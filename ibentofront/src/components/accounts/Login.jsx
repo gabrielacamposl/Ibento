@@ -36,7 +36,7 @@ const Login = () => {
     toast.innerHTML = `
       <div class="flex items-center gap-2">
         <span>${message}</span>
-        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">✕</button>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-black/70 hover:text-black">✕</button>
       </div>
     `;
     
@@ -190,22 +190,25 @@ const Login = () => {
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
             
             {/* Patrón de fondo sutil */}
-            <div className="absolute inset-0 opacity-5" style={{
-              backgroundImage: `radial-gradient(circle at 25% 25%, white 1px, transparent 1px)`,
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, white 1px)`,
               backgroundSize: '20px 20px'
             }}></div>
             
             {/* Logo y título */}
             <div className="text-center mb-8 relative z-10">
               <div className="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-white/20 group hover:scale-110 transition-transform duration-300">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                  i
-                </div>
+                 <Box
+                component="img"
+                src={ibentoLogo}
+                alt="Ibento Logo"
+                sx={{ width: 80, height: "auto", mb: 2 }}
+              />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "system-ui, sans-serif" }}>
+              <h1 className="text-3xl font-bold text-black mb-2" style={{ fontFamily: "system-ui, sans-serif" }}>
                 ¡Bienvenido!
               </h1>
-              <p className="text-white/80 text-sm">
+              <p className="text-black/80 text-sm">
                 Inicia sesión para conectar con personas increíbles
               </p>
             </div>
@@ -214,12 +217,12 @@ const Login = () => {
             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
               {/* Campo Email */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-white/90">
+                <label className="block text-sm font-medium text-black/90">
                   Correo electrónico <span className="text-pink-300">*</span>
                 </label>
                 <div className="relative group">
                   <input
-                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-white placeholder-white/50 outline-none"
+                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-white/50 outline-none"
                     required
                     id="email"
                     name="email"
@@ -230,19 +233,19 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Mail className="w-5 h-5 text-white/60 group-focus-within:text-purple-300 transition-colors" />
+                    <Mail className="w-5 h-5 text-black/60 group-focus-within:text-purple-300 transition-colors" />
                   </div>
                 </div>
               </div>
 
               {/* Campo Contraseña */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-white/90">
+                <label className="block text-sm font-medium text-black/90">
                   Contraseña <span className="text-pink-300">*</span>
                 </label>
                 <div className="relative group">
                   <input
-                    className="w-full p-4 pl-12 pr-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-white placeholder-white/50 outline-none"
+                    className="w-full p-4 pl-12 pr-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -253,11 +256,11 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-white/60 group-focus-within:text-purple-300 transition-colors" />
+                    <Lock className="w-5 h-5 text-black/60 group-focus-within:text-purple-300 transition-colors" />
                   </div>
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-white/60 hover:text-purple-300 transition-colors"
+                    className="absolute inset-y-0 right-3 flex items-center text-black/60 hover:text-purple-300 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -274,7 +277,7 @@ const Login = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 text-purple-600 bg-white/20 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
                   />
-                  <span className="text-white/80 text-sm">Recordar cuenta</span>
+                  <span className="text-black/80 text-sm">Recordar cuenta</span>
                 </label>
                 <Link
                   to="/recuperar-cuenta"
@@ -286,45 +289,36 @@ const Login = () => {
 
               {/* Botón de login */}
               <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
-                <button
+                <Button 
+                  className={buttonStyle} 
                   type="submit"
+                  fullWidth 
+                  variant="contained" 
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={handleLogin}
+                  loading={loading}
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Iniciando sesión...
-                      </>
-                    ) : (
-                      <>
-                        <Heart className="w-5 h-5" />
-                        Iniciar Sesión
-                      </>
-                    )}
-                  </span>
-                  {/* Efecto de brillo animado */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                </button>
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                </Button>
               </div>
             </form>
 
             {/* Divisor */}
             <div className="my-8 flex items-center">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-              <span className="px-4 text-white/60 text-sm">o</span>
+              <span className="px-4 text-black/60 text-sm">o</span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
             </div>
 
             {/* Crear cuenta */}
             <div className="text-center">
-              <p className="text-white/80 text-sm mb-4">
+              <p className="text-black/80 text-sm mb-4">
                 ¿No tienes una cuenta?
               </p>
               <Link
                 to="/crear-cuenta"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-black font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
               >
                 <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Crear cuenta
