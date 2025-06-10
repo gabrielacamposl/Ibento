@@ -210,7 +210,7 @@ const Login = () => {
             }}></div>
             
             {/* Logo y título */}
-            <div className="text-center mb-8 relative z-10">
+            <div className="text-center items-centerpt-10 px-6 min-h-screen mb-8 relative z-10">
               <div>
                  <Box
                 component="img"
@@ -220,9 +220,9 @@ const Login = () => {
               />
               </div>
 
-              <h3 className="text-black font-bold text-3x1">
+              <h1 className="text-black font-bold text-3x1">
                 Inicia sesión 
-              </h3>
+              </h1>
             </div>
 
             {/* Formulario */}
@@ -234,13 +234,13 @@ const Login = () => {
                 </label>
                 <div className="relative group">
                   <input
-                    className="w-full p-4 pl-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
+                    className="w-full p-4 pl-12 border border-black/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
                     required
                     id="email"
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="tu@email.com"
+                    placeholder="Correo electrónico"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -257,13 +257,13 @@ const Login = () => {
                 </label>
                 <div className="relative group">
                   <input
-                    className="w-full p-4 pl-12 pr-12 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
+                    className="w-full p-4 pl-12 pr-12 border border-blue/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
                     id="password"
                     autoComplete="current-password"
-                    placeholder="••••••••"
+                    placeholder="Contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -330,9 +330,8 @@ const Login = () => {
               </p>
               <Link
                 to="/crear-cuenta"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-black font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-purple font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
               >
-                <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Crear cuenta
               </Link>
             </div>
