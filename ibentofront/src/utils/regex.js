@@ -6,7 +6,7 @@ export const name_regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
 export const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Debe tener al menos 8 caracteres, una letra minúscula, una mayúscula y un número
-export const password_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+export const password_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[a-zA-Z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
 
 // CURP: Formato CURP válido (12 letras, 6 números, 1 letra y 2 números al final)
 export const curp_regex = /^[A-Z]{4}\d{6}[HM][A-Z]{6}\d{2}$/;
