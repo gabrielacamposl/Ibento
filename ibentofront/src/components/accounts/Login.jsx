@@ -16,6 +16,9 @@ import { buttonStyle, inputStyles } from "../../styles/styles";
 import api from '../../apilogin';
 import InstallPrompt from "../../components/pwa/InstallPrompt";
 import { initializePushNotifications } from '../../utils/pushNotifications';
+import { motion } from "framer-motion";
+import ibentoLogo from "/images/ibentoLogo.png";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
