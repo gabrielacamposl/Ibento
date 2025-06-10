@@ -10,10 +10,8 @@ const VerifyProfile = () => {
     const webcamRef = useRef(null);
     const toast = useRef(null);
 
-    // REFS PARA INE
+    // REF PARA INE
     const ineWebcamRef = useRef(null);
-    const cropCanvasRef = useRef(null);
-    const cropImageRef = useRef(null);
 
     const [user, setUser] = useState({
         ine: [],
@@ -38,26 +36,10 @@ const VerifyProfile = () => {
     const [capturedPhoto, setCapturedPhoto] = useState(null);
     const [stepsCompleted, setStepsCompleted] = useState({ ine: false, face: false });
 
-    // ESTADOS PARA INE CON SISTEMA IPHONE
+    // ESTADOS SIMPLIFICADOS PARA INE
     const [ineCapture, setIneCapture] = useState({
-        mode: null,
-        activeIndex: 0,
         showCamera: false,
-        capturedImage: null,
-        showCrop: false,
-        selectedFromGallery: null,
-        cropData: {
-            scale: 1,
-            translateX: 0,
-            translateY: 0,
-            cropArea: { x: 50, y: 50, width: 200, height: 130 },
-            imageSize: { width: 0, height: 0 },
-            isDragging: false,
-            startPos: { x: 0, y: 0 },
-            showGrid: false,
-            initialPinchDistance: null,
-            initialScale: null
-        }
+        activeIndex: 0,
     });
 
     const items = [
@@ -76,333 +58,44 @@ const VerifyProfile = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // ===== FUNCIONES PARA SISTEMA IPHONE =====
+    // ===== FUNCIONES SIMPLIFICADAS PARA INE =====
 
-    const initializeImageCrop = (imageElement) => {
-        if (!imageElement) return;
-        
-        const containerRect = imageElement.parentElement.getBoundingClientRect();
-        
-        // Calcular escala inicial para que la imagen cubra el área de recorte
-        const containerWidth = containerRect.width;
-        const containerHeight = containerRect.height;
-        const imageAspect = imageElement.naturalWidth / imageElement.naturalHeight;
-        const containerAspect = containerWidth / containerHeight;
-        
-        let initialScale;
-        if (imageAspect > containerAspect) {
-            initialScale = containerHeight / imageElement.naturalHeight;
-        } else {
-            initialScale = containerWidth / imageElement.naturalWidth;
-        }
-        
-        // Área de recorte centrada (tamaño de INE aproximado 3:2)
-        const cropWidth = Math.min(containerWidth * 0.8, 320);
-        const cropHeight = cropWidth * (2/3);
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                scale: Math.max(initialScale * 1.2, 1),
-                translateX: 0,
-                translateY: 0,
-                cropArea: {
-                    x: (containerWidth - cropWidth) / 2,
-                    y: (containerHeight - cropHeight) / 2,
-                    width: cropWidth,
-                    height: cropHeight
-                },
-                imageSize: {
-                    width: imageElement.naturalWidth,
-                    height: imageElement.naturalHeight
-                }
-            }
-        }));
-    };
-
-    const handleImageMouseDown = (e) => {
-        e.preventDefault();
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                isDragging: true,
-                startPos: {
-                    x: e.clientX - prev.cropData.translateX,
-                    y: e.clientY - prev.cropData.translateY
-                },
-                showGrid: true
-            }
-        }));
-    };
-
-    const handleImageMouseMove = (e) => {
-        if (!ineCapture.cropData.isDragging) return;
-        
-        e.preventDefault();
-        const newTranslateX = e.clientX - ineCapture.cropData.startPos.x;
-        const newTranslateY = e.clientY - ineCapture.cropData.startPos.y;
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                translateX: newTranslateX,
-                translateY: newTranslateY
-            }
-        }));
-    };
-
-    const handleImageMouseUp = () => {
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                isDragging: false,
-                showGrid: false
-            }
-        }));
-    };
-
-    const handleImageWheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newScale = Math.max(0.5, Math.min(4, ineCapture.cropData.scale * delta));
-        
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                scale: newScale
-            }
-        }));
-    };
-
-    // Gestos táctiles para móvil
-    const handleTouchStart = (e) => {
-        e.preventDefault();
-        
-        if (e.touches.length === 1) {
-            const touch = e.touches[0];
-            setIneCapture(prev => ({
-                ...prev,
-                cropData: {
-                    ...prev.cropData,
-                    isDragging: true,
-                    startPos: {
-                        x: touch.clientX - prev.cropData.translateX,
-                        y: touch.clientY - prev.cropData.translateY
-                    },
-                    showGrid: true
-                }
-            }));
-        } else if (e.touches.length === 2) {
-            const touch1 = e.touches[0];
-            const touch2 = e.touches[1];
-            const distance = Math.sqrt(
-                Math.pow(touch2.clientX - touch1.clientX, 2) + 
-                Math.pow(touch2.clientY - touch1.clientY, 2)
-            );
-            
-            setIneCapture(prev => ({
-                ...prev,
-                cropData: {
-                    ...prev.cropData,
-                    initialPinchDistance: distance,
-                    initialScale: prev.cropData.scale,
-                    showGrid: true
-                }
-            }));
-        }
-    };
-
-    const handleTouchMove = (e) => {
-        e.preventDefault();
-        
-        if (e.touches.length === 1 && ineCapture.cropData.isDragging) {
-            const touch = e.touches[0];
-            const newTranslateX = touch.clientX - ineCapture.cropData.startPos.x;
-            const newTranslateY = touch.clientY - ineCapture.cropData.startPos.y;
-            
-            setIneCapture(prev => ({
-                ...prev,
-                cropData: {
-                    ...prev.cropData,
-                    translateX: newTranslateX,
-                    translateY: newTranslateY
-                }
-            }));
-        } else if (e.touches.length === 2 && ineCapture.cropData.initialPinchDistance) {
-            const touch1 = e.touches[0];
-            const touch2 = e.touches[1];
-            const distance = Math.sqrt(
-                Math.pow(touch2.clientX - touch1.clientX, 2) + 
-                Math.pow(touch2.clientY - touch1.clientY, 2)
-            );
-            
-            const scale = (distance / ineCapture.cropData.initialPinchDistance) * ineCapture.cropData.initialScale;
-            const newScale = Math.max(0.5, Math.min(4, scale));
-            
-            setIneCapture(prev => ({
-                ...prev,
-                cropData: {
-                    ...prev.cropData,
-                    scale: newScale
-                }
-            }));
-        }
-    };
-
-    const handleTouchEnd = () => {
-        setIneCapture(prev => ({
-            ...prev,
-            cropData: {
-                ...prev.cropData,
-                isDragging: false,
-                initialPinchDistance: null,
-                initialScale: null,
-                showGrid: false
-            }
-        }));
-    };
-
-    const resetImagePosition = () => {
-        if (cropImageRef.current) {
-            initializeImageCrop(cropImageRef.current);
-        }
-    };
-
-    const confirmCropIPhone = async () => {
-        if (!cropCanvasRef.current || !cropImageRef.current) {
-            showError('Error: Referencias no disponibles');
-            return;
-        }
-
-        try {
-            const canvas = cropCanvasRef.current;
-            const ctx = canvas.getContext('2d');
-            const img = cropImageRef.current;
-            const { scale, translateX, translateY, cropArea } = ineCapture.cropData;
-            
-            canvas.width = cropArea.width;
-            canvas.height = cropArea.height;
-            
-            const tempImg = new Image();
-            tempImg.crossOrigin = 'anonymous';
-            
-            tempImg.onload = () => {
-                try {
-                    const containerRect = img.parentElement.getBoundingClientRect();
-                    const scaleX = img.naturalWidth / (img.offsetWidth * scale);
-                    const scaleY = img.naturalHeight / (img.offsetHeight * scale);
-                    
-                    const sourceX = (cropArea.x - translateX) * scaleX;
-                    const sourceY = (cropArea.y - translateY) * scaleY;
-                    const sourceWidth = cropArea.width * scaleX;
-                    const sourceHeight = cropArea.height * scaleY;
-                    
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(
-                        tempImg,
-                        sourceX, sourceY, sourceWidth, sourceHeight,
-                        0, 0, cropArea.width, cropArea.height
-                    );
-                    
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            showError('Error al crear la imagen recortada');
-                            return;
-                        }
-                        
-                        const file = new File([blob], `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`, {
-                            type: 'image/jpeg'
-                        });
-                        
-                        const newImages = [...ineImages];
-                        newImages[ineCapture.activeIndex] = file;
-                        setIneImages(newImages);
-                        
-                        const updatedUserINE = [...user.ine];
-                        updatedUserINE[ineCapture.activeIndex] = file;
-                        setUser(prev => ({ ...prev, ine: updatedUserINE }));
-                        
-                        resetIneCaptureWithHandles();
-                        showSuccess('Imagen recortada correctamente');
-                    }, 'image/jpeg', 0.9);
-                    
-                } catch (error) {
-                    console.error('Error al procesar imagen:', error);
-                    showError('Error al procesar la imagen');
-                }
-            };
-            
-            tempImg.onerror = () => showError('Error al cargar la imagen');
-            tempImg.src = ineCapture.selectedFromGallery;
-            
-        } catch (error) {
-            console.error('Error en crop:', error);
-            showError('Error al procesar el recorte');
-        }
-    };
-
-    // ===== FUNCIONES ORIGINALES =====
-
-    const startIneCapture = (mode, index) => {
-        setIneCapture(prev => ({
-            ...prev,
-            mode,
+    const startIneCapture = (index) => {
+        setIneCapture({
+            showCamera: true,
             activeIndex: index,
-            showCamera: mode === 'camera',
-            showCrop: false,
-            capturedImage: null,
-            selectedFromGallery: null,
-            cropData: {
-                scale: 1,
-                translateX: 0,
-                translateY: 0,
-                cropArea: { x: 50, y: 50, width: 200, height: 130 },
-                imageSize: { width: 0, height: 0 },
-                isDragging: false,
-                startPos: { x: 0, y: 0 },
-                showGrid: false,
-                initialPinchDistance: null,
-                initialScale: null
-            }
-        }));
+        });
     };
 
     const captureInePhoto = () => {
         if (!ineWebcamRef.current) return;
 
         const imageSrc = ineWebcamRef.current.getScreenshot();
-        setIneCapture(prev => ({
-            ...prev,
-            capturedImage: imageSrc,
-            showCamera: false
-        }));
-    };
-
-    const confirmIneCapture = () => {
-        if (!ineCapture.capturedImage) return;
-
-        const newImages = [...ineImages];
-        newImages[ineCapture.activeIndex] = dataURLtoFile(
-            ineCapture.capturedImage,
+        
+        // Convertir a File y guardar directamente
+        const file = dataURLtoFile(
+            imageSrc,
             `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`
         );
+
+        const newImages = [...ineImages];
+        newImages[ineCapture.activeIndex] = file;
         setIneImages(newImages);
 
         const updatedUserINE = [...user.ine];
-        updatedUserINE[ineCapture.activeIndex] = newImages[ineCapture.activeIndex];
+        updatedUserINE[ineCapture.activeIndex] = file;
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
 
-        resetIneCaptureWithHandles();
+        // Cerrar cámara
+        setIneCapture({
+            showCamera: false,
+            activeIndex: 0,
+        });
+
         showSuccess('Imagen de INE guardada correctamente');
     };
 
-    const handleGallerySelectionWithHandles = (e, index) => {
+    const handleGallerySelection = (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -418,54 +111,27 @@ const VerifyProfile = () => {
             return;
         }
 
-        const reader = new FileReader();
+        // Guardar directamente la imagen seleccionada
+        const newImages = [...ineImages];
+        newImages[index] = file;
+        setIneImages(newImages);
+
+        const updatedUserINE = [...user.ine];
+        updatedUserINE[index] = file;
+        setUser(prev => ({ ...prev, ine: updatedUserINE }));
+
+        // Limpiar el input
+        e.target.value = '';
         
-        reader.onload = (event) => {
-            setIneCapture(prev => ({
-                ...prev,
-                activeIndex: index,
-                selectedFromGallery: event.target.result,
-                showCrop: true,
-                mode: 'gallery',
-                capturedImage: null,
-                showCamera: false
-            }));
-        };
-        
-        reader.onerror = () => {
-            showError('Error al cargar la imagen');
-            e.target.value = '';
-        };
-        
-        reader.readAsDataURL(file);
+        showSuccess('Imagen seleccionada correctamente');
     };
 
-    const resetIneCaptureWithHandles = () => {
+    const cancelIneCapture = () => {
         setIneCapture({
-            mode: null,
-            activeIndex: 0,
             showCamera: false,
-            capturedImage: null,
-            showCrop: false,
-            selectedFromGallery: null,
-            cropData: {
-                scale: 1,
-                translateX: 0,
-                translateY: 0,
-                cropArea: { x: 50, y: 50, width: 200, height: 130 },
-                imageSize: { width: 0, height: 0 },
-                isDragging: false,
-                startPos: { x: 0, y: 0 },
-                showGrid: false,
-                initialPinchDistance: null,
-                initialScale: null
-            }
+            activeIndex: 0,
         });
-        
-        const fileInputs = document.querySelectorAll('input[type="file"]');
-        fileInputs.forEach(input => input.value = '');
-        
-        showInfo('Operación cancelada');
+        showInfo('Captura cancelada');
     };
 
     const handleImageDeleteINE = (index) => {
@@ -476,6 +142,8 @@ const VerifyProfile = () => {
         const updatedUserINE = [...user.ine];
         updatedUserINE[index] = null;
         setUser(prev => ({ ...prev, ine: updatedUserINE }));
+
+        showInfo('Imagen eliminada');
     };
 
     // ===== VALIDACIÓN DE INE =====
@@ -514,6 +182,7 @@ const VerifyProfile = () => {
                 }
             } else {
                 setMessage(data.error || 'La validación falló. Revisa las imágenes.');
+                showError(data.error || 'La validación falló. Revisa las imágenes.');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -746,7 +415,7 @@ const VerifyProfile = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-premium rounded-3xl p-6 mb-6">
 
-                        {/* STEP 1: INE VERIFICATION CON SISTEMA IPHONE */}
+                        {/* STEP 1: INE VERIFICATION SIMPLIFICADO */}
                         {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -757,7 +426,7 @@ const VerifyProfile = () => {
                                     <p className="text-gray-600">Captura o selecciona fotos claras de ambos lados de tu INE</p>
                                 </div>
 
-                                {/* Modal de Cámara */}
+                                {/* Modal de Cámara Simplificado */}
                                 {ineCapture.showCamera && (
                                     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
                                         <div className="bg-white rounded-3xl p-6 max-w-md w-full">
@@ -772,273 +441,44 @@ const VerifyProfile = () => {
 
                                             <div className="relative mb-6">
                                                 <div className="aspect-[3/2] bg-gray-100 rounded-2xl overflow-hidden relative">
-                                                    {!ineCapture.capturedImage ? (
-                                                        <>
-                                                            <Webcam
-                                                                ref={ineWebcamRef}
-                                                                audio={false}
-                                                                screenshotFormat="image/jpeg"
-                                                                videoConstraints={ineVideoConstraints}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                                <div className="w-[80%] h-[70%] border-4 border-yellow-400 rounded-2xl shadow-lg">
-                                                                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
-                                                                        Centra tu INE aquí
-                                                                    </div>
-                                                                    <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
-                                                                    <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
-                                                                    <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
-                                                                    <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div>
-                                                                </div>
+                                                    <Webcam
+                                                        ref={ineWebcamRef}
+                                                        audio={false}
+                                                        screenshotFormat="image/jpeg"
+                                                        videoConstraints={ineVideoConstraints}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-[80%] h-[70%] border-4 border-yellow-400 rounded-2xl shadow-lg">
+                                                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
+                                                                Centra tu INE aquí
                                                             </div>
-                                                        </>
-                                                    ) : (
-                                                        <img
-                                                            src={ineCapture.capturedImage}
-                                                            alt="INE Capturada"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    )}
+                                                            <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
+                                                            <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
+                                                            <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
+                                                            <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             <div className="flex space-x-3">
                                                 <button
-                                                    onClick={resetIneCaptureWithHandles}
+                                                    onClick={cancelIneCapture}
                                                     className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors"
                                                     type="button"
                                                 >
                                                     Cancelar
                                                 </button>
 
-                                                {!ineCapture.capturedImage ? (
-                                                    <button
-                                                        onClick={captureInePhoto}
-                                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
-                                                        type="button"
-                                                    >
-                                                        <Camera className="w-5 h-5" />
-                                                        <span>Capturar</span>
-                                                    </button>
-                                                ) : (
-                                                    <>
-                                                        <button
-                                                            onClick={() => setIneCapture(prev => ({ ...prev, capturedImage: null }))}
-                                                            className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors flex items-center justify-center"
-                                                            type="button"
-                                                        >
-                                                            <RotateCcw className="w-5 h-5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={confirmIneCapture}
-                                                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
-                                                            type="button"
-                                                        >
-                                                            <Check className="w-5 h-5" />
-                                                            <span>Confirmar</span>
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Modal de Crop estilo iPhone */}
-                                {ineCapture.showCrop && ineCapture.selectedFromGallery && (
-                                    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-                                        {/* Header */}
-                                        <div className="flex items-center justify-between p-4 bg-black text-white">
-                                            <button
-                                                onClick={resetIneCaptureWithHandles}
-                                                className="text-blue-400 font-medium text-lg"
-                                                type="button"
-                                            >
-                                                Cancelar
-                                            </button>
-                                            
-                                            <h3 className="text-lg font-medium">
-                                                Recortar
-                                            </h3>
-                                            
-                                            <button
-                                                onClick={confirmCropIPhone}
-                                                className="text-yellow-400 font-medium text-lg"
-                                                type="button"
-                                            >
-                                                Listo
-                                            </button>
-                                        </div>
-
-                                        {/* Área de recorte */}
-                                        <div className="flex-1 relative overflow-hidden">
-                                            <div className="absolute inset-0">
-                                                {/* Imagen que se puede mover y escalar */}
-                                                <div 
-                                                    className="absolute inset-0 flex items-center justify-center"
-                                                    style={{
-                                                        transform: `translate(${ineCapture.cropData.translateX}px, ${ineCapture.cropData.translateY}px)`
-                                                    }}
-                                                >
-                                                    <img
-                                                        ref={cropImageRef}
-                                                        src={ineCapture.selectedFromGallery}
-                                                        alt="Imagen a recortar"
-                                                        className="select-none"
-                                                        style={{
-                                                            transform: `scale(${ineCapture.cropData.scale})`,
-                                                            maxWidth: 'none',
-                                                            maxHeight: 'none',
-                                                            userSelect: 'none',
-                                                            WebkitUserSelect: 'none',
-                                                            cursor: ineCapture.cropData.isDragging ? 'grabbing' : 'grab'
-                                                        }}
-                                                        onLoad={() => {
-                                                            if (cropImageRef.current) {
-                                                                setTimeout(() => initializeImageCrop(cropImageRef.current), 100);
-                                                            }
-                                                        }}
-                                                        onMouseDown={handleImageMouseDown}
-                                                        onMouseMove={handleImageMouseMove}
-                                                        onMouseUp={handleImageMouseUp}
-                                                        onMouseLeave={handleImageMouseUp}
-                                                        onWheel={handleImageWheel}
-                                                        onTouchStart={handleTouchStart}
-                                                        onTouchMove={handleTouchMove}
-                                                        onTouchEnd={handleTouchEnd}
-                                                        onDragStart={(e) => e.preventDefault()}
-                                                        draggable={false}
-                                                    />
-                                                </div>
-
-                                                {/* Overlay oscura con área de recorte transparente */}
-                                                <div className="absolute inset-0 pointer-events-none">
-                                                    {/* Overlay superior */}
-                                                    <div 
-                                                        className="absolute top-0 left-0 right-0 bg-black/60"
-                                                        style={{ height: ineCapture.cropData.cropArea.y }}
-                                                    ></div>
-                                                    
-                                                    {/* Overlay inferior */}
-                                                    <div 
-                                                        className="absolute bottom-0 left-0 right-0 bg-black/60"
-                                                        style={{ 
-                                                            height: `calc(100% - ${ineCapture.cropData.cropArea.y + ineCapture.cropData.cropArea.height}px)` 
-                                                        }}
-                                                    ></div>
-                                                    
-                                                    {/* Overlay izquierda */}
-                                                    <div 
-                                                        className="absolute bg-black/60"
-                                                        style={{ 
-                                                            top: ineCapture.cropData.cropArea.y,
-                                                            left: 0,
-                                                            width: ineCapture.cropData.cropArea.x,
-                                                            height: ineCapture.cropData.cropArea.height
-                                                        }}
-                                                    ></div>
-                                                    
-                                                    {/* Overlay derecha */}
-                                                    <div 
-                                                        className="absolute bg-black/60"
-                                                        style={{ 
-                                                            top: ineCapture.cropData.cropArea.y,
-                                                            right: 0,
-                                                            width: `calc(100% - ${ineCapture.cropData.cropArea.x + ineCapture.cropData.cropArea.width}px)`,
-                                                            height: ineCapture.cropData.cropArea.height
-                                                        }}
-                                                    ></div>
-
-                                                    {/* Borde del área de recorte */}
-                                                    <div 
-                                                        className="absolute border-2 border-white rounded-lg"
-                                                        style={{
-                                                            left: ineCapture.cropData.cropArea.x,
-                                                            top: ineCapture.cropData.cropArea.y,
-                                                            width: ineCapture.cropData.cropArea.width,
-                                                            height: ineCapture.cropData.cropArea.height,
-                                                            boxShadow: '0 0 0 1px rgba(0,0,0,0.5)'
-                                                        }}
-                                                    >
-                                                        {/* Cuadrícula de regla de los tercios */}
-                                                        {ineCapture.cropData.showGrid && (
-                                                            <>
-                                                                {/* Líneas verticales */}
-                                                                <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/40"></div>
-                                                                <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white/40"></div>
-                                                                
-                                                                {/* Líneas horizontales */}
-                                                                <div className="absolute top-1/3 left-0 right-0 h-px bg-white/40"></div>
-                                                                <div className="absolute top-2/3 left-0 right-0 h-px bg-white/40"></div>
-                                                            </>
-                                                        )}
-
-                                                        {/* Esquinas del marco de recorte */}
-                                                        <div className="absolute -top-1 -left-1 w-6 h-6">
-                                                            <div className="absolute top-0 left-0 w-4 h-1 bg-white rounded-r"></div>
-                                                            <div className="absolute top-0 left-0 w-1 h-4 bg-white rounded-b"></div>
-                                                        </div>
-                                                        
-                                                        <div className="absolute -top-1 -right-1 w-6 h-6">
-                                                            <div className="absolute top-0 right-0 w-4 h-1 bg-white rounded-l"></div>
-                                                            <div className="absolute top-0 right-0 w-1 h-4 bg-white rounded-b"></div>
-                                                        </div>
-                                                        
-                                                        <div className="absolute -bottom-1 -left-1 w-6 h-6">
-                                                            <div className="absolute bottom-0 left-0 w-4 h-1 bg-white rounded-r"></div>
-                                                            <div className="absolute bottom-0 left-0 w-1 h-4 bg-white rounded-t"></div>
-                                                        </div>
-                                                        
-                                                        <div className="absolute -bottom-1 -right-1 w-6 h-6">
-                                                            <div className="absolute bottom-0 right-0 w-4 h-1 bg-white rounded-l"></div>
-                                                            <div className="absolute bottom-0 right-0 w-1 h-4 bg-white rounded-t"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Bottom controls */}
-                                        <div className="bg-black p-4">
-                                            <div className="flex items-center justify-center space-x-8">
-                                                {/* Botón de reset */}
                                                 <button
-                                                    onClick={resetImagePosition}
-                                                    className="p-3 bg-gray-800 rounded-full"
+                                                    onClick={captureInePhoto}
+                                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
                                                     type="button"
                                                 >
-                                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                    </svg>
+                                                    <Camera className="w-5 h-5" />
+                                                    <span>Capturar</span>
                                                 </button>
-
-                                                {/* Indicador de zoom */}
-                                                <div className="text-white text-sm font-medium">
-                                                    {Math.round(ineCapture.cropData.scale * 100)}%
-                                                </div>
-
-                                                {/* Botón de ajuste automático */}
-                                                <button
-                                                    onClick={() => {
-                                                        if (cropImageRef.current) {
-                                                            initializeImageCrop(cropImageRef.current);
-                                                        }
-                                                    }}
-                                                    className="p-3 bg-gray-800 rounded-full"
-                                                    type="button"
-                                                >
-                                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            {/* Instrucciones */}
-                                            <div className="mt-4 text-center">
-                                                <p className="text-gray-400 text-sm">
-                                                    Arrastra para mover • Pellizca para hacer zoom
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -1067,6 +507,10 @@ const VerifyProfile = () => {
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
+                                                        <div className="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1">
+                                                            <CheckCircle className="w-3 h-3" />
+                                                            <span>Imagen cargada</span>
+                                                        </div>
                                                     </>
                                                 ) : (
                                                     <div className="w-full h-full flex flex-col items-center justify-center text-purple-600">
@@ -1081,7 +525,7 @@ const VerifyProfile = () => {
                                             {!ineImages[index] && (
                                                 <div className="flex space-x-3">
                                                     <button
-                                                        onClick={() => startIneCapture('camera', index)}
+                                                        onClick={() => startIneCapture(index)}
                                                         className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
                                                         type="button"
                                                     >
@@ -1098,7 +542,7 @@ const VerifyProfile = () => {
                                                             type="file"
                                                             className="hidden"
                                                             accept="image/*"
-                                                            onChange={(e) => handleGallerySelectionWithHandles(e, index)}
+                                                            onChange={(e) => handleGallerySelection(e, index)}
                                                         />
                                                     </label>
                                                 </div>
@@ -1291,14 +735,6 @@ const VerifyProfile = () => {
             </div>
 
             <Toast ref={toast} position="bottom-center" />
-
-            <canvas
-                ref={cropCanvasRef}
-                className="hidden"
-                width="800"
-                height="600"
-                style={{ display: 'none' }}
-            />
         </div>
     );
 };
