@@ -292,7 +292,7 @@ const Login = () => {
                 </label>
                 <Link
                   to="/recuperar-cuenta"
-                  className="text-sm text-pink-300 hover:text-pink-200 transition-colors hover:underline"
+                  className="text-sm text-pink-300 hover:text-purple transition-colors hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -329,7 +329,7 @@ const Login = () => {
               </p>
               <Link
                 to="/crear-cuenta"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-purple font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm group"
+                className="text-purple font-semibold py-3 px-6 rounded-xl"
               >
                 Crear cuenta
               </Link>
