@@ -438,7 +438,7 @@ export default function Register() {
                         setMessage(""); // Limpia el mensaje si todo está bien
                         setStep(2);
                       }}
-                      className="w-full bg-gradient-to-r  text-center from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                       className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                     >
                       Siguiente
                     </Button>
@@ -522,7 +522,7 @@ export default function Register() {
                 {/* Botón de crear cuenta */}
                 <div className="mt-6 transform transition-transform hover:scale-[1.02] active:scale-[0.98] relative z-10">
                   <Button 
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                     className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                     onClick={handleSubmit} 
                     loading={loading}
                     disabled={loading}

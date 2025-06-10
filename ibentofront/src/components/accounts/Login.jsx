@@ -239,7 +239,7 @@ const Login = () => {
                 </label>
                 <div className="relative group">
                   <InputText
-                    className="w-full pl-12 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                    className="w-full pl-12 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-black/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                     required
                     id="email"
                     name="email"
@@ -261,7 +261,7 @@ const Login = () => {
                 </label>
                 <div className="relative group">
                   <InputText
-                    className="w-full pl-12 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                    className="w-full pl-12 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-black/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -305,7 +305,7 @@ const Login = () => {
               {/* Botón de login */}
               <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 <Button 
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                   className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                   type="submit"
                   onClick={handleLogin}
                   loading={loading}
