@@ -235,12 +235,12 @@ const VerifyProfile = () => {
                     await uploadAllData();
                     setStepsCompleted(prev => ({ ...prev, face: true }));
                     showSuccess("¡Rostro validado exitosamente!");
-                    navigate("/ibento/descripcion");
+                    navigate("../ibento/descripcion");
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    navigate("/ibento/descripcion");
+                    navigate("../ibento/descripcion");
                 }
             } else {
                 handleValidationFailure(data);
@@ -338,7 +338,7 @@ const VerifyProfile = () => {
     // ===== FUNCIÓN PARA CONTINUAR SIN VERIFICAR =====
     const continueWithoutVerification = () => {
         showInfo('Puedes verificar tu perfil más tarde desde la configuración');
-        navigate("/ibento/descripcion");
+        navigate("../ibento/descripcion");
     };
 
     // ===== CONFIGURACIONES DE CÁMARA =====
