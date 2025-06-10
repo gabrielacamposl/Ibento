@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCcw, Check, Image, Crop } from 'lucide-react';
+import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCcw, Check, Image, Crop, Clock, AlertTriangle } from 'lucide-react';
 import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
@@ -29,6 +29,7 @@ const VerifyProfile = () => {
     const [validationFeedback, setValidationFeedback] = useState('');
     const [canRetakePhoto, setCanRetakePhoto] = useState(false);
     const [canRetakeINE, setCanRetakeINE] = useState(false);
+    const [showVerifyLaterScreen, setShowVerifyLaterScreen] = useState(false);
 
     const [ineImages, setIneImages] = useState([null, null]);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -204,6 +205,12 @@ const VerifyProfile = () => {
             return;
         }
 
+        // Verificar si ya se agotaron los intentos
+        if (validationAttempts >= 3) {
+            setShowVerifyLaterScreen(true);
+            return;
+        }
+
         setValidatingFace(true);
         setValidationFeedback('');
 
@@ -228,12 +235,12 @@ const VerifyProfile = () => {
                     await uploadAllData();
                     setStepsCompleted(prev => ({ ...prev, face: true }));
                     showSuccess("¡Rostro validado exitosamente!");
-                    setActiveIndex(2);
+                    navigate("/ibento/profile_descrip");
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(2);
+                    navigate("/ibento/profile_descrip");
                 }
             } else {
                 handleValidationFailure(data);
@@ -249,6 +256,13 @@ const VerifyProfile = () => {
                 setValidationAttempts(prev => prev + 1);
                 showError('Error de conexión. Intenta nuevamente.');
                 setValidationFeedback('Error de conexión. Verifica tu internet.');
+                
+                // Verificar si se agotaron los intentos después del error
+                if (validationAttempts + 1 >= 3) {
+                    setTimeout(() => {
+                        setShowVerifyLaterScreen(true);
+                    }, 2000);
+                }
             }
         } finally {
             setValidatingFace(false);
@@ -289,8 +303,7 @@ const VerifyProfile = () => {
 
         if (newAttempts >= 3) {
             setTimeout(() => {
-                showInfo('Has agotado los 3 intentos. Puedes validar tu perfil después.');
-                setActiveIndex(2);
+                setShowVerifyLaterScreen(true);
             }, 2000);
         }
     };
@@ -320,6 +333,12 @@ const VerifyProfile = () => {
         setValidationFeedback('');
         setCanRetakeINE(false);
         setCanRetakePhoto(false);
+    };
+
+    // ===== FUNCIÓN PARA CONTINUAR SIN VERIFICAR =====
+    const continueWithoutVerification = () => {
+        showInfo('Puedes verificar tu perfil más tarde desde la configuración');
+        navigate("/ibento/profile_descrip");
     };
 
     // ===== CONFIGURACIONES DE CÁMARA =====
@@ -368,6 +387,48 @@ const VerifyProfile = () => {
     const uploadAllData = async () => {
         console.log('Subiendo todos los datos...');
     };
+
+    // ===== PANTALLA DE VERIFICAR MÁS TARDE =====
+    if (showVerifyLaterScreen) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center p-4">
+                <div className="glass-premium rounded-3xl p-8 max-w-md w-full text-center">
+                    <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl w-fit mx-auto mb-6">
+                        <Clock className="w-12 h-12 text-white" />
+                    </div>
+                    
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                        Verificar más tarde
+                    </h2>
+                    
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                        Has agotado tus 3 intentos de verificación facial. No te preocupes, puedes verificar tu perfil más tarde desde la configuración de tu cuenta.
+                    </p>
+                    
+                    <div className="glass-premium rounded-2xl p-4 mb-6 border-l-4 border-orange-500">
+                        <div className="flex items-center justify-center mb-2">
+                            <AlertTriangle className="w-5 h-5 text-orange-500 mr-2" />
+                            <span className="font-semibold text-orange-700">Importante</span>
+                        </div>
+                        <p className="text-sm text-orange-600">
+                            Tu perfil tendrá verificación pendiente hasta que completes este proceso.
+                        </p>
+                    </div>
+                    
+                    <button
+                        onClick={continueWithoutVerification}
+                        className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                    >
+                        Continuar con mi perfil
+                    </button>
+                    
+                    <p className="text-xs text-gray-500 mt-4">
+                        Podrás intentar nuevamente en 24 horas
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
@@ -568,6 +629,13 @@ const VerifyProfile = () => {
                                     </div>
                                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Verificación facial</h2>
                                     <p className="text-gray-600">Centra tu cara para verificar que la INE sea tuya</p>
+                                    
+                                    {/* Contador de intentos */}
+                                    <div className="mt-4 inline-flex items-center space-x-2 bg-blue-100 px-3 py-1 rounded-full">
+                                        <span className="text-blue-600 text-sm font-medium">
+                                            Intento {validationAttempts + 1} de 3
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col items-center space-y-6">
@@ -581,8 +649,8 @@ const VerifyProfile = () => {
                                                         screenshotFormat="image/jpeg"
                                                         videoConstraints={videoConstraints}
                                                         className="w-full h-full object-cover"
-                                                        style={{ transform: 'scaleX(-1)' }}
                                                         mirrored={true}
+                                                        style={{ transform: 'scaleX(-1)' }}
                                                     />
                                                 ) : (
                                                     <img
@@ -592,6 +660,15 @@ const VerifyProfile = () => {
                                                         style={{ transform: 'scaleX(-1)' }}
                                                     />
                                                 )}
+                                                
+                                                {/* Overlay con guía facial */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="w-48 h-64 border-4 border-green-400 rounded-full opacity-50">
+                                                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-400 text-white px-2 py-1 rounded text-xs font-bold">
+                                                            Centra tu rostro
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -713,7 +790,7 @@ const VerifyProfile = () => {
                         ) : activeIndex === 1 ? (
                             <button
                                 onClick={handleValidacionRostro}
-                                disabled={validatingFace || !capturedPhoto}
+                                disabled={validatingFace || !capturedPhoto || validationAttempts >= 3}
                                 className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                                 type="button"
                             >
