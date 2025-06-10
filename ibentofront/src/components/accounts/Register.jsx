@@ -257,12 +257,10 @@ export default function Register() {
                           className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500" 
                           name="nombre" 
                           onChange={handleChange} 
-                          placeholder="Tu nombre"
+                         
                           required 
                         />
-                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                          <User className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
-                        </div>
+                        
                       </div>
                     </div>
                     <div className="w-1/2 space-y-2">
@@ -274,12 +272,8 @@ export default function Register() {
                           className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500" 
                           name="apellido" 
                           onChange={handleChange} 
-                          placeholder="Tu apellido"
                           required 
                         />
-                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                          <User className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -295,12 +289,8 @@ export default function Register() {
                         name="email" 
                         type="email"
                         onChange={handleChange} 
-                        placeholder="tu@email.com"
                         required 
                       />
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Mail className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
-                      </div>
                     </div>
                   </div>
 
@@ -315,12 +305,8 @@ export default function Register() {
                         type={showPassword ? "text" : "password"}
                         name="password"
                         onChange={handleChange}
-                        placeholder="Tu contraseña"
                         required
                       />
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
-                      </div>
                       <button
                         type="button"
                         className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
@@ -345,12 +331,8 @@ export default function Register() {
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         onChange={handleChange}
-                        placeholder="Confirma tu contraseña"
                         required
                       />
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
-                      </div>
                       <button
                         type="button"
                         className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
@@ -456,7 +438,7 @@ export default function Register() {
                         setMessage(""); // Limpia el mensaje si todo está bien
                         setStep(2);
                       }}
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                      className="w-full bg-gradient-to-r  text-center from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                     >
                       Siguiente
                     </Button>

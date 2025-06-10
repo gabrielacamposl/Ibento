@@ -152,6 +152,11 @@ const Login = () => {
     }
   };
 
+  // Función para manejar la redirección a crear cuenta
+  const handleCreateAccount = () => {
+    navigate("/crear-cuenta");
+  };
+
   // Animación de partículas
   const AnimatedParticle = ({ index }) => {
     const color = colors[index % colors.length];
@@ -205,8 +210,8 @@ const Login = () => {
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
             
             {/* Patrón de fondo sutil */}
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 25% 25%, white 1px)`,
+            <div className="absolute inset-0 opacity-30" style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 1px, transparent 1px)`,
               backgroundSize: '20px 20px'
             }}></div>
             
@@ -220,7 +225,7 @@ const Login = () => {
                 />
               </div>
 
-              <h1 className="text-black font-bold text-3x1">
+              <h1 className="text-gray-800 font-bold text-2xl">
                 Inicia sesión 
               </h1>
             </div>
@@ -229,50 +234,48 @@ const Login = () => {
             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
               {/* Campo Email */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black/90">
-                  Correo electrónico <span className="text-pink-300">*</span>
+                <label className="block text-sm font-medium text-gray-800">
+                  Correo electrónico <span className="text-pink-500">*</span>
                 </label>
                 <div className="relative group">
                   <InputText
-                    className={inputStyles}
+                    className="w-full pl-12 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                     required
                     id="email"
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="Correo electrónico"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Mail className="w-5 h-5 text-black/60 group-focus-within:text-purple-300 transition-colors" />
+                    <Mail className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
                   </div>
                 </div>
               </div>
 
               {/* Campo Contraseña */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black/90">
-                  Contraseña <span className="text-pink-300">*</span>
+                <label className="block text-sm font-medium text-gray-800">
+                  Contraseña <span className="text-pink-500">*</span>
                 </label>
                 <div className="relative group">
                   <InputText
-                    className={inputStyles}
+                    className="w-full pl-12 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
                     id="password"
                     autoComplete="current-password"
-                    placeholder="Contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-black/60 group-focus-within:text-purple-300 transition-colors" />
+                    <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
                   </div>
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-black/60 hover:text-purple-300 transition-colors"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -289,11 +292,11 @@ const Login = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 text-purple-600 bg-white/20 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
                   />
-                  <span className="text-black/80 text-sm">Recordar cuenta</span>
+                  <span className="text-gray-700 text-sm">Recordar cuenta</span>
                 </label>
                 <Link
                   to="/recuperar-cuenta"
-                  className="text-sm text-pink-300 hover:text-purple transition-colors hover:underline"
+                  className="text-sm text-purple-600 hover:text-purple-800 transition-colors hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -302,11 +305,8 @@ const Login = () => {
               {/* Botón de login */}
               <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 <Button 
-                  className={buttonStyle} 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                   type="submit"
-                  fullWidth 
-                  variant="contained" 
-                  sx={{ mt: 3, mb: 2 }}
                   onClick={handleLogin}
                   loading={loading}
                   disabled={loading}
@@ -318,22 +318,22 @@ const Login = () => {
 
             {/* Divisor */}
             <div className="my-8 flex items-center">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-              <span className="px-4 text-black/60 text-sm">o</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
+              <span className="px-4 text-gray-600 text-sm">o</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
             </div>
 
             {/* Crear cuenta */}
             <div className="text-center">
-              <p className="text-black/80 text-sm mb-4">
+              <p className="text-gray-700 text-sm mb-4">
                 ¿No tienes una cuenta?
               </p>
-              <Link
-                to="/crear-cuenta"
-                className="text-purple font-semibold py-3 px-6 rounded-xl"
+              <button
+                onClick={handleCreateAccount}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
               >
                 Crear cuenta
-              </Link>
+              </button>
             </div>
           </div>
 
