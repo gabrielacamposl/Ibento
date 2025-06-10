@@ -496,7 +496,7 @@ const VerifyProfile = () => {
                                                     Capturar INE {ineCapture.activeIndex === 0 ? 'Frontal' : 'Trasera'}
                                                 </h3>
                                                 <p className="text-gray-600 text-sm">
-                                                    Centra tu INE dentro del recuadro amarillo
+                                                    Centra tu INE dentro del recuadro
                                                 </p>
                                             </div>
 
@@ -514,10 +514,10 @@ const VerifyProfile = () => {
                                                             <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
                                                                 Centra tu INE aquí
                                                             </div>
-                                                            <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
+                                                            {/* <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
                                                             <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
                                                             <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
-                                                            <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div>
+                                                            <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div> */}
                                                         </div>
                                                     </div>
                                                 </div>
