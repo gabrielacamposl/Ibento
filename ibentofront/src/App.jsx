@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
-// 🔥 CAMBIAR ESTA LÍNEA - USAR EL NUEVO SERVICIO 🔥
 import datingNotificationService from './utils/datingNotifications';
+import universalNotificationService from './utils/universalNotifications';
+
 import api from './apilogin'
 import AuthGuard from './components/auth/AuthGuard';
 
@@ -57,170 +58,164 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // 🔥 ESTADO PARA NOTIFICACIONES DATING 🔥
+  // 🌍 ESTADO UNIVERSAL DE NOTIFICACIONES
   const [notificationStatus, setNotificationStatus] = useState({
+    platform: 'unknown',
     isInitialized: false,
     hasPermission: false,
-    isSupported: false
+    method: 'none'
   });
 
-  // 🔥 INICIALIZAR SERVICE WORKERS Y NOTIFICACIONES DATING 🔥
+  // 🚀 INICIALIZAR SISTEMA UNIVERSAL
   useEffect(() => {
-    const initializeApp = async () => {
-      // Registrar service workers (tu código original)
+    const initializeUniversalApp = async () => {
+      console.log('🚀 Inicializando Ibento Universal...');
+
+      // Registrar Service Worker
       if ('serviceWorker' in navigator) {
         try {
-          // Registrar el service worker principal (sw.js) - YA ACTUALIZADO
           const swRegistration = await navigator.serviceWorker.register('/sw.js');
-          console.log('✅ SW principal registrado:', swRegistration);
-
-          // Opcional: registrar Firebase messaging SW si tienes uno separado
-          // const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          // console.log('✅ FCM SW registrado:', fcmRegistration);
-
-        } catch (registrationError) {
-          console.log('❌ Error registrando Service Workers:', registrationError);
+          console.log('✅ Service Worker registrado:', swRegistration);
+        } catch (error) {
+          console.log('❌ Error registrando Service Worker:', error);
         }
       }
 
-      // 🔥 INICIALIZAR SERVICIO DE NOTIFICACIONES DATING 🔥
+      // 🌍 Inicializar notificaciones universales
       try {
-        const initialized = await datingNotificationService.initialize();
+        const initialized = await universalNotificationService.initialize();
+        const status = universalNotificationService.getStatus();
+        
+        setNotificationStatus(status);
+        
         if (initialized) {
-          console.log('✅ Servicio de notificaciones dating inicializado');
+          console.log(`✅ Notificaciones ${status.platform} inicializadas:`, status);
           
-          // Mostrar notificación de bienvenida (opcional)
+          // Mostrar notificación de bienvenida específica por plataforma
           setTimeout(() => {
-            showNotificationToast('🎉 ¡Notificaciones habilitadas! Recibirás alertas de matches y mensajes.', 'success');
+            showPlatformWelcomeMessage(status.platform);
           }, 2000);
+        } else {
+          console.log('⚠️ Notificaciones en modo fallback:', status);
         }
-        
-        // Actualizar estado
-        setNotificationStatus(datingNotificationService.getStatus());
-        
       } catch (error) {
-        console.error('❌ Error inicializando notificaciones dating:', error);
-        showNotificationToast('⚠️ No se pudieron habilitar las notificaciones', 'error');
+        console.error('❌ Error inicializando notificaciones universales:', error);
       }
     };
 
-    initializeApp();
+    initializeUniversalApp();
 
-    // Actualizar estado de notificaciones cada 5 segundos
+    // Actualizar estado cada 10 segundos
     const statusInterval = setInterval(() => {
-      setNotificationStatus(datingNotificationService.getStatus());
-    }, 5000);
+      setNotificationStatus(universalNotificationService.getStatus());
+    }, 10000);
 
     return () => clearInterval(statusInterval);
   }, []);
 
-  // 🔥 CONFIGURAR LISTENERS DE NOTIFICACIONES DATING 🔥
+  // 🌍 CONFIGURAR LISTENERS UNIVERSALES
   useEffect(() => {
-    const handleNotificationReceived = (event) => {
-      console.log('📨 Nueva notificación recibida:', event.detail);
-    };
-
+    // Listeners para eventos de notificación
     const handleLikeNotification = (event) => {
-      console.log('💕 Notificación de like:', event.detail);
-      showNotificationToast(`💕 ${event.detail.userName || 'Alguien'} te dio like!`, 'like');
+      console.log('💕 Like notification:', event.detail);
+      showUniversalToast(`💕 ${event.detail.userName || 'Alguien'} te dio like!`, 'like');
     };
 
     const handleMatchNotification = (event) => {
-      console.log('🎉 Notificación de match:', event.detail);
-      showNotificationToast(`🎉 ¡Match con ${event.detail.userName || 'alguien'}!`, 'match');
+      console.log('🎉 Match notification:', event.detail);
+      showUniversalToast(`🎉 ¡Match con ${event.detail.userName || 'alguien'}!`, 'match');
     };
 
     const handleMessageNotification = (event) => {
-      console.log('💬 Notificación de mensaje:', event.detail);
-      showNotificationToast(`💬 Nuevo mensaje de ${event.detail.userName || 'alguien'}`, 'message');
+      console.log('💬 Message notification:', event.detail);
+      showUniversalToast(`💬 Mensaje de ${event.detail.userName || 'alguien'}`, 'message');
     };
 
-    const handleEventNotification = (event) => {
-      console.log('🎪 Notificación de evento:', event.detail);
-      showNotificationToast(`🎪 ${event.detail.event_title || 'Nuevo evento'}`, 'event');
-    };
-
-    const handleVerificationNotification = (event) => {
-      console.log('✅ Notificación de verificación:', event.detail);
-      showNotificationToast('✅ ¡Tu perfil ha sido verificado!', 'success');
-    };
-
-    // Agregar listeners para notificaciones dating
-    window.addEventListener('notification:received', handleNotificationReceived);
+    // Agregar listeners
     window.addEventListener('notification:like', handleLikeNotification);
     window.addEventListener('notification:match', handleMatchNotification);
     window.addEventListener('notification:message', handleMessageNotification);
-    window.addEventListener('notification:event', handleEventNotification);
-    window.addEventListener('notification:verification', handleVerificationNotification);
 
     // Cleanup
     return () => {
-      window.removeEventListener('notification:received', handleNotificationReceived);
       window.removeEventListener('notification:like', handleLikeNotification);
       window.removeEventListener('notification:match', handleMatchNotification);
       window.removeEventListener('notification:message', handleMessageNotification);
-      window.removeEventListener('notification:event', handleEventNotification);
-      window.removeEventListener('notification:verification', handleVerificationNotification);
     };
   }, []);
 
-  // 🔥 FUNCIONES DE PRUEBA PARA NOTIFICACIONES DATING 🔥
-  const testDatingNotifications = {
+  // 🎉 MENSAJE DE BIENVENIDA POR PLATAFORMA
+  const showPlatformWelcomeMessage = (platform) => {
+    const messages = {
+      'ios-pwa': '🍎 ¡Ibento instalado en iOS! Las notificaciones están optimizadas para tu iPhone.',
+      'ios-safari': '🍎 ¡Bienvenido desde Safari! Para mejor experiencia, instala Ibento en tu pantalla de inicio.',
+      'android-pwa': '🤖 ¡Ibento instalado en Android! Las notificaciones push están activas.',
+      'android-browser': '🤖 ¡Bienvenido desde Android! Instala Ibento como app para mejor experiencia.',
+      'windows': '💻 ¡Bienvenido desde Windows! Las notificaciones de escritorio están activas.',
+      'macos': '🖥️ ¡Bienvenido desde Mac! Las notificaciones están optimizadas para macOS.',
+      'desktop': '💻 ¡Bienvenido desde Desktop! Las notificaciones web están activas.'
+    };
+
+    const message = messages[platform] || '🌍 ¡Notificaciones universales activas!';
+    showUniversalToast(message, 'success');
+  };
+
+  // 🧪 FUNCIONES DE PRUEBA UNIVERSALES
+  const testUniversalNotifications = {
     match: () => {
-      datingNotificationService.notifyMatch('María García', '/test-photo.jpg', 'user123');
+      universalNotificationService.notifyMatch('María García', '/test-photo.jpg', 'user123');
     },
     like: () => {
-      datingNotificationService.notifyLike('Juan Pérez', '/test-photo2.jpg', 'user456');
+      universalNotificationService.notifyLike('Juan Pérez', '/test-photo2.jpg', 'user456');
     },
     message: () => {
-      datingNotificationService.notifyMessage('Ana López', '¡Hola! Me encanta tu perfil 😊', '/test-photo3.jpg', 'user789');
+      universalNotificationService.notifyMessage('Ana López', '¡Hola! Me encanta tu perfil 😊', '/test-photo3.jpg', 'user789');
     },
-    verification: () => {
-      datingNotificationService.notifyVerificationComplete();
+    all: () => {
+      universalNotificationService.testAllPlatforms();
     }
   };
 
-  // Función para mostrar toasts de notificaciones (tu código original mejorado)
-  const showNotificationToast = (message, type) => {
+  // 🎨 TOAST UNIVERSAL
+  const showUniversalToast = (message, type) => {
     const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 500;
-      z-index: 10000;
-      animation: slideInRight 0.3s ease-out;
-      max-width: 300px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    `;
-
+    
     const colors = {
       like: 'linear-gradient(135deg, #ec4899, #be185d)',
       match: 'linear-gradient(135deg, #10b981, #059669)',
       message: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-      event: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+      success: 'linear-gradient(135deg, #10b981, #059669)',
       error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-      success: 'linear-gradient(135deg, #10b981, #059669)'
+      warning: 'linear-gradient(135deg, #f59e0b, #d97706)'
     };
 
-    toast.style.background = colors[type] || colors.success;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type] || colors.success};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      z-index: 10000;
+      animation: slideInRight 0.3s ease-out;
+      max-width: 350px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+    `;
+    
     toast.textContent = message;
-
     document.body.appendChild(toast);
 
-    // Auto-remover después de 4 segundos
+    // Auto-remover
+    toast.onclick = () => toast.remove();
     setTimeout(() => {
-      toast.style.animation = 'slideOutRight 0.3s ease-in';
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, 4000);
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOutRight 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 5000);
   };
 
   return (
@@ -229,8 +224,6 @@ export default function App() {
       <Router>
         <AuthGuard>
           <Routes>
-            {/* TUS RUTAS ORIGINALES - NO CAMBIAR */}
-            {/* Rutas de autenticación */}
             <Route path="/" element={<Login />} />
             <Route path="/crear-cuenta" element={<Register />} />
             <Route path="/verificar-correo" element={<VerificarCorreo />} />
@@ -310,14 +303,3 @@ export default function App() {
     </div>
   );
 }
-
-// Estilos para botones de prueba (solo desarrollo)
-const buttonStyle = {
-  padding: '4px 8px',
-  fontSize: '10px',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  backgroundColor: '#3b82f6',
-  color: 'white'
-};
