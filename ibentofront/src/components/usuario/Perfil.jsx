@@ -18,7 +18,8 @@ import { WifiOff } from 'lucide-react';
 const Perfil = () => {
     const toast = useRef(null);
     const navigate = useNavigate();
-    const { makeRequest } = useOfflineRequest();    const [favoritos, setFavoritos] = useState([]);
+    const { makeRequest } = useOfflineRequest();    
+    const [favoritos, setFavoritos] = useState([]);
     const [saveEvents, setSaveEvents] = useState([]);
     const [userPerfil, setUserPerfil] = useState({});
     const [verificar, setVerificar] = useState(false);

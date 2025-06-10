@@ -14,6 +14,9 @@ const buscarMatchx = () => {
     const containerRef = useRef(null);
     const { makeRequest } = useOfflineRequest();
 
+    //Verificar si el usuario está verificado
+    const [userPerfil, setUserPerfil] = useState({});
+
     // Estados para el swipe system premium
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -55,9 +58,60 @@ const buscarMatchx = () => {
         };
     }, []);
 
-    const handleVerificar = () => { // Renamed
-        setTimeout(() => navigate("../verificar-ine"), 0);
+    const handleVerificar = () => {
+        if (!userPerfil.is_ine_validated) {
+            setTimeout(() => navigate("../verificar-ine"), 0);
+        }
+        else if (userPerfil.birthday === null) {
+            setTimeout(() => navigate("../descripcion"), 0);
+        }
+        else if (userPerfil.profile_pic?.length === 0) {
+            setTimeout(() => navigate("../subirFotos"), 0);
+
+        }
+        else if (!userPerfil.preferencias_generales?.length > 0) {
+            setTimeout(() => navigate("../intereses"), 0);
+        }
     };
+
+    useEffect(() => {
+        const Perfil = async () => {
+            try {
+                const token = localStorage.getItem('access');
+
+                if (!token) {
+                    console.error("No se encontró token de autenticación");
+                    setLoading(false);
+                    return;
+                }
+
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}usuarios/info_to_edit/`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    },
+                    'user-profile'
+                );
+
+                if (result.data) {
+                    setUserPerfil(result.data);
+                    console.log("Perfil obtenido:", result.data);
+                    if (result.offline) {
+                        console.log('Perfil cargado desde cache offline');
+                    }
+                } else {
+                    console.error("Error al obtener perfil");
+                }
+            } catch (error) {
+                console.error("Error al obtener perfil:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        Perfil();
+    }, []);
 
     // Verificar si el usuario está verificado
     useEffect(() => {
@@ -557,17 +611,6 @@ const buscarMatchx = () => {
                         </button>
                     </div>
                 </div>
-
-                {verificar == false && (
-                    <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                        <div className="text-center text-white">
-                            <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
-                            <p className="mt-2">¡Créalo ahora!.</p>
-                            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
-                        </div>
-                    </div>
-                )}
-
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
                         {/* Header */}
@@ -1073,17 +1116,17 @@ const buscarMatchx = () => {
             )}
 
             {/* Modal de verificación premium */}
-            {verificar === false && (
-                <div className="fixed inset-0 z-70 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                    <div className="text-center text-white p-8 glass-premium rounded-3xl border border-white/30 max-w-md mx-4">
-                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CircleUserIcon className="w-10 h-10 text-white" />
+            {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 m-6 text-center shadow-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Users className="w-10 h-10 text-white" />
                         </div>
-                        <h1 className="text-3xl font-bold mb-4">Perfil Requerido</h1>
-                        <p className="text-white/90 mb-6">Aún no cuentas con tu perfil de acompañantes. ¡Créalo ahora y comienza a conectar!</p>
+                        <h2 className="text-2xl font-bold text-white mb-4">Perfil de Acompañante</h2>
+                        <p className="text-white/80 mb-6">Aún no cuentas con tu perfil de acompañante. ¡Créalo ahora y comienza a conectar!</p>
                         <button
-                            className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
-                            onClick={handdleVerificar}
+                            onClick={handleVerificar}
+                            className="bg-gradient-to-r from-pink-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold hover:from-pink-600 hover:to-violet-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
                             Crear Perfil
                         </button>
