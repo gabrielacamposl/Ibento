@@ -1,12 +1,14 @@
+// src/App.js - ACTUALIZADO CON NOTIFICACIONES DATING
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
-import pushNotificationService from './utils/pushNotifications';
+// 🔥 CAMBIAR ESTA LÍNEA - USAR EL NUEVO SERVICIO 🔥
+import datingNotificationService from './utils/datingNotifications';
 import api from './apilogin'
 import AuthGuard from './components/auth/AuthGuard';
 
-// -------------------------- RUTAS -----------------------------------------
+// -------------------------- RUTAS (TU CÓDIGO ORIGINAL) -----------------------------------------
 // Auth & Register
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
@@ -55,40 +57,65 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Registrar service workers e inicializar notificaciones push
+  
+  // 🔥 ESTADO PARA NOTIFICACIONES DATING 🔥
+  const [notificationStatus, setNotificationStatus] = useState({
+    isInitialized: false,
+    hasPermission: false,
+    isSupported: false
+  });
+
+  // 🔥 INICIALIZAR SERVICE WORKERS Y NOTIFICACIONES DATING 🔥
   useEffect(() => {
     const initializeApp = async () => {
-      // Registrar service workers
+      // Registrar service workers (tu código original)
       if ('serviceWorker' in navigator) {
         try {
-          // Registrar el service worker principal (sw.js)
+          // Registrar el service worker principal (sw.js) - YA ACTUALIZADO
           const swRegistration = await navigator.serviceWorker.register('/sw.js');
           console.log('✅ SW principal registrado:', swRegistration);
 
-          // Registrar el service worker de Firebase Messaging
-          const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('✅ FCM SW registrado:', fcmRegistration);
+          // Opcional: registrar Firebase messaging SW si tienes uno separado
+          // const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          // console.log('✅ FCM SW registrado:', fcmRegistration);
 
         } catch (registrationError) {
           console.log('❌ Error registrando Service Workers:', registrationError);
         }
       }
 
-      // Inicializar servicio de notificaciones push
+      // 🔥 INICIALIZAR SERVICIO DE NOTIFICACIONES DATING 🔥
       try {
-        const initialized = await pushNotificationService.initialize();
+        const initialized = await datingNotificationService.initialize();
         if (initialized) {
-          console.log('✅ Servicio de notificaciones push inicializado');
+          console.log('✅ Servicio de notificaciones dating inicializado');
+          
+          // Mostrar notificación de bienvenida (opcional)
+          setTimeout(() => {
+            showNotificationToast('🎉 ¡Notificaciones habilitadas! Recibirás alertas de matches y mensajes.', 'success');
+          }, 2000);
         }
+        
+        // Actualizar estado
+        setNotificationStatus(datingNotificationService.getStatus());
+        
       } catch (error) {
-        console.error('❌ Error inicializando notificaciones push:', error);
+        console.error('❌ Error inicializando notificaciones dating:', error);
+        showNotificationToast('⚠️ No se pudieron habilitar las notificaciones', 'error');
       }
     };
 
     initializeApp();
+
+    // Actualizar estado de notificaciones cada 5 segundos
+    const statusInterval = setInterval(() => {
+      setNotificationStatus(datingNotificationService.getStatus());
+    }, 5000);
+
+    return () => clearInterval(statusInterval);
   }, []);
 
-  // Configurar listeners de notificaciones
+  // 🔥 CONFIGURAR LISTENERS DE NOTIFICACIONES DATING 🔥
   useEffect(() => {
     const handleNotificationReceived = (event) => {
       console.log('📨 Nueva notificación recibida:', event.detail);
@@ -96,30 +123,36 @@ export default function App() {
 
     const handleLikeNotification = (event) => {
       console.log('💕 Notificación de like:', event.detail);
-      showNotificationToast(`💕 ${event.detail.liker_name} te dio like!`, 'like');
+      showNotificationToast(`💕 ${event.detail.userName || 'Alguien'} te dio like!`, 'like');
     };
 
     const handleMatchNotification = (event) => {
       console.log('🎉 Notificación de match:', event.detail);
-      showNotificationToast(`🎉 ¡Match con ${event.detail.match_name}!`, 'match');
+      showNotificationToast(`🎉 ¡Match con ${event.detail.userName || 'alguien'}!`, 'match');
     };
 
     const handleMessageNotification = (event) => {
       console.log('💬 Notificación de mensaje:', event.detail);
-      showNotificationToast(`💬 Nuevo mensaje de ${event.detail.sender_name}`, 'message');
+      showNotificationToast(`💬 Nuevo mensaje de ${event.detail.userName || 'alguien'}`, 'message');
     };
 
     const handleEventNotification = (event) => {
       console.log('🎪 Notificación de evento:', event.detail);
-      showNotificationToast(`🎪 ${event.detail.event_title}`, 'event');
+      showNotificationToast(`🎪 ${event.detail.event_title || 'Nuevo evento'}`, 'event');
     };
 
-    // Agregar listeners
+    const handleVerificationNotification = (event) => {
+      console.log('✅ Notificación de verificación:', event.detail);
+      showNotificationToast('✅ ¡Tu perfil ha sido verificado!', 'success');
+    };
+
+    // Agregar listeners para notificaciones dating
     window.addEventListener('notification:received', handleNotificationReceived);
     window.addEventListener('notification:like', handleLikeNotification);
     window.addEventListener('notification:match', handleMatchNotification);
     window.addEventListener('notification:message', handleMessageNotification);
     window.addEventListener('notification:event', handleEventNotification);
+    window.addEventListener('notification:verification', handleVerificationNotification);
 
     // Cleanup
     return () => {
@@ -128,10 +161,27 @@ export default function App() {
       window.removeEventListener('notification:match', handleMatchNotification);
       window.removeEventListener('notification:message', handleMessageNotification);
       window.removeEventListener('notification:event', handleEventNotification);
+      window.removeEventListener('notification:verification', handleVerificationNotification);
     };
   }, []);
 
-  // Función para mostrar toasts de notificaciones
+  // 🔥 FUNCIONES DE PRUEBA PARA NOTIFICACIONES DATING 🔥
+  const testDatingNotifications = {
+    match: () => {
+      datingNotificationService.notifyMatch('María García', '/test-photo.jpg', 'user123');
+    },
+    like: () => {
+      datingNotificationService.notifyLike('Juan Pérez', '/test-photo2.jpg', 'user456');
+    },
+    message: () => {
+      datingNotificationService.notifyMessage('Ana López', '¡Hola! Me encanta tu perfil 😊', '/test-photo3.jpg', 'user789');
+    },
+    verification: () => {
+      datingNotificationService.notifyVerificationComplete();
+    }
+  };
+
+  // Función para mostrar toasts de notificaciones (tu código original mejorado)
   const showNotificationToast = (message, type) => {
     const toast = document.createElement('div');
     toast.style.cssText = `
@@ -175,9 +225,11 @@ export default function App() {
 
   return (
     <div className="App">
+      
       <Router>
         <AuthGuard>
           <Routes>
+            {/* TUS RUTAS ORIGINALES - NO CAMBIAR */}
             {/* Rutas de autenticación */}
             <Route path="/" element={<Login />} />
             <Route path="/crear-cuenta" element={<Register />} />
@@ -204,14 +256,13 @@ export default function App() {
               <Route path="editarIntereses" element={<EditarIntereses />} />
               <Route path="favoritos" element={<Favoritos />} />
               <Route path="guardados" element={<Guardados />} />
-              {/* <Route path="verificar" element={<VerificarPerfil />} /> */}
               <Route path="profileVerify" element={<PerfilCheck />} />
               <Route path="profileRepeat" element={<PerfilRepetido />} />
 
               {/* Verificar */}
               <Route path="verificar-ine" element={<IneValidation />} />
-              <Route path="subirFotos" element={<SubirFotos />} />
               <Route path="descripcion" element={<Descripcion />} />
+              <Route path="subirFotos" element={<SubirFotos />} />
               <Route path="intereses" element={<Intereses />} />
 
               {/* Matches y chat */}
@@ -228,11 +279,11 @@ export default function App() {
         </AuthGuard>
       </Router>
 
-      {/* Componentes adicionales */}
-      {/* <InstallPrompt /> */}
+      {/* TUS COMPONENTES ADICIONALES ORIGINALES */}
+      <InstallPrompt />
       {/* <NotificationManager /> */}
 
-      {/* Estilos para animaciones */}
+      {/* Estilos para animaciones (tu código original) */}
       <style>{`
         @keyframes slideInRight {
           from {
@@ -259,3 +310,14 @@ export default function App() {
     </div>
   );
 }
+
+// Estilos para botones de prueba (solo desarrollo)
+const buttonStyle = {
+  padding: '4px 8px',
+  fontSize: '10px',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  backgroundColor: '#3b82f6',
+  color: 'white'
+};

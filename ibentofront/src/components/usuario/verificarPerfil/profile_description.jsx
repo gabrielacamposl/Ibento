@@ -107,7 +107,7 @@ const description = () => {
                 
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
-                    navigate("../eventos");
+                    navigate("../subirFotos");
                 }, 2000);
             }
         } catch (error) {

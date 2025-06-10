@@ -1,10 +1,9 @@
-// public/sw.js - Service Worker con Workbox y Firebase
+// public/sw.js - Service Worker con Workbox y Firebase + Dating App
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
-// 🔥 Importar Firebase para notificaciones
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
@@ -22,38 +21,150 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 
   const messaging = firebase.messaging();
 
-  // Manejar notificaciones en background
+  // 🔥 MANEJAR NOTIFICACIONES EN BACKGROUND CON DATING FEATURES 🔥
   messaging.onBackgroundMessage(function(payload) {
     console.log('[SW] Received background message:', payload);
     
     const notificationTitle = payload.notification?.title || 'Nueva notificación de Ibento';
-    const notificationOptions = {
+    const notificationType = payload.data?.type || 'general';
+    
+    // 🔥 CONFIGURACIÓN BASE 🔥
+    let notificationOptions = {
       body: payload.notification?.body || '',
       icon: payload.notification?.icon || '/icons/ibento192x192.png',
       badge: '/icons/ibentoba.png',
-      vibrate: [200, 100, 200],
       data: {
         click_action: payload.data?.click_action || 'https://ibento.com.mx/',
-        type: payload.data?.type || 'general',
+        type: notificationType,
         timestamp: Date.now(),
+        userId: payload.data?.userId,
+        userName: payload.data?.userName,
+        userPhoto: payload.data?.userPhoto,
         ...payload.data
       },
-      actions: [
-        {
-          action: 'open',
-          title: 'Ver ahora',
-          icon: '/icons/ibento48x48.png'
-        },
-        {
-          action: 'close',
-          title: 'Cerrar'
-        }
-      ],
       tag: payload.data?.type || 'ibento-notification',
       renotify: true,
       requireInteraction: true,
       silent: false
     };
+
+    // 🔥 PERSONALIZAR SEGÚN TIPO DE NOTIFICACIÓN DATING 🔥
+    switch(notificationType) {
+      case 'match':
+        notificationOptions = {
+          ...notificationOptions,
+          vibrate: [500, 200, 500, 200, 500, 200, 500],
+          icon: payload.data?.userPhoto || '/icons/ibento192x192.png',
+          actions: [
+            {
+              action: 'open_chat',
+              title: '💬 Chatear ahora',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'view_profile',
+              title: '👤 Ver perfil',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'close',
+              title: 'Cerrar'
+            }
+          ],
+          tag: 'match-notification',
+          image: payload.data?.userPhoto, // Imagen grande del usuario
+          badge: '/icons/ibentoba.png'
+        };
+        break;
+
+      case 'like':
+        notificationOptions = {
+          ...notificationOptions,
+          vibrate: [300, 100, 300, 100, 300],
+          icon: payload.data?.userPhoto || '/icons/ibento192x192.png',
+          actions: [
+            {
+              action: 'like_back',
+              title: '❤️ Dar like',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'view_profile',
+              title: '👤 Ver perfil',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'close',
+              title: 'Cerrar'
+            }
+          ],
+          tag: 'like-notification',
+          badge: '/icons/ibentoba.png'
+        };
+        break;
+
+      case 'message':
+        notificationOptions = {
+          ...notificationOptions,
+          vibrate: [200, 100, 200],
+          icon: payload.data?.userPhoto || '/icons/ibento192x192.png',
+          actions: [
+            {
+              action: 'reply_quick',
+              title: '💬 Respuesta rápida',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'open_chat',
+              title: 'Abrir chat',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'close',
+              title: 'Cerrar'
+            }
+          ],
+          tag: `message-${payload.data?.userId}`,
+          badge: '/icons/ibentoba.png'
+        };
+        break;
+
+      case 'verification_complete':
+        notificationOptions = {
+          ...notificationOptions,
+          vibrate: [400, 200, 400, 200, 400],
+          icon: '/icons/ibento192x192.png',
+          actions: [
+            {
+              action: 'start_matching',
+              title: '🔍 Comenzar a buscar matches',
+              icon: '/icons/ibento48x48.png'
+            },
+            {
+              action: 'view_profile',
+              title: '👤 Ver mi perfil',
+              icon: '/icons/ibento48x48.png'
+            }
+          ],
+          tag: 'verification-notification',
+          badge: '/icons/ibentoba.png'
+        };
+        break;
+
+      default:
+        // Configuración original para eventos
+        notificationOptions.actions = [
+          {
+            action: 'open',
+            title: 'Ver ahora',
+            icon: '/icons/ibento48x48.png'
+          },
+          {
+            action: 'close',
+            title: 'Cerrar'
+          }
+        ];
+    }
 
     return self.registration.showNotification(notificationTitle, notificationOptions);
   });
@@ -78,6 +189,26 @@ registerRoute(
       new ExpirationPlugin({
         maxEntries: 100,
         maxAgeSeconds: 60 * 60 * 24, // 24 horas
+        purgeOnQuotaError: true
+      })
+    ]
+  })
+);
+
+// 🔥 CACHE PARA ENDPOINTS DE DATING APP 🔥
+registerRoute(
+  ({ url }) => url.pathname.includes('/validar-ine/') || 
+              url.pathname.includes('/validar-rostro/') ||
+              url.pathname.includes('/matches/') ||
+              url.pathname.includes('/likes/') ||
+              url.pathname.includes('/messages/') ||
+              url.pathname.includes('/chat/'),
+  new StaleWhileRevalidate({
+    cacheName: 'dating-api-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 10, // 10 minutos para datos de dating
         purgeOnQuotaError: true
       })
     ]
@@ -147,45 +278,75 @@ self.addEventListener('activate', event => {
       clients.forEach(client => {
         client.postMessage({
           type: 'SW_UPDATED',
-          version: 'workbox-managed'
+          version: 'workbox-managed-dating'
         });
       });
     })()
   );
 });
 
-// Click en notificaciones
+// 🔥 CLICK EN NOTIFICACIONES MEJORADO PARA DATING APP 🔥
 self.addEventListener('notificationclick', function(event) {
   console.log('[SW] Notification click received:', event);
   
-// //   event.notification.close();
+  event.notification.close();
   
   const notificationData = event.notification.data || {};
   const notificationType = notificationData.type || 'general';
+  const action = event.action;
   
-//   let targetUrl = 'https://ibento.com.mx/';
+  let targetUrl = '/';
   
-  // Determinar URL según tipo de notificación
-  switch(notificationType) {
-    case 'like':
-      targetUrl = '/ibento/verLike';
+  // 🔥 MANEJO DE ACCIONES ESPECÍFICAS DE DATING APP 🔥
+  switch(action) {
+    // Acciones de Match
+    case 'open_chat':
+      targetUrl = `/ibento/chat?userId=${notificationData.userId}`;
       break;
-    case 'match':
-      targetUrl = '/ibento/match';
+    case 'view_profile':
+      targetUrl = `/ibento/verPerfil?userId=${notificationData.userId}`;
       break;
-    case 'message':
-      targetUrl = '/ibento/chat';
+    
+    // Acciones de Like
+    case 'like_back':
+      targetUrl = `/ibento/matches?action=like&userId=${notificationData.userId}`;
       break;
-    case 'event':
-      targetUrl = '/ibento/eventos';
+    
+    // Acciones de Mensaje
+    case 'reply_quick':
+      targetUrl = `/ibento/chat?userId=${notificationData.userId}&quickReply=true`;
       break;
+    
+    // Acciones de Verificación
+    case 'start_matching':
+      targetUrl = '/ibento/matches';
+      break;
+    
+    case 'close':
+      return; // No hacer nada, solo cerrar
+    
     default:
-      targetUrl = notificationData.click_action || '/ibento/eventos';
+      // Determinar URL según tipo de notificación si no hay acción específica
+      switch(notificationType) {
+        case 'like':
+          targetUrl = '/ibento/verLike';
+          break;
+        case 'match':
+          targetUrl = '/ibento/match';
+          break;
+        case 'message':
+          targetUrl = `/ibento/chat?userId=${notificationData.userId}`;
+          break;
+        case 'verification_complete':
+          targetUrl = '/ibento/profileVerify';
+          break;
+        case 'event':
+          targetUrl = '/ibento/eventos';
+          break;
+        default:
+          targetUrl = notificationData.click_action || '/ibento/eventos';
+      }
   }
-  
-//   if (event.action === 'close') {
-//     return;
-//   }
   
   // Buscar ventana existente o abrir una nueva
   event.waitUntil(
@@ -203,7 +364,10 @@ self.addEventListener('notificationclick', function(event) {
           return client.focus().then(() => {
             return client.postMessage({
               type: 'NAVIGATE',
-              url: targetUrl
+              url: targetUrl,
+              notificationType: notificationType,
+              action: action,
+              data: notificationData
             });
           });
         }
@@ -217,7 +381,79 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-// Mensajes del cliente
+// 🔥 FUNCIÓN PARA MOSTRAR NOTIFICACIONES LOCALES DE DATING APP 🔥
+async function showDatingNotification(type, data) {
+  const notifications = {
+    match: {
+      title: '🎉 ¡Nuevo Match!',
+      body: `¡Hiciste match con ${data.userName}! ¡Comienza a chatear!`,
+      icon: data.userPhoto || '/icons/ibento192x192.png',
+      vibrate: [500, 200, 500, 200, 500],
+      actions: [
+        { action: 'open_chat', title: '💬 Chatear', icon: '/icons/ibento48x48.png' },
+        { action: 'view_profile', title: '👤 Ver perfil', icon: '/icons/ibento48x48.png' }
+      ],
+      tag: 'match-notification',
+      badge: '/icons/ibentoba.png'
+    },
+    
+    like: {
+      title: '❤️ ¡Alguien te dio like!',
+      body: `A ${data.userName} le gustas. ¡Dale like tú también para hacer match!`,
+      icon: data.userPhoto || '/icons/ibento192x192.png',
+      vibrate: [300, 100, 300],
+      actions: [
+        { action: 'like_back', title: '❤️ Dar like', icon: '/icons/ibento48x48.png' },
+        { action: 'view_profile', title: '👤 Ver perfil', icon: '/icons/ibento48x48.png' }
+      ],
+      tag: 'like-notification',
+      badge: '/icons/ibentoba.png'
+    },
+    
+    message: {
+      title: `💬 Mensaje de ${data.userName}`,
+      body: data.message.length > 50 ? data.message.substring(0, 50) + '...' : data.message,
+      icon: data.userPhoto || '/icons/ibento192x192.png',
+      vibrate: [200, 100, 200],
+      actions: [
+        { action: 'reply_quick', title: '💬 Responder', icon: '/icons/ibento48x48.png' },
+        { action: 'open_chat', title: 'Abrir chat', icon: '/icons/ibento48x48.png' }
+      ],
+      tag: `message-${data.userId}`,
+      badge: '/icons/ibentoba.png'
+    },
+    
+    verification_complete: {
+      title: '✅ ¡Verificación completada!',
+      body: 'Tu perfil ha sido verificado. ¡Ya puedes buscar matches!',
+      icon: '/icons/ibento192x192.png',
+      vibrate: [400, 200, 400],
+      actions: [
+        { action: 'start_matching', title: '🔍 Buscar matches', icon: '/icons/ibento48x48.png' },
+        { action: 'view_profile', title: '👤 Mi perfil', icon: '/icons/ibento48x48.png' }
+      ],
+      tag: 'verification-notification',
+      badge: '/icons/ibentoba.png'
+    }
+  };
+
+  const config = notifications[type];
+  if (!config) return;
+
+  const notificationOptions = {
+    ...config,
+    data: {
+      type,
+      timestamp: Date.now(),
+      ...data
+    },
+    requireInteraction: true
+  };
+
+  await self.registration.showNotification(config.title, notificationOptions);
+}
+
+// 🔥 MENSAJES DEL CLIENTE MEJORADOS 🔥
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -225,9 +461,71 @@ self.addEventListener('message', event => {
   
   // Responder con información del SW
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({
-      version: 'workbox-managed',
-      ready: true
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({
+        version: 'workbox-managed-dating',
+        ready: true,
+        datingFeatures: true
+      });
+    }
+  }
+
+  // 🔥 MOSTRAR NOTIFICACIÓN DE DATING DESDE EL CLIENTE 🔥
+  if (event.data && event.data.type === 'SHOW_DATING_NOTIFICATION') {
+    showDatingNotification(event.data.notificationType, event.data.data)
+      .then(() => {
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ success: true });
+        }
+      })
+      .catch(error => {
+        console.error('[SW] Error showing dating notification:', error);
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ success: false, error: error.message });
+        }
+      });
+  }
+  
+  // Cachear datos de usuario manualmente
+  if (event.data && event.data.type === 'CACHE_USER_DATA') {
+    cacheUserSession(event.data.userData);
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ success: true });
+    }
+  }
+  
+  // Obtener datos de usuario del cache
+  if (event.data && event.data.type === 'GET_CACHED_USER') {
+    getCachedUserSession().then(userData => {
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ userData });
+      }
+    });
+  }
+  
+  // Cachear datos de eventos manualmente
+  if (event.data && event.data.type === 'CACHE_EVENTS_DATA') {
+    cacheEventsData(event.data.eventsData, event.data.cacheKey);
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ success: true });
+    }
+  }
+  
+  // Obtener datos de eventos del cache
+  if (event.data && event.data.type === 'GET_CACHED_EVENTS') {
+    getCachedEventsData(event.data.cacheKey).then(eventsData => {
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ eventsData });
+      }
+    });
+  }
+  
+  // Limpiar datos expirados
+  if (event.data && event.data.type === 'CLEAN_EXPIRED_DATA') {
+    cleanExpiredData().then(() => {
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ success: true });
+      }
     });
   }
 });
@@ -243,18 +541,39 @@ self.addEventListener('quotaexceeded', event => {
   // Workbox maneja esto automáticamente con purgeOnQuotaError
 });
 
-// ================== FUNCIONALIDAD OFFLINE OPTIMIZADA PARA MÓVILES ==================
+// ================== FUNCIONALIDAD OFFLINE OPTIMIZADA PARA MÓVILES (TU CÓDIGO ORIGINAL) ==================
 
 // Cache de datos de usuario y eventos para funcionalidad offline
 const OFFLINE_DATA_CACHE = 'offline-data-v1';
 const USER_SESSION_CACHE = 'user-session-v1';
 const EVENTS_DATA_CACHE = 'events-data-v1';
 const MOBILE_CACHE = 'mobile-optimized-v1';
+const DATING_DATA_CACHE = 'dating-data-v1'; // 🔥 NUEVO CACHE PARA DATING
 
 // Detectar si es dispositivo móvil
 function isMobileDevice() {
   return self.registration && self.registration.scope.includes('mobile') ||
          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// 🔥 FUNCIÓN PARA CACHEAR DATOS DE DATING APP 🔥
+async function cacheDatingData(dataType, data) {
+  try {
+    const cache = await caches.open(DATING_DATA_CACHE);
+    const expirationTime = isMobileDevice() ? 
+      (30 * 60 * 1000) :  // 30 minutos para móviles
+      (60 * 60 * 1000);   // 1 hora para desktop
+    
+    await cache.put(`/dating-${dataType}`, new Response(JSON.stringify({
+      data: data,
+      timestamp: Date.now(),
+      expires: Date.now() + expirationTime,
+      isMobile: isMobileDevice()
+    })));
+    console.log(`[SW] Dating data cached for type: ${dataType}`);
+  } catch (error) {
+    console.error('[SW] Error caching dating data:', error);
+  }
 }
 
 // Función para cachear datos de usuario con optimización móvil
@@ -350,7 +669,7 @@ async function getCachedEventsData(cacheKey) {
 // Función para limpiar datos expirados con optimización móvil
 async function cleanExpiredData() {
   try {
-    const cacheNames = [USER_SESSION_CACHE, EVENTS_DATA_CACHE, OFFLINE_DATA_CACHE, MOBILE_CACHE];
+    const cacheNames = [USER_SESSION_CACHE, EVENTS_DATA_CACHE, OFFLINE_DATA_CACHE, MOBILE_CACHE, DATING_DATA_CACHE];
     
     for (const cacheName of cacheNames) {
       const cache = await caches.open(cacheName);
@@ -542,55 +861,7 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// Mensajes para manejar datos offline desde el cliente
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  // Responder con información del SW
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({
-      version: 'workbox-managed',
-      ready: true
-    });
-  }
-  
-  // Cachear datos de usuario manualmente
-  if (event.data && event.data.type === 'CACHE_USER_DATA') {
-    cacheUserSession(event.data.userData);
-    event.ports[0].postMessage({ success: true });
-  }
-  
-  // Obtener datos de usuario del cache
-  if (event.data && event.data.type === 'GET_CACHED_USER') {
-    getCachedUserSession().then(userData => {
-      event.ports[0].postMessage({ userData });
-    });
-  }
-  
-  // Cachear datos de eventos manualmente
-  if (event.data && event.data.type === 'CACHE_EVENTS_DATA') {
-    cacheEventsData(event.data.eventsData, event.data.cacheKey);
-    event.ports[0].postMessage({ success: true });
-  }
-  
-  // Obtener datos de eventos del cache
-  if (event.data && event.data.type === 'GET_CACHED_EVENTS') {
-    getCachedEventsData(event.data.cacheKey).then(eventsData => {
-      event.ports[0].postMessage({ eventsData });
-    });
-  }
-  
-  // Limpiar datos expirados
-  if (event.data && event.data.type === 'CLEAN_EXPIRED_DATA') {
-    cleanExpiredData().then(() => {
-      event.ports[0].postMessage({ success: true });
-    });
-  }
-});
-
 // Limpiar datos expirados cada hora
 setInterval(cleanExpiredData, 60 * 60 * 1000);
 
-console.log('[SW] Service Worker loaded with Workbox + Firebase + Offline functionality');
+console.log('[SW] Service Worker loaded with Workbox + Firebase + Dating App functionality');
