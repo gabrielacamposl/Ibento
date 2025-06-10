@@ -106,6 +106,9 @@ const fotos = () => {
             if (response.data && response.data.pictures) {
                 showSuccess("¡Fotos subidas correctamente!");
                 setSavedPhotos(response.data.pictures); // Guardar las fotos subidas en el estado
+                setTimeout(() => {
+                    navigate("../intereses");
+                }, 2000);
             } else {
                 showWarn("Error al subir las fotos. Por favor, inténtalo de nuevo.");
             }

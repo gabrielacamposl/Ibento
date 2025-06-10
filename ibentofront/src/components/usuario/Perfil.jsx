@@ -37,7 +37,9 @@ const Perfil = () => {
         return () => {
             window.removeEventListener('connectionChange', handleConnectionChange);
         };
-    }, []);    useEffect(() => {
+    }, []);    
+    
+    useEffect(() => {
         const Perfil = async () => {
             try {
                 const token = localStorage.getItem('access');
@@ -190,7 +192,19 @@ const Perfil = () => {
     const [index, setIndex] = React.useState(0);
 
     const handleVerificar = () => {
-        setTimeout(() => navigate("../verificar"), 0);
+        if (!userPerfil.is_ine_validated) {
+            setTimeout(() => navigate("../verificar-ine"), 0);
+        }
+        else if (userPerfil.birthday === null) {
+            setTimeout(() => navigate("../descripcion"), 0);
+        }
+        else if (userPerfil.profile_pic?.length === 0) {
+            setTimeout(() => navigate("../subirFotos"), 0);
+
+        }
+        else if (!userPerfil.preferencias_generales?.length > 0) {
+            setTimeout(() => navigate("../intereses"), 0);
+        }
     };
 
     const productTemplate = (product) => {
@@ -323,7 +337,7 @@ const Perfil = () => {
                             ))}
                         </div>
                     </div>
-                    {userPerfil.is_ine_validated === false && (
+                    {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
 
                         <div className="col-span-full text-center py-2">
                             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">

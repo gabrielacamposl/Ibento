@@ -102,12 +102,11 @@ const description = () => {
             const response = await api.post('usuarios/agregar_info/', formData);
             
             if (response.status === 200) {
-                setStepsCompleted(prev => ({ ...prev, info: true }));
-                showContrast("¡Registro completado exitosamente! Bienvenido a Ibento.");
+                showContrast("Información guardada correctamente.");
                 
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
-                    navigate("../eventos");
+                    navigate("../subirFotos");
                 }, 2000);
             }
         } catch (error) {
