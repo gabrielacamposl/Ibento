@@ -2,8 +2,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HeartIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import { Avatar } from 'primereact/avatar';
-import { AvatarGroup } from 'primereact/avatargroup';
 
 import {useFetchEvents, useFetchNearestEvents} from '../../../hooks/usefetchEvents';
 import useGeolocation from '../../../hooks/useGeolocation';
@@ -22,7 +20,7 @@ interface ListEvent {
     url: string;
     numLike : number;
     numSaves : number;
-  }
+}
 
   
 
@@ -111,25 +109,24 @@ export default function CardWrapper(
                         ) : nearestEvents.length === 0 && !nearestLoading ? (
                             <div className="col-span-full text-center py-8">
                                 <p className="text-gray-500">No hay eventos cercanos disponibles</p>
-                            </div>
-                        ) : (
+                            </div>                        ) : (
                             nearestEvents.map((event, index) => (
-                                <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} distance={event.distance} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                                <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} distance={event.distance} />
                             ))
                         )}
                     </>
                 )}
                 {name === "Próximos eventos" && upcomingEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} />
                 ))}
                 {name === "Deportes" && sportsEvents.map((event, index) => (   
                     console.log(event._id), 
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.png", "/avatar3.png"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} />
                 ))}
                 {name === "Musicales" && musicalEvents.map((event, index) => (
                     console.log(event._id),
-                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} avatars={["/avatar1.jpg", "/avatar2.jpg", "/avatar3.jpg"]} />
+                    <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} fecha={event.dates} numLikes={event.numLike} />
                 ))}
             </div>
         </div>
@@ -140,22 +137,18 @@ export default function CardWrapper(
 }
 
 export function Card({
-    key,
     id,
     imgs, 
     title,
     numLikes,
     fecha,
-    avatars,
     distance
     }: {
-    key: string;
     id: string;
     imgs: string[];
     title: string;
     numLikes: number;
     fecha: string[];
-    avatars: string[];
     distance?:number;
     }) {
 
@@ -171,10 +164,6 @@ export function Card({
     if (!numLikes) {
         numLikes = 0;
     }
-
-    // if(!key){
-    //     key = "ECIP1-1";
-    // }
 
     console.log("Fecha: " + fecha)
 
@@ -214,43 +203,52 @@ export function Card({
         fechaString = "HOY"
     }    const url = "../eventos/" + id;
     return (
-        <Link to={url} className="bg-white rounded-lg flex-col flex-none p-1 h-auto w-full drop-shadow-xl">
-            <img
-            src={`${imgs[0]}`}
-            className="rounded-lg object-cover w-full h-32 sm:h-40" 
-            alt={title}/>
-            <div className="h-auto min-h-[2rem] p-2">
-                <h2 className="text-sm sm:text-base font-medium text-black text-left my-1 line-clamp-2">{title}</h2>
+        <Link to={url} className="group bg-white/90 backdrop-blur-sm rounded-2xl flex-col flex-none p-3 h-auto w-full shadow-lg border border-white/20 hover:shadow-xl hover:scale-105 transition-all duration-300 overflow-hidden">
+            {/* Container de imagen con efecto overlay */}
+            <div className="relative rounded-xl overflow-hidden mb-3">
+                <img
+                    src={`${imgs[0]}`}
+                    className="w-full h-32 sm:h-40 object-cover transition-transform duration-300 group-hover:scale-110" 
+                    alt={title}
+                />
+                {/* Overlay gradient sutil */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Badge de likes floating */}
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg border border-white/20">
+                    <HeartIcon className='h-4 w-4 text-pink-500' />
+                    <span className='text-xs font-semibold text-gray-800'>{likeString}</span>
+                </div>
             </div>
-                <div className='flex flex-row items-center justify-center gap-2 my-2 px-2'>
-                <div className='flex w-full space-x-1 items-center justify-center'>
-                    <AvatarGroup>
-                        <Avatar image={avatars[1]} size="normal" shape="circle" />
-                        <Avatar image={avatars[1]} size="normal" shape="circle" />
-                        <Avatar image={avatars[1]} size="normal" shape="circle" />
-                    </AvatarGroup>
-                    <HeartIcon className='h-4 w-4 text-black' />
-                    <p className='text-xs text-black'>{likeString}</p>
-                    {distance == undefined && (
-                        <>
-                        <div className="flex flex-row items-center justify-center">
-                            <ClockIcon className='h-3 w-3 text-black' />
-                            <p className='text-xs text-black'>{fechaString}</p>
+
+            {/* Content */}
+            <div className="px-1">
+                <h2 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 line-clamp-2 leading-tight">
+                    {title}
+                </h2>
+                
+                {/* Info Row */}
+                <div className='flex items-center justify-between'>
+                    {distance == undefined ? (
+                        <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full px-3 py-1.5">
+                            <ClockIcon className='h-3.5 w-3.5 text-purple-600' />
+                            <span className='text-xs font-medium text-purple-700'>{fechaString}</span>
                         </div>
-                            
-                        </>
-                    )}
-                    {distance !== undefined && (
-                        <>
-                        <div className="flex flex-row items-center justify-center">
-                            <MapPinIcon className='h-3 w-3 text-black' />
-                            <p className='text-xs text-black'>{distanceString}</p>
+                    ) : (
+                        <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full px-3 py-1.5">
+                            <MapPinIcon className='h-3.5 w-3.5 text-blue-600' />
+                            <span className='text-xs font-medium text-blue-700'>{distanceString}</span>
                         </div>
-                        </>
                     )}
+                    
+                    {/* Decorative element */}
+                    <div className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                        <div className="w-1 h-1 bg-gradient-to-r from-purple-300 to-pink-300 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-0.5 h-0.5 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full animate-pulse delay-300"></div>
+                    </div>
                 </div>
             </div>
         </Link>
-        
     );
 }
