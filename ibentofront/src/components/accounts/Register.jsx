@@ -13,9 +13,9 @@ import Box from '@mui/material/Box';
 import { Button } from "primereact/button";
 import { Dialog } from 'primereact/dialog';
 import { buttonStyle, buttonAccept } from "../../styles/styles";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, Heart, Users } from "lucide-react";
 import { motion } from "framer-motion";
-import axios from "../../axiosConfig";
+
 import api from "../../api";
 
 import ibentoLogo from "/images/ibentoLogo.png";
@@ -28,9 +28,6 @@ import Page from "./Terminos"
 import "primereact/resources/themes/lara-light-indigo/theme.css";   
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-
-
-
 
 export default function Register() {
   const navigate = useNavigate();
@@ -53,15 +50,13 @@ export default function Register() {
   const [categorias, setCategorias] = useState([]);
 
   const [disable, setDisable] = useState(false);
-  const colors = ["#FFFFFF"]; // "#FF00FF", "#00FFFF", Rosa y azul cielo
+  const colors = ["#FF00FF", "#00FFFF", "#FFFFFF", "#9333EA", "#3B82F6"];
 
   const [message, setMessage] = useState("");
-
   const [visible, setVisible] = useState(false);
   const [checked, setChecked] = useState(false);
-
-
   const [loading, setLoading] = useState(false);
+
   // Función para mostrar el diálogo
   const showDialog = () => {
     setVisible(true);
@@ -82,7 +77,6 @@ export default function Register() {
       />
       <Button
         label="Aceptar"
-        // className="p-button-rounded text-white bg-purple-800"
         className={buttonAccept}
         onClick={() => {
           setChecked(true);
@@ -147,8 +141,6 @@ export default function Register() {
       return;
     }
 
-    // Validar que el correo no esté en uso
-
     // Los datos a enviar
     const data = {
       nombre: form.nombre,
@@ -177,124 +169,200 @@ export default function Register() {
     }
   }
 
+  // Animación de partículas
+  const AnimatedParticle = ({ index }) => {
+    const color = colors[index % colors.length];
+    const size = Math.random() * 100 + 50;
+    const duration = 15 + Math.random() * 10;
+    
+    return (
+      <div
+        className="absolute rounded-full opacity-20 blur-xl animate-pulse"
+        style={{
+          backgroundColor: color,
+          width: size + 'px',
+          height: size + 'px',
+          left: Math.random() * 100 + '%',
+          top: Math.random() * 100 + '%',
+          animationDuration: duration + 's',
+          animationDelay: Math.random() * 5 + 's',
+        }}
+      />
+    );
+  };
+
   return (
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Fondo degradado animado */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-pink-500">
+        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-magenta-400/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
+      </div>
 
-    <div className="flex justify-center items-center">
-      {/* Formulario para la visualización web  */}
-      <div className= " w-full  flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
-        {/* Fondo degradado y luces */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
+      {/* Partículas flotantes */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <AnimatedParticle key={i} index={i} />
+        ))}
+      </div>
 
-        {/* Contenido */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <Box
-            component="img"
-            src={ibentoLogo}
-            alt="Ibento Logo"
-            sx={{ width: 80, height: "auto", mb: 2 }}
-          />
+      {/* Mesh gradient overlay */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+      </div>
 
-          {/* Título */}
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
-
-          {/* Formulario */}
+      {/* Contenido principal */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
+          
           {step === 1 && (
             <>
-              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
-                <form className="space-y-5" onSubmit={handleSubmit}>
+              {/* Tarjeta principal con glassmorphism */}
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+                {/* Efecto de brillo superior */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                
+                {/* Patrón de fondo sutil */}
+                <div className="absolute inset-0 opacity-30" style={{
+                  backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 1px, transparent 1px)`,
+                  backgroundSize: '20px 20px'
+                }}></div>
+                
+                {/* Logo y título */}
+                <div className="text-center items-center mb-8 relative z-10">
+                  <div className="flex justify-center items-center mb-4">
+                    <img
+                      src={ibentoLogo}
+                      alt="Ibento Logo"
+                      className="w-20 h-auto"
+                    />
+                  </div>
+                  <h1 className="text-gray-800 font-bold text-2xl">
+                    Crear Cuenta
+                  </h1>
+                </div>
+
+                {/* Formulario */}
+                <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
                   {/* Nombre y Apellido */}
                   <div className="flex space-x-3">
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
-                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
+                    <div className="w-1/2 space-y-2">
+                      <label className="block text-sm font-medium text-gray-800">
+                        Nombre <span className="text-pink-500">*</span>
+                      </label>
+                      <div className="relative group">
+                        <InputText 
+                          className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500" 
+                          name="nombre" 
+                          onChange={handleChange} 
+                          placeholder="Tu nombre"
+                          required 
+                        />
+                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                          <User className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
-                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
+                    <div className="w-1/2 space-y-2">
+                      <label className="block text-sm font-medium text-gray-800">
+                        Apellido <span className="text-pink-500">*</span>
+                      </label>
+                      <div className="relative group">
+                        <InputText 
+                          className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500" 
+                          name="apellido" 
+                          onChange={handleChange} 
+                          placeholder="Tu apellido"
+                          required 
+                        />
+                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                          <User className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                    <InputText className={inputStyles} name="email" onChange={handleChange} required />
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-800">
+                      Correo electrónico <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative group">
+                      <InputText 
+                        className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500" 
+                        name="email" 
+                        type="email"
+                        onChange={handleChange} 
+                        placeholder="tu@email.com"
+                        required 
+                      />
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <Mail className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Contraseña */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
-                    <div className="relative">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-800">
+                      Contraseña <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative group">
                       <InputText
-                        className={`${inputStyles} pr-10`}
+                        className="w-full pl-10 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                         type={showPassword ? "text" : "password"}
                         name="password"
                         onChange={handleChange}
+                        placeholder="Tu contraseña"
                         required
                       />
-
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                      </div>
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-2 flex items-center"
+                        className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
-                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                      La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
-                    </Typography>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Mínimo 8 caracteres, una mayúscula y un número
+                    </p>
                   </div>
 
                   {/* Confirmar Contraseña */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
-                    <div className="relative">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-800">
+                      Confirmar Contraseña <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative group">
                       <InputText
-                        className={`${inputStyles} pr-10`}
+                        className="w-full pl-10 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         onChange={handleChange}
+                        placeholder="Confirma tu contraseña"
                         required
                       />
-                     
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                      </div>
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-2 flex items-center"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
+                        className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                   </div>
 
                   {/* Checkbox términos */}
-                  <div className="flex items-start">
+                  <div className="flex items-start space-x-3">
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -302,125 +370,143 @@ export default function Register() {
                           color="primary"
                           checked={isTermsAccepted}
                           onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                          sx={{
+                            '&.Mui-checked': {
+                              color: '#9333EA',
+                            },
+                          }}
                         />
                       }
-                      
-                     
                     />
-                    <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
-                          He leído y acepto el
-                          <span
-                            className="mx-1 text-purple-600 cursor-pointer"
-                          >
-                           <strong>Términos y condiciones</strong>
-                          </span>
-                          {/* <Button className="font-bold " label="Aviso de privacidad" onClick={() => setVisible(true)} /> */}
-                          y los <strong>Aviso de privacidad</strong>.
-                        </span>
+                    <span className="text-xs text-gray-700 leading-relaxed cursor-pointer" onClick={() => setVisible(true)}>
+                      He leído y acepto los
+                      <span className="mx-1 text-purple-600 font-semibold hover:text-purple-800 transition-colors">
+                        Términos y condiciones
+                      </span>
+                      y el <strong>Aviso de privacidad</strong>.
+                    </span>
                   </div>
 
-                  <div className="card flex justify-content-center">
-                    <Dialog
-                      visible={visible}
-                      style={{ width: "90vw", maxWidth: "1000px" }}
-                      onHide={hideDialog}
-                      footer={dialogFooter}
-                      draggable={false}
-                      resizable={false}
-                      className="p-1"
-                      contentClassName="p-0"
-                      header="Términos y condiciones"
-                      headerClassName="bg-white border-none p-3"
-                      closeIcon={<i className="pi pi-times text-gray-500 hover:text-gray-700" />}
-                    >
-                      <div className="dialog-content">
-                        <Page />
-                      </div>
-                    </Dialog>
-                  </div>
-                  {/* Botón de Siguiente */}
+                  {/* Dialog */}
+                  <Dialog
+                    visible={visible}
+                    style={{ width: "90vw", maxWidth: "1000px" }}
+                    onHide={hideDialog}
+                    footer={dialogFooter}
+                    draggable={false}
+                    resizable={false}
+                    className="p-1"
+                    contentClassName="p-0"
+                    header="Términos y condiciones"
+                    headerClassName="bg-white border-none p-3"
+                    closeIcon={<i className="pi pi-times text-gray-500 hover:text-gray-700" />}
+                  >
+                    <div className="dialog-content">
+                      <Page />
+                    </div>
+                  </Dialog>
+
+                  {/* Mensaje de error */}
                   {message && (
-                    <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                      {message}
-                    </Typography>
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                      <p className="text-red-600 text-sm">{message}</p>
+                    </div>
                   )}
 
+                  {/* Botón de Siguiente */}
+                  <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        // Validar que todos los campos estén llenos
+                        for (const field of requiredFields) {
+                          if (!form[field]) {
+                            setMessage("Por favor completa todos los campos obligatorios.");
+                            return;
+                          }
+                        }
 
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      // Validar que todos los campos estén llenos
-                      for (const field of requiredFields) {
-                        if (!form[field]) {
-                          setMessage("Por favor completa todos los campos obligatorios.");
+                        // Validar campos
+                        if (!name_regex.test(form.nombre)) {
+                          setMessage("El nombre debe contener solo letras.");
                           return;
                         }
-                      }
+                        if (!name_regex.test(form.apellido)) {
+                          setMessage("El apellido debe contener solo letras.");
+                          return;
+                        }
+                        if (!email_regex.test(form.email)) {
+                          setMessage("El correo electrónico no es válido.");
+                          return;
+                        }
+                        if (!password_regex.test(form.password)) {
+                          setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
+                          return;
+                        }
+                        if (form.password !== form.confirmPassword) {
+                          setMessage("Las contraseñas no coinciden");
+                          return;
+                        }
+                        if (!isTermsAccepted) {
+                          setMessage("Debes aceptar los términos y condiciones para continuar.");
+                          return;
+                        }
 
-                      // Validar campos
-                      if (!name_regex.test(form.nombre)) {
-                        setMessage("El nombre debe contener solo letras.");
-                        return;
-                      }
-                      if (!name_regex.test(form.apellido)) {
-                        setMessage("El apellido debe contener solo letras.");
-                        return;
-                      }
-                      if (!email_regex.test(form.email)) {
-                        setMessage("El correo electrónico no es válido.");
-                        return;
-                      }
-                      if (!password_regex.test(form.password)) {
-                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
-                        return;
-                      }
-                      if (form.password !== form.confirmPassword) {
-                        setMessage("Las contraseñas no coinciden");
-                        return;
-                      }
-                      if (!isTermsAccepted) {
-                        setMessage("Debes aceptar los términos y condiciones para continuar.");
-                        return;
-                      }
-
-                      // Si todas las validaciones pasan, avanzar al siguiente paso
-                      setMessage(""); // Limpia el mensaje si todo está bien
-                      setStep(2);
-                    }} // Cambiar al paso 2
-                    className={buttonStyle}
-                    variant="contained"
-                  >
-                    Siguiente
-                  </Button>
-                  {/* Botón Google
-                  <button
-                    type="button"
-                    className="flex items-center justify-center w-full border border-gray-300 text-gray-700 rounded-full py-2 mt-4"
-                  >
-                    <img src="/images/Google_G.png" alt="Google" className="w-6 h-6 mr-2" />
-                    Iniciar con Google
-                  </button> */}
+                        // Si todas las validaciones pasan, avanzar al siguiente paso
+                        setMessage(""); // Limpia el mensaje si todo está bien
+                        setStep(2);
+                      }}
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
                 </form>
               </div>
-            </>)}
+            </>
+          )}
+
           {step === 2 && (
             <>
-              <div className="p-6 bg-white rounded-2xl">
-                <p className="text-gray-600 mb-4">¿Qué tipo de eventos te gustan?</p>
-                <div className="space-y-6">
+              {/* Paso 2: Preferencias */}
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+                {/* Efecto de brillo superior */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                
+                {/* Patrón de fondo sutil */}
+                <div className="absolute inset-0 opacity-30" style={{
+                  backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 1px, transparent 1px)`,
+                  backgroundSize: '20px 20px'
+                }}></div>
+
+                {/* Título */}
+                <div className="text-center mb-8 relative z-10">
+                  <div className="flex justify-center items-center mb-4">
+                    <Heart className="w-8 h-8 text-purple-500 mr-2" />
+                    <Users className="w-8 h-8 text-pink-500" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Casi listo!</h2>
+                  <p className="text-gray-600">¿Qué tipo de eventos te emocionan?</p>
+                  <p className="text-sm text-purple-600 mt-2">Selecciona al menos 3 preferencias</p>
+                </div>
+
+                <div className="space-y-6 relative z-10 max-h-96 overflow-y-auto">
                   {categorias.map((categoria) => (
                     <div key={categoria.id} className="space-y-3">
-                      <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
-                        <h3 className="font-semibold text-purple-700">{categoria.nombre}</h3>
+                      <div className="bg-gradient-to-r from-purple-100/80 to-pink-100/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/40">
+                        <h3 className="font-semibold text-purple-700 flex items-center">
+                          <Heart className="w-4 h-4 mr-2" />
+                          {categoria.nombre}
+                        </h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {[...new Set(categoria.valores)].map((valor) => (
                           <button
                             key={valor}
-                            className={`px-4 py-2 rounded-full font-light transition-all duration-300 text-sm ${
+                            className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm border ${
                               selectedEvents.includes(valor)
-                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
-                                : 'bg-gray-100 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg transform scale-105 border-transparent'
+                                : 'bg-white/70 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border-purple-200 hover:border-purple-300 backdrop-blur-sm'
                             }`}
                             onClick={() => toggleSeleccionado(valor)}
                           >
@@ -431,316 +517,62 @@ export default function Register() {
                     </div>
                   ))}
                 </div>
-              
 
-                 <div className=" mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
-                  
-                   <Button 
-                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  
-               
-        
-                  onClick={handleSubmit} 
-                  loading={loading}
-                  disabled={loading}
-                >
-                <div className="ml-2 flex items-center justify-center w-full">
-                  {loading ? 
-                 
-                  'Creando Cuenta...'
-            
-                  :
-                   'Crear Cuenta'
-                  }
+                {/* Contador de selecciones */}
+                <div className="mt-6 text-center relative z-10">
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200/50">
+                    <p className="text-sm text-gray-600">
+                      Has seleccionado <span className="font-bold text-purple-600">{selectedEvents.length}</span> preferencias
+                      {selectedEvents.length < 3 && (
+                        <span className="text-red-500 ml-1">(mínimo 3)</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-                </Button>            
-                   
-               </div>
-                        </div>
+
+                {/* Mensaje de error */}
+                {message && (
+                  <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-center relative z-10">
+                    <p className="text-red-600 text-sm">{message}</p>
+                  </div>
+                )}
+
+                {/* Botón de crear cuenta */}
+                <div className="mt-6 transform transition-transform hover:scale-[1.02] active:scale-[0.98] relative z-10">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                    onClick={handleSubmit} 
+                    loading={loading}
+                    disabled={loading}
+                  >
+                    <div className="flex items-center justify-center w-full">
+                      {loading ? 'Creando tu cuenta...' : '🎉 Crear mi cuenta'}
+                    </div>
+                  </Button>            
+                </div>
+              </div>
             </>
-
           )}
-
-
-
-
         </div>
       </div>
 
-      {/* Formulario para móviles
-      <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
-      
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
-
-       
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-        
-          <Box
-            component="img"
-            src={ibentoLogo}
-            alt="Ibento Logo"
-            sx={{ width: 80, height: "auto", mb: 2 }}
-          />
-
-          
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
-
-          
-          {step === 1 && (
-            <>
-              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6">
-                <form className="space-y-5" onSubmit={handleSubmit}>
-          
-                  <div className="flex space-x-3">
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
-                      <InputText className={inputStyles} name="nombre" onChange={handleChange} required />
-                    </div>
-                    <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Apellido:</label>
-                      <InputText className={inputStyles} name="apellido" onChange={handleChange} required />
-                    </div>
-                  </div>
-
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                    <InputText className={inputStyles} name="email" onChange={handleChange} required />
-                  </div>
-
-                 
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
-                    <div className="relative">
-                      <InputText
-                        className={`${inputStyles} pr-10`}
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        onChange={handleChange}
-                        required
-                      />
-
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-2 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                      </button>
-                    </div>
-                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                      La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
-                    </Typography>
-                  </div>
-
-                 
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña:</label>
-                    <div className="relative">
-                      <InputText
-                        className={`${inputStyles} pr-10`}
-                        type={showConfirmPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        onChange={handleChange}
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-2 flex items-center"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Cambia el estado al hacer clic
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                      </button>
-                    </div>
-                  </div>
-
-                
-                  <div className="flex items-start">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          value="allowPrivTerm"
-                          color="primary"
-                          checked={isTermsAccepted}
-                          onChange={(e) => setIsTermsAccepted(e.target.checked)}
-                        />
-                      }
-                      label={
-                        <span style={{ fontSize: "12px" }} className={verifyStyle} onClick={() => setVisible(true)}>
-                          He leído y acepto el
-                          <span
-                            className="mx-1 text-purple-600 cursor-pointer"
-                          >
-                           <strong>Términos y condiciones</strong>
-                          </span>
-                         
-                          y los <strong>Aviso de privacidad</strong>.
-                        </span>
-                      }
-                    />
-                  </div>
-
-                  <div className="card flex justify-content-center">
-                    <Dialog
-                      visible={visible}
-                      style={{ width: "90vw", maxWidth: "1000px" }}
-                      onHide={hideDialog}
-                      footer={dialogFooter}
-                      draggable={false}
-                      resizable={false}
-                      className="p-1"
-                      contentClassName="p-0"
-                      header="Términos y condiciones"
-                      headerClassName="bg-white border-none p-3"
-                      closeIcon={<i className="pi pi-times text-gray-500 hover:text-gray-700" />}
-                    >
-                      <div className="dialog-content">
-                        <Page />
-                      </div>
-                    </Dialog>
-                  </div>
-                
-                  {message && (
-                    <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                      {message}
-                    </Typography>
-                  )}
-
-
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      // Validar que todos los campos estén llenos
-                      for (const field of requiredFields) {
-                        if (!form[field]) {
-                          setMessage("Por favor completa todos los campos obligatorios.");
-                          return;
-                        }
-                      }
-
-                      // Validar campos
-                      if (!name_regex.test(form.nombre)) {
-                        setMessage("El nombre debe contener solo letras.");
-                        return;
-                      }
-                      if (!name_regex.test(form.apellido)) {
-                        setMessage("El apellido debe contener solo letras.");
-                        return;
-                      }
-                      if (!email_regex.test(form.email)) {
-                        setMessage("El correo electrónico no es válido.");
-                        return;
-                      }
-                      if (!password_regex.test(form.password)) {
-                        setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.");
-                        return;
-                      }
-                      if (form.password !== form.confirmPassword) {
-                        setMessage("Las contraseñas no coinciden");
-                        return;
-                      }
-                      if (!isTermsAccepted) {
-                        setMessage("Debes aceptar los términos y condiciones para continuar.");
-                        return;
-                      }
-
-                      // Si todas las validaciones pasan, avanzar al siguiente paso
-                      setMessage(""); // Limpia el mensaje si todo está bien
-                      setStep(2);
-                    }} // Cambiar al paso 2
-                    className={buttonStyle}
-                    variant="contained"
-                  >
-                    Siguiente
-                  </Button>
-                  {/* Botón Google
-                  <button
-                    type="button"
-                    className="flex items-center justify-center w-full border border-gray-300 text-gray-700 rounded-full py-2 mt-4"
-                  >
-                    <img src="/images/Google_G.png" alt="Google" className="w-6 h-6 mr-2" />
-                    Iniciar con Google
-                  
-                </form>
-              </div>
-            </>)}
-          {step === 2 && (
-            <>
-              <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-6 h-200 overflow-y-auto">
-                <Typography variant="h5" component="h1" sx={{ textAlign: "center", mb: 2, fontWeight: "bold", color: "black" }}>
-                  ¿Qué tipo de eventos te gustan?
-                </Typography>
-
-                <Grid container spacing={2}>
-                  <div className="intereses-container">
-                    {categorias.map((categoria) => (
-                      <div key={categoria.id} className="categoria mb-5">
-                        <div className={buttonStyleCategoria} style={{ cursor: 'default' }}>
-                          {categoria.nombre}
-                        </div>
-                        <ul className="flex flex-wrap">
-                          {categoria.valores.map((valor) => (
-                            <li
-                              key={valor}
-                              className={`cursor-pointer mt-2 text-center px-4 py-1 ml-2 rounded-full font-medium transition ${selectedEvents.includes(valor)
-                                ? 'bg-purple-400 text-white shadow border-2 border-white'
-                                : 'btn-off'
-                                }`}
-                              onClick={() => toggleSeleccionado(valor)}
-                            >
-                              {valor}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </Grid>
-
-                <Button onClick={handleSubmit} className={buttonStyle} variant="contained" disabled={selectedEvents.length < 3}>
-                  Crear Cuenta
-                </Button>
-
-              </div>
-            </>
-          )}
-
-
-
-
-        </div>
-      </div> 
-      */}
-
-
-
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
-
-
   );
 }

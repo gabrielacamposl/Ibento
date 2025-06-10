@@ -3,6 +3,7 @@ import { Eye, EyeOff, Heart, Users, MessageCircle, Mail, Lock, Bell } from "luci
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 import {
   FormControlLabel,
   Checkbox,
@@ -232,8 +233,8 @@ const Login = () => {
                   Correo electrónico <span className="text-pink-300">*</span>
                 </label>
                 <div className="relative group">
-                  <input
-                    className="w-full p-4 pl-12 border border-black/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
+                  <InputText
+                    className={inputStyles}
                     required
                     id="email"
                     name="email"
@@ -255,8 +256,8 @@ const Login = () => {
                   Contraseña <span className="text-pink-300">*</span>
                 </label>
                 <div className="relative group">
-                  <input
-                    className="w-full p-4 pl-12 pr-12 border border-blue/20 rounded-xl bg-white/10 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 focus:bg-white/20 transition-all duration-300 text-black placeholder-black/50 outline-none"
+                  <InputText
+                    className={inputStyles}
                     required
                     name="password"
                     type={showPassword ? "text" : "password"}
