@@ -1,50 +1,63 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import api from '../../apilogin';
-
 import InstallPrompt from "../../components/pwa/InstallPrompt";
+import { initializePushNotifications } from '../../utils/pushNotifications';
 import {
   FormControlLabel,
   Checkbox,
-  Paper,
   Box,
-  Grid,
   Typography,
-  CssBaseline,
 } from "@mui/material";
 import { Button } from "primereact/button";
-import { buttonStyle, inputStyles } from "../../styles/styles";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Heart, Users, MessageCircle, Bell } from "lucide-react";
 import { motion } from "framer-motion";
-import ibentoLogo from "/images/ibentoLogo.png";
 
+// Simulamos el logo y estilos
+const ibentoLogo = "/images/ibentoLogo.png";
+const buttonStyle = "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105";
+const inputStyles = "w-full p-3 border border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300";
 
+const colors = ["#FF00FF", "#00FFFF", "#FFFFFF", "#9333EA", "#3B82F6"];
 
-const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
-
-
-const Login = () => {  const [email, setEmail] = useState("");
+const Login = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const navigate = useNavigate();
   const toast = useRef(null);
 
+  // Verificar soporte de notificaciones al cargar
+  useEffect(() => {
+    if ('Notification' in window && 'serviceWorker' in navigator) {
+      setPushEnabled(true);
+    }
+  }, []);
+
   // Funciones para mostrar toasts
   const showSuccess = (message) => {
-    toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+    toast.current?.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
   };
 
   const showError = (message) => {
-    toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
+    toast.current?.show({severity:'error', summary: 'Error', detail: message, life: 4000});
   };
 
   const showWarn = (message) => {
-    toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
-  };   const handleLogin = async (e) => {
+    toast.current?.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
+  };
+
+  const showInfo = (message) => {
+    toast.current?.show({severity:'info', summary: 'Información', detail: message, life: 4000});
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -75,6 +88,17 @@ const Login = () => {  const [email, setEmail] = useState("");
 
       // Opcional: Guardar timestamp del login para debugging
       localStorage.setItem("login_time", new Date().toISOString());
+
+      // Inicializar notificaciones push después del login exitoso
+      if (pushEnabled) {
+        try {
+          await initializePushNotifications(res.data.id);
+          showInfo("¡Notificaciones activadas! Recibirás alertas de matches, likes y mensajes");
+        } catch (pushError) {
+          console.warn("Error al activar notificaciones:", pushError);
+          showInfo("Login exitoso. Para recibir notificaciones, permite el acceso cuando te lo solicite el navegador");
+        }
+      }
 
       // Mostrar mensaje de éxito
       showSuccess("¡Inicio de sesión exitoso! Redirigiendo...");
@@ -118,306 +142,268 @@ const Login = () => {  const [email, setEmail] = useState("");
     }
   };
 
-
   return (
-
-    <div className="h-screen flex justify-center items-center">      {/* Formulario para la visualización web  */}
-      <div className="hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
-         {/* Fondo degradado y luces */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Contenido */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-            <Box
-              sx={{
-                my: 8,
-                mx: 4,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Box
-                component="img"
-                src={ibentoLogo}
-                alt="Ibento Logo"
-                sx={{ width: 80, height: "auto", mb: 2 }}
-              />
-              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
-                Inicia Sesión
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    className={`${inputStyles} pr-10`}
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-
-                </Grid>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Contraseña<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      required
-                      fullWidth
-                      name="password"
-                      label="Contraseña"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
-                  </div>
-                </Grid>
-
-                <Grid item xs={12} container justifyContent="left" alignItems="left">
-
-                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Grid>
-
-
-               
-                <Button 
-                  className={buttonStyle} 
-                  type="submit"
-                  fullWidth 
-                  variant="contained" 
-                  sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}
-                  loading={loading}
-                  disabled={loading}
-                >
-                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                </Button>
-                <Grid container justifyContent="center" alignItems="center">
-                  <Grid item xs={12} container justifyContent="center" alignItems="center">
-
-                    <Link
-                      to="/crear-cuenta"
-                      component="button"
-                      variant="body2" sx={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        color: "rgb(129, 45, 177)",
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "rgb(164, 96, 203)",
-                        },
-                      }}>
-                      Crear cuenta
-                    </Link>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Box>
-          </Grid>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Fondo degradado animado */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300">
+        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-300/30 via-transparent to-magenta-300/30"></div>
       </div>
 
-        {/* Formulario para móviles */}
-      <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
-        {/* Fondo degradado y luces */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Contenido */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-            <Box
-              sx={{
-                my: 8,
-                mx: 4,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+      {/* Partículas flotantes mejoradas */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => {
+          const color = colors[i % colors.length];
+          const size = Math.random() * 100 + 50;
+          return (
+            <motion.div
+              key={i}
+              className="absolute rounded-full opacity-20 blur-xl"
+              style={{ 
+                backgroundColor: color,
+                width: size,
+                height: size,
               }}
+              initial={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+              }}
+              animate={{
+                x: [
+                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                  Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                ],
+                y: [
+                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+                  Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+                ],
+                scale: [1, 1.2, 0.8, 1],
+                opacity: [0.1, 0.3, 0.1, 0.2],
+              }}
+              transition={{
+                duration: 15 + Math.random() * 10,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Contenido principal */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="w-full max-w-md"
+        >
+          {/* Tarjeta principal con glassmorphism */}
+          <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+            {/* Efecto de brillo superior */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+            
+            {/* Logo y título */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="text-center mb-8"
             >
-              <Box
-                component="img"
-                src={ibentoLogo}
-                alt="Ibento Logo"
-                sx={{ width: 80, height: "auto", mb: 2 }}
-              />
-              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
-                Inicia Sesión
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    className={`${inputStyles} pr-10`}
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-
-                </Grid>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Contraseña<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      required
-                      fullWidth
-                      name="password"
-                      label="Contraseña"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
-                  </div>
-                </Grid>
-
-                <Grid item xs={12} className='mt-2 mb-2' container justifyContent="left" alignItems="left">
-
-                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Grid>
-
-
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Recordar cuenta"
-                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+              <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <img
+                  src={ibentoLogo}
+                  alt="Ibento Logo"
+                  className="w-12 h-12 object-contain"
                 />
+              </div>
+              <Typography 
+                component="h1" 
+                className="text-3xl font-bold text-white mb-2"
+                style={{ fontFamily: "Aptos, sans-serif" }}
+              >
+                ¡Bienvenido!
+              </Typography>
+              <p className="text-white/80 text-sm">
+                Inicia sesión para conectar con personas increíbles
+              </p>
+            </motion.div>
 
-                <Button 
-                  className={buttonStyle} 
+            {/* Formulario */}
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              onSubmit={handleLogin}
+              className="space-y-6"
+            >
+              {/* Campo Email */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white/90">
+                  Correo electrónico <span className="text-pink-300">*</span>
+                </label>
+                <div className="relative">
+                  <InputText
+                    className={`${inputStyles} pl-4`}
+                    required
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <div className="absolute inset-y-0 right-3 flex items-center">
+                    <Users className="w-5 h-5 text-purple-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Campo Contraseña */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white/90">
+                  Contraseña <span className="text-pink-300">*</span>
+                </label>
+                <div className="relative">
+                  <InputText
+                    className={`${inputStyles} pl-4 pr-12`}
+                    required
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-3 flex items-center text-purple-400 hover:text-purple-600 transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Recordar cuenta y recuperar contraseña */}
+              <div className="flex items-center justify-between">
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      sx={{
+                        color: 'white',
+                        '&.Mui-checked': {
+                          color: '#e879f9',
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <span className="text-white/80 text-sm">Recordar cuenta</span>
+                  }
+                />
+                <Link
+                  to="/recuperar-cuenta"
+                  className="text-sm text-pink-300 hover:text-pink-200 transition-colors hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+
+              {/* Botón de login */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  className={`${buttonStyle} w-full text-lg relative overflow-hidden`}
                   type="submit"
-                  fullWidth 
-                  variant="contained" 
-                  sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}
                   loading={loading}
                   disabled={loading}
                 >
-                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Iniciando sesión...
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="w-5 h-5" />
+                        Iniciar Sesión
+                      </>
+                    )}
+                  </span>
+                  {/* Efecto de brillo animado */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-200%] animate-pulse"></div>
                 </Button>
-                <Grid container justifyContent="center" alignItems="center">
-                  <Grid item xs={12} container justifyContent="center" alignItems="center">
+              </motion.div>
+            </motion.form>
 
-                    <Link
-                      to="/crear-cuenta"
-                      component="button"
-                      variant="body2" sx={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        color: "rgb(129, 45, 177)",
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "rgb(164, 96, 203)",
-                        },
-                      }}>
-                      Crear cuenta
-                    </Link>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Box>
-          </Grid>        </div>
+            {/* Divisor */}
+            <div className="my-8 flex items-center">
+              <div className="flex-1 h-px bg-white/20"></div>
+              <span className="px-4 text-white/60 text-sm">o</span>
+              <div className="flex-1 h-px bg-white/20"></div>
+            </div>
+
+            {/* Crear cuenta */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-center"
+            >
+              <p className="text-white/80 text-sm mb-3">
+                ¿No tienes una cuenta?
+              </p>
+              <Link
+                to="/crear-cuenta"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Crear cuenta
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Características PWA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mt-6 text-center space-y-2"
+          >
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Bell className="w-5 h-5 text-yellow-300" />
+                <span className="text-white font-medium">App Móvil</span>
+              </div>
+              <p className="text-white/70 text-xs leading-relaxed">
+                📱 Instala la app para recibir notificaciones instantáneas de matches, likes y mensajes
+              </p>
+              {pushEnabled && (
+                <div className="mt-2 text-green-300 text-xs">
+                  ✓ Notificaciones push disponibles
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* Toast component for notifications */}
+      {/* Toast component */}
       <Toast ref={toast} />
-        <InstallPrompt />
+      
+      {/* InstallPrompt component */}
+      <InstallPrompt />
     </div>
-
   );
 };
 
