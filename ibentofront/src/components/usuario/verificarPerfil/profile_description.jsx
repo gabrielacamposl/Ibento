@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X } from 'lucide-react';
-import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex, patron_curp } from "../../../utils/regex";
@@ -35,13 +34,6 @@ const description = () => {
         window.scrollTo(0, 0);
     }, []);
 
-  
-   
-
- 
-
-
-
     // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
     
     // Función para manejar cambios en el formulario
@@ -57,22 +49,22 @@ const description = () => {
         const { birthday, gender, description, curp } = formData;
         
         if (!birthday.trim()) {
-            showWarn('La fecha de nacimiento es requerida');
+            showWarn('La fecha de nacimiento es requerida.');
             return false;
         }
         
         if (!gender) {
-            showWarn('El género es requerido');
+            showWarn('El género es requerido.');
             return false;
         }
         
         if (!description.trim()) {
-            showWarn('La descripción es requerida');
+            showWarn('La descripción es requerida.');
             return false;
         }
         
         if (!curp.trim()) {
-            showWarn('El CURP es requerido');
+            showWarn('El CURP es requerido.');
             return false;
         }
 

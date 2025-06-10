@@ -204,13 +204,16 @@ export default function App() {
               <Route path="editarIntereses" element={<EditarIntereses />} />
               <Route path="favoritos" element={<Favoritos />} />
               <Route path="guardados" element={<Guardados />} />
-              <Route path="verificar" element={<VerificarPerfil />} />
+              {/* <Route path="verificar" element={<VerificarPerfil />} /> */}
               <Route path="profileVerify" element={<PerfilCheck />} />
               <Route path="profileRepeat" element={<PerfilRepetido />} />
 
               {/* Verificar */}
               <Route path="verificar-ine" element={<IneValidation />} />
-              v
+              <Route path="subirFotos" element={<SubirFotos />} />
+              <Route path="descripcion" element={<Descripcion />} />
+              <Route path="intereses" element={<Intereses />} />
+
               {/* Matches y chat */}
               <Route path="matches" element={<BuscarMatches />} />
               <Route path="verPerfil" element={<Perfiles />} />
@@ -219,12 +222,7 @@ export default function App() {
               <Route path="match" element={<MisMatches />} />
               <Route path="verLike" element={<Like />} />
               <Route path="chat" element={<Chat />} />
-
-              {/* Acciones de verificación */}
-              <Route path="subirFotos" element={<SubirFotos />} />
-              <Route path="descripcion" element={<Descripcion />} />
-              <Route path="ineValidation" element={<IneValidation />} />
-              <Route path="intereses" element={<Intereses />} />
+              
             </Route>
           </Routes>
         </AuthGuard>
