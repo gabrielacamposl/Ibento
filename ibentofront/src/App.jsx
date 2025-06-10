@@ -280,7 +280,7 @@ export default function App() {
       </Router>
 
       {/* TUS COMPONENTES ADICIONALES ORIGINALES */}
-      <InstallPrompt />
+      {/*<InstallPrompt />*/}
       {/* <NotificationManager /> */}
 
       {/* Estilos para animaciones (tu código original) */}
