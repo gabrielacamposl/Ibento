@@ -214,14 +214,19 @@ const description = () => {
                                                 
                                                 Fecha de nacimiento
                                                 <span className="text-red-500 ml-1">*</span>
-                                            </label>
-                                            <input
+                                            </label>                            <input
                                                 type="date"
                                                 value={formData.birthday}
                                                 onChange={(e) => handleFormChange('birthday', e.target.value)}
+                                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                                                min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm"
                                                 required
                                             />
+                                            <div className="flex items-center text-xs text-gray-500 mt-1">
+                                                <span className="mr-2">💡</span>
+                                                Debes tener al menos 18 años para registrarte
+                                            </div>
                                         </div>
 
                                         {/* Género */}
