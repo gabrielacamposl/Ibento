@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCcw, Check, Image, Crop, Clock, AlertTriangle, Info } from 'lucide-react';
+import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X, RotateCcw, Check, Image, Crop, Clock, AlertTriangle } from 'lucide-react';
 import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
@@ -68,17 +68,12 @@ const VerifyProfile = () => {
         });
     };
 
-    // Función mejorada para capturar INE con mejor calidad
     const captureInePhoto = () => {
         if (!ineWebcamRef.current) return;
 
-        const imageSrc = ineWebcamRef.current.getScreenshot({
-            width: 1920,
-            height: 1080,
-            quality: 1.0
-        });
+        const imageSrc = ineWebcamRef.current.getScreenshot();
         
-        // Convertir a File con mejor calidad
+        // Convertir a File y guardar directamente
         const file = dataURLtoFile(
             imageSrc,
             `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`
@@ -163,13 +158,8 @@ const VerifyProfile = () => {
 
         try {
             const formData = new FormData();
-            
-            // Comprimir y optimizar imágenes antes de enviar
-            const frontOptimized = await optimizeImageForUpload(ineImages[0]);
-            const backOptimized = await optimizeImageForUpload(ineImages[1]);
-            
-            formData.append('ine_front', frontOptimized);
-            formData.append('ine_back', backOptimized);
+            formData.append('ine_front', ineImages[0]);
+            formData.append('ine_back', ineImages[1]);
 
             const response = await api.post('validar-ine/', formData, {
                 headers: {
@@ -208,7 +198,7 @@ const VerifyProfile = () => {
         }
     };
 
-    // ===== VALIDACIÓN DE ROSTRO MEJORADA =====
+    // ===== VALIDACIÓN DE ROSTRO =====
     const handleValidacionRostro = async () => {
         if (!capturedPhoto) {
             showWarn('Debes capturar una imagen de tu rostro');
@@ -228,13 +218,8 @@ const VerifyProfile = () => {
             showInfo('Validando rostro, por favor espera...');
 
             const formData = new FormData();
-            
-            // Optimizar imágenes para mejor reconocimiento facial
-            const ineOptimized = await optimizeImageForUpload(ineImages[0]);
-            const selfieOptimized = await optimizeImageForFaceRecognition(capturedPhoto);
-            
-            formData.append('ine_front', ineOptimized);
-            formData.append('selfie', selfieOptimized);
+            formData.append('ine_front', ineImages[0]);
+            formData.append('selfie', dataURLtoFile(capturedPhoto, 'selfie.jpg'));
 
             const response = await api.post('validar-rostro/', formData, {
                 headers: {
@@ -255,7 +240,7 @@ const VerifyProfile = () => {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    navigatei("/ibento/descripcion");
+                    navigate("/ibento/descripcion");
                 }
             } else {
                 handleValidationFailure(data);
@@ -323,20 +308,14 @@ const VerifyProfile = () => {
         }
     };
 
-    // ===== CAPTURA DE FOTO MEJORADA =====
+    // ===== CAPTURA DE FOTO =====
     const capturarImagen = () => {
         if (!webcamRef.current) {
             showWarn('La cámara no está disponible');
             return;
         }
 
-        // Capturar con alta calidad para reconocimiento facial
-        const imageSrc = webcamRef.current.getScreenshot({
-            width: 1280,
-            height: 720,
-            quality: 1.0
-        });
-        
+        const imageSrc = webcamRef.current.getScreenshot();
         setCapturedPhoto(imageSrc);
         setUser(prev => ({ ...prev, facePhoto: imageSrc }));
         showSuccess('¡Foto capturada correctamente!');
@@ -362,91 +341,17 @@ const VerifyProfile = () => {
         navigate("../descripcion");
     };
 
-    // ===== CONFIGURACIONES DE CÁMARA MEJORADAS =====
+    // ===== CONFIGURACIONES DE CÁMARA =====
     const videoConstraints = {
         facingMode: "user",
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30 }
+        width: { ideal: 640 },
+        height: { ideal: 480 }
     };
 
     const ineVideoConstraints = {
         facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        frameRate: { ideal: 30 }
-    };
-
-    // ===== FUNCIONES DE OPTIMIZACIÓN DE IMAGEN =====
-    const optimizeImageForUpload = (file) => {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = () => {
-                // Mantener alta resolución para documentos
-                const maxWidth = 1920;
-                const maxHeight = 1080;
-                
-                let { width, height } = img;
-                
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-                
-                if (height > maxHeight) {
-                    width = (width * maxHeight) / height;
-                    height = maxHeight;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                canvas.toBlob((blob) => {
-                    const optimizedFile = new File([blob], file.name, {
-                        type: 'image/jpeg',
-                        lastModified: Date.now(),
-                    });
-                    resolve(optimizedFile);
-                }, 'image/jpeg', 0.95);
-            };
-            
-            if (file instanceof File) {
-                img.src = URL.createObjectURL(file);
-            } else {
-                img.src = file;
-            }
-        });
-    };
-
-    const optimizeImageForFaceRecognition = (dataURL) => {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = () => {
-                // Resolución óptima para reconocimiento facial
-                canvas.width = 1280;
-                canvas.height = 720;
-                
-                ctx.drawImage(img, 0, 0, 1280, 720);
-                
-                canvas.toBlob((blob) => {
-                    const optimizedFile = new File([blob], 'selfie_optimized.jpg', {
-                        type: 'image/jpeg',
-                        lastModified: Date.now(),
-                    });
-                    resolve(optimizedFile);
-                }, 'image/jpeg', 0.95);
-            };
-            
-            img.src = dataURL;
-        });
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
     };
 
     // ===== FUNCIONES DE TOAST =====
@@ -571,7 +476,7 @@ const VerifyProfile = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-premium rounded-3xl p-6 mb-6">
 
-                        {/* STEP 1: INE VERIFICATION MEJORADO */}
+                        {/* STEP 1: INE VERIFICATION SIMPLIFICADO */}
                         {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -582,50 +487,17 @@ const VerifyProfile = () => {
                                     <p className="text-gray-600">Captura o selecciona fotos claras de ambos lados de tu INE</p>
                                 </div>
 
-                                {/* Instrucciones mejoradas */}
-                                <div className="glass-premium rounded-2xl p-6 mb-6 border-l-4 border-blue-500">
-                                    <div className="flex items-start space-x-3">
-                                        <Info className="w-6 h-6 text-blue-500 mt-1 flex-shrink-0" />
-                                        <div>
-                                            <h4 className="font-semibold text-blue-700 mb-2">Instrucciones importantes:</h4>
-                                            <ul className="space-y-2 text-sm text-blue-600">
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Llena completamente el recuadro:</strong> Tu INE debe ocupar todo el espacio sin dejar bordes blancos
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Imagen nítida:</strong> Asegúrate de que todos los textos sean legibles
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Buena iluminación:</strong> Evita sombras y reflejos en la superficie
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Sin cortes:</strong> La INE completa debe estar visible en la imagen
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Modal de Cámara Mejorado SIN recuadro blanco */}
+                                {/* Modal de Cámara Simplificado */}
                                 {ineCapture.showCamera && (
                                     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                                        <div className="bg-white rounded-3xl p-6 max-w-lg w-full">
+                                        <div className="bg-white rounded-3xl p-6 max-w-md w-full">
                                             <div className="text-center mb-4">
                                                 <h3 className="text-xl font-bold text-gray-800 mb-2">
                                                     Capturar INE {ineCapture.activeIndex === 0 ? 'Frontal' : 'Trasera'}
                                                 </h3>
-                                                <p className="text-gray-600 text-sm mb-2">
-                                                    Coloca tu INE ocupando toda la pantalla
+                                                <p className="text-gray-600 text-sm">
+                                                    Centra tu INE dentro del recuadro
                                                 </p>
-                                                <div className="bg-amber-100 border border-amber-300 rounded-lg p-3">
-                                                    <p className="text-amber-800 text-xs font-medium">
-                                                        📄 La INE debe llenar completamente el visor, sin espacios en blanco en los bordes
-                                                    </p>
-                                                </div>
                                             </div>
 
                                             <div className="relative mb-6">
@@ -637,23 +509,15 @@ const VerifyProfile = () => {
                                                         videoConstraints={ineVideoConstraints}
                                                         className="w-full h-full object-cover"
                                                     />
-                                                    {/* Overlay con guías sutiles SIN recuadro blanco */}
                                                     <div className="absolute inset-0 flex items-center justify-center">
-                                                        {/* Solo esquinas como guía visual */}
-                                                        <div className="relative w-[90%] h-[85%]">
-                                                            {/* Esquina superior izquierda */}
-                                                            <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-yellow-400 rounded-tl-lg"></div>
-                                                            {/* Esquina superior derecha */}
-                                                            <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-yellow-400 rounded-tr-lg"></div>
-                                                            {/* Esquina inferior izquierda */}
-                                                            <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-yellow-400 rounded-bl-lg"></div>
-                                                            {/* Esquina inferior derecha */}
-                                                            <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-yellow-400 rounded-br-lg"></div>
-                                                            
-                                                            {/* Texto instructivo */}
+                                                        <div className="w-[80%] h-[70%] border-4 rounded-2xl shadow-lg">
                                                             <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
-                                                                INE debe llenar este espacio
+                                                                Centra tu INE aquí
                                                             </div>
+                                                            {/* <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
+                                                            <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
+                                                            <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
+                                                            <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div> */}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -756,7 +620,7 @@ const VerifyProfile = () => {
                             </div>
                         )}
 
-                        {/* STEP 2: FACE VERIFICATION MEJORADO */}
+                        {/* STEP 2: FACE VERIFICATION */}
                         {activeIndex === 1 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
@@ -771,34 +635,6 @@ const VerifyProfile = () => {
                                         <span className="text-blue-600 text-sm font-medium">
                                             Intento {validationAttempts + 1} de 3
                                         </span>
-                                    </div>
-                                </div>
-
-                                {/* Instrucciones para mejor reconocimiento facial */}
-                                <div className="glass-premium rounded-2xl p-6 mb-6 border-l-4 border-green-500">
-                                    <div className="flex items-start space-x-3">
-                                        <Camera className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                                        <div>
-                                            <h4 className="font-semibold text-green-700 mb-2">Para un mejor reconocimiento:</h4>
-                                            <ul className="space-y-2 text-sm text-green-600">
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Distancia adecuada:</strong> Mantén tu rostro a 30-50 cm de la cámara
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Rostro completo:</strong> Asegúrate de que tu cara esté completamente visible
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Iluminación uniforme:</strong> Usa luz natural o luz blanca directa
-                                                </li>
-                                                <li className="flex items-start">
-                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                                                    <strong>Sin obstáculos:</strong> Retira lentes, mascarilla o cualquier accesorio
-                                                </li>
-                                            </ul>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -825,17 +661,12 @@ const VerifyProfile = () => {
                                                     />
                                                 )}
                                                 
-                                                {/* Overlay con guía facial mejorada */}
+                                                {/* Overlay con guía facial */}
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="relative">
-                                                        {/* Círculo guía más grande para mejor distancia */}
-                                                        <div className="w-56 h-72 border-4 border-green-400 rounded-full opacity-60">
-                                                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-400 text-white px-3 py-1 rounded text-xs font-bold">
-                                                                Centra tu rostro aquí
-                                                            </div>
+                                                    <div className="w-48 h-64 border-4 border-green-400 rounded-full opacity-50">
+                                                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-400 text-white px-2 py-1 rounded text-xs font-bold">
+                                                            Centra tu rostro
                                                         </div>
-                                                        {/* Punto central de referencia */}
-                                                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-400 rounded-full opacity-80"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -909,11 +740,11 @@ const VerifyProfile = () => {
                                             </li>
                                             <li className="flex items-center">
                                                 <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                                Rostro centrado y a distancia media
+                                                Rostro centrado y visible
                                             </li>
                                             <li className="flex items-center">
                                                 <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                                Sin lentes oscuros ni mascarilla
+                                                Sin lentes oscuros
                                             </li>
                                             <li className="flex items-center">
                                                 <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
