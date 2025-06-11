@@ -192,6 +192,10 @@ const Perfil = () => {
     }
     const [index, setIndex] = React.useState(0);
 
+    const handleFaceVerification = () => {
+        setTimeout(() => navigate("../verificar-rostro"), 0);
+    };
+
     const handleVerificar = () => {
         if (!userPerfil.is_ine_validated) {
             setTimeout(() => navigate("../verificar-ine"), 0);
@@ -324,7 +328,7 @@ const Perfil = () => {
                                     {/* Botón mejorado */}
                                     <button 
                                         className="relative bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group overflow-hidden"
-                                        onClick={handleVerificar}
+                                        onClick={handleFaceVerification}
                                     >
                                         {/* Efecto de brillo */}
                                         <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
