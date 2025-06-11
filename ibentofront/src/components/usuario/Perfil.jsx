@@ -280,18 +280,80 @@ const Perfil = () => {
                                     />
                                 </svg>
                             </Link>
-                        </div>
+                        </div>                    </div>
+                    <div className="lg:hidden">
+                        <SideBar />
                     </div>
-                    <SideBar />
                 </div>
 
                 {/* Información del usuario */}
                 <div className="px-6 pt-20 pb-6">
                     {/* Nombre y edad */}
                     <div className="text-center mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                        <h1 className="text-2xl font-bold text-gray-800 mb-2"> 
                             {userPerfil.nombre + " " + userPerfil.apellido}
-                        </h1>                        <div className="flex items-center justify-center space-x-3 text-gray-600">
+                        </h1>                        {(userPerfil.is_ine_validated === true && userPerfil.is_validated_camera === false && userPerfil.birthday != null && userPerfil.profile_pic.length > 0 && userPerfil.preferencias_generales?.length) && (
+
+                        <div className="mb-6">
+                            <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border border-purple-200 rounded-2xl p-6 shadow-lg overflow-hidden">
+                                {/* Elementos decorativos de fondo */}
+                                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-full blur-xl"></div>
+                                <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-indigo-200/30 to-purple-200/30 rounded-full blur-xl"></div>
+                                
+                                {/* Icono principal */}
+                                <div className="relative flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 text-white">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                {/* Contenido principal */}
+                                <div className="relative text-center">
+                                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700 bg-clip-text text-transparent mb-2">
+                                        ¡Casi listo!
+                                    </h3>
+                                    <p className="text-gray-700 font-medium mb-2">
+                                        Termina de verificar tu perfil
+                                    </p>
+                                    <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                                        Verifica tu rostro para obtener tu badge de verificación y acceder a todas las funciones premium
+                                    </p>
+                                    
+                                    {/* Botón mejorado */}
+                                    <button 
+                                        className="relative bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group overflow-hidden"
+                                        onClick={handleVerificar}
+                                    >
+                                        {/* Efecto de brillo */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        
+                                        <span className="relative flex items-center justify-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121 8.25z" />
+                                            </svg>
+                                            <span>Finalizar verificación</span>
+                                        </span>
+                                    </button>
+                                </div>
+
+                                {/* Indicador de progreso */}
+                                <div className="relative mt-6">
+                                    <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <span>INE verificada</span>
+                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <span>Perfil completo</span>
+                                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                                        <span>Verificación facial</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    )}
+                        <div className="flex items-center justify-center space-x-3 text-gray-600">
                             <div className="flex items-center space-x-1">
                                 {userPerfil.gender !== "" && userPerfil.gender && (
                                     <>
@@ -337,18 +399,77 @@ const Perfil = () => {
                                 </span>
                             ))}
                         </div>
-                    </div>
-                    {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
+                    </div>                    {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
 
-                        <div className="col-span-full text-center py-2">
-                            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-                                <p className="font-medium">Crear cuenta de matches</p>
-                                <p className="text-sm">Para poder completar tu perfil y acceder a todas las funciones, completa tu perfil.</p>
-                                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handleVerificar}>Crear</button>
+                        <div className="mb-6">
+                            <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border border-purple-200 rounded-2xl p-6 shadow-lg overflow-hidden">
+                                {/* Elementos decorativos de fondo */}
+                                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-full blur-xl"></div>
+                                <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-indigo-200/30 to-purple-200/30 rounded-full blur-xl"></div>
+
+                                {/* Icono principal */}
+                                <div className="relative flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 text-white">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                {/* Contenido principal */}
+                                <div className="relative text-center">
+                                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700 bg-clip-text text-transparent mb-2">
+                                        ¡Bienvenido a Ibento!
+                                    </h3>
+                                    <p className="text-gray-700 font-medium mb-2">
+                                        Crear cuenta de matches
+                                    </p>
+                                    <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                                        Completa tu perfil para acceder a todas las funciones y comenzar a conectar con personas increíbles
+                                    </p>
+                                    
+                                    {/* Botón mejorado */}
+                                    <button 
+                                        className="relative bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group overflow-hidden"
+                                        onClick={handleVerificar}
+                                    >
+                                        {/* Efecto de brillo */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        
+                                        <span className="relative flex items-center justify-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                            <span>Crear perfil</span>
+                                        </span>
+                                    </button>
+                                </div>
+
+                                {/* Lista de pasos pendientes */}
+                                <div className="relative mt-6">
+                                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                        <div className={`flex items-center space-x-2 ${userPerfil.is_ine_validated ? 'text-green-600' : ''}`}>
+                                            <div className={`w-2 h-2 rounded-full ${userPerfil.is_ine_validated ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                                            <span>Verificar INE</span>
+                                        </div>
+                                        <div className={`flex items-center space-x-2 ${userPerfil.birthday ? 'text-green-600' : ''}`}>
+                                            <div className={`w-2 h-2 rounded-full ${userPerfil.birthday ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                                            <span>Información básica</span>
+                                        </div>
+                                        <div className={`flex items-center space-x-2 ${userPerfil.profile_pic?.length > 0 ? 'text-green-600' : ''}`}>
+                                            <div className={`w-2 h-2 rounded-full ${userPerfil.profile_pic?.length > 0 ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                                            <span>Fotos de perfil</span>
+                                        </div>
+                                        <div className={`flex items-center space-x-2 ${userPerfil.preferencias_generales?.length > 0 ? 'text-green-600' : ''}`}>
+                                            <div className={`w-2 h-2 rounded-full ${userPerfil.preferencias_generales?.length > 0 ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                                            <span>Intereses</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                    )}                    {/* Sobre mí */}
+                    )}{/* Sobre mí */}
                     {userPerfil.description !== null && userPerfil.description && (
                         <div className="mb-8">
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">

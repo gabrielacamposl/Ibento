@@ -17,6 +17,7 @@ import {
 import { Bell, Search, Heart, Sparkles } from 'lucide-react';
 import { useUserNotifications } from '../hooks/useNotificationSidebar';
 import NotificationSidebar from './eventos/components/NotificationsSidebar';
+import SideBar from './usuario/sidebar';
 import api from '../api';
 
 // Función para obtener el saludo según la hora
@@ -187,9 +188,7 @@ function WebNavigation() {
             </nav>            {/* Sección de Acciones */}
             <div className="flex items-center space-x-4">
               {/* Divider */}
-              <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
-
-              {/* Acciones */}
+              <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>              {/* Acciones */}
               <div className="flex items-center space-x-3">
                 {/* Búsqueda */}
                 <button
@@ -230,6 +229,9 @@ function WebNavigation() {
                       </>
                     )}
                   </button>
+                </div>                {/* Configuración/Menú - Solo en versión web */}
+                <div className="hidden lg:block">
+                  <SideBar isWebVersion={true} />
                 </div>
               </div>
             </div>
