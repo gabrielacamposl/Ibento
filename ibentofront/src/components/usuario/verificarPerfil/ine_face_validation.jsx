@@ -250,12 +250,12 @@ const VerifyProfile = () => {
                     await uploadAllData();
                     setStepsCompleted(prev => ({ ...prev, face: true }));
                     showSuccess("¡Rostro validado exitosamente!");
-                    navigate("../descripcion");
+                    navigate("/ibento/descripcion");
                 } catch (uploadError) {
                     console.error("Error al subir datos después de validación:", uploadError);
                     setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
                     showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    navigate("../descripcion");
+                    navigatei("/ibento/descripcion");
                 }
             } else {
                 handleValidationFailure(data);
