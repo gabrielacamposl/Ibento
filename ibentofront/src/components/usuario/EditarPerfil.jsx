@@ -22,10 +22,89 @@ const EditarPerfil = () => {
     const [descripcion, setDescripcion] = useState('');
     const [fotos, setFotos] = useState([]);
     const [itemsAboutMe, setItemsAboutMe] = useState([]);
-    const [myAwnsers, setMyAwnsers] = useState([]);
-    const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [myAwnsers, setMyAwnsers] = useState([]);    const [selectedAnswers, setSelectedAnswers] = useState({});
 
     const [loading, setLoading] = useState(true);
+      // Estados para validaciones
+    const [errors, setErrors] = useState({
+        nombre: '',
+        apellido: '',
+        cumpleanos: ''
+    });
+    
+    // Estado para el botón de guardar cambios
+    const [isSaving, setIsSaving] = useState(false);// Función para validar solo letras, acentos y espacios
+    const validateLettersOnly = (value) => {
+        // Permite letras (incluyendo acentos), espacios, y caracteres especiales del español
+        const regex = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+$/;
+        // También validar que no sea solo espacios
+        return regex.test(value) && value.trim().length > 0;
+    };
+
+    // Función para validar edad mínima de 18 años
+    const validateAge = (birthday) => {
+        if (!birthday) return false;
+        
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        
+        // Verificar formato de fecha válido
+        if (isNaN(birthDate.getTime())) return false;
+        
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age >= 18;
+    };
+
+    // Función para manejar cambios en el nombre
+    const handleNombreChange = (value) => {
+        if (value === '' || validateLettersOnly(value)) {
+            setNombre(value);
+            setErrors(prev => ({ ...prev, nombre: '' }));
+        } else {
+            setErrors(prev => ({ 
+                ...prev, 
+                nombre: 'El nombre solo puede contener letras, acentos y espacios' 
+            }));
+        }
+    };
+
+    // Función para manejar cambios en el apellido
+    const handleApellidoChange = (value) => {
+        if (value === '' || validateLettersOnly(value)) {
+            setApellido(value);
+            setErrors(prev => ({ ...prev, apellido: '' }));
+        } else {
+            setErrors(prev => ({ 
+                ...prev, 
+                apellido: 'El apellido solo puede contener letras, acentos y espacios' 
+            }));
+        }
+    };
+
+    // Función para manejar cambios en la fecha de cumpleaños
+    const handleCumpleanosChange = (value) => {
+        setCumpleanos(value);
+        
+        if (value === '') {
+            setErrors(prev => ({ ...prev, cumpleanos: '' }));
+            return;
+        }
+
+        if (!validateAge(value)) {
+            setErrors(prev => ({ 
+                ...prev, 
+                cumpleanos: 'Debes ser mayor de 18 años' 
+            }));
+        } else {
+            setErrors(prev => ({ ...prev, cumpleanos: '' }));
+        }
+    };
     // Función para obtener categorías de eventos
     useEffect(() => {
         const fetchCategorias = async () => {
@@ -173,6 +252,42 @@ const EditarPerfil = () => {
             return;
         }
 
+        // Validar todos los campos antes de enviar
+        let hasValidationErrors = false;
+        let newErrors = { nombre: '', apellido: '', cumpleanos: '' };
+
+        // Validar nombre si se ha modificado
+        if (nombre && !validateLettersOnly(nombre)) {
+            newErrors.nombre = 'El nombre solo puede contener letras, acentos y espacios';
+            hasValidationErrors = true;
+        }
+
+        // Validar apellido si se ha modificado
+        if (apellido && !validateLettersOnly(apellido)) {
+            newErrors.apellido = 'El apellido solo puede contener letras, acentos y espacios';
+            hasValidationErrors = true;
+        }
+
+        // Validar fecha de nacimiento si se ha modificado
+        if (cumpleanos && !validateAge(cumpleanos)) {
+            newErrors.cumpleanos = 'Debes ser mayor de 18 años';
+            hasValidationErrors = true;
+        }
+
+        // Verificar si hay errores existentes
+        if (errors.nombre || errors.apellido || errors.cumpleanos) {
+            hasValidationErrors = true;
+        }
+
+        if (hasValidationErrors) {
+            setErrors(newErrors);
+            alert("Por favor corrige los errores en el formulario antes de continuar.");
+            return;
+        }
+
+        // Establecer estado de carga
+        setIsSaving(true);
+
         try {
             const respuestas = Object.entries(selectedAnswers).map(([categoria_id, respuesta]) => ({
                 categoria_id,
@@ -269,10 +384,12 @@ const EditarPerfil = () => {
             } else {
                 console.error("Error al actualizar perfil");
                 alert("Error al actualizar el perfil. Inténtalo de nuevo.");
-            }
-        } catch (error) {
+            }        } catch (error) {
             console.error("Error al actualizar perfil:", error);
             alert("Error al actualizar el perfil: " + (error.response?.data?.error || error.message));
+        } finally {
+            // Restablecer estado de carga
+            setIsSaving(false);
         }
     }
 
@@ -307,33 +424,64 @@ const EditarPerfil = () => {
 
                     {/* Información básica */}
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4">
-                            <div>
-                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                        <div className="grid grid-cols-1 gap-4">                            <div>                                <label className="flex items-center text-gray-700 font-semibold mb-2">
                                     <User className="w-4 h-4 mr-2 text-purple-500" />
                                     Nombre
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 ${
+                                        errors.nombre 
+                                        ? 'border-red-400 focus:border-red-400 focus:ring-red-100' 
+                                        : 'border-gray-200 focus:border-purple-400 focus:ring-purple-100'
+                                    }`}
                                     defaultValue={userPerfil.nombre}
-                                    onChange={(e) => setNombre(e.target.value)}
-                                    placeholder="Tu nombre"
+                                    onChange={(e) => handleNombreChange(e.target.value)}
+                                    placeholder="Ej: María José"
                                 />
+                                {errors.nombre && (
+                                    <p className="mt-1 text-sm text-red-600 flex items-center">
+                                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        {errors.nombre}
+                                    </p>
+                                )}
+                                {!errors.nombre && (
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Solo se permiten letras, acentos y espacios
+                                    </p>
+                                )}
                             </div>
 
-                            <div>
-                                <label className="flex items-center text-gray-700 font-semibold mb-2">
+                            <div>                                <label className="flex items-center text-gray-700 font-semibold mb-2">
                                     <User className="w-4 h-4 mr-2 text-purple-500" />
                                     Apellido
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all bg-gray-50 text-gray-800"
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 ${
+                                        errors.apellido 
+                                        ? 'border-red-400 focus:border-red-400 focus:ring-red-100' 
+                                        : 'border-gray-200 focus:border-purple-400 focus:ring-purple-100'
+                                    }`}
                                     defaultValue={userPerfil.apellido}
-                                    onChange={(e) => setApellido(e.target.value)}
-                                    placeholder="Tu apellido"
+                                    onChange={(e) => handleApellidoChange(e.target.value)}
+                                    placeholder="Ej: García López"
                                 />
+                                {errors.apellido && (
+                                    <p className="mt-1 text-sm text-red-600 flex items-center">
+                                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        {errors.apellido}
+                                    </p>
+                                )}
+                                {!errors.apellido && (
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Solo se permiten letras, acentos y espacios
+                                    </p>
+                                )}
                             </div>
                         </div>
                         {userPerfil.gender != "" && userPerfil.birthday != null && (
@@ -358,23 +506,35 @@ const EditarPerfil = () => {
                                             <option value="O">Otro</option>
                                         </select>
                                     </div>
-                                </div>
-
-                                <div>
+                                </div>                                <div>
                                     <label className="flex items-center text-gray-700 font-semibold mb-2">
                                         <Calendar className="w-4 h-4 mr-2 text-purple-500" />
-                                        Fecha
+                                        Fecha de nacimiento
                                     </label>
                                     <input
-                                        type="text"
-                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-gray-50 text-gray-800"
+                                        type="date"
+                                        className={`w-full px-3 py-2 rounded-lg border transition-all bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 ${
+                                            errors.cumpleanos 
+                                            ? 'border-red-400 focus:border-red-400 focus:ring-red-100' 
+                                            : 'border-gray-200 focus:border-purple-400 focus:ring-purple-100'
+                                        }`}
                                         defaultValue={userPerfil.birthday}
-                                        placeholder='AAAA-MM-DD'
-                                        onChange={(e) => setCumpleanos(e.target.value)}
+                                        onChange={(e) => handleCumpleanosChange(e.target.value)}
+                                        max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                                     />
-                                    <span className="text-sm text-gray-500 mt-1 block">
-                                        {calculateAge(userPerfil.birthday)} años
-                                    </span>
+                                    {errors.cumpleanos && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center">
+                                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            {errors.cumpleanos}
+                                        </p>
+                                    )}
+                                    {!errors.cumpleanos && (cumpleanos || userPerfil.birthday) && (
+                                        <span className="text-sm text-gray-500 mt-1 block">
+                                            {calculateAge(cumpleanos || userPerfil.birthday)} años
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -585,9 +745,24 @@ const EditarPerfil = () => {
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-20">
                     <button
                         onClick={handleSubmit}
-                        className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        disabled={isSaving || errors.nombre || errors.apellido || errors.cumpleanos}
+                        className={`w-full font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2 ${
+                            isSaving || errors.nombre || errors.apellido || errors.cumpleanos
+                                ? 'bg-gray-400 cursor-not-allowed text-white'
+                                : 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 hover:scale-105'
+                        }`}
                     >
-                        Guardar Cambios
+                        {isSaving ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Guardando cambios...</span>
+                            </>
+                        ) : (
+                            <span>Guardar Cambios</span>
+                        )}
                     </button>
                 </div>
             </div>
