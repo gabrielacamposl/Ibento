@@ -19,26 +19,18 @@ const fotos = () => {
     // Estados de carga individuales para cada acción
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
    
-    
- 
-
-
-
-    
 
     //Estado para guardas las fotos de perfil
     const [savedPhotos, setSavedPhotos] = useState([]);
 
-   
-
-    // useEffect(() => {
-    //     const token = localStorage.getItem("access");
-    //     if (!token) {
-    //         // Redirige si no hay token
-    //         navigate("/login");
-    //     }
-    //     window.scrollTo(0, 0);
-    // }, []);
+    useEffect(() => {
+        const token = localStorage.getItem("access");
+        if (!token) {
+            // Redirige si no hay token
+            navigate("/login");
+        }
+        window.scrollTo(0, 0);
+    }, []);
 
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
@@ -176,7 +168,6 @@ const fotos = () => {
     
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-            {/* Header Section */}
             {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 

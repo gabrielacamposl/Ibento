@@ -2647,3 +2647,38 @@ def eliminar_cuenta(request):
     except Exception as e:
         logger.error(f"Error eliminando cuenta: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Notificaciones iOS
+@api_view(['POST'])
+def send_notification(request):
+    user = request.user
+    notification_type = request.data.get('type')
+    title = request.data.get('title')
+    body = request.data.get('body')
+    data = request.data.get('data', {})
+    
+    # Obtener token FCM del usuario
+    try:
+        fcm_token = user.fcm_token  # O como tengas guardado el token
+        
+        if fcm_token:
+            # Enviar con Firebase Admin SDK
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                data={
+                    'type': notification_type,
+                    **data
+                },
+                token=fcm_token
+            )
+            
+            response = messaging.send(message)
+            return Response({'success': True, 'message_id': response})
+        else:
+            return Response({'error': 'No FCM token found'}, status=400)
+            
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

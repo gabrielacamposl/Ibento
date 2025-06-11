@@ -1,12 +1,15 @@
+// src/App.js - ACTUALIZADO CON NOTIFICACIONES DATING
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import 'primereact/resources/primereact.min.css';
 import InstallPrompt from './components/pwa/InstallPrompt';
-import pushNotificationService from './utils/pushNotifications';
+import datingNotificationService from './utils/datingNotifications';
+import universalNotificationService from './utils/universalNotifications';
+
 import api from './apilogin'
 import AuthGuard from './components/auth/AuthGuard';
 
-// -------------------------- RUTAS -----------------------------------------
+// -------------------------- RUTAS (TU CÓDIGO ORIGINAL) -----------------------------------------
 // Auth & Register
 import Register from "./components/accounts/Register";
 import Confirm from "./components/accounts/Confirm";
@@ -55,130 +58,172 @@ import BusquedaCategoria from "./components/eventos/searchCategories";
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Registrar service workers e inicializar notificaciones push
+  // 🌍 ESTADO UNIVERSAL DE NOTIFICACIONES
+  const [notificationStatus, setNotificationStatus] = useState({
+    platform: 'unknown',
+    isInitialized: false,
+    hasPermission: false,
+    method: 'none'
+  });
+
+  // 🚀 INICIALIZAR SISTEMA UNIVERSAL
   useEffect(() => {
-    const initializeApp = async () => {
-      // Registrar service workers
+    const initializeUniversalApp = async () => {
+      console.log('🚀 Inicializando Ibento Universal...');
+
+      // Registrar Service Worker
       if ('serviceWorker' in navigator) {
         try {
-          // Registrar el service worker principal (sw.js)
           const swRegistration = await navigator.serviceWorker.register('/sw.js');
-          console.log('✅ SW principal registrado:', swRegistration);
-
-          // Registrar el service worker de Firebase Messaging
-          const fcmRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('✅ FCM SW registrado:', fcmRegistration);
-
-        } catch (registrationError) {
-          console.log('❌ Error registrando Service Workers:', registrationError);
+          console.log('✅ Service Worker registrado:', swRegistration);
+        } catch (error) {
+          console.log('❌ Error registrando Service Worker:', error);
         }
       }
 
-      // Inicializar servicio de notificaciones push
+      // 🌍 Inicializar notificaciones universales
       try {
-        const initialized = await pushNotificationService.initialize();
+        const initialized = await universalNotificationService.initialize();
+        const status = universalNotificationService.getStatus();
+        
+        setNotificationStatus(status);
+        
         if (initialized) {
-          console.log('✅ Servicio de notificaciones push inicializado');
+          console.log(`✅ Notificaciones ${status.platform} inicializadas:`, status);
+          
+          // Mostrar notificación de bienvenida específica por plataforma
+          setTimeout(() => {
+            showPlatformWelcomeMessage(status.platform);
+          }, 2000);
+        } else {
+          console.log('⚠️ Notificaciones en modo fallback:', status);
         }
       } catch (error) {
-        console.error('❌ Error inicializando notificaciones push:', error);
+        console.error('❌ Error inicializando notificaciones universales:', error);
       }
     };
 
-    initializeApp();
+    initializeUniversalApp();
+
+    // Actualizar estado cada 10 segundos
+    const statusInterval = setInterval(() => {
+      setNotificationStatus(universalNotificationService.getStatus());
+    }, 10000);
+
+    return () => clearInterval(statusInterval);
   }, []);
 
-  // Configurar listeners de notificaciones
+  // 🌍 CONFIGURAR LISTENERS UNIVERSALES
   useEffect(() => {
-    const handleNotificationReceived = (event) => {
-      console.log('📨 Nueva notificación recibida:', event.detail);
-    };
-
+    // Listeners para eventos de notificación
     const handleLikeNotification = (event) => {
-      console.log('💕 Notificación de like:', event.detail);
-      showNotificationToast(`💕 ${event.detail.liker_name} te dio like!`, 'like');
+      console.log('💕 Like notification:', event.detail);
+      showUniversalToast(`💕 ${event.detail.userName || 'Alguien'} te dio like!`, 'like');
     };
 
     const handleMatchNotification = (event) => {
-      console.log('🎉 Notificación de match:', event.detail);
-      showNotificationToast(`🎉 ¡Match con ${event.detail.match_name}!`, 'match');
+      console.log('🎉 Match notification:', event.detail);
+      showUniversalToast(`🎉 ¡Match con ${event.detail.userName || 'alguien'}!`, 'match');
     };
 
     const handleMessageNotification = (event) => {
-      console.log('💬 Notificación de mensaje:', event.detail);
-      showNotificationToast(`💬 Nuevo mensaje de ${event.detail.sender_name}`, 'message');
-    };
-
-    const handleEventNotification = (event) => {
-      console.log('🎪 Notificación de evento:', event.detail);
-      showNotificationToast(`🎪 ${event.detail.event_title}`, 'event');
+      console.log('💬 Message notification:', event.detail);
+      showUniversalToast(`💬 Mensaje de ${event.detail.userName || 'alguien'}`, 'message');
     };
 
     // Agregar listeners
-    window.addEventListener('notification:received', handleNotificationReceived);
     window.addEventListener('notification:like', handleLikeNotification);
     window.addEventListener('notification:match', handleMatchNotification);
     window.addEventListener('notification:message', handleMessageNotification);
-    window.addEventListener('notification:event', handleEventNotification);
 
     // Cleanup
     return () => {
-      window.removeEventListener('notification:received', handleNotificationReceived);
       window.removeEventListener('notification:like', handleLikeNotification);
       window.removeEventListener('notification:match', handleMatchNotification);
       window.removeEventListener('notification:message', handleMessageNotification);
-      window.removeEventListener('notification:event', handleEventNotification);
     };
   }, []);
 
-  // Función para mostrar toasts de notificaciones
-  const showNotificationToast = (message, type) => {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 500;
-      z-index: 10000;
-      animation: slideInRight 0.3s ease-out;
-      max-width: 300px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    `;
+  // 🎉 MENSAJE DE BIENVENIDA POR PLATAFORMA
+  const showPlatformWelcomeMessage = (platform) => {
+    const messages = {
+      'ios-pwa': '🍎 ¡Ibento instalado en iOS! Las notificaciones están optimizadas para tu iPhone.',
+      'ios-safari': '🍎 ¡Bienvenido desde Safari! Para mejor experiencia, instala Ibento en tu pantalla de inicio.',
+      'android-pwa': '🤖 ¡Ibento instalado en Android! Las notificaciones push están activas.',
+      'android-browser': '🤖 ¡Bienvenido desde Android! Instala Ibento como app para mejor experiencia.',
+      'windows': '💻 ¡Bienvenido desde Windows! Las notificaciones de escritorio están activas.',
+      'macos': '🖥️ ¡Bienvenido desde Mac! Las notificaciones están optimizadas para macOS.',
+      'desktop': '💻 ¡Bienvenido desde Desktop! Las notificaciones web están activas.'
+    };
 
+    const message = messages[platform] || '🌍 ¡Notificaciones universales activas!';
+    showUniversalToast(message, 'success');
+  };
+
+  // 🧪 FUNCIONES DE PRUEBA UNIVERSALES
+  const testUniversalNotifications = {
+    match: () => {
+      universalNotificationService.notifyMatch('María García', '/test-photo.jpg', 'user123');
+    },
+    like: () => {
+      universalNotificationService.notifyLike('Juan Pérez', '/test-photo2.jpg', 'user456');
+    },
+    message: () => {
+      universalNotificationService.notifyMessage('Ana López', '¡Hola! Me encanta tu perfil 😊', '/test-photo3.jpg', 'user789');
+    },
+    all: () => {
+      universalNotificationService.testAllPlatforms();
+    }
+  };
+
+  // 🎨 TOAST UNIVERSAL
+  const showUniversalToast = (message, type) => {
+    const toast = document.createElement('div');
+    
     const colors = {
       like: 'linear-gradient(135deg, #ec4899, #be185d)',
       match: 'linear-gradient(135deg, #10b981, #059669)',
       message: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-      event: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+      success: 'linear-gradient(135deg, #10b981, #059669)',
       error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-      success: 'linear-gradient(135deg, #10b981, #059669)'
+      warning: 'linear-gradient(135deg, #f59e0b, #d97706)'
     };
 
-    toast.style.background = colors[type] || colors.success;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type] || colors.success};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      z-index: 10000;
+      animation: slideInRight 0.3s ease-out;
+      max-width: 350px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+    `;
+    
     toast.textContent = message;
-
     document.body.appendChild(toast);
 
-    // Auto-remover después de 4 segundos
+    // Auto-remover
+    toast.onclick = () => toast.remove();
     setTimeout(() => {
-      toast.style.animation = 'slideOutRight 0.3s ease-in';
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, 4000);
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOutRight 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 5000);
   };
 
   return (
     <div className="App">
+      
       <Router>
         <AuthGuard>
           <Routes>
-            {/* Rutas de autenticación */}
             <Route path="/" element={<Login />} />
             <Route path="/crear-cuenta" element={<Register />} />
             <Route path="/verificar-correo" element={<VerificarCorreo />} />
@@ -204,14 +249,13 @@ export default function App() {
               <Route path="editarIntereses" element={<EditarIntereses />} />
               <Route path="favoritos" element={<Favoritos />} />
               <Route path="guardados" element={<Guardados />} />
-              {/* <Route path="verificar" element={<VerificarPerfil />} /> */}
               <Route path="profileVerify" element={<PerfilCheck />} />
               <Route path="profileRepeat" element={<PerfilRepetido />} />
 
               {/* Verificar */}
               <Route path="verificar-ine" element={<IneValidation />} />
-              <Route path="subirFotos" element={<SubirFotos />} />
               <Route path="descripcion" element={<Descripcion />} />
+              <Route path="subirFotos" element={<SubirFotos />} />
               <Route path="intereses" element={<Intereses />} />
 
               {/* Matches y chat */}
@@ -228,11 +272,11 @@ export default function App() {
         </AuthGuard>
       </Router>
 
-      {/* Componentes adicionales */}
-      {/* <InstallPrompt /> */}
+      {/* TUS COMPONENTES ADICIONALES ORIGINALES */}
+      {/*<InstallPrompt />*/}
       {/* <NotificationManager /> */}
 
-      {/* Estilos para animaciones */}
+      {/* Estilos para animaciones (tu código original) */}
       <style>{`
         @keyframes slideInRight {
           from {
