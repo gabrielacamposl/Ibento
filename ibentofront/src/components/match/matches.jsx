@@ -218,16 +218,9 @@ const Matches = () => {
                             >
                                 <ArrowLeft className="w-5 h-5 text-white" />
                             </button>
-                            <div className="flex items-center space-x-2">
-                                <Sparkles className="w-6 h-6 text-yellow-400" />
-                                <span className="text-white font-semibold text-lg">Matches</span>
-                            </div>
-                            <button className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                <Menu className="w-5 h-5 text-white" />
-                            </button>
                         </div>
                         <div className="text-center">
-                            <h1 className="text-3xl font-bold text-white mb-2">Mis Matches</h1>
+                            <h1 className="text-3xl font-bold text-white mb-2">Mis Chats</h1>
                             <p className="text-white/70">Conecta con personas increíbles</p>
                         </div>
                     </div>

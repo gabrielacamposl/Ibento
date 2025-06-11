@@ -36,6 +36,7 @@ import IneValidation from "./components/usuario/verificarPerfil/ine_face_validat
 import SubirFotos from "./components/usuario/verificarPerfil/upload_photos";
 import Descripcion from "./components/usuario/verificarPerfil/profile_description";
 import Intereses from "./components/usuario/verificarPerfil/select_interests";
+import VerificarRostro from "./components/usuario/verificarPerfil/face_validation";
 
 // Match
 import PerfilCheck from "./components/usuario/PerfilVerificado";
@@ -257,6 +258,7 @@ export default function App() {
               <Route path="descripcion" element={<Descripcion />} />
               <Route path="subirFotos" element={<SubirFotos />} />
               <Route path="intereses" element={<Intereses />} />
+              <Route path="verificar-rostro" element={<VerificarRostro />} />
 
               {/* Matches y chat */}
               <Route path="matches" element={<BuscarMatches />} />
