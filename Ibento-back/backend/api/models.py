@@ -239,3 +239,20 @@ class FCMToken(models.Model):
     
     def __str__(self):
         return f"{self.usuario.nombre} - {self.device_type}"
+
+#----------------------------------- MODELO PARA LAS METRICAS DE USO ----------------------------------------
+
+class Metricas(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
+    num_ine_checked = models.IntegerField(default=0)
+    num_ine_validated = models.IntegerField(default=0)
+    num_face_checked = models.IntegerField(default=0)
+    num_face_validated = models.IntegerField(default=0)
+    num_matches = models.IntegerField(default=0)
+    num_interactions = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'metricas'
+    
+    def __str__(self):
+        return f"Metricas: {self._id} - INE Checked: {self.num_ine_checked}, INE Validated: {self.num_ine_validated}, Face Checked: {self.num_face_checked}, Face Validated: {self.num_face_validated}, Matches: {self.num_matches}, Interactions: {self.num_interactions}"
