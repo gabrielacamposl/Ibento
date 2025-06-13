@@ -235,9 +235,9 @@ export default function PasswordResetValidate() {
             {/* Logo y título */}
             <div className="text-center items-center mb-8 relative z-10">
               <div className="flex justify-center items-center mb-4">
-                <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Shield className="w-10 h-10 text-white" />
-                </div>
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Shield className="w-10 h-10 text-white" />
+                  </div>
               </div>
 
               <h1 className="text-gray-800 font-bold text-2xl mb-2">
@@ -293,8 +293,7 @@ export default function PasswordResetValidate() {
               {/* Botón de validar */}
               <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 <Button 
-                  className="w-full flex items-center justify-center bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-6 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
-                  type="submit"
+                   className="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                   loading={loading}
                   disabled={loading || codigo.join('').length !== 6}
                 >
