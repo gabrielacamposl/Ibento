@@ -47,7 +47,7 @@ from api.services.notification_service import NotificationService
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
-from api.models import FCMToken
+from api.models import FCMToken, Metricas
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -674,6 +674,12 @@ def delete_profile_picture(request, photo_url):
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def ine_validation_view(request):
+
+    #Metricas
+    metricas, created = Metricas.objects.get_or_create(_id=1)
+    metricas.num_ine_checked += 1
+    metricas.save()
+
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
     
@@ -730,7 +736,11 @@ def ine_validation_view(request):
             del front_b64
         if 'back_b64' in locals():
             del back_b64
-        
+    
+    #Metricas
+    metricas.num_ine_validated += 1
+    metricas.save()
+
     return Response({
             "success": True,
             "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
@@ -746,6 +756,12 @@ def ine_validation_view(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def face_validation_view(request):
+
+    #Metricas
+    metricas, created = Metricas.objects.get_or_create(_id=1)
+    metricas.num_face_checked += 1
+    metricas.save()
+
     ine_front = request.FILES.get('ine_front')
     selfie = request.FILES.get('selfie')
     
@@ -811,8 +827,12 @@ def face_validation_view(request):
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE) 
-              
-        # RESPUESTA EXITOSA
+                # RESPUESTA EXITOSA
+
+        #Metricas
+        metricas.num_face_validated += 1
+        metricas.save()
+        
         return Response({
             "success": True,
             "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
