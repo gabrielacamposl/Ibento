@@ -1081,6 +1081,7 @@ def matches(request):
     usuario_destino_id = request.data.get("usuario_destino")
     tipo_interaccion = request.data.get("tipo_interaccion")
 
+
     if tipo_interaccion not in ["like", "dislike"]:
         return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1175,6 +1176,45 @@ def matches(request):
         "message": "Interacción registrada correctamente.",
         "is_match": False
     }, status=200)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def generar_compatibilidades(request):
+
+    matches = Matches.objects.all()
+
+    for match in matches:
+        # Obtener las preferencias de los usuarios en el match
+        preferencias_a = match.usuario_a.preferencias_generales
+        preferencias_b = match.usuario_b.preferencias_generales
+
+        # Calcular la compatibilidad
+        compatibilidad = recomendacion_de_usuarios(preferencias_a, preferencias_b)
+
+        match.compatibilidad = compatibilidad
+        match.save()
+
+    return Response({"message": "Compatibilidades generadas correctamente"}, status=200)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def generar_compatibilidades_interacciones(request):
+    
+    interacciones = Interaccion.objects.all()
+    for interaccion in interacciones:
+        # Obtener las preferencias de los usuarios en la interacción
+        preferencias_a = interaccion.usuario_origen.preferencias_generales
+        preferencias_b = interaccion.usuario_destino.preferencias_generales
+
+        # Calcular la compatibilidad
+        compatibilidad = recomendacion_de_usuarios(preferencias_a, preferencias_b)
+
+        interaccion.compatibilidad = compatibilidad
+        interaccion.save()
+
+    return Response({"message": "Compatibilidades generadas correctamente"}, status=200)
+
 
 # ------- Personas que me dieron like : *Futuros acompañantes*
 

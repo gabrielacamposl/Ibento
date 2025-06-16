@@ -589,7 +589,7 @@ def compatibilidad_mascotas(respuesta_a, respuesta_b):
             return -0.2
 
     if "Soy alérgico" in (respuesta_a or respuesta_b):
-        if len(respuesta_a & respuesta_b & ["No me gustan", "Me gustan pero no tengo"]) > 0:
+        if len(respuesta_a & respuesta_b & set(["No me gustan", "Me gustan pero no tengo"])) > 0:
             return 0.5
         if "No tengo mascotas pero quisiera una" in (respuesta_a or respuesta_b):
             return -0.3
