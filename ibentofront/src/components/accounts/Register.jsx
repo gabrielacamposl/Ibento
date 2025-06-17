@@ -69,15 +69,15 @@ export default function Register() {
 
   // Footer personalizado para el diálogo
   const dialogFooter = (
-    <div className="flex justify-between p-4">
+    <div className="flex justify-between gap-4 p-6 bg-gradient-to-r from-purple-50/30 to-pink-50/30 backdrop-blur-sm border-t border-white/20">
       <Button
         label="Cancelar"
-        className="p-button-outlined text-purple-800"
+        className="flex-1 px-6 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-sm border border-white/30 text-gray-600 hover:text-gray-700 rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
         onClick={hideDialog}
       />
       <Button
         label="Aceptar"
-        className={buttonAccept}
+        className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] backdrop-blur-sm border border-white/20"
         onClick={() => {
           setChecked(true);
           hideDialog();
