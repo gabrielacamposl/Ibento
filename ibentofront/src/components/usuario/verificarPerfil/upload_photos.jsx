@@ -19,7 +19,6 @@ const fotos = () => {
     // Estados de carga individuales para cada acción
     const [pictures, setPictures] = useState(Array(6).fill(null)); // Inicializar con 6 elementos `null`
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
-   
     
 // Obtener imágenes de perfil del usuario
 useEffect(() => {
@@ -89,23 +88,17 @@ const updateProfileImages = async () => {
 
 
 
-
-
-    
-
     //Estado para guardas las fotos de perfil
     const [savedPhotos, setSavedPhotos] = useState([]);
 
-   
-
-    // useEffect(() => {
-    //     const token = localStorage.getItem("access");
-    //     if (!token) {
-    //         // Redirige si no hay token
-    //         navigate("/login");
-    //     }
-    //     window.scrollTo(0, 0);
-    // }, []);
+    useEffect(() => {
+        const token = localStorage.getItem("access");
+        if (!token) {
+            // Redirige si no hay token
+            navigate("/login");
+        }
+        window.scrollTo(0, 0);
+    }, []);
 
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
@@ -169,9 +162,8 @@ const updateProfileImages = async () => {
             if (response.data && response.data.pictures) {
                 showSuccess("¡Fotos subidas correctamente!");
                 setSavedPhotos(response.data.pictures); // Guardar las fotos subidas en el estado
-                console.log("Fotos subidas exitosamente:", response.data.pictures);
                 setTimeout(() => {
-                    navigate("../intereses"); // Redirigir al perfil después de subir las fotos
+                    navigate("../intereses");
                 }, 2000);
             } else {
                 showWarn("Error al subir las fotos. Por favor, inténtalo de nuevo.");
@@ -201,9 +193,8 @@ const updateProfileImages = async () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-            {/* Header Section */}
-            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
-                <div className="flex items-center justify-center p-6">
+            {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+                <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
                         className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300 absolute left-6"

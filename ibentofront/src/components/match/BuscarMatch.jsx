@@ -14,6 +14,9 @@ const buscarMatchx = () => {
     const containerRef = useRef(null);
     const { makeRequest } = useOfflineRequest();
 
+    //Verificar si el usuario está verificado
+    const [userPerfil, setUserPerfil] = useState({});
+
     // Estados para el swipe system premium
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -22,9 +25,7 @@ const buscarMatchx = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [swipeDirection, setSwipeDirection] = useState(null);
     const [likeAnimation, setLikeAnimation] = useState(null);
-    const [isOffline, setIsOffline] = useState(!navigator.onLine);
-
-    // Estados para usuarios y filtros
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);    // Estados para usuarios y filtros
     const [UserMatch, setUserMatch] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState();
@@ -33,7 +34,14 @@ const buscarMatchx = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [removedUsers, setRemovedUsers] = useState(new Set());
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [verificar, setVerificar] = useState(undefined);
+    const [verificar, setVerificar] = useState(undefined);    // Estado para el tutorial de gestos
+    const [showTutorial, setShowTutorial] = useState(false);
+    const [tutorialStep, setTutorialStep] = useState(0);
+
+    // Estado para el panel expandible de información de usuario
+    const [showUserPanel, setShowUserPanel] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [panelAnimation, setPanelAnimation] = useState('');
 
     const [filters, setFilters] = useState({
         searchMode: 'global',
@@ -55,11 +63,60 @@ const buscarMatchx = () => {
         };
     }, []);
 
-    const handleVerificar = () => { // Renamed
-        setTimeout(() => navigate("../verificar"), 0);
+    const handleVerificar = () => {
+        if (!userPerfil.is_ine_validated) {
+            setTimeout(() => navigate("../verificar-ine"), 0);
+        }
+        else if (userPerfil.birthday === null) {
+            setTimeout(() => navigate("../descripcion"), 0);
+        }
+        else if (userPerfil.profile_pic?.length === 0) {
+            setTimeout(() => navigate("../subirFotos"), 0);
+
+        }
+        else if (!userPerfil.preferencias_generales?.length > 0) {
+            setTimeout(() => navigate("../intereses"), 0);
+        }
     };
 
-    // Verificar si el usuario está verificado
+    useEffect(() => {
+        const Perfil = async () => {
+            try {
+                const token = localStorage.getItem('access');
+
+                if (!token) {
+                    console.error("No se encontró token de autenticación");
+                    setLoading(false);
+                    return;
+                }
+
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}usuarios/info_to_edit/`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    },
+                    'user-profile'
+                );
+
+                if (result.data) {
+                    setUserPerfil(result.data);
+                    console.log("Perfil obtenido:", result.data);
+                    if (result.offline) {
+                        console.log('Perfil cargado desde cache offline');
+                    }
+                } else {
+                    console.error("Error al obtener perfil");
+                }
+            } catch (error) {
+                console.error("Error al obtener perfil:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        Perfil();
+    }, []);    // Verificar si el usuario está verificado
     useEffect(() => {
         const token = localStorage.getItem('access');
         const fetchUserValidationData = async () => {
@@ -75,6 +132,12 @@ const buscarMatchx = () => {
                 if (result.data) {
                     const userData = result.data;
                     setVerificar(userData.is_ine_validated);
+                    
+                    // Verificar si debe mostrar el tutorial
+                    const hasSeenTutorial = localStorage.getItem('hasSeenMatchTutorial');
+                    if (userData.is_ine_validated && !hasSeenTutorial && UserMatch.length > 0) {
+                        setShowTutorial(true);
+                    }
                 } else {
                     setVerificar(false);
                 }
@@ -89,7 +152,7 @@ const buscarMatchx = () => {
         } else {
             setVerificar(false);
         }
-    }, []);
+    }, [UserMatch.length]);
 
     useEffect(() => {
         async function fetchData() {
@@ -245,9 +308,7 @@ const buscarMatchx = () => {
     // Utilidades
     const hasMoreUsers = () => {
         return currentIndex < UserMatch.length;
-    };
-
-    const calculateAge = (birthDate) => {
+    };    const calculateAge = (birthDate) => {
         const today = new Date();
         const birth = new Date(birthDate);
         let age = today.getFullYear() - birth.getFullYear();
@@ -258,6 +319,68 @@ const buscarMatchx = () => {
         }
 
         return `, ${age}`;
+    };
+
+    // Funciones para el tutorial
+    const tutorialSteps = [
+        {
+            title: "¡Bienvenido a Descubre!",
+            description: "Aquí puedes conocer personas increíbles",
+            position: "center",
+            highlight: null
+        },
+        {
+            title: "Desliza hacia la derecha",
+            description: "Para dar 'Me gusta' a alguien que te interese",
+            position: "right",
+            highlight: "card",
+            gesture: "swipe-right"
+        },
+        {
+            title: "Desliza hacia la izquierda", 
+            description: "Para pasar al siguiente perfil",
+            position: "left",
+            highlight: "card",
+            gesture: "swipe-left"
+        },
+        {
+            title: "Toca las imágenes",
+            description: "Para ver más fotos del perfil",
+            position: "top",
+            highlight: "images",
+            gesture: "tap"
+        },
+        {
+            title: "Usa los botones",
+            description: "También puedes usar estos botones para decidir",
+            position: "bottom",
+            highlight: "buttons",
+            gesture: null
+        }
+    ];
+
+    const nextTutorialStep = () => {
+        if (tutorialStep < tutorialSteps.length - 1) {
+            setTutorialStep(tutorialStep + 1);
+        } else {
+            closeTutorial();
+        }
+    };
+
+    const prevTutorialStep = () => {
+        if (tutorialStep > 0) {
+            setTutorialStep(tutorialStep - 1);
+        }
+    };
+
+    const closeTutorial = () => {
+        setShowTutorial(false);
+        setTutorialStep(0);
+        localStorage.setItem('hasSeenMatchTutorial', 'true');
+    };
+
+    const skipTutorial = () => {
+        closeTutorial();
     };
 
     // Sistema de swipe premium - Touch handlers
@@ -496,14 +619,10 @@ const buscarMatchx = () => {
     };
 
     const handdleVerificar = () => {
-        setTimeout(() => navigate("../verificar"), 0);
-    };
+        setTimeout(() => navigate("../verificar-ine"), 0);
+    };    const user = UserMatch[currentIndex];
 
-    const user = UserMatch[currentIndex];
-
-    console.log("User:" + user)
-
-    const handleNext = () => {
+    console.log("User:" + user);const handleNext = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % user.profile_pic.length);
         }
@@ -513,6 +632,22 @@ const buscarMatchx = () => {
         if (user?.profile_pic) {
             setCurrentImageIndex((prevIndex) => (prevIndex - 1 + user.profile_pic.length) % user.profile_pic.length);
         }
+    };
+
+    // Funciones para el panel expandible de información
+    const handleImageTap = (e, user) => {
+        e.stopPropagation();
+        setSelectedUser(user);
+        setPanelAnimation('panel-slide-in');
+        setShowUserPanel(true);
+    };
+
+    const closeUserPanel = () => {
+        setPanelAnimation('panel-slide-out');
+        setTimeout(() => {
+            setShowUserPanel(false);
+            setSelectedUser(null);
+            setPanelAnimation('');        }, 300);
     };
 
     // Conditional returns after all hooks
@@ -557,17 +692,6 @@ const buscarMatchx = () => {
                         </button>
                     </div>
                 </div>
-
-                {verificar == false && (
-                    <div className="min-h-screen fixed inset-0 z-60 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                        <div className="text-center text-white">
-                            <h1 className="text-3xl font-bold">Aún no cuentas con tu perfil de acompañantes</h1>
-                            <p className="mt-2">¡Créalo ahora!.</p>
-                            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={handdleVerificar}>Crear</button>
-                        </div>
-                    </div>
-                )}
-
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box max-w-sm mx-auto bg-gray-50 rounded-3xl shadow-xl border-0 p-0 overflow-hidden">
                         {/* Header */}
@@ -910,18 +1034,22 @@ const buscarMatchx = () => {
                                         onMouseDown={stackIndex === 0 ? handleMouseDown : undefined}
                                         onMouseMove={stackIndex === 0 ? (e) => isDragging && handleMouseMove(e) : undefined}
                                         onMouseUp={stackIndex === 0 ? handleMouseUp : undefined}
-                                    >
-                                        {/* Imagen de perfil */}
+                                    >                                        {/* Imagen de perfil */}
                                         <div className="relative h-full">
-                                            <img
-                                                src={user?.profile_pic?.[currentImageIndex] || '/profile_empty.webp'}
-                                                alt={user?.nombre || 'Usuario'}
-                                                className="w-full h-full object-cover"
-                                                draggable={false}
-                                            />
+                                            <div 
+                                                className="w-full h-full cursor-pointer"
+                                                onClick={(e) => stackIndex === 0 && handleImageTap(e, user)}
+                                            >
+                                                <img
+                                                    src={user?.profile_pic?.[currentImageIndex] || '/profile_empty.webp'}
+                                                    alt={user?.nombre || 'Usuario'}
+                                                    className="w-full h-full object-cover"
+                                                    draggable={false}
+                                                />
+                                            </div>
 
                                             {/* Overlay gradiente más sutil */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none"></div>
 
                                             {/* Botones de navegación de imagen (solo en la primera tarjeta) */}
                                             {stackIndex === 0 && user?.profile_pic?.length > 1 && (
@@ -982,14 +1110,7 @@ const buscarMatchx = () => {
                                                         {user?.nombre}{user?.edad ? `, ${user.edad}` : (user?.fecha_nacimiento ? calculateAge(user.fecha_nacimiento) : '')}
                                                     </h2>
                                                 </div>
-                                                <button
-                                                    onClick={() => navigate('../verLike')}
-                                                    className="p-3 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300"
-                                                >
-                                                    <Sparkles className="w-5 h-5 text-white" />
-                                                </button>
                                             </div>
-
                                             {/* Preferencias del usuario */}
                                             <div className="flex flex-wrap gap-2 mb-3">
                                                 {user?.preferencias_evento?.slice(0, 3).map((pref, idx) => (
@@ -1047,43 +1168,62 @@ const buscarMatchx = () => {
                 </div>
             </div>
 
-            {/* Botones de acción flotantes premium - MEJORADOS */}
+            {/* Botones de acción flotantes premium - ADAPTADOS PARA WEB */}
             {hasMoreUsers() && (
-                <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
-                    <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
-                        {/* Botón Dislike - Más grande */}
-                        <button
-                            onClick={handleDislikeButton}
-                            disabled={isAnimating}
-                            className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        >
-                            <X className="w-8 h-8 text-white" />
-                        </button>
-
-                        {/* Botón Like - Más grande */}
-                        <button
-                            onClick={handleLikeButton}
-                            disabled={isAnimating}
-                            className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        >
-                            <Heart className="w-8 h-8 text-white" />
-                        </button>
+                <>
+                    {/* Mobile: botones flotantes */}
+                    <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center lg:hidden">
+                        <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
+                            <button
+                                onClick={handleDislikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <X className="w-8 h-8 text-white" />
+                            </button>
+                            <button
+                                onClick={handleLikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <Heart className="w-8 h-8 text-white" />
+                            </button>
+                        </div>
                     </div>
-                </div>
+                    {/* Desktop: botones debajo del stack */}
+                    <div className="hidden lg:flex justify-center mt-8">
+                        <div className="flex items-center gap-8 bg-white/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-2xl border border-white/40">
+                            <button
+                                onClick={handleDislikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <X className="w-8 h-8 text-white" />
+                            </button>
+                            <button
+                                onClick={handleLikeButton}
+                                disabled={isAnimating}
+                                className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                <Heart className="w-8 h-8 text-white" />
+                            </button>
+                        </div>
+                    </div>
+                </>
             )}
 
             {/* Modal de verificación premium */}
-            {verificar === false && (
-                <div className="fixed inset-0 z-70 flex items-center justify-center bg-[linear-gradient(to_bottom,rgba(40,120,250,0.7),rgba(110,79,249,0.7),rgba(188,81,246,0.7))] backdrop-blur-md">
-                    <div className="text-center text-white p-8 glass-premium rounded-3xl border border-white/30 max-w-md mx-4">
-                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CircleUserIcon className="w-10 h-10 text-white" />
+            {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 m-6 text-center shadow-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Users className="w-10 h-10 text-white" />
                         </div>
-                        <h1 className="text-3xl font-bold mb-4">Perfil Requerido</h1>
-                        <p className="text-white/90 mb-6">Aún no cuentas con tu perfil de acompañantes. ¡Créalo ahora y comienza a conectar!</p>
+                        <h2 className="text-2xl font-bold text-white mb-4">Perfil de Acompañante</h2>
+                        <p className="text-white/80 mb-6">Aún no cuentas con tu perfil de acompañante. ¡Créalo ahora y comienza a conectar!</p>
                         <button
-                            className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
-                            onClick={handdleVerificar}
+                            onClick={handleVerificar}
+                            className="bg-gradient-to-r from-pink-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold hover:from-pink-600 hover:to-violet-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
                             Crear Perfil
                         </button>
@@ -1092,13 +1232,314 @@ const buscarMatchx = () => {
             )}
 
             {/* Indicador de estado de conexión */}
-            <ConnectionStatus />
-
-            {/* Indicador offline en la parte superior derecha si hay datos offline */}
+            <ConnectionStatus />            {/* Indicador offline en la parte superior derecha si hay datos offline */}
             {isOffline && (
                 <div className="fixed top-4 right-4 z-40 bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">
                     <WifiOff className="w-4 h-4" />
                     <span className="text-sm font-medium">Modo Offline</span>
+                </div>
+            )}            {/* Tutorial de gestos */}
+            {showTutorial && (
+                <div className="fixed inset-0 z-50 tutorial-overlay">
+                    {/* Overlay con highlights */}
+                    <div className="relative w-full h-full">
+                        {/* Highlight de tarjeta */}
+                        {tutorialSteps[tutorialStep].highlight === 'card' && (
+                            <div className="absolute inset-x-6 top-32 bottom-40 border-4 border-white rounded-3xl tutorial-highlight shadow-2xl" />
+                        )}
+                        
+                        {/* Highlight de imágenes */}
+                        {tutorialSteps[tutorialStep].highlight === 'images' && (
+                            <div className="absolute inset-x-6 top-32 bottom-64 border-4 border-white rounded-3xl tutorial-highlight shadow-2xl" />
+                        )}
+                        
+                        {/* Highlight de botones */}
+                        {tutorialSteps[tutorialStep].highlight === 'buttons' && (
+                            <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-80 h-20 border-4 border-white rounded-full tutorial-highlight shadow-2xl lg:hidden" />
+                        )}
+
+                        {/* Animaciones de gestos */}
+                        {tutorialSteps[tutorialStep].gesture === 'swipe-right' && (
+                            <div className="absolute inset-x-6 top-32 bottom-40 flex items-center justify-center tutorial-gesture-indicator">
+                                <div className="tutorial-swipe-gesture">
+                                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-2xl tutorial-tap">
+                                        <Heart className="w-10 h-10 text-white fill-current" />
+                                    </div>
+                                    <div className="mt-4 text-center">
+                                        <div className="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                            <span className="mr-2">👉</span>
+                                            Desliza hacia la derecha
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {tutorialSteps[tutorialStep].gesture === 'swipe-left' && (
+                            <div className="absolute inset-x-6 top-32 bottom-40 flex items-center justify-center tutorial-gesture-indicator">
+                                <div className="tutorial-swipe-gesture">
+                                    <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl tutorial-tap">
+                                        <X className="w-10 h-10 text-white" />
+                                    </div>
+                                    <div className="mt-4 text-center">
+                                        <div className="inline-flex items-center bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                            <span className="mr-2">👈</span>
+                                            Desliza hacia la izquierda
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {tutorialSteps[tutorialStep].gesture === 'tap' && (
+                            <div className="absolute inset-x-6 top-40 bottom-64 flex items-center justify-center tutorial-gesture-indicator">
+                                <div className="tutorial-tap">
+                                    <div className="w-16 h-16 bg-blue-500 rounded-full opacity-90 shadow-2xl"></div>
+                                </div>
+                                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                                    <div className="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                        <span className="mr-2">👆</span>
+                                        Toca para ver más fotos
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Panel de tutorial */}
+                    <div className={`absolute ${tutorialSteps[tutorialStep].position === 'center' ? 'inset-x-6 top-1/2 transform -translate-y-1/2' :
+                        tutorialSteps[tutorialStep].position === 'bottom' ? 'bottom-6 left-6 right-6' :
+                        tutorialSteps[tutorialStep].position === 'top' ? 'top-32 left-6 right-6' :
+                        tutorialSteps[tutorialStep].position === 'left' ? 'top-1/3 left-6 right-20' :
+                        'top-1/3 right-6 left-20'} 
+                        tutorial-panel rounded-3xl p-6 shadow-2xl tutorial-slide-in`}>
+                        
+                        {/* Progress indicator */}
+                        <div className="flex justify-center mb-4">
+                            <div className="flex space-x-2">
+                                {tutorialSteps.map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                                            index === tutorialStep 
+                                                ? 'bg-gradient-to-r from-pink-500 to-purple-500 scale-125' 
+                                                : index < tutorialStep
+                                                ? 'bg-green-400'
+                                                : 'bg-gray-300'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="text-center mb-6">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                                {tutorialSteps[tutorialStep].title}
+                            </h3>
+                            <p className="text-gray-600 text-lg leading-relaxed">
+                                {tutorialSteps[tutorialStep].description}
+                            </p>
+                        </div>
+
+                        {/* Navigation buttons */}
+                        <div className="flex justify-between items-center">
+                            <button
+                                onClick={skipTutorial}
+                                className="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors font-medium"
+                            >
+                                Saltar tutorial
+                            </button>
+
+                            <div className="flex space-x-3">
+                                {tutorialStep > 0 && (
+                                    <button
+                                        onClick={prevTutorialStep}
+                                        className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl transition-all duration-300 font-medium shadow-sm hover:shadow-md"
+                                    >
+                                        Anterior
+                                    </button>
+                                )}
+                                <button
+                                    onClick={nextTutorialStep}
+                                    className="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                    {tutorialStep === tutorialSteps.length - 1 ? '¡Comenzar! 🚀' : 'Siguiente'}
+                                </button>
+                            </div>
+                        </div>                    </div>
+                </div>
+            )}
+
+            {/* Panel expandible de información de usuario */}
+            {showUserPanel && selectedUser && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm">
+                    <div className={`w-full max-w-lg bg-white rounded-t-3xl shadow-2xl border-t border-gray-200 max-h-[85vh] overflow-hidden ${panelAnimation}`}>
+                        {/* Header del panel */}
+                        <div className="relative">
+                            {/* Imagen de fondo */}
+                            <div className="h-48 overflow-hidden">
+                                <img
+                                    src={selectedUser?.profile_pic?.[0] || '/profile_empty.webp'}
+                                    alt={selectedUser?.nombre || 'Usuario'}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            </div>
+                            
+                            {/* Botón cerrar */}
+                            <button
+                                onClick={closeUserPanel}
+                                className="absolute top-4 right-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all duration-300"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            {/* Información básica superpuesta */}
+                            <div className="absolute bottom-4 left-6 right-6 text-white">                                <h2 className="text-3xl font-bold mb-2">
+                                    {selectedUser?.nombre}
+                                    {selectedUser?.edad ? `, ${selectedUser.edad}` : 
+                                     (selectedUser?.fecha_nacimiento ? calculateAge(selectedUser.fecha_nacimiento) : '')}
+                                </h2>
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <span className="text-sm text-gray-200">Activo recientemente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contenido scrolleable */}
+                        <div className="p-6 overflow-y-auto max-h-[calc(85vh-12rem)]">
+                            {/* Galería de fotos */}
+                            {selectedUser?.profile_pic && selectedUser.profile_pic.length > 1 && (
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Fotos</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {selectedUser.profile_pic.map((pic, index) => (
+                                            <div key={index} className="aspect-square rounded-xl overflow-hidden">
+                                                <img
+                                                    src={pic}
+                                                    alt={`Foto ${index + 1}`}
+                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Descripción/Bio */}
+                            {selectedUser?.bio && (
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Acerca de mí</h3>
+                                    <p className="text-gray-600 leading-relaxed">{selectedUser.bio}</p>
+                                </div>
+                            )}
+
+                            {/* Información básica */}
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Información básica</h3>
+                                <div className="space-y-3">
+                                    {selectedUser?.edad && (
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <Calendar className="w-4 h-4 text-blue-600" />
+                                            </div>
+                                            <span className="text-gray-700">{selectedUser.edad} años</span>
+                                        </div>
+                                    )}
+                                    {selectedUser?.ubicacion && (
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <Globe className="w-4 h-4 text-green-600" />
+                                            </div>
+                                            <span className="text-gray-700">{selectedUser.ubicacion}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Preferencias de eventos */}
+                            {selectedUser?.preferencias_evento && selectedUser.preferencias_evento.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Le gustan estos eventos</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedUser.preferencias_evento.map((pref, idx) => (
+                                            <span 
+                                                key={idx} 
+                                                className="bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 px-3 py-2 rounded-full text-sm font-medium border border-pink-200"
+                                            >
+                                                {pref}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Intereses generales */}
+                            {selectedUser?.preferencias_generales && selectedUser.preferencias_generales.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Intereses</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedUser.preferencias_generales.map((interes, idx) => (
+                                            <span 
+                                                key={idx} 
+                                                className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-3 py-2 rounded-full text-sm font-medium border border-blue-200"
+                                            >
+                                                {interes}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Eventos en común */}
+                            {selectedUser?.eventos_en_comun > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Conexión</h3>
+                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                                <Calendar className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-green-800">
+                                                    {selectedUser.eventos_en_comun} eventos en común
+                                                </p>
+                                                <p className="text-sm text-green-600">
+                                                    Tienen gustos similares en eventos
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Botones de acción */}
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    onClick={() => {
+                                        closeUserPanel();
+                                        handleDislikeButton();
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:from-gray-200 hover:to-gray-300 transition-all duration-300 flex items-center justify-center space-x-2"
+                                >
+                                    <X className="w-5 h-5" />
+                                    <span>Pasar</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        closeUserPanel();
+                                        handleLikeButton();
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                    <Heart className="w-5 h-5" />
+                                    <span>Me gusta</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

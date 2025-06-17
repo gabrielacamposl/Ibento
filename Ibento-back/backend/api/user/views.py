@@ -47,7 +47,7 @@ from api.services.notification_service import NotificationService
 # Importar modelos 
 from api.models import Usuario, Evento, TokenBlackList
 from api.models import Interaccion, Matches,Bloqueo, Conversacion, Mensaje
-from api.models import FCMToken
+from api.models import FCMToken, Metricas
 from api.models import CategoriasPerfil
 # Importar Serializers
 from .serializers import (UsuarioSerializer,   # Serializers para el auth & register
@@ -759,6 +759,12 @@ def delete_profile_picture(request, photo_url):
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def ine_validation_view(request):
+
+    #Metricas
+    metricas, created = Metricas.objects.get_or_create(_id=1)
+    metricas.num_ine_checked += 1
+    metricas.save()
+
     ine_front = request.FILES.get('ine_front')
     ine_back = request.FILES.get('ine_back')
     
@@ -815,7 +821,11 @@ def ine_validation_view(request):
             del front_b64
         if 'back_b64' in locals():
             del back_b64
-        
+    
+    #Metricas
+    metricas.num_ine_validated += 1
+    metricas.save()
+
     return Response({
             "success": True,
             "mensaje_ine": "Tu INE ha sido validada exitosamente en el padrón electoral.",
@@ -831,6 +841,12 @@ def ine_validation_view(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def face_validation_view(request):
+
+    #Metricas
+    metricas, created = Metricas.objects.get_or_create(_id=1)
+    metricas.num_face_checked += 1
+    metricas.save()
+
     ine_front = request.FILES.get('ine_front')
     selfie = request.FILES.get('selfie')
     
@@ -896,8 +912,12 @@ def face_validation_view(request):
                 "error": "Error temporal en la validación de rostro. Intenta nuevamente.",
                 "codigo": "FACE_SERVICE_ERROR"
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE) 
-              
-        # RESPUESTA EXITOSA
+                # RESPUESTA EXITOSA
+
+        #Metricas
+        metricas.num_face_validated += 1
+        metricas.save()
+        
         return Response({
             "success": True,
             "mensaje_rostro": "Tu identidad ha sido verificada correctamente.",
@@ -1002,14 +1022,18 @@ def sugerencia_usuarios(request):
     print(f"Age Range: {age_range}")
 
     #Filtrar por genero y edad si se especifica
-    if gender != None and gender != 'Todos':
+    if gender != None:
         if gender == 'Hombre':
             g = 'H'
         elif gender == 'Mujer':
             g = 'M'
-        else: 
+        elif gender == 'Otro': 
             g = 'O'
-        candidatos = candidatos.filter(gender = g)
+        else:
+            g = None
+        
+        if g is not None:
+            candidatos = candidatos.filter(gender = g)
     
     if age_range is not None and min_age is not None and max_age is not None:
         from datetime import date
@@ -1059,26 +1083,6 @@ def sugerencia_usuarios(request):
             candidatos = candidatos.exclude(_id__in=ids_objeto)
 
     if us_modo_busqueda == 'global':
-
-        # if interacciones_realizadas:
-        #     ids_objeto = [ObjectId(id_str) for id_str in interacciones_realizadas if id_str]
-        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
-        
-        # if usuarios_bloqueados:
-        #     ids_objeto = [ObjectId(id_str) for id_str in usuarios_bloqueados if id_str]
-        #     candidatos = candidatos.exclude(_id__in=ids_objeto)
-        
-        # if usuarios_con_match:
-        #     todos_ids_match = []
-        #     for usuario_b_id, usuario_a_id in usuarios_con_match:
-        #         if str(usuario_a_id) != str(us_id):
-        #             todos_ids_match.append(usuario_a_id)
-        #         if str(usuario_b_id) != str(us_id):
-        #             todos_ids_match.append(usuario_b_id)
-            
-        #     if todos_ids_match:
-        #         ids_objeto = [ObjectId(id_str) for id_str in todos_ids_match if id_str]
-        #         candidatos = candidatos.exclude(_id__in=ids_objeto)
         pass
 
     if us_modo_busqueda == 'evento':
@@ -1139,14 +1143,6 @@ def sugerencia_usuarios(request):
 
     print("IDs ordenados por compatibilidad:", ids_ordenados)
 
-    # Obtener usuarios manteniendo el orden
-    # usuarios_ordenados = []
-    # for user_id in ids_ordenados:
-    #     try:
-    #         usuario = candidatos.get(_id=user_id)
-    #         usuarios_ordenados.append(usuario)
-    #     except Usuario.DoesNotExist:
-    #         continue
     usuarios_dict = {str(u._id): u for u in candidatos.filter(_id__in=ids_ordenados)}
     usuarios_ordenados = [usuarios_dict[str(user_id)] for user_id in ids_ordenados if str(user_id) in usuarios_dict]
 
@@ -1169,6 +1165,7 @@ def matches(request):
     usuario_origen = request.user
     usuario_destino_id = request.data.get("usuario_destino")
     tipo_interaccion = request.data.get("tipo_interaccion")
+
 
     if tipo_interaccion not in ["like", "dislike"]:
         return Response({"error": "Tipo de interacción inválido."}, status=status.HTTP_400_BAD_REQUEST)
@@ -1265,6 +1262,45 @@ def matches(request):
         "is_match": False
     }, status=200)
 
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def generar_compatibilidades(request):
+
+    matches = Matches.objects.all()
+
+    for match in matches:
+        # Obtener las preferencias de los usuarios en el match
+        preferencias_a = match.usuario_a.preferencias_generales
+        preferencias_b = match.usuario_b.preferencias_generales
+
+        # Calcular la compatibilidad
+        compatibilidad = recomendacion_de_usuarios(preferencias_a, preferencias_b)
+
+        match.compatibilidad = compatibilidad
+        match.save()
+
+    return Response({"message": "Compatibilidades generadas correctamente"}, status=200)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def generar_compatibilidades_interacciones(request):
+    
+    interacciones = Interaccion.objects.all()
+    for interaccion in interacciones:
+        # Obtener las preferencias de los usuarios en la interacción
+        preferencias_a = interaccion.usuario_origen.preferencias_generales
+        preferencias_b = interaccion.usuario_destino.preferencias_generales
+
+        # Calcular la compatibilidad
+        compatibilidad = recomendacion_de_usuarios(preferencias_a, preferencias_b)
+
+        interaccion.compatibilidad = compatibilidad
+        interaccion.save()
+
+    return Response({"message": "Compatibilidades generadas correctamente"}, status=200)
+
+
 # ------- Personas que me dieron like : *Futuros acompañantes*
 
 @api_view(["GET"])
@@ -1285,7 +1321,7 @@ def personas_que_me_dieron_like(request):
             u = interaccion.usuario_origen
 
             # Calcular edad si hay birthday
-            edad = None
+            edad = 18
             if u.birthday:
                 today = date.today()
                 birthday = u.birthday
@@ -1301,17 +1337,17 @@ def personas_que_me_dieron_like(request):
                 else:
                     edad = None
 
-                # Agregar datos del usuario
-                usuarios.append({
-                    "_id": str(u._id),
-                    "nombre": u.nombre,
-                    "apellido": u.apellido,
-                    "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
-                    "preferencias_evento": u.preferencias_evento or [],
-                    "preferencias_generales": u.preferencias_generales or [],
-                    "edad": edad,
-                    "descripcion": u.description or "",
-                })
+        # Agregar datos del usuario
+            usuarios.append({
+                "_id": str(u._id),
+                "nombre": u.nombre,
+                "apellido": u.apellido,
+                "profile_pic": u.profile_pic[0] if u.profile_pic and len(u.profile_pic) > 0 else None,
+                "preferencias_evento": u.preferencias_evento or [],
+                "preferencias_generales": u.preferencias_generales or [],
+                "edad": edad,
+                "descripcion": u.description or "",
+            })   
             
         return Response(usuarios, status=200)
 
@@ -2757,6 +2793,7 @@ def eliminar_cuenta(request):
         logger.error(f"Error eliminando cuenta: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 #update with True is_ine_validated and is_validated_camera
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2776,3 +2813,39 @@ def update_validated_status(request):
     except Exception as e:
         logger.error(f"Error updating validation status: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Notificaciones iOS
+@api_view(['POST'])
+def send_notification(request):
+    user = request.user
+    notification_type = request.data.get('type')
+    title = request.data.get('title')
+    body = request.data.get('body')
+    data = request.data.get('data', {})
+    
+    # Obtener token FCM del usuario
+    try:
+        fcm_token = user.fcm_token  # O como tengas guardado el token
+        
+        if fcm_token:
+            # Enviar con Firebase Admin SDK
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                data={
+                    'type': notification_type,
+                    **data
+                },
+                token=fcm_token
+            )
+            
+            response = messaging.send(message)
+            return Response({'success': True, 'message_id': response})
+        else:
+            return Response({'error': 'No FCM token found'}, status=400)
+            
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+

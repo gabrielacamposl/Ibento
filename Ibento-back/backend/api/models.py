@@ -90,13 +90,14 @@ class Interaccion(models.Model):
     usuario_origen = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="interacciones_origen", to_field="_id")
     usuario_destino = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="interacciones_destino", to_field="_id")
     tipo_interaccion = models.CharField(max_length=10, choices=TIPO_INTERACCION)
+    compatibilidad = models.FloatField(default=0.0)
     fecha_interaccion = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         unique_together = ('usuario_origen', 'usuario_destino')
         
     def __str__(self):
-        return f"{self.usuario_origen.email} → {self.usuario_objetivo.email}: {self.tipo_interaccion}"
+        return f"{self.usuario_origen.email} → {self.usuario_destino.email}: {self.tipo_interaccion}"
     
 
 # --------- Matches de acompañantes
@@ -104,6 +105,7 @@ class Matches (models.Model):
     _id = models.CharField(primary_key=True, max_length=50, default= generate_objectid)
     usuario_a = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="usuario_a", to_field= "_id")
     usuario_b = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name = "usuario_b", to_field= "_id")
+    compatibilidad = models.FloatField(default=0.0)
     fecha_match = models.DateTimeField(auto_now_add = True)
 
     class Meta:
@@ -114,15 +116,15 @@ class Matches (models.Model):
             )
         ]
 
-    def save(self, *args, **kwargs):
-        # Validar duplicados en ambos sentidos
-        if Matches.objects.filter(
-            Q(usuario_a=self.usuario_a, usuario_b=self.usuario_b) |
-            Q(usuario_a=self.usuario_b, usuario_b=self.usuario_a)
-        ).exists():
-            raise ValidationError("Este match ya existe entre estos usuarios.")
+    # def save(self, *args, **kwargs):
+    #     # Validar duplicados en ambos sentidos
+    #     if Matches.objects.filter(
+    #         Q(usuario_a=self.usuario_a, usuario_b=self.usuario_b) |
+    #         Q(usuario_a=self.usuario_b, usuario_b=self.usuario_a)
+    #     ).exists():
+    #         raise ValidationError("Este match ya existe entre estos usuarios.")
 
-        super().save(*args, **kwargs)
+    #     super().save(*args, **kwargs)
 
     def _str_ (self):
         return f"Match entre {self.usuario_a.nombre} y {self.usuario_b.nombre}"
@@ -239,3 +241,20 @@ class FCMToken(models.Model):
     
     def __str__(self):
         return f"{self.usuario.nombre} - {self.device_type}"
+
+#----------------------------------- MODELO PARA LAS METRICAS DE USO ----------------------------------------
+
+class Metricas(models.Model):
+    _id = models.CharField(primary_key=True, max_length=50, default=generate_objectid, editable= False)
+    num_ine_checked = models.IntegerField(default=0)
+    num_ine_validated = models.IntegerField(default=0)
+    num_face_checked = models.IntegerField(default=0)
+    num_face_validated = models.IntegerField(default=0)
+    num_matches = models.IntegerField(default=0)
+    num_interactions = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'metricas'
+    
+    def __str__(self):
+        return f"Metricas: {self._id} - INE Checked: {self.num_ine_checked}, INE Validated: {self.num_ine_validated}, Face Checked: {self.num_face_checked}, Face Validated: {self.num_face_validated}, Matches: {self.num_matches}, Interactions: {self.num_interactions}"

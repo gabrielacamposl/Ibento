@@ -5,7 +5,7 @@ import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
 
-const VerifyProfile = () => {
+const FaceValidation = () => {
     const navigate = useNavigate();
     const webcamRef = useRef(null);
     const toast = useRef(null);
@@ -31,7 +31,8 @@ const VerifyProfile = () => {
     const [canRetakeINE, setCanRetakeINE] = useState(false);
     const [showVerifyLaterScreen, setShowVerifyLaterScreen] = useState(false);
 
-    const [ineImages, setIneImages] = useState([null, null]);
+    // Solo necesitamos una imagen (frontal)
+    const [ineImages, setIneImages] = useState([null]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [message, setMessage] = useState([]);
     const [capturedPhoto, setCapturedPhoto] = useState(null);
@@ -43,12 +44,10 @@ const VerifyProfile = () => {
         activeIndex: 0,
     });
 
+    // Solo 2 pasos: INE frontal y validación de rostro
     const items = [
-        { label: 'Paso 1' },
-        { label: 'Paso 2' },
-        { label: 'Paso 3' },
-        { label: 'Paso 4' },
-        { label: 'Paso 5' },
+        { label: 'INE Frontal' },
+        { label: 'Validación' },
     ];
 
     useEffect(() => {
@@ -61,10 +60,10 @@ const VerifyProfile = () => {
 
     // ===== FUNCIONES SIMPLIFICADAS PARA INE =====
 
-    const startIneCapture = (index) => {
+    const startIneCapture = () => {
         setIneCapture({
             showCamera: true,
-            activeIndex: index,
+            activeIndex: 0,
         });
     };
 
@@ -74,18 +73,10 @@ const VerifyProfile = () => {
         const imageSrc = ineWebcamRef.current.getScreenshot();
         
         // Convertir a File y guardar directamente
-        const file = dataURLtoFile(
-            imageSrc,
-            `ine_${ineCapture.activeIndex === 0 ? 'frontal' : 'trasera'}.jpg`
-        );
+        const file = dataURLtoFile(imageSrc, 'ine_frontal.jpg');
 
-        const newImages = [...ineImages];
-        newImages[ineCapture.activeIndex] = file;
-        setIneImages(newImages);
-
-        const updatedUserINE = [...user.ine];
-        updatedUserINE[ineCapture.activeIndex] = file;
-        setUser(prev => ({ ...prev, ine: updatedUserINE }));
+        setIneImages([file]);
+        setUser(prev => ({ ...prev, ine: [file] }));
 
         // Cerrar cámara
         setIneCapture({
@@ -96,7 +87,7 @@ const VerifyProfile = () => {
         showSuccess('Imagen de INE guardada correctamente');
     };
 
-    const handleGallerySelection = (e, index) => {
+    const handleGallerySelection = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -113,13 +104,8 @@ const VerifyProfile = () => {
         }
 
         // Guardar directamente la imagen seleccionada
-        const newImages = [...ineImages];
-        newImages[index] = file;
-        setIneImages(newImages);
-
-        const updatedUserINE = [...user.ine];
-        updatedUserINE[index] = file;
-        setUser(prev => ({ ...prev, ine: updatedUserINE }));
+        setIneImages([file]);
+        setUser(prev => ({ ...prev, ine: [file] }));
 
         // Limpiar el input
         e.target.value = '';
@@ -135,67 +121,10 @@ const VerifyProfile = () => {
         showInfo('Captura cancelada');
     };
 
-    const handleImageDeleteINE = (index) => {
-        const newImages = [...ineImages];
-        newImages[index] = null;
-        setIneImages(newImages);
-
-        const updatedUserINE = [...user.ine];
-        updatedUserINE[index] = null;
-        setUser(prev => ({ ...prev, ine: updatedUserINE }));
-
+    const handleImageDeleteINE = () => {
+        setIneImages([null]);
+        setUser(prev => ({ ...prev, ine: [] }));
         showInfo('Imagen eliminada');
-    };
-
-    // ===== VALIDACIÓN DE INE =====
-    const handleIneValidation = async () => {
-        if (!ineImages[0] || !ineImages[1]) {
-            showWarn('Debes subir ambas imágenes de la INE');
-            return;
-        }
-
-        setValidatingIne(true);
-
-        try {
-            const formData = new FormData();
-            formData.append('ine_front', ineImages[0]);
-            formData.append('ine_back', ineImages[1]);
-
-            const response = await api.post('validar-ine/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            const data = response.data;
-
-            if (data.success && data.ine_validada) {
-                setMessage('¡INE validada exitosamente! Ahora valida tu identidad.');
-                try {
-                    setStepsCompleted(prev => ({ ...prev, ine: true }));
-                    showSuccess("¡INE validada exitosamente! Ahora valida tu identidad.");
-                    setActiveIndex(1);
-                } catch (uploadError) {
-                    console.error("Error al subir datos después de validación:", uploadError);
-                    setMessage(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    showWarn(`Validación exitosa pero error al subir datos: ${uploadError.message}`);
-                    setActiveIndex(1);
-                }
-            } else {
-                setMessage(data.error || 'La validación falló. Revisa las imágenes.');
-                showError(data.error || 'La validación falló. Revisa las imágenes.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            const errorMessage = error.response?.data?.error ||
-                error.response?.data?.message ||
-                error.message ||
-                'Error desconocido';
-            setMessage(`Error: ${errorMessage}`);
-            showError(`Error: ${errorMessage}`);
-        } finally {
-            setValidatingIne(false);
-        }
     };
 
     // ===== VALIDACIÓN DE ROSTRO =====
@@ -338,7 +267,7 @@ const VerifyProfile = () => {
     // ===== FUNCIÓN PARA CONTINUAR SIN VERIFICAR =====
     const continueWithoutVerification = () => {
         showInfo('Puedes verificar tu perfil más tarde desde la configuración');
-        navigate("../descripcion");
+        navigate("../eventos");
     };
 
     // ===== CONFIGURACIONES DE CÁMARA =====
@@ -388,83 +317,31 @@ const VerifyProfile = () => {
         console.log('Subiendo todos los datos...');
     };
 
-
-    // Función para saltar la validación y actualizar el estado en el backend
-    const validarSkip = async () => {
-        const token = localStorage.getItem("access");
-        try {
-            // Aquí mandamos los campos que espera tu endpoint
-            const response = await api.post(
-                'validar/',
-                {
-                    is_ine_validated: true,
-                    is_validated_camera: true,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                }
-            );
-
-            if (response.status === 200) {
-                showSuccess('Validación saltada exitosamente');
-                setTimeout(() => {
-                    navigate('../descripcion');
-                }, 1000);
-            } else {
-                showError('Error al saltar la validación: ' + (response.data?.error || ''));
-            }
-        } catch (error) {
-            console.error('Error al saltar validación:', error);
-            showError('Error al saltar validación: ' + (error.response?.data?.error || error.message));
-        }
-    };
-
-    
-
     // ===== PANTALLA DE VERIFICAR MÁS TARDE =====
     if (showVerifyLaterScreen) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center p-4">
                 <div className="glass-premium rounded-3xl p-8 max-w-md w-full text-center">
-                    <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl w-fit mx-auto mb-6">
-                        <Clock className="w-12 h-12 text-white" />
+                    <div className="p-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl w-fit mx-auto mb-6">
+                        <Clock className="w-8 h-8 text-white" />
                     </div>
-                    
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                        Verificar más tarde
-                    </h2>
-                    
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                        Has agotado tus 3 intentos de verificación facial. No te preocupes, puedes verificar tu perfil más tarde desde la configuración de tu cuenta.
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Verificación más tarde</h2>
+                    <p className="text-gray-600 mb-6">
+                        Has agotado los intentos de verificación. Puedes intentar nuevamente más tarde o continuar sin verificar.
                     </p>
-                    
-                    <div className="glass-premium rounded-2xl p-4 mb-6 border-l-4 border-blue-500">
-                        <div className="flex items-center justify-center mb-2">
-                            <AlertTriangle className="w-5 h-5 text-blue-500 mr-2" />
-                            <span className="font-semibold text-blue-700">Importante</span>
-                        </div>
-                        <p className="text-sm text-blue-600">
-                            Tu perfil tendrá verificación pendiente hasta que completes este proceso.
-                        </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={continueWithoutVerification}
+                            className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                        >
+                            Continuar sin verificar
+                        </button>
                     </div>
-                    
-                    <button
-                        onClick={continueWithoutVerification}
-                        className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
-                    >
-                        Continuar con mi perfil
-                    </button>
-                    
-                    <p className="text-xs text-gray-500 mt-4">
-                        Podrás intentar nuevamente en 24 horas
-                    </p>
                 </div>
+                <Toast ref={toast} position="bottom-center" />
             </div>
         );
     }
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
@@ -484,7 +361,7 @@ const VerifyProfile = () => {
                         </div>
                         <div>
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                                Verificación
+                                Verificación Facial
                             </h1>
                             <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
                         </div>
@@ -512,49 +389,35 @@ const VerifyProfile = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-premium rounded-3xl p-6 mb-6">
 
-                        {/* STEP 1: INE VERIFICATION SIMPLIFICADO */}
+                        {/* STEP 1: INE FRONTAL */}
                         {activeIndex === 0 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
                                     <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl w-fit mx-auto mb-4">
                                         <Shield className="w-8 h-8 text-white" />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifica tu identidad</h2>
-                                    <p className="text-gray-600">Captura o selecciona fotos claras de ambos lados de tu INE</p>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Sube tu INE</h2>
+                                    <p className="text-gray-600">Solo necesitamos la parte frontal de tu INE</p>
                                 </div>
 
-                                {/* Modal de Cámara Simplificado */}
+                                {/* Cámara para capturar INE */}
                                 {ineCapture.showCamera && (
-                                    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                                        <div className="bg-white rounded-3xl p-6 max-w-md w-full">
-                                            <div className="text-center mb-4">
-                                                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                                                    Capturar INE {ineCapture.activeIndex === 0 ? 'Frontal' : 'Trasera'}
-                                                </h3>
-                                                <p className="text-gray-600 text-sm">
-                                                    Centra tu INE dentro del recuadro
-                                                </p>
-                                            </div>
+                                    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                                        <div className="glass-premium rounded-3xl p-6 max-w-md w-full">
+                                            <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                                                Capturar INE Frontal
+                                            </h3>
 
                                             <div className="relative mb-6">
-                                                <div className="aspect-[3/2] bg-gray-100 rounded-2xl overflow-hidden relative">
-                                                    <Webcam
-                                                        ref={ineWebcamRef}
-                                                        audio={false}
-                                                        screenshotFormat="image/jpeg"
-                                                        videoConstraints={ineVideoConstraints}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <div className="w-[80%] h-[70%] border-4 rounded-2xl shadow-lg">
-                                                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
-                                                                Centra tu INE aquí
-                                                            </div>
-                                                            {/* <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-yellow-400"></div>
-                                                            <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-yellow-400"></div>
-                                                            <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-yellow-400"></div>
-                                                            <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-yellow-400"></div> */}
-                                                        </div>
+                                                <div className="glass-premium rounded-2xl p-4 shadow-2xl">
+                                                    <div className="relative rounded-xl overflow-hidden aspect-[3/2] bg-gray-100">
+                                                        <Webcam
+                                                            ref={ineWebcamRef}
+                                                            audio={false}
+                                                            screenshotFormat="image/jpeg"
+                                                            videoConstraints={ineVideoConstraints}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -581,71 +444,69 @@ const VerifyProfile = () => {
                                     </div>
                                 )}
 
-                                {/* Grid de imágenes INE */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {Array.from({ length: 2 }).map((_, index) => (
-                                        <div key={index} className="glass-premium rounded-2xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                                                {index === 0 ? 'Parte frontal' : 'Parte trasera'}
-                                            </h3>
+                                {/* Imagen INE frontal */}
+                                <div className="max-w-md mx-auto">
+                                    <div className="glass-premium rounded-2xl p-6">
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                                            Parte frontal de tu INE
+                                        </h3>
 
-                                            <div className="relative w-full aspect-[3/2] border-2 border-dashed border-purple-200 rounded-2xl overflow-hidden hover:border-purple-400 transition-colors duration-300 mb-4">
-                                                {ineImages[index] ? (
-                                                    <>
-                                                        <img
-                                                            src={URL.createObjectURL(ineImages[index])}
-                                                            alt={`INE ${index === 0 ? 'frontal' : 'trasera'}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        <button
-                                                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
-                                                            onClick={() => handleImageDeleteINE(index)}
-                                                            type="button"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                        <div className="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1">
-                                                            <CheckCircle className="w-3 h-3" />
-                                                            <span>Imagen cargada</span>
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <div className="w-full h-full flex flex-col items-center justify-center text-purple-600">
-                                                        <Upload className="w-8 h-8 mb-2" />
-                                                        <span className="text-sm font-medium text-center px-4">
-                                                            Agregar {index === 0 ? 'frontal' : 'trasera'}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {!ineImages[index] && (
-                                                <div className="flex space-x-3">
+                                        <div className="relative w-full aspect-[3/2] border-2 border-dashed border-purple-200 rounded-2xl overflow-hidden hover:border-purple-400 transition-colors duration-300 mb-4">
+                                            {ineImages[0] ? (
+                                                <>
+                                                    <img
+                                                        src={URL.createObjectURL(ineImages[0])}
+                                                        alt="INE frontal"
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                     <button
-                                                        onClick={() => startIneCapture(index)}
-                                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
+                                                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                                        onClick={handleImageDeleteINE}
                                                         type="button"
                                                     >
-                                                        <Camera className="w-4 h-4" />
-                                                        <span className="text-sm">Cámara</span>
+                                                        <X className="w-4 h-4" />
                                                     </button>
-
-                                                    <label className="flex-1 cursor-pointer">
-                                                        <div className="px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                                            <Image className="w-4 h-4" />
-                                                            <span className="text-sm">Galería</span>
-                                                        </div>
-                                                        <input
-                                                            type="file"
-                                                            className="hidden"
-                                                            accept="image/*"
-                                                            onChange={(e) => handleGallerySelection(e, index)}
-                                                        />
-                                                    </label>
+                                                    <div className="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1">
+                                                        <CheckCircle className="w-3 h-3" />
+                                                        <span>Imagen cargada</span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center text-purple-600">
+                                                    <Upload className="w-8 h-8 mb-2" />
+                                                    <span className="text-sm font-medium text-center px-4">
+                                                        Agregar INE frontal
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
-                                    ))}
+
+                                        {!ineImages[0] && (
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    onClick={startIneCapture}
+                                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
+                                                    type="button"
+                                                >
+                                                    <Camera className="w-4 h-4" />
+                                                    <span className="text-sm">Cámara</span>
+                                                </button>
+
+                                                <label className="flex-1 cursor-pointer">
+                                                    <div className="px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                                                        <Image className="w-4 h-4" />
+                                                        <span className="text-sm">Galería</span>
+                                                    </div>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        onChange={handleGallerySelection}
+                                                    />
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {message && (
@@ -665,16 +526,10 @@ const VerifyProfile = () => {
                                     </div>
                                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Verificación facial</h2>
                                     <p className="text-gray-600">Centra tu cara para verificar que la INE sea tuya</p>
-                                    
-                                    {/* Contador de intentos */}
-                                    <div className="mt-4 inline-flex items-center space-x-2 bg-blue-100 px-3 py-1 rounded-full">
-                                        <span className="text-blue-600 text-sm font-medium">
-                                            Intento {validationAttempts + 1} de 3
-                                        </span>
-                                    </div>
                                 </div>
 
                                 <div className="flex flex-col items-center space-y-6">
+                                    {/* Camera/Photo Container */}
                                     <div className="relative">
                                         <div className="glass-premium rounded-3xl p-4 shadow-2xl">
                                             <div className="relative rounded-2xl overflow-hidden w-80 h-96 bg-gray-100">
@@ -794,6 +649,7 @@ const VerifyProfile = () => {
 
                     </div>
 
+                    {/* Navigation Buttons */}
                     <div className="mt-8 flex justify-center space-x-4 w-full mb-20">
                         <button
                             onClick={() => setActiveIndex(prev => prev - 1)}
@@ -804,36 +660,16 @@ const VerifyProfile = () => {
                             Anterior
                         </button>
 
-
-                        <button
-                            onClick={() => validarSkip()}
-                            
-                            className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
-                            type="button"
-                        >
-                            Saltar Paso
-                        </button>
-
                         {activeIndex === 0 ? (
                             <button
-                                onClick={handleIneValidation}
-                                disabled={validatingIne}
-                                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                                onClick={() => setActiveIndex(1)}
+                                disabled={!ineImages[0]}
+                                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                                 type="button"
                             >
-                                {validatingIne ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Validando...
-                                    </div>
-                                ) : (
-                                    'Validar INE'
-                                )}
+                                Siguiente
                             </button>
-                        ) : activeIndex === 1 ? (
+                        ) : (
                             <button
                                 onClick={handleValidacionRostro}
                                 disabled={validatingFace || !capturedPhoto || validationAttempts >= 3}
@@ -852,7 +688,7 @@ const VerifyProfile = () => {
                                     'Validar Identidad'
                                 )}
                             </button>
-                        ) : null}
+                        )}
                     </div>
                 </div>
             </div>
@@ -860,6 +696,8 @@ const VerifyProfile = () => {
             <Toast ref={toast} position="bottom-center" />
         </div>
     );
+
 };
 
-export default VerifyProfile;
+export default FaceValidation;
+

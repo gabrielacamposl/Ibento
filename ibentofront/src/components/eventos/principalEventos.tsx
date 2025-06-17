@@ -7,6 +7,7 @@ import Cards from './components/cards';
 import SearchMenu from './components/menu';
 import CircularDemo from './components/carousel2';
 import NotificationSidebar from './components/NotificationsSidebar';
+import HeroSection from '../HeroSection';
 
 import LoadingSpinner from './../../assets/components/LoadingSpinner';
 
@@ -120,6 +121,9 @@ function Page() {
         );
     }    return (
         <div className="min-h-screen bg-gradient-to-br lg:w-full from-slate-50 via-purple-50/30 to-pink-50/30 relative overflow-hidden">
+            {/* Hero Section - Solo visible en pantallas grandes */}
+            <HeroSection />
+            
             {/* Elementos decorativos de fondo */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -128,8 +132,7 @@ function Page() {
             </div>
 
             {/* Header Premium - Solo en versión móvil */}
-            {/* {!isWebVersion && ( */}
-                <div className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg">
+            <div className="lg:hidden relative z-10 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg">
                     <div className="flex w-full items-center h-24 px-6 pt-2">
                         {/* Avatar y saludo */}
                         <div className="flex items-center space-x-4 flex-1">
@@ -194,9 +197,8 @@ function Page() {
                             </div>
                         </div>
                     </div>
-                </div>
-            {/* )}            Contenido principal */}
-            <div className={`relative z-10 pb-24 ${isWebVersion ? 'pt-4' : ''}`}>
+                </div>            {/* Contenido principal */}
+            <div className={`relative z-10 pb-24 lg:pb-8 ${isWebVersion ? 'pt-4' : ''}`}>
                 {/* Quick Stats Cards */}
                 <div className="px-6 py-4">
                     <div className="grid grid-cols-2 gap-4 mb-6">

@@ -31,12 +31,12 @@ function Cards({
     return (
         <div className="h-auto flex w-full flex-col justify-center box-border">
             {/* Contenedor con scroll horizontal */}
-            <div className="w-full overflow-x-auto">   
+            <div className="w-full overflow-x-auto scrollbar-hide">   
                 {/* Contenedor de tarjetas con ancho fijo para forzar el scroll */}
-                <div className="flex flex-row space-x-1 w-full h-auto p-2">  
+                <div className="flex flex-row space-x-4 w-full h-auto p-4 pb-6">  
                     {listEvents.map((event, index) => (
                         console.log(index),
-                        <Card key={event._id} id = {event._id} imgs={event.imgs} title={event.title} likes={event.numLike} />
+                        <Card key={event._id} id={event._id} imgs={event.imgs} title={event.title} likes={event.numLike} />
                     ))}
                 </div>
             </div>
@@ -48,11 +48,9 @@ function Cards({
     id : string;
     imgs: string[];
     title: string;
-    key: string;
     likes: number
   }
-
-  function Card({ id, imgs, title, key, likes }: CardProps) {
+  function Card({ id, imgs, title, likes }: CardProps) {
     const url = "../eventos/" + id;
 
     let likeString = "";
@@ -65,29 +63,50 @@ function Cards({
     }
 
     return (
-        <>
-        <Link to={url} className="flex flex-col flex-none p-2 h-auto w-64 drop-shadow-xl lg:w-72">
-            <div className="relative bg-white w-60 rounded-xl flex flex-col flex p-1 shadow-md">
-                <div className='relative w-full h-36 lg:h-48'>
+        <Link 
+            to={url} 
+            className="group flex-none w-64 lg:w-72 transition-all duration-300 hover:scale-105"
+        >
+            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
+                {/* Container de imagen con efectos */}
+                <div className='relative w-full h-40 lg:h-52 overflow-hidden'>
                     <img 
-                    src={`${imgs[0]}`} 
-                    className="rounded-xl object-cover w-full h-36 lg:h-48 " 
-                    alt={title} 
+                        src={`${imgs[0]}`} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        alt={title} 
                     />
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black to-transparent"></div>
+                    
+                    {/* Overlay gradiente */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    
+                    {/* Badge de likes floating */}
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-1.5 shadow-lg border border-white/20">
+                        <HeartIcon className='h-4 w-4 text-pink-500' />
+                        <span className="text-sm font-semibold text-gray-800">{likeString}</span>
+                    </div>
+                    
+                    {/* Efecto de brillo al hover */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </div>
                 
-                
-                <div className='absolute bottom-3 left-3 flex flex-row space-x-2'>
-                    <HeartIcon className='h-4 w-4 font-strong' />
-                    <h2 className="text-sm font-bold">{likeString}</h2>
+                {/* Content */}
+                <div className="p-4">
+                    <h3 className="font-semibold text-gray-800 text-base lg:text-lg line-clamp-2 leading-tight group-hover:text-purple-700 transition-colors duration-300">
+                        {title}
+                    </h3>
+                    
+                    {/* Decorative dots */}
+                    <div className="flex items-center gap-1 mt-3">
+                        <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-gradient-to-r from-purple-300 to-pink-300 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-1 h-1 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full animate-pulse delay-300"></div>
+                    </div>
                 </div>
-            </div>
-            <div className="mt-2 p-2">
-                <h3 className="font-medium text-black truncate">{title}</h3>
+                
+                {/* Bottom glow effect */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
         </Link>
-        </>
     );
   }
   

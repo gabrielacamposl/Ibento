@@ -1,11 +1,9 @@
-import { useState, useRef } from "react";
-import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
+import { useState, useRef, useEffect } from "react";
+import { Eye, EyeOff, Heart, Users, MessageCircle, Mail, Lock, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
-import api from '../../apilogin';
-
-import InstallPrompt from "../../components/pwa/InstallPrompt";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 import {
   FormControlLabel,
   Checkbox,
@@ -15,42 +13,67 @@ import {
   Typography,
   CssBaseline,
 } from "@mui/material";
-import { Button } from "primereact/button";
 import { buttonStyle, inputStyles } from "../../styles/styles";
-import { Eye, EyeOff } from "lucide-react";
+import api from '../../apilogin';
+import InstallPrompt from "../../components/pwa/InstallPrompt";
+import { initializePushNotifications } from '../../utils/pushNotifications';
 import { motion } from "framer-motion";
 import ibentoLogo from "/images/ibentoLogo.png";
 
 
-
-const colors = ["#FF00FF", "#00FFFF", "#FFFFFF"];
-
-
-const Login = () => {  const [email, setEmail] = useState("");
+const Login = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const navigate = useNavigate();
-  const toast = useRef(null);
+  const toastRef = useRef(null);
 
-  // Funciones para mostrar toasts
-  const showSuccess = (message) => {
-    toast.current.show({severity:'success', summary: 'Éxito', detail: message, life: 4000});
+  const colors = ["#FF00FF", "#00FFFF", "#FFFFFF", "#9333EA", "#3B82F6"];
+
+  // Verificar soporte de notificaciones al cargar
+  useEffect(() => {
+    if ('Notification' in window && 'serviceWorker' in navigator) {
+      setPushEnabled(true);
+    }
+  }, []);
+
+  const showToast = (message, type = 'info') => {
+    // Crear toast personalizado
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-white max-w-sm transition-all duration-300 transform translate-x-full`;
+    
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warn' ? 'bg-yellow-500' : 'bg-blue-500';
+    toast.className += ` ${bgColor}`;
+    
+    toast.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span>${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-black/70 hover:text-black">✕</button>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+    
+    // Auto-remove después de 4 segundos
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
   };
 
-  const showError = (message) => {
-    toast.current.show({severity:'error', summary: 'Error', detail: message, life: 4000});
-  };
-
-  const showWarn = (message) => {
-    toast.current.show({severity:'warn', summary: 'Advertencia', detail: message, life: 4000});
-  };   const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     // Validaciones básicas
     if (!email || !password) {
-      showWarn("Por favor completa todos los campos");
+      showToast("Por favor completa todos los campos", 'warn');
       setLoading(false);
       return;
     }
@@ -76,8 +99,19 @@ const Login = () => {  const [email, setEmail] = useState("");
       // Opcional: Guardar timestamp del login para debugging
       localStorage.setItem("login_time", new Date().toISOString());
 
+      // Inicializar notificaciones push después del login exitoso
+      if (pushEnabled) {
+        try {
+          await initializePushNotifications(res.data.id);
+          showToast("¡Notificaciones activadas! Recibirás alertas de matches, likes y mensajes", 'info');
+        } catch (pushError) {
+          console.warn("Error al activar notificaciones:", pushError);
+          showToast("Login exitoso. Para recibir notificaciones, permite el acceso cuando te lo solicite el navegador", 'info');
+        }
+      }
+
       // Mostrar mensaje de éxito
-      showSuccess("¡Inicio de sesión exitoso! Redirigiendo...");
+      showToast("¡Inicio de sesión exitoso! Redirigiendo...", 'success');
 
       // Redirigir al usuario después de un breve delay para que vea el toast
       setTimeout(() => {
@@ -114,310 +148,239 @@ const Login = () => {  const [email, setEmail] = useState("");
         mensajeError = "Error de conexión. Verifica tu internet.";
       }
       
-      showError(mensajeError);
+      showToast(mensajeError, 'error');
     }
   };
 
+  // Función para manejar la redirección a crear cuenta
+  const handleCreateAccount = () => {
+    navigate("/crear-cuenta");
+  };
+
+  // Animación de partículas
+  const AnimatedParticle = ({ index }) => {
+    const color = colors[index % colors.length];
+    const size = Math.random() * 100 + 50;
+    const duration = 15 + Math.random() * 10;
+    
+    return (
+      <div
+        className="absolute rounded-full opacity-20 blur-xl animate-pulse"
+        style={{
+          backgroundColor: color,
+          width: size + 'px',
+          height: size + 'px',
+          left: Math.random() * 100 + '%',
+          top: Math.random() * 100 + '%',
+          animationDuration: duration + 's',
+          animationDelay: Math.random() * 5 + 's',
+        }}
+      />
+    );
+  };
 
   return (
-
-    <div className="h-screen flex justify-center items-center">      {/* Formulario para la visualización web  */}
-      <div className="hidden md:block  w-full h-screen flex justify-center items-center bg-gradient-to-b from-blue-300 via-purple-300 to-white relative ">
-         {/* Fondo degradado y luces */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Contenido */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-            <Box
-              sx={{
-                my: 8,
-                mx: 4,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Box
-                component="img"
-                src={ibentoLogo}
-                alt="Ibento Logo"
-                sx={{ width: 80, height: "auto", mb: 2 }}
-              />
-              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
-                Inicia Sesión
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    className={`${inputStyles} pr-10`}
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-
-                </Grid>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Contraseña<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      required
-                      fullWidth
-                      name="password"
-                      label="Contraseña"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
-                  </div>
-                </Grid>
-
-                <Grid item xs={12} container justifyContent="left" alignItems="left">
-
-                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Grid>
-
-
-               
-                <Button 
-                  className={buttonStyle} 
-                  type="submit"
-                  fullWidth 
-                  variant="contained" 
-                  sx={{ mt: 3, mb: 2 }}
-                  onClick={handleLogin}
-                  loading={loading}
-                  disabled={loading}
-                >
-                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                </Button>
-                <Grid container justifyContent="center" alignItems="center">
-                  <Grid item xs={12} container justifyContent="center" alignItems="center">
-
-                    <Link
-                      to="/crear-cuenta"
-                      component="button"
-                      variant="body2" sx={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        color: "rgb(129, 45, 177)",
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "rgb(164, 96, 203)",
-                        },
-                      }}>
-                      Crear cuenta
-                    </Link>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Box>
-          </Grid>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Fondo degradado animado */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-pink-500">
+        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-magenta-400/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
       </div>
 
-        {/* Formulario para móviles */}
-      <div className="block md:hidden w-full min-h-screen bg-gradient-to-b from-blue-300 via-purple-300 to-white relative">
-        {/* Fondo degradado y luces */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {[...Array(7)].map((_, i) => {
-            const color = colors[i % colors.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 opacity-30 blur-2xl rounded-full"
-                style={{ backgroundColor: color }}
-                initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight / 2,
-                }}
-                animate={{
-                  x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-                  y: [Math.random() * window.innerHeight / 2, Math.random() * window.innerHeight / 2],
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 4,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                }}
-              />
-            );
-          })}
-        </div>
+      {/* Partículas flotantes */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <AnimatedParticle key={i} index={i} />
+        ))}
+      </div>
 
-        {/* Contenido */}
-        <div className="relative z-10 flex flex-col items-center pt-10 px-6 min-h-screen">
-          {/* Logo */}
-          <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-            <Box
-              sx={{
-                my: 8,
-                mx: 4,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Box
-                component="img"
-                src={ibentoLogo}
-                alt="Ibento Logo"
-                sx={{ width: 80, height: "auto", mb: 2 }}
-              />
-              <Typography component="h1" variant="h5" sx={{ mt: 2, fontFamily: "Aptos, sans-serif", fontWeight: "bold" }}>
-                Inicia Sesión
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo electrónico<span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    className={`${inputStyles} pr-10`}
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+      {/* Mesh gradient overlay */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+      </div>
 
-                </Grid>
-                <Grid item xs={12}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Contraseña<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <InputText
-                      className={`${inputStyles} pr-10`}
-                      required
-                      fullWidth
-                      name="password"
-                      label="Contraseña"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-2 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                    </button>
-                  </div>
-                </Grid>
-
-                <Grid item xs={12} className='mt-2 mb-2' container justifyContent="left" alignItems="left">
-
-                  <Link to="/recuperar-cuenta" variant="body2" sx={{ fontStyle: "italic", color: "rgb(145, 64, 192)", fontSize: 15 }}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Grid>
-
-
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Recordar cuenta"
-                  sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+      {/* Contenido principal */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
+          {/* Tarjeta principal con glassmorphism */}
+          <div className="bg-white rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+            {/* Efecto de brillo superior */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+            
+            {/* Patrón de fondo sutil */}
+            <div className="absolute inset-0 opacity-30" style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }}></div>
+            
+            {/* Logo y título */}
+            <div className="text-center items-center mb-8 relative z-10">
+              <div className="flex justify-center items-center mb-4">
+                 <img
+                  src="/images/ibentoLogo.png"
+                  alt="Ibento Logo"
+                  className="w-20 h-auto"
                 />
+              </div>
 
+              <h1 className="text-gray-800 font-bold text-2xl">
+                Inicia sesión 
+              </h1>
+            </div>
+
+            {/* Formulario */}
+            <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+              {/* Campo Email */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-800">
+                  Correo electrónico <span className="text-pink-500">*</span>
+                </label>
+                <div className="relative group">
+                  <InputText
+                    className="w-full pl-12 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-black/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                    required
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Campo Contraseña */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-800">
+                  Contraseña <span className="text-pink-500">*</span>
+                </label>
+                <div className="relative group">
+                  <InputText
+                    className="w-full pl-12 pr-12 py-3 bg-white/70 backdrop-blur-sm border border-black/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                    required
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-gray-600 group-focus-within:text-purple-500 transition-colors" />
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-purple-500 transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Recordar cuenta y recuperar contraseña */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-purple-600 bg-white/20 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
+                  />
+                  <span className="text-gray-700 text-sm">Recordar cuenta</span>
+                </label>
+                <Link
+                  to="/recuperar-cuenta"
+                  className="text-sm text-purple-600 hover:text-purple-800 transition-colors hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+
+              {/* Botón de login */}
+              <div className="transform transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 <Button 
-                  className={buttonStyle} 
+                   className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
                   type="submit"
-                  fullWidth 
-                  variant="contained" 
-                  sx={{ mt: 3, mb: 2 }}
                   onClick={handleLogin}
                   loading={loading}
                   disabled={loading}
                 >
                   {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
-                <Grid container justifyContent="center" alignItems="center">
-                  <Grid item xs={12} container justifyContent="center" alignItems="center">
+              </div>
+            </form>
 
-                    <Link
-                      to="/crear-cuenta"
-                      component="button"
-                      variant="body2" sx={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        color: "rgb(129, 45, 177)",
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "rgb(164, 96, 203)",
-                        },
-                      }}>
-                      Crear cuenta
-                    </Link>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Box>
-          </Grid>        </div>
+            {/* Divisor */}
+            <div className="my-8 flex items-center">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
+              <span className="px-4 text-gray-600 text-sm">o</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
+            </div>
+
+            {/* Crear cuenta */}
+            <div className="text-center">
+              <p className="text-gray-700 text-sm mb-4">
+                ¿No tienes una cuenta?
+              </p>
+              <button
+                onClick={handleCreateAccount}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                Crear cuenta
+              </button>
+            </div>
+          </div>
+
+          {/* Características PWA */}
+          <div className="mt-6 text-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Bell className="w-5 h-5 text-yellow-300" />
+                <span className="text-white font-medium">App Móvil</span>
+              </div>
+              <p className="text-white/70 text-xs leading-relaxed">
+                📱 ¡Instala la app para la mejor experiencia!
+              </p>
+              <p className="text-white/70 text-xs">
+                Recibe notificaciones de matches, likes y mensajes al instante
+              </p>
+              {pushEnabled && (
+                <div className="mt-2 text-green-300 text-xs">
+                  ✓ Notificaciones push disponibles
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Toast component for notifications */}
-      <Toast ref={toast} />
-        <InstallPrompt />
-    </div>
+      {/* InstallPrompt component */}
+      <InstallPrompt />
 
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+    </div>
   );
 };
 

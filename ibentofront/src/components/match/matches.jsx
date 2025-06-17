@@ -9,6 +9,10 @@ import '../../assets/css/swipe-animations.css';
 const Matches = () => {
     const navigate = useNavigate();
     const { makeRequest } = useOfflineRequest();
+
+    //Verificar si el usuario está verificado
+    const [userPerfil, setUserPerfil] = useState({});
+
     const [verificar, setVerificar] = useState(undefined);
     const [loading, setLoading] = useState(true);
     const [conversaciones, setConversaciones] = useState([]);
@@ -33,8 +37,20 @@ const Matches = () => {
         navigate("../verMatches");
     };
 
-    const handleVerificar = () => { // Renamed
-        setTimeout(() => navigate("../verificar"), 0);
+    const handleVerificar = () => {
+        if (!userPerfil.is_ine_validated) {
+            setTimeout(() => navigate("../verificar-ine"), 0);
+        }
+        else if (userPerfil.birthday === null) {
+            setTimeout(() => navigate("../descripcion"), 0);
+        }
+        else if (userPerfil.profile_pic?.length === 0) {
+            setTimeout(() => navigate("../subirFotos"), 0);
+
+        }
+        else if (!userPerfil.preferencias_generales?.length > 0) {
+            setTimeout(() => navigate("../intereses"), 0);
+        }
     };
 
     useEffect(() => {
@@ -66,6 +82,45 @@ const Matches = () => {
         } else {
             setVerificar(false);
         }
+    }, []);
+
+    useEffect(() => {
+        const Perfil = async () => {
+            try {
+                const token = localStorage.getItem('access');
+
+                if (!token) {
+                    console.error("No se encontró token de autenticación");
+                    setLoading(false);
+                    return;
+                }
+
+                const result = await makeRequest(
+                    `${api.defaults.baseURL}usuarios/info_to_edit/`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    },
+                    'user-profile'
+                );
+
+                if (result.data) {
+                    setUserPerfil(result.data);
+                    console.log("Perfil obtenido:", result.data);
+                    if (result.offline) {
+                        console.log('Perfil cargado desde cache offline');
+                    }
+                } else {
+                    console.error("Error al obtener perfil");
+                }
+            } catch (error) {
+                console.error("Error al obtener perfil:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        Perfil();
     }, []);
 
     useEffect(() => {
@@ -163,22 +218,15 @@ const Matches = () => {
                             >
                                 <ArrowLeft className="w-5 h-5 text-white" />
                             </button>
-                            <div className="flex items-center space-x-2">
-                                <Sparkles className="w-6 h-6 text-yellow-400" />
-                                <span className="text-white font-semibold text-lg">Matches</span>
-                            </div>
-                            <button className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                <Menu className="w-5 h-5 text-white" />
-                            </button>
                         </div>
                         <div className="text-center">
-                            <h1 className="text-3xl font-bold text-white mb-2">Mis Matches</h1>
+                            <h1 className="text-3xl font-bold text-white mb-2">Mis Chats</h1>
                             <p className="text-white/70">Conecta con personas increíbles</p>
                         </div>
                     </div>
                 </div>
 
-                {verificar === false && (
+                {(userPerfil.is_ine_validated === false || userPerfil.birthday === null || userPerfil.profile_pic?.length === 0 || !userPerfil.preferencias_generales?.length > 0) && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
                         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 m-6 text-center shadow-2xl">
                             <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -193,7 +241,8 @@ const Matches = () => {
                                 Crear Perfil
                             </button>
                         </div>
-                    </div>)}
+                    </div>
+                )}
 
                 <div className="px-6 py-6 space-y-8">
                     <div className="space-y-4">

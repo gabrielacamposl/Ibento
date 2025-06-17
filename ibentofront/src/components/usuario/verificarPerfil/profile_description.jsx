@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Shield, Camera, CheckCircle, Upload, Plus, X } from 'lucide-react';
-import Webcam from 'react-webcam';
 import api from "../../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex, patron_curp } from "../../../utils/regex";
@@ -54,13 +53,6 @@ const description = () => {
         window.scrollTo(0, 0);
     }, []);
 
-  
-   
-
- 
-
-
-
     // ---------------------------- FORMULARIO DE INFORMACIÓN ADICIONAL ----------------------------
     
     // Función para manejar cambios en el formulario
@@ -76,22 +68,22 @@ const description = () => {
         const { birthday, gender, description, curp } = formData;
         
         if (!birthday.trim()) {
-            showWarn('La fecha de nacimiento es requerida');
+            showWarn('La fecha de nacimiento es requerida.');
             return false;
         }
         
         if (!gender) {
-            showWarn('El género es requerido');
+            showWarn('El género es requerido.');
             return false;
         }
         
         if (!description.trim()) {
-            showWarn('La descripción es requerida');
+            showWarn('La descripción es requerida.');
             return false;
         }
         
         if (!curp.trim()) {
-            showWarn('El CURP es requerido');
+            showWarn('El CURP es requerido.');
             return false;
         }
 
@@ -113,6 +105,7 @@ const description = () => {
         //         showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
         //         return false;
         //  }
+
         
         return true;
     };
@@ -129,8 +122,9 @@ const description = () => {
             const response = await api.post('usuarios/agregar_info/', formData);
             
             if (response.status === 200) {
-                showContrast("¡Información subida !.");
-                
+
+                showContrast("Información guardada correctamente.");
+               
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
                     navigate("../subirFotos");
@@ -228,11 +222,11 @@ const description = () => {
                                         <User className="w-8 h-8 text-white" />
                                     </div>
                                     <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                                        Tu información personal
+                                        Información personal
                                     </h1>
                                    
                                     <p className="text-gray-500">
-                                        Agrega los siguientes datos para finalizar tu registro
+                                     
                                     </p>
                                 </div>
 
@@ -242,23 +236,28 @@ const description = () => {
                                         {/* Fecha de nacimiento */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-semibold text-gray-700 flex items-center">
-                                                <span className="mr-2">📅</span>
+                                                
                                                 Fecha de nacimiento
                                                 <span className="text-red-500 ml-1">*</span>
-                                            </label>
-                                            <input
+                                            </label>                            <input
                                                 type="date"
                                                 value={formData.birthday}
                                                 onChange={(e) => handleFormChange('birthday', e.target.value)}
+                                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                                                min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm"
                                                 required
                                             />
+                                            <div className="flex items-center text-xs text-gray-500 mt-1">
+                                                <span className="mr-2">💡</span>
+                                                Debes tener al menos 18 años para registrarte
+                                            </div>
                                         </div>
 
                                         {/* Género */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-semibold text-gray-700 flex items-center">
-                                                <span className="mr-2">👤</span>
+                                               
                                                 Género
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
@@ -285,7 +284,7 @@ const description = () => {
                                         {/* CURP */}
                                         <div className="md:col-span-2 space-y-2">
                                             <label className="text-sm font-semibold text-gray-700 flex items-center">
-                                                <span className="mr-2">🆔</span>
+                                                
                                                 CURP
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
@@ -296,6 +295,7 @@ const description = () => {
                                                 //onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
                                                 disabled
                                                 placeholder="Ingresa tu CURP (18 caracteres)"
+
                                                 maxLength={18}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm uppercase font-mono"
                                                 required
@@ -309,23 +309,20 @@ const description = () => {
                                         {/* Descripción */}
                                         <div className="md:col-span-2 space-y-2">
                                             <label className="text-sm font-semibold text-gray-700 flex items-center">
-                                                <span className="mr-2">📝</span>
+                                                
                                                 Descripción personal
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
                                             <textarea
                                                 value={formData.description}
                                                 onChange={(e) => handleFormChange('description', e.target.value)}
-                                                placeholder="Cuéntanos un poco sobre ti... ¿Qué te gusta hacer? ¿Cuáles son tus aficiones?"
+                                                placeholder="Cuéntanos un poco sobre ti... "
                                                 rows={4}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm resize-none"
                                                 required
                                             />
                                             <div className="flex justify-between items-center text-xs text-gray-500">
-                                                <span className="flex items-center">
-                                                    <span className="mr-1">💡</span>
-                                                    Sé auténtico y describe tus intereses
-                                                </span>
+                                            
                                                 <span className="text-gray-400">
                                                     {formData.description.length}/500
                                                 </span>

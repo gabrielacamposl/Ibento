@@ -27,6 +27,8 @@ from api.user.views import (crear_usuario,
                             like_event,
                             obtener_eventos_favoritos,
                             obtener_match,
+                            generar_compatibilidades,
+                            generar_compatibilidades_interacciones,
                             obtener_usuarios_conversacion,
                             es_favorito,
                             obtener_usuario_info,
@@ -97,6 +99,9 @@ urlpatterns = [
     # --- Eliminar match
     path('api/matches/<str:match_id>/eliminar/', eliminar_match, name='eliminar_match'),
     
+    path('api/matches/generar-compatibilidades/', generar_compatibilidades, name='generar_compatibilidades'),
+    path('api/matches/generar-compatibilidades-interacciones/', generar_compatibilidades_interacciones, name='generar_compatibilidades_interacciones'),
+
     path('api/matches/<str:match_id>/', obtener_match, name='obtener_match'),
     path('api/bloquear/', bloquear_usuario, name='bloquear_usuario'),
     path('api/matches/<str:match_id>/obtener/', obtener_match_id, name='obtener_match_id'),
