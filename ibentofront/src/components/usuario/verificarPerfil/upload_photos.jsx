@@ -10,15 +10,83 @@ const fotos = () => {
     
     const toast = useRef(null);
     const [user, setUser] = useState({
-        pictures: [],
+        pictures: Array(6).fill(null), // Inicializar con 6 elementos `null`
         
     });
     
     const [loading, setLoading] = useState(false);
 
     // Estados de carga individuales para cada acción
+    const [pictures, setPictures] = useState(Array(6).fill(null)); // Inicializar con 6 elementos `null`
     const [uploadingPhotos, setUploadingPhotos] = useState(false);
-   
+    
+// Obtener imágenes de perfil del usuario
+useEffect(() => {
+    const fetchFotos = async () => {
+        try {
+            const response = await api.get("perfil/imagenes/");
+            console.log("Respuesta de obtener imágenes:", response.data);
+
+            const images = response.data.imagenes;
+            if (response.status === 200 && images && Array.isArray(images)) {
+                const picturesArray = Array.from({ length: 6 }, (_, i) => images[i] || null);
+                setPictures(picturesArray); // Actualizar el estado `pictures`
+            } else {
+                console.warn("La respuesta no contiene la propiedad 'imagenes' o no es un array.");
+                setPictures(Array(6).fill(null)); // Rellenar con `null` si no hay imágenes
+            }
+        } catch (error) {
+            console.error("Error al obtener imágenes de perfil:", error.response?.data || error);
+        }
+    };
+
+    fetchFotos();
+}, []);
+
+// Actualizar imágenes de perfil del usuario
+const updateProfileImages = async () => {
+    if (pictures.filter((pic) => pic !== null).length < 3) {
+        toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Debes subir al menos 3 fotos.', life: 4000 });
+        return;
+    }
+
+    setUploadingPhotos(true);
+
+    try {
+        const formData = new FormData();
+        pictures.forEach((picture) => {
+            if (picture instanceof File) {
+                formData.append("pictures", picture);
+            } else if (typeof picture === "string") {
+                formData.append("pictures", picture); // Mantener las URLs existentes
+            }
+        });
+
+        const response = await api.patch("perfil/imagenes/actualizar/", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        if (response.status === 200) {
+            console.log("Fotos actualizadas exitosamente:", response.data.profile_pic);
+            toast.current.show({ severity: 'success', summary: 'Éxito', detail: '¡Fotos actualizadas correctamente!', life: 4000 });
+            setPictures(response.data.profile_pic); // Actualizar el estado con las imágenes actualizadas
+            setTimeout(() => {
+                    navigate("../intereses"); // Redirigir al perfil después de subir las fotos
+                }, 1000);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Error al actualizar las fotos. Por favor, inténtalo de nuevo.', life: 4000 });
+        }
+    } catch (error) {
+        console.error("Error al actualizar fotos:", error.response?.data || error);
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al actualizar las fotos. Por favor, inténtalo de nuevo.', life: 4000 });
+    } finally {
+        setUploadingPhotos(false);
+    }
+};
+
+
 
     //Estado para guardas las fotos de perfil
     const [savedPhotos, setSavedPhotos] = useState([]);
@@ -35,29 +103,25 @@ const fotos = () => {
     // ------------- Subir fotos de perfil
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
-        if (!file) return;        if (!file.type.startsWith("image/")) {
-            showWarn("Por favor selecciona una imagen válida.");
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Por favor selecciona una imagen válida.', life: 4000 });
             return;
         }
 
-        setUser((prev) => {
-            const newPictures = [...prev.pictures];
-            newPictures[index] = file;
-            return {
-                ...prev,
-                pictures: newPictures,
-            };
+        setPictures((prev) => {
+            const newPictures = [...prev];
+            newPictures[index] = file; // Reemplazar la imagen en el índice especificado
+            return newPictures;
         });
     };
 
     const handleImageDelete = (indexToDelete) => {
-        setUser((prev) => {
-            const newPictures = [...prev.pictures];
-            newPictures.splice(indexToDelete, 1);
-            return {
-                ...prev,
-                pictures: newPictures,
-            };
+        setPictures((prev) => {
+            const newPictures = [...prev];
+            newPictures[indexToDelete] = null; // Reemplazar la imagen eliminada con `null`
+            return newPictures;
         });
     };    
     
@@ -112,33 +176,6 @@ const fotos = () => {
         }
     };
 
-    const uploadSavedPhotos = async () => {
-        if (user.pictures.length === 0) {
-            console.error("No hay fotos para subir");
-            return;
-        }
-
-        try {
-            const formData = new FormData();
-            user.pictures.forEach((picture) => {
-                formData.append("pictures", picture);
-            });
-
-            console.log("Subiendo fotos guardadas:", user.pictures);
-
-            const response = await api.post("perfil/subir-fotos/", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            console.log("Fotos subidas exitosamente:", response.data.pictures);
-            return response.data;
-        } catch (error) {
-            console.error("Error al subir fotos:", error.response?.data || error);
-            throw error;
-        }
-    };
    
 
     // Funciones para mostrar toasts
@@ -154,36 +191,34 @@ const fotos = () => {
 
 
 
-    // Función auxiliar para convertir dataURL a File
-    const dataURLtoFile = (dataurl, filename) => {
-        const arr = dataurl.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }        return new File([u8arr], filename, { type: mime });
-    };
-    
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
-                        className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300"
+                        className="p-3 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 hover:bg-white/60 transition-all duration-300 absolute left-6"
+                        style={{ left: '1.5rem' }}
                     >
                         <ArrowLeft className="w-5 h-5 text-gray-700" />
                     </button>
-                    
-                   
-
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl">
+                            <Shield className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                                Subir Fotos
+                            </h1>
+                            <p className="text-sm text-gray-600">Paso {4} de {5}</p>
+                        </div>
+                    </div>
                 </div>
-            </div> */}
+            </div>
+
 
             {/* Main Content */}
-            <div className="pt-10 px-4 pb-8">
+            <div className="pt-24 px-4 pb-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Content Cards */}
                     <div className="glass-premium rounded-3xl p-6 mb-6">
@@ -194,12 +229,14 @@ const fotos = () => {
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <div key={index} className="relative">
                                             <div className="relative w-35 h-45 sm:w-35 sm:h-40 md:w-35 md:h-45 border-dashed divBorder flex items-center justify-center mt-4">
-                                                {user.pictures[index] ? (
+                                                {pictures[index] ? (
                                                     <img
                                                         src={
-                                                            typeof user.pictures[index] === "string"
-                                                                ? user.pictures[index]
-                                                                : URL.createObjectURL(user.pictures[index])
+                                                            typeof pictures[index] === "string"
+                                                                ? pictures[index]
+                                                                : pictures[index] instanceof File
+                                                                    ? URL.createObjectURL(pictures[index])
+                                                                    : ""
                                                         }
                                                         alt={`Imagen ${index + 1}`}
                                                         className="w-full h-full object-cover"
@@ -213,8 +250,9 @@ const fotos = () => {
                                                     </label>
                                                 )}
 
-                                                {user.pictures[index] && (
+                                                {pictures[index] && (
                                                     <button
+                                                        type="button"
                                                         className="w-7 h-7 btn-custom absolute top-0 right-0 text-white  rounded-full btn-custom"
                                                         onClick={() => handleImageDelete(index)}
                                                     >
@@ -230,9 +268,16 @@ const fotos = () => {
                                 </div>
                             
                         </div>
-                        <div className="flex justify-center mt-6">
+                        <div className="flex justify-center mt-6 space-x-4">
+                            <button
+                        onClick={() => navigate(-1)}
+                        className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
+                    >
+                        Anterior
+                    </button>
                          <button
-                            onClick={handleUploadPictures}
+                            type="button"
+                            onClick={updateProfileImages}
                             disabled={uploadingPhotos}
                             className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
                         >
@@ -245,7 +290,7 @@ const fotos = () => {
                                     Subiendo...
                                 </div>
                             ) : (
-                                'Subir Fotos'
+                                'Actualizar Fotos'
                             )}
                         </button>
                         </div>
@@ -263,3 +308,4 @@ const fotos = () => {
 };
 
 export default fotos;
+

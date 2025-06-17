@@ -484,6 +484,8 @@ def actualizar_perfil(request):
             usuario.profile_pic = current_photos + uploaded_urls
             usuario.save(update_fields=['profile_pic'])
 
+            
+
     # Procesar preferencias_evento
     if 'preferencias_evento' in informacion:
         valor = informacion['preferencias_evento']
@@ -573,6 +575,89 @@ def actualizar_perfil(request):
             return Response({'error': f'Error al guardar los cambios: {str(e)}'}, status=500)
 
     return Response({'error': 'No se proporcionaron campos válidos para actualizar'}, status=400)
+
+#Actualizar imagenes de perfil
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def actualizar_imagenes_perfil(request):
+    usuario = request.user
+    
+    # Obtener las imágenes de perfil
+    pictures = request.data.getlist('pictures') if hasattr(request.data, 'getlist') else request.data.get('pictures', [])
+    
+    # Solo procesar imágenes si se enviaron y no están vacías
+    if pictures and len(pictures) > 0 and not all(p == '' for p in pictures if isinstance(p, str)):
+        # Imagenes del usuario de la BD
+        current_photos = usuario.profile_pic or []
+        urls_recibidas = [p for p in pictures if isinstance(p, str) and p.startswith('http')]
+        nuevas_imagenes = [p for p in pictures if not isinstance(p, str)]
+        print("Nuevas imágenes recibidas:", len(nuevas_imagenes))
+        
+        # Proceso de eliminación de imágenes de Cloudinary y actualización de fotos actuales
+        if urls_recibidas:
+            delete_urls = []
+            for url_delete in current_photos:
+                try:
+                    if url_delete not in urls_recibidas:
+                        public_id = extract_public_id(url_delete)
+                        if public_id: 
+                            result = cloudinary.uploader.destroy(public_id)
+                            if result.get('result') == 'ok':
+                                delete_urls.append(url_delete)
+                        else: 
+                            return Response({"error": "Error al eliminar la imagen de Cloudinary."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except Exception as e:
+                    return Response({"error": "No se procesó la imagen."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Eliminar las URLs de las imágenes actuales
+            current_photos = [url for url in current_photos if url not in delete_urls]
+            usuario.profile_pic = current_photos 
+            usuario.save(update_fields=['profile_pic'])
+            print("Fotos actuales después de eliminar:", current_photos)
+
+        # Proceso de subida de nuevas imágenes a Cloudinary
+        if nuevas_imagenes:
+            folder_path = f"usuarios/perfiles/{usuario.nombre}_{usuario._id}"
+            uploaded_urls = []
+            for image in nuevas_imagenes:
+                try:
+                    result = cloudinary.uploader.upload(
+                        image,
+                        folder=folder_path,
+                        transformation=[
+                            {"width": 800, "height": 800, "crop": "limit", "quality": "auto"}
+                        ]
+                    )
+                    uploaded_urls.append(result['secure_url'])
+                except Exception as e:
+                    return Response(
+                        {"error": "Error al subir una imagen.", "details": str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            print("URLs subidas:", uploaded_urls)
+
+            # Actualizar la lista de fotos en la BD después de subir nuevas imágenes
+            usuario.profile_pic = current_photos + uploaded_urls
+            usuario.save(update_fields=['profile_pic'])
+
+    return Response({"message": "Imágenes actualizadas correctamente.", "profile_pic": usuario.profile_pic}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def obtener_imagenes_perfil(request):
+    """
+    Obtiene las imágenes de perfil del usuario autenticado.
+    """
+    usuario = request.user
+
+    # Obtener las imágenes de perfil
+    imagenes_perfil = usuario.profile_pic or []
+
+    return Response({
+        "message": "Imágenes de perfil obtenidas correctamente.",
+        "imagenes": imagenes_perfil
+    }, status=status.HTTP_200_OK)
+
 
 
 def extract_public_id(cloudinary_url):
@@ -2708,6 +2793,27 @@ def eliminar_cuenta(request):
         logger.error(f"Error eliminando cuenta: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+#update with True is_ine_validated and is_validated_camera
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_validated_status(request):
+    try:
+        user = request.user
+        is_ine_validated = request.data.get('is_ine_validated')
+        is_validated_camera = request.data.get('is_validated_camera')
+        print(is_ine_validated,is_validated_camera)
+        # Actualizar los campos del usuario
+        user.is_ine_validated = is_ine_validated
+        user.is_validated_camera = is_validated_camera
+        user.save(update_fields=['is_ine_validated', 'is_validated_camera'])
+
+        return Response({"detail": "Estado de validación actualizado correctamente."}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error updating validation status: {str(e)}")
+        return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # Notificaciones iOS
 @api_view(['POST'])
 def send_notification(request):
@@ -2742,3 +2848,4 @@ def send_notification(request):
             
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
