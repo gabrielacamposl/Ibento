@@ -700,6 +700,40 @@ const VerifyProfile = () => {
         console.log('Subiendo todos los datos...');
     };
 
+
+    // Función para saltar la validación y actualizar el estado en el backend
+    const validarSkip = async () => {
+        const token = localStorage.getItem("access");
+        try {
+            // Aquí mandamos los campos que espera tu endpoint
+            const response = await api.post(
+                'validar/',
+                {
+                    is_ine_validated: true,
+                    is_validated_camera: true,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                showSuccess('Validación saltada exitosamente');
+                setTimeout(() => {
+                    navigate('../descripcion');
+                }, 1000);
+            } else {
+                showError('Error al saltar la validación: ' + (response.data?.error || ''));
+            }
+        } catch (error) {
+            console.error('Error al saltar validación:', error);
+            showError('Error al saltar validación: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* Header Section */}
@@ -1245,6 +1279,16 @@ const VerifyProfile = () => {
                             type="button"
                         >
                             Anterior
+                        </button>
+
+
+                        <button
+                            onClick={() => validarSkip()}
+                            
+                            className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
+                            type="button"
+                        >
+                            Saltar Paso
                         </button>
 
                         {activeIndex === 0 ? (

@@ -2756,3 +2756,23 @@ def eliminar_cuenta(request):
     except Exception as e:
         logger.error(f"Error eliminando cuenta: {str(e)}")
         return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#update with True is_ine_validated and is_validated_camera
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_validated_status(request):
+    try:
+        user = request.user
+        is_ine_validated = request.data.get('is_ine_validated')
+        is_validated_camera = request.data.get('is_validated_camera')
+        print(is_ine_validated,is_validated_camera)
+        # Actualizar los campos del usuario
+        user.is_ine_validated = is_ine_validated
+        user.is_validated_camera = is_validated_camera
+        user.save(update_fields=['is_ine_validated', 'is_validated_camera'])
+
+        return Response({"detail": "Estado de validación actualizado correctamente."}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error updating validation status: {str(e)}")
+        return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

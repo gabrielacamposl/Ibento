@@ -16,15 +16,34 @@ const description = () => {
     // Estados de carga individuales para cada acción
     const [submittingInfo, setSubmittingInfo] = useState(false);
     
-   
+   //Se genera una curp aleatoria para pruebas
+    const generateRandomCurp = () => {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+        let curp = '';
+        for (let i = 0; i < 18; i++) {
+            if (i < 16) {
+                curp += letters.charAt(Math.floor(Math.random() * letters.length));
+            } else {
+                curp += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            }
+        }
+        return curp;
+    };
+    
+    const curpGenerada = generateRandomCurp();
+
     // Estados para el formulario de información adicional (step 4)
     const [formData, setFormData] = useState({
         birthday: '',
         gender: '',
         description: '',
-        curp: ''
+        curp: curpGenerada // Usar la CURP generada
     });
     
+    
+    
+
     
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -90,10 +109,10 @@ const description = () => {
         //     showWarn('El CURP debe tener exactamente 18 caracteres');
         //     return false;
         // }
-        if (!patron_curp.test(curp.trim().toUpperCase())) {
-                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
-                return false;
-         }
+        // if (!patron_curp.test(curp.trim().toUpperCase())) {
+        //         showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
+        //         return false;
+        //  }
         
         return true;
     };
@@ -272,8 +291,10 @@ const description = () => {
                                             </label>
                                             <input
                                                 type="text"
-                                                value={formData.curp}
-                                                onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
+                                                //value={formData.curp}
+                                                value={curpGenerada}
+                                                //onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
+                                                disabled
                                                 placeholder="Ingresa tu CURP (18 caracteres)"
                                                 maxLength={18}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm uppercase font-mono"

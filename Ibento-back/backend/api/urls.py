@@ -38,6 +38,7 @@ from api.user.views import (crear_usuario,
                             eliminar_cuenta,
                             obtener_imagenes_perfil,
                             actualizar_imagenes_perfil,
+                            update_validated_status
                             )
 
 
@@ -130,6 +131,7 @@ urlpatterns = [
     path('api/test-notification/', test_notification, name='test_notification'),  # Solo para desarrollo
     
 
-
+    #Pruebas de API
+    path('api/validar/', update_validated_status, name='update_validated_status'),
   
 ]
