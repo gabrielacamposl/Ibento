@@ -6,7 +6,7 @@ import api from "../../../api";
 import { Toast } from 'primereact/toast';
 import { curp_regex, patron_curp } from "../../../utils/regex";
 // Agregar esta importación para face-api.js
-// import * as faceapi from 'face-api.js';
+// import * as face-api.js;
 
 const Verificar = () => {
     const navigate = useNavigate();
@@ -26,6 +26,7 @@ const Verificar = () => {
     const [savingPreferences, setSavingPreferences] = useState(false);
     const [validatingIne, setValidatingIne] = useState(false);
     const [submittingInfo, setSubmittingInfo] = useState(false);
+
 
     // Estados para tracking de pasos completados
     const [stepsCompleted, setStepsCompleted] = useState({
@@ -80,7 +81,7 @@ const Verificar = () => {
 
         fetchQuestions();
     }, []);    
-    
+
     const handleSavePreferences = async () => {
         setSavingPreferences(true);
         
@@ -102,11 +103,12 @@ const Verificar = () => {
                 const respuestaUsuario = selectedAnswers[item._id] || [];
                 return !item.optional && respuestaUsuario.length === 0;
             });
-            
+
             if (obligatoriasNoRespondidas.length > 0) {
                 showWarn("Por favor responde todas las preguntas obligatorias marcadas con *.");
                 return;
             }
+
 
             // Preparar payload para envío directo
             const payload = { respuestas };
@@ -191,7 +193,10 @@ const Verificar = () => {
         }
 
         return true;
+
     };
+
+ 
 
     //------------------------- VALIDACIÓN Y COMPARACIÓN DE ROSTRO -------------------
 
@@ -225,7 +230,7 @@ const Verificar = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* Header Section */}
-            {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
@@ -242,12 +247,12 @@ const Verificar = () => {
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                                 Verificación
                             </h1>
-                            <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
+                            <p className="text-sm text-gray-600">Paso {5} de {5}</p>
                         </div>
                     </div>
 
                     <div className="w-12 h-12 flex items-center justify-center">
-                        <div className="relative w-10 h-10">
+                        {/* <div className="relative w-10 h-10">
                             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
                             <div 
                                 className="absolute inset-0 bg-white rounded-full"
@@ -258,13 +263,13 @@ const Verificar = () => {
                             <div className="absolute inset-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs font-bold">{activeIndex + 1}</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-            </div> */}
+            </div>
 
             {/* Main Content */}
-            <div className="pt-10 px-4 pb-8">
+            <div className="pt-24 px-4 pb-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Content Cards */}
                     <div className="glass-premium rounded-3xl p-6 mb-6">
@@ -361,6 +366,7 @@ const Verificar = () => {
 
 
                         <div className="mt-8 flex justify-center space-x-4 w-full mb-20">
+
                             <button
                                 onClick={() => setActiveIndex(prev => prev - 1)}
                                 disabled={activeIndex === 0}
@@ -390,8 +396,6 @@ const Verificar = () => {
 
                         </div>x
                     </div>
-
-
                 </div>
             </div>
             <Toast ref={toast} position="bottom-center" />

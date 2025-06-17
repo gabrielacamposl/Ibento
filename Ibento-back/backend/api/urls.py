@@ -37,7 +37,10 @@ from api.user.views import (crear_usuario,
                             obtener_modo_busqueda,
                             actualizar_perfil,
                             eliminar_evento_favorito,
-                            eliminar_cuenta
+                            eliminar_cuenta,
+                            obtener_imagenes_perfil,
+                            actualizar_imagenes_perfil,
+                            update_validated_status
                             )
 
 
@@ -76,6 +79,10 @@ urlpatterns = [
     #----- Validación de INE con Kiban
     path('api/validar-ine/', ine_validation_view, name='validar_ine'),
     path('api/validar-rostro/', face_validation_view, name='validar_face'),
+    # ---- Obtener imágenes de perfil
+    path('api/perfil/imagenes/', obtener_imagenes_perfil, name='obtener_imagenes_perfil'),
+    # ---- Actualizar imágenes de perfil
+    path('api/perfil/imagenes/actualizar/', actualizar_imagenes_perfil, name='actualizar_imagenes_perfil'),
 
     # Matches
     # ---- Dar like o dislike
@@ -129,6 +136,7 @@ urlpatterns = [
     path('api/test-notification/', test_notification, name='test_notification'),  # Solo para desarrollo
     
 
-
+    #Pruebas de API
+    path('api/validar/', update_validated_status, name='update_validated_status'),
   
 ]
