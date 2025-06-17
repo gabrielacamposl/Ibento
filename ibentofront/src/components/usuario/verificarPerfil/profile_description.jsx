@@ -15,15 +15,34 @@ const description = () => {
     // Estados de carga individuales para cada acción
     const [submittingInfo, setSubmittingInfo] = useState(false);
     
-   
+   //Se genera una curp aleatoria para pruebas
+    const generateRandomCurp = () => {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+        let curp = '';
+        for (let i = 0; i < 18; i++) {
+            if (i < 16) {
+                curp += letters.charAt(Math.floor(Math.random() * letters.length));
+            } else {
+                curp += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            }
+        }
+        return curp;
+    };
+    
+    const curpGenerada = generateRandomCurp();
+
     // Estados para el formulario de información adicional (step 4)
     const [formData, setFormData] = useState({
         birthday: '',
         gender: '',
         description: '',
-        curp: ''
+        curp: curpGenerada // Usar la CURP generada
     });
     
+    
+    
+
     
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -77,11 +96,16 @@ const description = () => {
             return false;
         }
         
-   
-        if (!patron_curp.test(curp.trim().toUpperCase())) {
-                showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
-                return false;
-         }
+        // Validar CURP (18 caracteres alfanuméricos)
+        // if (curp.length !== 18) {
+        //     showWarn('El CURP debe tener exactamente 18 caracteres');
+        //     return false;
+        // }
+        // if (!patron_curp.test(curp.trim().toUpperCase())) {
+        //         showWarn("La CURP debe tener 18 caracteres alfanuméricos y seguir el formato correcto.");
+        //         return false;
+        //  }
+
         
         return true;
     };
@@ -98,8 +122,9 @@ const description = () => {
             const response = await api.post('usuarios/agregar_info/', formData);
             
             if (response.status === 200) {
+
                 showContrast("Información guardada correctamente.");
-                
+               
                 // Navegar a la página de eventos después de un delay
                 setTimeout(() => {
                     navigate("../subirFotos");
@@ -143,7 +168,7 @@ const description = () => {
     return (
         <div className="text-black min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
             {/* Header Section */}
-            {/* <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
+            <div className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-white/30">
                 <div className="flex items-center justify-between p-6">
                     <button 
                         onClick={() => navigate(-1)}
@@ -160,12 +185,12 @@ const description = () => {
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                                 Verificación
                             </h1>
-                            <p className="text-sm text-gray-600">Paso {activeIndex + 1} de {items.length}</p>
+                            <p className="text-sm text-gray-600">Paso {3} de {5}</p>
                         </div>
                     </div>
 
                     <div className="w-12 h-12 flex items-center justify-center">
-                        <div className="relative w-10 h-10">
+                        {/* <div className="relative w-10 h-10">
                             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
                             <div 
                                 className="absolute inset-0 bg-white rounded-full"
@@ -176,10 +201,10 @@ const description = () => {
                             <div className="absolute inset-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs font-bold">{activeIndex + 1}</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-            </div> */}
+            </div>
 
             {/* Main Content */}
             <div className="pt-10 px-4 pb-8">
@@ -265,9 +290,12 @@ const description = () => {
                                             </label>
                                             <input
                                                 type="text"
-                                                value={formData.curp}
-                                                onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
-                                             
+                                                //value={formData.curp}
+                                                value={curpGenerada}
+                                                //onChange={(e) => handleFormChange('curp', e.target.value.toUpperCase())}
+                                                disabled
+                                                placeholder="Ingresa tu CURP (18 caracteres)"
+
                                                 maxLength={18}
                                                 className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm uppercase font-mono"
                                                 required
@@ -312,7 +340,13 @@ const description = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-center mt-6">
+                        <div className="flex justify-center mt-6 space-x-4">
+                        <button
+                        onClick={() => navigate(-1)}
+                        className="px-8 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:shadow-none"
+                    >
+                        Anterior
+                    </button>
                         <button
                             onClick={handleSubmitInfo}
                             disabled={submittingInfo}
