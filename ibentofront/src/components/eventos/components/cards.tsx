@@ -1,6 +1,7 @@
  import { HeartIcon, ClockIcon } from '@heroicons/react/24/solid';
- import React from 'react';
- import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../../../api';
 
 interface ListEvent {
     _id: string;
@@ -43,8 +44,7 @@ function Cards({
         </div>
     );
   }
-  
-  interface CardProps {
+    interface CardProps {
     id : string;
     imgs: string[];
     title: string;
@@ -52,15 +52,55 @@ function Cards({
   }
   function Card({ id, imgs, title, likes }: CardProps) {
     const url = "../eventos/" + id;
+    const [isLiked, setIsLiked] = useState(false);
+    const [currentLikes, setCurrentLikes] = useState(likes);
 
     let likeString = "";
-    if (likes >= 1000000) {
-        likeString = (likes / 1000000).toFixed(1) + "M";
-    } else if (likes >= 1000) {
-        likeString = (likes / 1000).toFixed(1) + "k";
+    if (currentLikes >= 1000000) {
+        likeString = (currentLikes / 1000000).toFixed(1) + "M";
+    } else if (currentLikes >= 1000) {
+        likeString = (currentLikes / 1000).toFixed(1) + "k";
     } else {
-        likeString = likes + "";
+        likeString = currentLikes + "";
     }
+
+    const handleLike = async (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation to event page
+        e.stopPropagation(); // Stop event bubbling
+        
+        if (isLiked) return; // Prevent multiple likes
+
+        const token = localStorage.getItem("access");
+        if (!token) {
+            console.error("User not authenticated");
+            return;
+        }
+
+        setIsLiked(true);
+        setCurrentLikes(prev => prev + 1);
+
+        try {
+            const response = await api.post(`eventos/${id}/like/`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            
+            if (response.status === 200) {
+                console.log("Like registrado exitosamente");
+            } else {
+                // Revert on error
+                setIsLiked(false);
+                setCurrentLikes(prev => prev - 1);
+                console.error("Error al dar like:", response);
+            }
+        } catch (error) {
+            // Revert on error
+            setIsLiked(false);
+            setCurrentLikes(prev => prev - 1);
+            console.error("Error al dar like:", error);
+        }
+    };
 
     return (
         <Link 
@@ -78,10 +118,21 @@ function Cards({
                     
                     {/* Overlay gradiente */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                    
-                    {/* Badge de likes floating */}
+                      {/* Badge de likes floating */}
                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-1.5 shadow-lg border border-white/20">
-                        <HeartIcon className='h-4 w-4 text-pink-500' />
+                        <button 
+                            onClick={handleLike}
+                            disabled={isLiked}
+                            className={`p-1 rounded-full transition-all duration-300 transform hover:scale-110 ${
+                                isLiked 
+                                    ? 'bg-pink-500 text-white cursor-not-allowed' 
+                                    : 'hover:bg-pink-100 active:scale-95'
+                            }`}
+                        >
+                            <HeartIcon className={`h-4 w-4 transition-all duration-300 ${
+                                isLiked ? 'text-white' : 'text-pink-500'
+                            }`} />
+                        </button>
                         <span className="text-sm font-semibold text-gray-800">{likeString}</span>
                     </div>
                     

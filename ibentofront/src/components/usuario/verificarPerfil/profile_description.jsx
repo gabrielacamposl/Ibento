@@ -256,11 +256,11 @@ const description = () => {
                                             </div>
                                         </div>
 
-                                        {/* CURP */}
+                                        {/* ID Unico */}
                                         <div className="md:col-span-2 space-y-2">
                                             <label className="text-sm font-semibold text-gray-700 flex items-center">
                                                 
-                                                CURP
+                                                ID Único
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
                                             <input
@@ -274,7 +274,7 @@ const description = () => {
                                             />
                                             <div className="flex items-center text-xs text-gray-500 mt-1">
                                                 <span className="mr-2">💡</span>
-                                                El CURP debe tener exactamente 18 caracteres
+                                                El ID debe tener exactamente 18 caracteres
                                             </div>
                                         </div>
 
